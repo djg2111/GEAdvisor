@@ -278,6 +278,7 @@ body {
 /* ── App shell ────────────────────────────────────────────────────────────── */
 
 #app {
+  position: relative;        /* contain startup overlay */
   display: flex;
   flex-direction: column;
   height: 95%;              /* fill parent, not viewport — respects zoom */
@@ -858,6 +859,45 @@ button:disabled {
 .slider-row input[type="number"]:focus {
   outline: 1px solid var(--accent-primary);
   border-color: var(--accent-primary);
+}
+
+/* ── Startup loading overlay ──────────────────────────────────────────────── */
+
+.startup-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 900;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  background: var(--bg, #1e1e1e);
+  transition: opacity 0.4s ease;
+}
+.startup-overlay.fade-out {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.startup-spinner {
+  width: 36px;
+  height: 36px;
+  border: 3px solid var(--border, #333);
+  border-top-color: var(--accent-blue, #569cd6);
+  border-radius: 50%;
+  animation: startup-spin 0.8s linear infinite;
+}
+@keyframes startup-spin {
+  to { transform: rotate(360deg); }
+}
+
+.startup-status {
+  color: var(--text-muted, #888);
+  font-size: 12px;
+  text-align: center;
+  max-width: 260px;
+  line-height: 1.4;
 }
 
 .loader {
@@ -1577,6 +1617,30 @@ button:disabled {
   margin-bottom: 12px;
   border-radius: 4px;
   background: var(--bg-elevated);
+}
+
+.graph-history-status {
+  display: none;
+  text-align: center;
+  padding: 8px 4px;
+  font-size: 11px;
+  color: var(--text-muted, #888);
+}
+.graph-history-status.visible {
+  display: block;
+}
+.graph-history-status button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--accent-blue, #569cd6);
+  text-decoration: underline;
+  font-size: 11px;
+  padding: 0 2px;
+}
+.graph-history-status button:disabled {
+  opacity: 0.5;
+  cursor: default;
 }
 
 .graph-stats {
@@ -4429,6 +4493,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   MarketAnalyzerService: () => (/* binding */ MarketAnalyzerService)
 /* harmony export */ });
+/* harmony import */ var _weirdGloopService__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./weirdGloopService */ "./services/weirdGloopService.ts");
 /**
  * @module MarketAnalyzerService
  * Deterministic filtering pipeline that transforms raw cached GE data into a
@@ -4450,6 +4515,7 @@ __webpack_require__.r(__webpack_exports__);
  * fallback fetch to the Weird Gloop historical API when the local IndexedDB
  * price-history store has insufficient data for sparkline rendering.
  */
+
 // ─── Pure Time-Series Math ──────────────────────────────────────────────────
 /**
  * Calculate the Exponential Moving Average of a price series.
@@ -4554,11 +4620,46 @@ class MarketAnalyzerService {
      * @param config - Optional overrides for ranking behaviour.
      */
     constructor(cache, config) {
+        this.cachedAvgVolumeMap = null;
+        this.cachedPriceHistoryMap = null;
+        this.mapCacheTimestamp = 0;
         this.cache = cache;
         this.topN = config?.topN ?? DEFAULTS.topN;
         this.minVolume = config?.minVolume ?? DEFAULTS.minVolume;
         this.maxVolume = config?.maxVolume ?? 0;
         this.maxPrice = config?.maxPrice ?? 0;
+    }
+    /** Invalidate the cached volume/price maps so the next call rebuilds them. */
+    invalidateMapCache() {
+        this.cachedAvgVolumeMap = null;
+        this.cachedPriceHistoryMap = null;
+        this.mapCacheTimestamp = 0;
+    }
+    /** Check whether the cached maps are still within their TTL. */
+    isMapsStale() {
+        return !this.cachedAvgVolumeMap
+            || !this.cachedPriceHistoryMap
+            || (Date.now() - this.mapCacheTimestamp > MarketAnalyzerService.MAP_CACHE_TTL_MS);
+    }
+    /**
+     * Return (possibly cached) avgVolumeMap and priceHistoryMap.
+     * Rebuilds both if the cache is stale or empty.
+     */
+    async getOrBuildMaps(days = 30) {
+        if (!this.isMapsStale()) {
+            console.log("[MarketAnalyzer] Using cached scoring maps (age: " +
+                `${((Date.now() - this.mapCacheTimestamp) / 1000).toFixed(0)}s).`);
+            return {
+                avgVolumeMap: this.cachedAvgVolumeMap,
+                priceHistoryMap: this.cachedPriceHistoryMap,
+            };
+        }
+        const avgVolumeMap = await this.buildAvgVolumeMap(days);
+        const priceHistoryMap = await this.buildPriceHistoryMap(days);
+        this.cachedAvgVolumeMap = avgVolumeMap;
+        this.cachedPriceHistoryMap = priceHistoryMap;
+        this.mapCacheTimestamp = Date.now();
+        return { avgVolumeMap, priceHistoryMap };
     }
     // ─── Public API ───────────────────────────────────────────────────────
     /**
@@ -4575,9 +4676,9 @@ class MarketAnalyzerService {
             return [];
         }
         // Build a volume-SMA map from the last 30 days of history.
-        const avgVolumeMap = await this.buildAvgVolumeMap(30);
         // Build a price-history map for sparklines / EMA / regression.
-        const priceHistoryMap = await this.buildPriceHistoryMap(30);
+        // Uses TTL-cached maps to skip redundant IndexedDB reads + API calls.
+        const { avgVolumeMap, priceHistoryMap } = await this.getOrBuildMaps(30);
         const effectiveMinVol = overrides?.minVolume ?? this.minVolume;
         const effectiveMaxVol = overrides?.maxVolume ?? this.maxVolume;
         const effectiveMaxPrice = overrides?.maxPrice ?? this.maxPrice;
@@ -4608,8 +4709,7 @@ class MarketAnalyzerService {
         const matched = allRecords.filter((r) => r.name.toLowerCase().includes(needle));
         if (matched.length === 0)
             return [];
-        const avgVolumeMap = await this.buildAvgVolumeMap(30);
-        const priceHistoryMap = await this.buildPriceHistoryMap(30);
+        const { avgVolumeMap, priceHistoryMap } = await this.getOrBuildMaps(30);
         // Score with no volume/price filters so *every* match is included.
         const scored = this.scoreAndFilter(matched, 0, 0, 0, avgVolumeMap, priceHistoryMap);
         const sorted = this.sortDescending(scored);
@@ -4629,8 +4729,7 @@ class MarketAnalyzerService {
         const matched = allRecords.filter((r) => names.has(r.name));
         if (matched.length === 0)
             return [];
-        const avgVolumeMap = await this.buildAvgVolumeMap(30);
-        const priceHistoryMap = await this.buildPriceHistoryMap(30);
+        const { avgVolumeMap, priceHistoryMap } = await this.getOrBuildMaps(30);
         const scored = this.scoreAndFilter(matched, 0, 0, 0, avgVolumeMap, priceHistoryMap);
         return this.sortDescending(scored);
     }
@@ -4902,13 +5001,19 @@ class MarketAnalyzerService {
             // ── Sparse-data fallback: fetch from Weird Gloop API ──────────────
             // If most items have ≤ 1 day of local history, pull from the API so
             // sparklines can render immediately after install / cache clear.
+            // Capped at 500 items to avoid rate-limit avalanche after full scans.
+            // Uses batched pipe-delimited WeirdGloopService – March 2026
             const allItems = await this.cache.getAll();
             const itemNames = allItems.map((r) => r.name);
             const sparse = itemNames.length > 0 &&
                 itemNames.filter((n) => (map.get(n)?.length ?? 0) >= 2).length < itemNames.length * 0.3;
             if (sparse && itemNames.length > 0) {
-                console.log("[MarketAnalyzer] Local price history is sparse — fetching from Weird Gloop API…");
-                const apiMap = await this.fetchAPIHistory(itemNames, days);
+                const SPARSE_CAP = 500;
+                const namesToFetch = itemNames.length > SPARSE_CAP
+                    ? itemNames.slice(0, SPARSE_CAP)
+                    : itemNames;
+                console.log(`[MarketAnalyzer] Local price history is sparse — fetching ${namesToFetch.length} items from Weird Gloop API…`);
+                const apiMap = await this.fetchAPIHistory(namesToFetch, days);
                 // Merge: API data fills in gaps; local data takes precedence when present.
                 for (const [name, prices] of apiMap) {
                     if (!map.has(name) || (map.get(name).length < prices.length)) {
@@ -4923,45 +5028,36 @@ class MarketAnalyzerService {
         return map;
     }
     /**
-     * Fetch historical prices from the Weird Gloop `/exchange/history/rs/last90d`
-     * endpoint and extract daily closing prices for the last {@link days} days.
+     * Fetch historical prices from the Weird Gloop API and extract daily
+     * closing prices for the last {@link days} days.
      *
-     * Each item is fetched individually (the `/last90d` endpoint does not
-     * support pipe-separated batch names).  Requests are run in parallel
-     * batches of {@link CONCURRENCY} to avoid overwhelming the API.
-     * Individual failures are logged but do not reject the returned promise.
+     * Delegates to {@link WeirdGloopService.fetchHistoricalPrices} which uses
+     * pipe-delimited batched requests (50 items per HTTP call) dispatched
+     * sequentially with rate-limit-safe pauses.  Results are also persisted
+     * to IndexedDB so subsequent calls hit the cache instead.
      *
      * @param itemNames - Canonical RS3 item names.
      * @param days      - Number of recent days to extract from the 90-day window.
      * @returns A `Map<itemName, number[]>` of chronological daily prices.
      */
+    // Batched pipe-delimited history via WeirdGloopService – March 2026
     async fetchAPIHistory(itemNames, days) {
         const result = new Map();
-        const CONCURRENCY = 10;
-        const cutoff = new Date();
-        cutoff.setDate(cutoff.getDate() - days);
-        const cutoffMs = cutoff.getTime();
         const todayStr = new Date().toISOString().slice(0, 10);
-        /** Fetch a single item's history and add to result map. */
-        const fetchOne = async (name) => {
-            try {
-                const url = `https://api.weirdgloop.org/exchange/history/rs/last90d?name=${encodeURIComponent(name)}`;
-                const resp = await fetch(url, {
-                    headers: {
-                        "User-Agent": "RS3-GE-Analyzer-Alt1Plugin/1.0",
-                        Accept: "application/json",
-                    },
-                });
-                if (!resp.ok)
-                    throw new Error(`HTTP ${resp.status}`);
-                const json = await resp.json();
-                const entries = json[name];
-                if (!Array.isArray(entries))
-                    return;
+        try {
+            const api = new _weirdGloopService__WEBPACK_IMPORTED_MODULE_0__.WeirdGloopService();
+            const historyMap = await api.fetchHistoricalPrices(itemNames, days);
+            // Persist fetched data to IndexedDB for future use.
+            if (historyMap.size > 0) {
+                try {
+                    await this.cache.bulkInsertHistory(historyMap);
+                }
+                catch { /* non-critical */ }
+            }
+            // Transform WeirdGloopHistoryEntry[] → number[] (daily prices).
+            for (const [name, entries] of historyMap) {
                 const dayMap = new Map();
                 for (const e of entries) {
-                    if (e.timestamp < cutoffMs)
-                        continue;
                     const day = new Date(e.timestamp).toISOString().slice(0, 10);
                     if (day === todayStr)
                         continue;
@@ -4972,14 +5068,9 @@ class MarketAnalyzerService {
                     result.set(name, sorted.map((d) => d[1]));
                 }
             }
-            catch {
-                // Individual item failure — silently skip.
-            }
-        };
-        // Process items in concurrent batches.
-        for (let i = 0; i < itemNames.length; i += CONCURRENCY) {
-            const batch = itemNames.slice(i, i + CONCURRENCY);
-            await Promise.allSettled(batch.map(fetchOne));
+        }
+        catch (err) {
+            console.warn("[MarketAnalyzer] fetchAPIHistory failed:", err);
         }
         console.log(`[MarketAnalyzer] API history fetched for ${result.size} items.`);
         return result;
@@ -5012,6 +5103,9 @@ class MarketAnalyzerService {
         return `${sign}${abs.toLocaleString("en-US")}`;
     }
 }
+// Cached intermediate maps with TTL – March 2026
+/** TTL for cached volume/price maps (10 minutes). */
+MarketAnalyzerService.MAP_CACHE_TTL_MS = 10 * 60 * 1000;
 
 
 /***/ },
@@ -5419,11 +5513,11 @@ class WeirdGloopService {
     }
     /**
      * Fetch up to 90 days of historical daily prices for every item in
-     * {@link itemNames}.  The Weird Gloop `/last90d` endpoint only supports a
-     * single item per request, so items are fetched in concurrent batches of
-     * {@link HISTORY_CONCURRENCY} to avoid overwhelming the API.
+     * {@link itemNames}.  Items are batched into pipe-delimited requests of
+     * {@link HISTORY_BATCH_SIZE} (default 50) and dispatched **sequentially**
+     * to avoid rate-limiting.
      *
-     * Individual item failures are logged but do **not** reject the returned
+     * Individual batch failures are logged but do **not** reject the returned
      * promise — successfully fetched histories are always returned.
      *
      * @param itemNames - Canonical RS3 item names.
@@ -5435,30 +5529,40 @@ class WeirdGloopService {
     async fetchHistoricalPrices(itemNames, days = 30) {
         if (itemNames.length === 0)
             return new Map();
-        const HISTORY_CONCURRENCY = 10;
+        // Batch history requests using pipe-delimited names — March 2026
+        const HISTORY_BATCH_SIZE = 50;
         const cutoff = Date.now() - days * 24 * 60 * 60 * 1000;
         const result = new Map();
-        console.log(`[WeirdGloopService] Fetching last90d history for ${itemNames.length} items (keeping last ${days} days)…`);
-        const fetchOne = async (name) => {
-            const url = `https://api.weirdgloop.org/exchange/history/rs/last90d?name=${encodeURIComponent(name)}`;
-            const resp = await WeirdGloopService.fetchWithRetry(url);
-            if (!resp)
-                return; // all retries exhausted
-            const json = await resp.json();
-            const entries = json[name];
-            if (!Array.isArray(entries))
-                return;
-            const filtered = entries
-                .filter((e) => e.timestamp >= cutoff)
-                .sort((a, b) => a.timestamp - b.timestamp);
-            if (filtered.length > 0)
-                result.set(name, filtered);
-        };
-        for (let i = 0; i < itemNames.length; i += HISTORY_CONCURRENCY) {
-            const batch = itemNames.slice(i, i + HISTORY_CONCURRENCY);
-            await Promise.allSettled(batch.map(fetchOne));
-            // Small pause between concurrent groups to stay under rate limit.
-            if (i + HISTORY_CONCURRENCY < itemNames.length) {
+        const batches = this.chunkArray(itemNames, HISTORY_BATCH_SIZE);
+        console.log(`[WeirdGloopService] Fetching last90d history for ${itemNames.length} items in ` +
+            `${batches.length} batch(es) of up to ${HISTORY_BATCH_SIZE} (keeping last ${days} days)…`);
+        for (let idx = 0; idx < batches.length; idx++) {
+            const batch = batches[idx];
+            const nameParam = batch.map((n) => encodeURIComponent(n)).join("|");
+            const url = `https://api.weirdgloop.org/exchange/history/rs/last90d?name=${nameParam}`;
+            try {
+                const resp = await WeirdGloopService.fetchWithRetry(url);
+                if (!resp) {
+                    console.warn(`[WeirdGloopService] History batch ${idx + 1} — all retries exhausted.`);
+                    continue;
+                }
+                const json = await resp.json();
+                for (const name of batch) {
+                    const entries = json[name];
+                    if (!Array.isArray(entries))
+                        continue;
+                    const filtered = entries
+                        .filter((e) => e.timestamp >= cutoff)
+                        .sort((a, b) => a.timestamp - b.timestamp);
+                    if (filtered.length > 0)
+                        result.set(name, filtered);
+                }
+            }
+            catch (err) {
+                console.error(`[WeirdGloopService] History batch ${idx + 1} failed:`, err);
+            }
+            // Pause between sequential batches to stay under rate limit.
+            if (idx < batches.length - 1) {
                 await WeirdGloopService.sleep(WeirdGloopService.HISTORY_GROUP_DELAY_MS);
             }
         }
@@ -5556,8 +5660,8 @@ class WeirdGloopService {
 WeirdGloopService.MAX_RETRIES = 4;
 /** Base delay (ms) for exponential backoff — doubled on each retry. */
 WeirdGloopService.BACKOFF_BASE_MS = 2000;
-/** Small pause (ms) between sequential history-concurrency groups. */
-WeirdGloopService.HISTORY_GROUP_DELAY_MS = 300;
+/** Small pause (ms) between sequential history batches. */
+WeirdGloopService.HISTORY_GROUP_DELAY_MS = 1000;
 
 
 /***/ },
@@ -6200,7 +6304,7 @@ let geCatalogue = [];
  * ready.  Returns only after the initial data pipeline has completed and the
  * market panel is rendered.
  */
-async function initUI() {
+async function initUI(onStatus) {
     resolveElements();
     populateProviderDropdown();
     restoreSettings();
@@ -6225,6 +6329,7 @@ async function initUI() {
     wiki = new _services__WEBPACK_IMPORTED_MODULE_0__.WikiService();
     portfolio = new _services__WEBPACK_IMPORTED_MODULE_0__.PortfolioService();
     // Run the initial market analysis and render.
+    onStatus?.("Ranking top items\u2026", "Step 2 of 5");
     try {
         await refreshMarketPanel();
     }
@@ -6234,6 +6339,7 @@ async function initUI() {
         showError(msg);
     }
     // Render the favourites section (if any favourites exist).
+    onStatus?.("Loading favourites\u2026", "Step 3 of 5");
     restoreFavSort();
     bindFavSort();
     await renderFavorites();
@@ -6242,6 +6348,7 @@ async function initUI() {
     // Build the full item catalogue for portfolio autocomplete.
     await loadItemCatalogue();
     // Fetch the full GE catalogue (~7 000 items) for market search.
+    onStatus?.("Fetching item catalogue\u2026", "Step 4 of 5");
     try {
         geCatalogue = await (0,_services__WEBPACK_IMPORTED_MODULE_0__.fetchGECatalogue)();
     }
@@ -6251,6 +6358,7 @@ async function initUI() {
     }
     // Pre-fetch wiki text for the first batch of items so that the first
     // chat message doesn't have to wait for wiki I/O.
+    onStatus?.("Pre-fetching wiki data\u2026", "Step 5 of 5");
     await prefetchWikiText();
     // Restore any persisted LLM chat conversation.
     restoreChatHistory();
@@ -8028,8 +8136,21 @@ async function refreshItemGraph(item, range) {
                 `<span class="graph-stat-value">${hist.length} day${hist.length !== 1 ? "s" : ""}</span>` +
                 `</div>`;
     }
-    requestAnimationFrame(() => {
+    // Manual history refresh fallback – March 2026
+    // Update history-status visibility after range refresh.
+    const statusEl = mBody.querySelector(".graph-history-status");
+    if (hist.length < 7) {
+        statusEl?.classList.add("visible");
         if (canvas)
+            canvas.style.display = "none";
+    }
+    else {
+        statusEl?.classList.remove("visible");
+        if (canvas)
+            canvas.style.display = "";
+    }
+    requestAnimationFrame(() => {
+        if (canvas && hist.length >= 2)
             drawGraphChart(canvas, hist);
     });
 }
@@ -8108,12 +8229,18 @@ async function showGraphModal(item) {
     const trendIcon = trendLabel === "Uptrend" ? "\uD83D\uDCC8" : trendLabel === "Downtrend" ? "\u26A0\uFE0F" : "\u27A1\uFE0F";
     // Build range selector row inside the modal.
     const rangeOptions = [7, 30, 90].map((d) => `<option value="${d}"${d === range ? " selected" : ""}>History: ${d} days</option>`).join("");
+    // Manual history refresh fallback – March 2026
+    const insufficientData = hist.length < 7;
     mBody.innerHTML =
         `<div class="graph-modal-range-row">` +
             `<label>Range:</label>` +
             `<select class="graph-range-inline">${rangeOptions}</select>` +
             `</div>` +
-            `<canvas class="graph-modal-canvas" width="480" height="180"></canvas>` +
+            `<canvas class="graph-modal-canvas" width="480" height="180"${insufficientData ? ' style="display:none"' : ''}></canvas>` +
+            `<div class="graph-history-status${insufficientData ? ' visible' : ''}">` +
+            `Insufficient history \u2022 ` +
+            `<button class="refresh-history-btn">Refresh</button>` +
+            `</div>` +
             `<div class="graph-stats">` +
             `<div class="graph-stat-row">` +
             `<span class="graph-stat-label">${range}-Day Trend</span>` +
@@ -8154,11 +8281,59 @@ async function showGraphModal(item) {
             refreshItemGraph(item, newRange);
         });
     }
+    // Manual history refresh fallback – March 2026
+    bindRefreshHistoryBtn(mBody, item);
     // Draw the chart after the modal is in the DOM.
     requestAnimationFrame(() => {
         const canvas = mBody.querySelector(".graph-modal-canvas");
-        if (canvas)
+        if (canvas && !insufficientData)
             drawGraphChart(canvas, hist);
+    });
+}
+// Manual history refresh fallback – March 2026
+/**
+ * Bind the “Refresh” button inside `.graph-history-status` so users can
+ * manually fetch missing history for low-volume / post-scan items.
+ */
+function bindRefreshHistoryBtn(container, item) {
+    const btn = container.querySelector(".refresh-history-btn");
+    if (!btn)
+        return;
+    btn.addEventListener("click", async () => {
+        btn.disabled = true;
+        btn.textContent = "Fetching\u2026";
+        try {
+            const prices = await ensureItemHistory(item.name, 90);
+            const range = parseInt((container.querySelector(".graph-range-inline")?.value) || "7", 10);
+            const sliced = (range < 90 && prices.length > range) ? prices.slice(-range) : prices;
+            const hist = sliced.length > 0 ? [...sliced, item.price] : [item.price];
+            // Update canvas visibility & status strip.
+            const canvas = container.querySelector(".graph-modal-canvas");
+            const statusEl = container.querySelector(".graph-history-status");
+            if (hist.length >= 7) {
+                if (canvas) {
+                    canvas.style.display = "";
+                    drawGraphChart(canvas, hist);
+                }
+                statusEl?.classList.remove("visible");
+            }
+            else {
+                // Still insufficient — draw what we have but keep the status.
+                if (canvas) {
+                    canvas.style.display = "";
+                    drawGraphChart(canvas, hist);
+                }
+                btn.textContent = "Refresh";
+                btn.disabled = false;
+            }
+            // Refresh stats as well.
+            refreshItemGraph(item, range);
+        }
+        catch {
+            showToast("Failed to load history", "info");
+            btn.textContent = "Refresh";
+            btn.disabled = false;
+        }
     });
 }
 /** Hide the graph modal. */
@@ -9267,17 +9442,42 @@ else if (alt1Status) {
         `Alt1 not detected — <a href="${addAppUrl}">click here</a> to add this app.`;
 }
 // ── Boot sequence ───────────────────────────────────────────────────────────
+// Startup loading overlay – March 2026
+const startupOverlay = document.getElementById("startup-overlay");
+const startupStatus = document.getElementById("startup-status");
+/** Update the startup overlay status text. */
+function setStartupStatus(msg, step) {
+    if (startupStatus) {
+        startupStatus.innerHTML = step
+            ? `${msg}<br><span style="font-size:10px;opacity:0.6">${step}</span>`
+            : msg;
+    }
+}
+/** Fade out and remove the startup overlay. */
+function dismissOverlay() {
+    if (!startupOverlay)
+        return;
+    startupOverlay.classList.add("fade-out");
+    startupOverlay.addEventListener("transitionend", () => {
+        startupOverlay.remove();
+    }, { once: true });
+    // Safety fallback in case transitionend doesn't fire.
+    setTimeout(() => { startupOverlay.remove(); }, 600);
+}
 (async () => {
     try {
         // Step 1 — Populate the IndexedDB cache with fresh GE data.
+        setStartupStatus("Loading market data\u2026", "Step 1 of 5");
         await (0,_services__WEBPACK_IMPORTED_MODULE_0__.initDataPipeline)();
         // Step 2 — Wire services → DOM and render the interface.
-        await (0,_uiService__WEBPACK_IMPORTED_MODULE_1__.initUI)();
+        await (0,_uiService__WEBPACK_IMPORTED_MODULE_1__.initUI)((msg, step) => setStartupStatus(msg, step));
         console.log("[GE Analyzer] Startup complete.");
+        dismissOverlay();
     }
     catch (err) {
         console.error("[GE Analyzer] Startup failed:", err);
-        alt1Status?.insertAdjacentHTML("beforeend", `<div style="color:#f44747;margin-top:4px">Startup error — see console.</div>`);
+        setStartupStatus("Startup failed \u2014 see console for details.");
+        alt1Status?.insertAdjacentHTML("beforeend", `<div style="color:#f44747;margin-top:4px">Startup error \u2014 see console.</div>`);
     }
 })();
 
