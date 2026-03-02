@@ -12,6 +12,10 @@ RS3 Alt1 Toolkit plugin using a RAG pipeline: `Weird Gloop API → IndexedDB cac
 - JSDoc on all public methods and exported interfaces
 - LLM system prompt must include `RS3_ECONOMIC_RULES` from `coreKnowledge.ts` with supremacy clause — these rules override any model training data
 - LLM prompts must forbid hallucinating prices/volumes/game mechanics; only use data passed in the user message
+- **Keep docs in sync**: After completing any feature, bug fix, or refactor, update **all three** documentation files before considering the task done:
+  1. `.github/copilot-instructions.md` — update File Roles, UI Layout, Key Patterns, or Gotchas if the change affects architecture, DOM structure, conventions, or known pitfalls.
+  2. `readme.md` — update the Features list or any other section that the change touches (e.g. new UI capabilities, new service, removed feature).
+  3. `HANDOFF.md` — update the relevant deep-dive section(s), localStorage keys table, types table, current-status checklist, and past-issues table as applicable.
 
 ## Build & Verify
 
