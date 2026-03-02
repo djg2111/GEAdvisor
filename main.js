@@ -1075,21 +1075,20 @@ button:disabled {
 
 /* \\u2500\\u2500 Sparkline canvas \\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500 */
 
-.sparkline {
-  display: block;
-  width: 100%;
-  height: 0;
-  padding: 0 8px;
-  box-sizing: border-box;
-  opacity: 0;
+.graph-btn {
+  all: unset;
   cursor: pointer;
-  overflow: hidden;
-  transition: height 0.2s ease, opacity 0.2s ease;
+  font-size: 11px;
+  line-height: 1;
+  color: var(--text-muted);
+  padding: 2px 3px;
+  border-radius: 3px;
+  flex-shrink: 0;
+  letter-spacing: -1px;
+  transition: color 0.15s;
 }
-
-.market-card.expanded .sparkline {
-  height: 40px;
-  opacity: 1;
+.graph-btn:hover {
+  color: var(--accent-green-bright, #4ec9b0);
 }
 
 .item-sprite {
@@ -1162,6 +1161,8 @@ button:disabled {
   align-items: center;
   gap: 2px;
   flex-shrink: 0;
+  flex-wrap: wrap;
+  justify-content: center;
 }
 
 /* ── Favourite button ──────────────────────────────────────────────────────── */
@@ -1434,14 +1435,91 @@ button:disabled {
   margin-bottom: 8px;
 }
 
-.modal-sparkline {
+/* (modal-sparkline removed — chart now in dedicated graph modal) */
+
+/* ── Graph Modal ──────────────────────────────────────────────────────────── */
+
+.graph-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.15s ease;
+}
+.graph-modal-backdrop.visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.graph-modal {
+  background: var(--bg-main);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  width: 92%;
+  max-width: 520px;
+  max-height: 85vh;
+  overflow-y: auto;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.5);
+}
+
+.graph-modal-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--border);
+}
+.graph-modal-title {
+  flex: 1;
+  font-weight: 600;
+  font-size: 14px;
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.graph-modal-body {
+  padding: 12px;
+}
+
+.graph-modal-canvas {
   display: block;
   width: 100%;
-  height: 60px;
-  margin-bottom: 8px;
-  opacity: 1;
-  overflow: visible;
-  transition: none;
+  height: 180px;
+  margin-bottom: 12px;
+  border-radius: 4px;
+  background: var(--bg-elevated);
+}
+
+.graph-stats {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.graph-stat-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 4px 0;
+  border-bottom: 1px solid var(--border);
+  font-size: 12px;
+}
+.graph-stat-row:last-child {
+  border-bottom: none;
+}
+.graph-stat-label {
+  color: var(--text-muted);
+}
+.graph-stat-value {
+  font-weight: 600;
+  color: var(--text);
 }
 
 .item-modal-details {
@@ -1519,6 +1597,13 @@ button:disabled {
   text-align: center;
   padding: 8px 6px;
   gap: 4px;
+  overflow: visible;
+}
+
+.market-items.tile .card-actions {
+  gap: 3px;
+  justify-content: center;
+  flex-wrap: wrap;
 }
 
 .market-items.tile .item-sprite {
@@ -1550,16 +1635,7 @@ button:disabled {
   padding: 1px 4px;
 }
 
-.market-items.tile .sparkline {
-  height: 0;
-}
-
-/* ─ Expanded card tweaks (tile view) ─ */
-
-.market-items.tile .market-card.expanded .sparkline {
-  height: 50px;
-  padding: 0 6px;
-}
+/* (tile sparkline rules removed — chart now in dedicated graph modal) */
 
 /* ── Hybrid view (compact grid, list-style rows) ──────────────────────────── */
 
@@ -1579,9 +1655,7 @@ button:disabled {
   height: 24px;
 }
 
-.market-items.hybrid .sparkline {
-  height: 0;
-}
+/* (hybrid sparkline rule removed) */
 
 .market-items.hybrid .flip-badges {
   gap: 2px;
@@ -2399,10 +2473,7 @@ body[data-layout="sidebar"] #portfolio-view {
     gap: 5px;
   }
 
-  /* Slightly larger sparklines on cards when expanded. */
-  .market-card.expanded .sparkline {
-    height: 50px;
-  }
+  /* (responsive sparkline rule removed — chart now in dedicated graph modal) */
 
   /* Advisor chat gets more comfortable padding. */
   #advisor-view {
@@ -4160,9 +4231,10 @@ class MarketAnalyzerService {
      * Fetch historical prices from the Weird Gloop `/exchange/history/rs/last90d`
      * endpoint and extract daily closing prices for the last {@link days} days.
      *
-     * Items are batched into groups of 50 (the historical endpoint returns
-     * significantly more data per item than `/latest`).  Individual batch
-     * failures are logged but do not reject the returned promise.
+     * Each item is fetched individually (the `/last90d` endpoint does not
+     * support pipe-separated batch names).  Requests are run in parallel
+     * batches of {@link CONCURRENCY} to avoid overwhelming the API.
+     * Individual failures are logged but do not reject the returned promise.
      *
      * @param itemNames - Canonical RS3 item names.
      * @param days      - Number of recent days to extract from the 90-day window.
@@ -4170,44 +4242,34 @@ class MarketAnalyzerService {
      */
     async fetchAPIHistory(itemNames, days) {
         const result = new Map();
-        const BATCH = 50;
+        const CONCURRENCY = 10;
         const cutoff = new Date();
         cutoff.setDate(cutoff.getDate() - days);
-        const cutoffTs = Math.floor(cutoff.getTime() / 1000);
+        const cutoffMs = cutoff.getTime();
         const todayStr = new Date().toISOString().slice(0, 10);
-        const batches = [];
-        for (let i = 0; i < itemNames.length; i += BATCH) {
-            batches.push(itemNames.slice(i, i + BATCH));
-        }
-        const settled = await Promise.allSettled(batches.map(async (batch) => {
-            const nameParam = batch.map((n) => encodeURIComponent(n)).join("|");
-            const url = `https://api.weirdgloop.org/exchange/history/rs/last90d?name=${nameParam}`;
-            const resp = await fetch(url, {
-                headers: {
-                    "User-Agent": "RS3-GE-Analyzer-Alt1Plugin/1.0",
-                    Accept: "application/json",
-                },
-            });
-            if (!resp.ok)
-                throw new Error(`HTTP ${resp.status}`);
-            return resp.json();
-        }));
-        for (const res of settled) {
-            if (res.status !== "fulfilled") {
-                console.warn("[MarketAnalyzer] Historical API batch failed:", res.reason);
-                continue;
-            }
-            for (const [name, entries] of Object.entries(res.value)) {
+        /** Fetch a single item's history and add to result map. */
+        const fetchOne = async (name) => {
+            try {
+                const url = `https://api.weirdgloop.org/exchange/history/rs/last90d?name=${encodeURIComponent(name)}`;
+                const resp = await fetch(url, {
+                    headers: {
+                        "User-Agent": "RS3-GE-Analyzer-Alt1Plugin/1.0",
+                        Accept: "application/json",
+                    },
+                });
+                if (!resp.ok)
+                    throw new Error(`HTTP ${resp.status}`);
+                const json = await resp.json();
+                const entries = json[name];
                 if (!Array.isArray(entries))
-                    continue;
-                // Group by day, keep last price per day, filter to recent window.
+                    return;
                 const dayMap = new Map();
                 for (const e of entries) {
-                    if (e.timestamp < cutoffTs)
+                    if (e.timestamp < cutoffMs)
                         continue;
-                    const day = new Date(e.timestamp * 1000).toISOString().slice(0, 10);
+                    const day = new Date(e.timestamp).toISOString().slice(0, 10);
                     if (day === todayStr)
-                        continue; // caller appends today's price
+                        continue;
                     dayMap.set(day, e.price);
                 }
                 const sorted = [...dayMap.entries()].sort((a, b) => (a[0] < b[0] ? -1 : 1));
@@ -4215,6 +4277,14 @@ class MarketAnalyzerService {
                     result.set(name, sorted.map((d) => d[1]));
                 }
             }
+            catch {
+                // Individual item failure — silently skip.
+            }
+        };
+        // Process items in concurrent batches.
+        for (let i = 0; i < itemNames.length; i += CONCURRENCY) {
+            const batch = itemNames.slice(i, i + CONCURRENCY);
+            await Promise.allSettled(batch.map(fetchOne));
         }
         console.log(`[MarketAnalyzer] API history fetched for ${result.size} items.`);
         return result;
@@ -6092,6 +6162,161 @@ function drawSparkline(canvas, data) {
     }
     ctx.stroke();
 }
+// ─── Graph Modal Chart Renderer ─────────────────────────────────────────────
+/**
+ * Abbreviate a gp value for axis labels (e.g. 1200 → "1.2K", 3400000 → "3.4M").
+ */
+function axisLabel(value) {
+    const abs = Math.abs(value);
+    const sign = value < 0 ? "-" : "";
+    if (abs >= 1000000000)
+        return `${sign}${(abs / 1000000000).toFixed(1)}B`;
+    if (abs >= 1000000)
+        return `${sign}${(abs / 1000000).toFixed(1)}M`;
+    if (abs >= 1000)
+        return `${sign}${(abs / 1000).toFixed(1)}K`;
+    return `${sign}${abs}`;
+}
+/**
+ * Draw a full-featured area chart on the graph modal canvas, including:
+ * - Y-axis price labels (left)
+ * - X-axis day labels (bottom: "Day 1", "Day 2", … or "d-6", "d-5", …, "today")
+ * - Horizontal grid lines
+ * - Gradient-filled area under the curve
+ * - Trend-coloured line with data-point dots
+ *
+ * Handles edge cases (0 or 1 data points) the same as {@link drawSparkline}.
+ *
+ * @param canvas - The target `<canvas>` DOM element.
+ * @param data   - Array of numeric price values in chronological order.
+ */
+function drawGraphChart(canvas, data) {
+    const ctx = canvas.getContext("2d");
+    if (!ctx)
+        return;
+    const dpr = window.devicePixelRatio || 1;
+    const cssW = canvas.offsetWidth || canvas.width;
+    const cssH = canvas.offsetHeight || canvas.height;
+    canvas.width = cssW * dpr;
+    canvas.height = cssH * dpr;
+    ctx.scale(dpr, dpr);
+    // ── No data: placeholder ──
+    if (data.length === 0) {
+        ctx.font = '12px "Segoe UI", sans-serif';
+        ctx.fillStyle = "#888";
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.fillText("No price history available", cssW / 2, cssH / 2);
+        return;
+    }
+    // ── Single data point ──
+    if (data.length === 1) {
+        ctx.font = '11px "Segoe UI", sans-serif';
+        ctx.fillStyle = "#888";
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.fillText(`${axisLabel(data[0])} gp (1 day)`, cssW / 2, cssH / 2);
+        return;
+    }
+    // ── Chart margins ──
+    const marginLeft = 52;
+    const marginRight = 10;
+    const marginTop = 10;
+    const marginBottom = 22;
+    const plotW = cssW - marginLeft - marginRight;
+    const plotH = cssH - marginTop - marginBottom;
+    const min = Math.min(...data);
+    const max = Math.max(...data);
+    const range = max - min || 1;
+    // Compute nice Y-axis ticks (4 horizontal lines).
+    const TICKS = 4;
+    const tickValues = [];
+    for (let i = 0; i <= TICKS; i++) {
+        tickValues.push(min + (range * i) / TICKS);
+    }
+    // ── Draw grid lines + Y-axis labels ──
+    ctx.font = '10px "Segoe UI", sans-serif';
+    ctx.textAlign = "right";
+    ctx.textBaseline = "middle";
+    for (const tv of tickValues) {
+        const y = marginTop + plotH - ((tv - min) / range) * plotH;
+        // Grid line
+        ctx.strokeStyle = "rgba(255,255,255,0.07)";
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(marginLeft, y);
+        ctx.lineTo(cssW - marginRight, y);
+        ctx.stroke();
+        // Label
+        ctx.fillStyle = "#888";
+        ctx.fillText(axisLabel(tv), marginLeft - 6, y);
+    }
+    // ── X-axis labels ──
+    ctx.textAlign = "center";
+    ctx.textBaseline = "top";
+    ctx.fillStyle = "#888";
+    const stepX = plotW / (data.length - 1);
+    // Show labels at first, last, and ~3 evenly-spaced middle points.
+    const labelCount = Math.min(data.length, 6);
+    const labelStep = (data.length - 1) / (labelCount - 1);
+    for (let li = 0; li < labelCount; li++) {
+        const idx = Math.round(li * labelStep);
+        const x = marginLeft + idx * stepX;
+        // Label: days ago relative to today.
+        const daysAgo = data.length - 1 - idx;
+        const label = daysAgo === 0 ? "today" : `d\u2212${daysAgo}`;
+        ctx.fillText(label, x, cssH - marginBottom + 6);
+    }
+    // ── Helper: data index → canvas coords ──
+    const toXY = (i) => ({
+        x: marginLeft + i * stepX,
+        y: marginTop + plotH - ((data[i] - min) / range) * plotH,
+    });
+    // Trend colour.
+    const first = data[0];
+    const last = data[data.length - 1];
+    const lineColour = last > first ? "#4ec9b0" : last < first ? "#f44747" : "#888";
+    // ── Gradient fill under curve ──
+    ctx.beginPath();
+    ctx.moveTo(toXY(0).x, toXY(0).y);
+    for (let i = 1; i < data.length; i++) {
+        const p = toXY(i);
+        ctx.lineTo(p.x, p.y);
+    }
+    ctx.lineTo(toXY(data.length - 1).x, marginTop + plotH);
+    ctx.lineTo(toXY(0).x, marginTop + plotH);
+    ctx.closePath();
+    const grad = ctx.createLinearGradient(0, marginTop, 0, marginTop + plotH);
+    grad.addColorStop(0, lineColour + "44");
+    grad.addColorStop(1, lineColour + "08");
+    ctx.fillStyle = grad;
+    ctx.fill();
+    // ── Line ──
+    ctx.strokeStyle = lineColour;
+    ctx.lineWidth = 2;
+    ctx.lineJoin = "round";
+    ctx.lineCap = "round";
+    ctx.beginPath();
+    for (let i = 0; i < data.length; i++) {
+        const p = toXY(i);
+        if (i === 0)
+            ctx.moveTo(p.x, p.y);
+        else
+            ctx.lineTo(p.x, p.y);
+    }
+    ctx.stroke();
+    // ── Data-point dots ──
+    for (let i = 0; i < data.length; i++) {
+        const p = toXY(i);
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, 3, 0, Math.PI * 2);
+        ctx.fillStyle = lineColour;
+        ctx.fill();
+        ctx.strokeStyle = "rgba(0,0,0,0.5)";
+        ctx.lineWidth = 1;
+        ctx.stroke();
+    }
+}
 /**
  * Render all market items in the current view mode.
  */
@@ -6107,13 +6332,6 @@ function renderMarketItems(items) {
     for (const item of items) {
         els.marketItems.appendChild(buildItemCard(item));
     }
-    // Draw sparklines now that canvases are in the DOM.
-    const canvases = els.marketItems.querySelectorAll("canvas.sparkline");
-    canvases.forEach((canvas) => {
-        const data = canvas.__priceHistory;
-        if (data)
-            drawSparkline(canvas, data);
-    });
 }
 // ─── Favourites Panel ────────────────────────────────────────────────────────
 /** Whether the favourites panel body is collapsed. */
@@ -6149,13 +6367,6 @@ async function renderFavorites() {
     for (const item of items) {
         els.favoritesItems.appendChild(buildItemCard(item));
     }
-    // Draw sparklines.
-    const canvases = els.favoritesItems.querySelectorAll("canvas.sparkline");
-    canvases.forEach((canvas) => {
-        const data = canvas.__priceHistory;
-        if (data)
-            drawSparkline(canvas, data);
-    });
 }
 /** Bind the collapse/expand toggle for the favourites section header. */
 function bindFavoritesCollapse() {
@@ -6196,7 +6407,7 @@ function bindTop20Collapse() {
 }
 /**
  * Render search results into the dedicated #search-results container.
- * Uses the same card builder + sparkline drawing as the Top 20.
+ * Uses the same card builder as the Top 20.
  */
 function renderSearchResults(items) {
     els.searchResults.innerHTML = "";
@@ -6212,13 +6423,6 @@ function renderSearchResults(items) {
     for (const item of items) {
         els.searchResults.appendChild(buildItemCard(item));
     }
-    // Draw sparklines.
-    const canvases = els.searchResults.querySelectorAll("canvas.sparkline");
-    canvases.forEach((canvas) => {
-        const data = canvas.__priceHistory;
-        if (data)
-            drawSparkline(canvas, data);
-    });
 }
 /**
  * Create a single market item card element.  Works for all three view modes —
@@ -6425,6 +6629,16 @@ function buildItemCard(item) {
     actions.appendChild(popoutBtn);
     actions.appendChild(favBtn);
     actions.appendChild(alertBtn);
+    // Graph button — opens the dedicated chart modal.
+    const graphBtn = document.createElement("button");
+    graphBtn.className = "graph-btn";
+    graphBtn.textContent = "\u2581\u2583\u2585";
+    graphBtn.title = "View price chart";
+    graphBtn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        showGraphModal(item);
+    });
+    actions.appendChild(graphBtn);
     actions.appendChild(addFlipCardBtn);
     actions.appendChild(wikiLink);
     actions.appendChild(geLink);
@@ -6450,34 +6664,10 @@ function buildItemCard(item) {
     ].join("");
     // Toggle inline expand on click (multiple cards can be expanded).
     header.addEventListener("click", () => {
-        const wasExpanded = card.classList.toggle("expanded");
-        // Redraw sparkline once the CSS height transition finishes.
-        if (wasExpanded) {
-            const onReady = () => {
-                sparkCanvas.removeEventListener("transitionend", onReady);
-                const data = sparkCanvas.__priceHistory;
-                if (data)
-                    drawSparkline(sparkCanvas, data);
-            };
-            sparkCanvas.addEventListener("transitionend", onReady);
-        }
-    });
-    // \u2500\u2500 Sparkline canvas (between header and detail) \u2500\u2500
-    const sparkCanvas = document.createElement("canvas");
-    sparkCanvas.className = "sparkline";
-    sparkCanvas.width = 100;
-    sparkCanvas.height = 30;
-    sparkCanvas.title = "Click to view details";
-    // Attach price data for post-render drawing.
-    sparkCanvas.__priceHistory = item.priceHistory;
-    // Click the sparkline to open the enlarged detail modal.
-    sparkCanvas.addEventListener("click", (e) => {
-        e.stopPropagation();
-        showItemModal(item);
+        card.classList.toggle("expanded");
     });
     card.appendChild(header);
     card.appendChild(alertPopover);
-    card.appendChild(sparkCanvas);
     card.appendChild(detail);
     return card;
 }
@@ -6491,7 +6681,7 @@ let itemModal = null;
  * .item-modal-backdrop
  *   .item-modal
  *     .item-modal-header  (sprite + name + close btn)
- *     .item-modal-body    (badges, sparkline, detail rows)
+ *     .item-modal-body    (badges, detail rows)
  * ```
  */
 function ensureModal() {
@@ -6632,7 +6822,6 @@ function showItemModal(item) {
     ].filter(Boolean).join("");
     mBody.innerHTML =
         `<div class="item-modal-badges">${badgesHtml}</div>` +
-            `<canvas class="sparkline modal-sparkline" width="340" height="60"></canvas>` +
             `<div class="item-modal-details">${rows}</div>` +
             `<div class="alert-inputs">` +
             `<h4 class="alert-inputs-title">\uD83D\uDD14 Price Alerts</h4>` +
@@ -6645,11 +6834,6 @@ function showItemModal(item) {
             `<input id="modal-alert-sell" type="number" min="0" placeholder="Sell target (gp)" />` +
             `</div>` +
             `</div>`;
-    // Draw the sparkline (handles 0, 1, or ≥ 2 data points gracefully).
-    const canvas = mBody.querySelector("canvas.modal-sparkline");
-    if (canvas) {
-        drawSparkline(canvas, item.priceHistory);
-    }
     // ── Price alert inputs ──────────────────────────────────────────────────
     const alertBuyInput = mBody.querySelector("#modal-alert-buy");
     const alertSellInput = mBody.querySelector("#modal-alert-sell");
@@ -6681,6 +6865,181 @@ function showItemModal(item) {
 function hideItemModal() {
     if (itemModal)
         itemModal.classList.remove("visible");
+}
+// \u2500\u2500\u2500 Graph Modal \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
+/** Lazily-created singleton graph modal container. */
+let graphModal = null;
+/** Create (once) and return the reusable graph modal element. */
+function ensureGraphModal() {
+    if (graphModal)
+        return graphModal;
+    const backdrop = document.createElement("div");
+    backdrop.className = "graph-modal-backdrop";
+    backdrop.addEventListener("click", (e) => {
+        if (e.target === backdrop)
+            hideGraphModal();
+    });
+    const modal = document.createElement("div");
+    modal.className = "graph-modal";
+    const mHeader = document.createElement("div");
+    mHeader.className = "graph-modal-header";
+    mHeader.id = "graph-modal-header";
+    const closeBtn = document.createElement("button");
+    closeBtn.className = "item-modal-close";
+    closeBtn.textContent = "\u2715";
+    closeBtn.addEventListener("click", hideGraphModal);
+    mHeader.appendChild(closeBtn);
+    const mBody = document.createElement("div");
+    mBody.className = "graph-modal-body";
+    mBody.id = "graph-modal-body";
+    modal.appendChild(mHeader);
+    modal.appendChild(mBody);
+    backdrop.appendChild(modal);
+    document.body.appendChild(backdrop);
+    graphModal = backdrop;
+    return backdrop;
+}
+/**
+ * Fetch 7-day price history for a single item from the Weird Gloop API.
+ * Returns chronological daily prices (excluding today) or an empty array on failure.
+ */
+async function fetchItemHistory(name) {
+    try {
+        const url = `https://api.weirdgloop.org/exchange/history/rs/last90d?name=${encodeURIComponent(name)}`;
+        const resp = await fetch(url, {
+            headers: {
+                "User-Agent": "RS3-GE-Analyzer-Alt1Plugin/1.0",
+                Accept: "application/json",
+            },
+        });
+        if (!resp.ok)
+            return [];
+        const json = await resp.json();
+        const entries = json[name];
+        if (!Array.isArray(entries))
+            return [];
+        const cutoff = new Date();
+        cutoff.setDate(cutoff.getDate() - 7);
+        const cutoffMs = cutoff.getTime();
+        const todayStr = new Date().toISOString().slice(0, 10);
+        const dayMap = new Map();
+        for (const e of entries) {
+            if (e.timestamp < cutoffMs)
+                continue;
+            const day = new Date(e.timestamp).toISOString().slice(0, 10);
+            if (day === todayStr)
+                continue;
+            dayMap.set(day, e.price);
+        }
+        const sorted = [...dayMap.entries()].sort((a, b) => (a[0] < b[0] ? -1 : 1));
+        return sorted.map((d) => d[1]);
+    }
+    catch {
+        return [];
+    }
+}
+/**
+ * Populate the graph modal with a specific item\u2019s price chart and
+ * momentum analytics, then show it.
+ *
+ * If the item has fewer than 2 data points, an on-demand API fetch is
+ * attempted before rendering to backfill the chart.
+ */
+async function showGraphModal(item) {
+    const backdrop = ensureGraphModal();
+    const mHeader = backdrop.querySelector("#graph-modal-header");
+    const mBody = backdrop.querySelector("#graph-modal-body");
+    // \u2500\u2500 Header \u2500\u2500
+    const closeBtn = mHeader.querySelector(".item-modal-close");
+    mHeader.innerHTML = "";
+    const img = document.createElement("img");
+    img.className = "item-sprite";
+    img.src = spriteUrl(item.itemId);
+    img.alt = item.name;
+    img.width = 36;
+    img.height = 32;
+    img.onerror = () => { img.style.display = "none"; };
+    const title = document.createElement("span");
+    title.className = "graph-modal-title";
+    title.textContent = `${item.name} \u2014 Price Chart`;
+    mHeader.appendChild(img);
+    mHeader.appendChild(title);
+    mHeader.appendChild(closeBtn);
+    // ── On-demand history fetch if data is sparse ──
+    if (item.priceHistory.length < 2) {
+        // Show a loading state immediately.
+        mBody.innerHTML = `<div style="text-align:center;padding:24px;color:#888;">Loading price history\u2026</div>`;
+        backdrop.classList.add("visible");
+        const fetched = await fetchItemHistory(item.name);
+        if (fetched.length > 0) {
+            // Rebuild priceHistory: historical days + today's price.
+            item.priceHistory = [...fetched, item.price];
+            // Re-classify trend.
+            if (item.priceHistory.length >= 2 && item.priceHistory[0] > 0) {
+                const pct = (item.price - item.priceHistory[0]) / item.priceHistory[0];
+                item.priceTrend = pct < -0.05 ? "Downtrend" : pct > 0.05 ? "Uptrend" : "Stable";
+            }
+        }
+    }
+    const hist = item.priceHistory;
+    const hasData = hist.length >= 2;
+    // Compute momentum stats.
+    const currentPrice = item.price;
+    const oldestPrice = hasData ? hist[0] : currentPrice;
+    const highPrice = hasData ? Math.max(...hist) : currentPrice;
+    const lowPrice = hasData ? Math.min(...hist) : currentPrice;
+    const pctChange = oldestPrice > 0 ? ((currentPrice - oldestPrice) / oldestPrice) * 100 : 0;
+    const absChange = currentPrice - oldestPrice;
+    const volatility = hasData ? ((highPrice - lowPrice) / lowPrice) * 100 : 0;
+    // Trend direction and colour.
+    const trendLabel = item.priceTrend;
+    const trendColour = trendLabel === "Uptrend" ? "var(--accent-green-bright, #4ec9b0)"
+        : trendLabel === "Downtrend" ? "var(--accent-red, #f44747)" : "var(--text-muted, #888)";
+    const trendIcon = trendLabel === "Uptrend" ? "\uD83D\uDCC8" : trendLabel === "Downtrend" ? "\u26A0\uFE0F" : "\u27A1\uFE0F";
+    mBody.innerHTML =
+        `<canvas class="graph-modal-canvas" width="480" height="180"></canvas>` +
+            `<div class="graph-stats">` +
+            `<div class="graph-stat-row">` +
+            `<span class="graph-stat-label">7-Day Trend</span>` +
+            `<span class="graph-stat-value" style="color:${trendColour}">${trendIcon} ${trendLabel}</span>` +
+            `</div>` +
+            `<div class="graph-stat-row">` +
+            `<span class="graph-stat-label">Change</span>` +
+            `<span class="graph-stat-value" style="color:${trendColour}">${absChange >= 0 ? "+" : ""}${formatGpShort(absChange)} gp (${pctChange >= 0 ? "+" : ""}${pctChange.toFixed(1)}%)</span>` +
+            `</div>` +
+            `<div class="graph-stat-row">` +
+            `<span class="graph-stat-label">Current Price</span>` +
+            `<span class="graph-stat-value">${currentPrice.toLocaleString("en-US")} gp</span>` +
+            `</div>` +
+            `<div class="graph-stat-row">` +
+            `<span class="graph-stat-label">7-Day High</span>` +
+            `<span class="graph-stat-value">${highPrice.toLocaleString("en-US")} gp</span>` +
+            `</div>` +
+            `<div class="graph-stat-row">` +
+            `<span class="graph-stat-label">7-Day Low</span>` +
+            `<span class="graph-stat-value">${lowPrice.toLocaleString("en-US")} gp</span>` +
+            `</div>` +
+            `<div class="graph-stat-row">` +
+            `<span class="graph-stat-label">Volatility</span>` +
+            `<span class="graph-stat-value">${volatility.toFixed(1)}%</span>` +
+            `</div>` +
+            `<div class="graph-stat-row">` +
+            `<span class="graph-stat-label">Data Points</span>` +
+            `<span class="graph-stat-value">${hist.length} day${hist.length !== 1 ? "s" : ""}</span>` +
+            `</div>` +
+            `</div>`;
+    // Draw the chart after the modal is in the DOM.
+    backdrop.classList.add("visible");
+    requestAnimationFrame(() => {
+        const canvas = mBody.querySelector(".graph-modal-canvas");
+        if (canvas)
+            drawGraphChart(canvas, hist);
+    });
+}
+/** Hide the graph modal. */
+function hideGraphModal() {
+    if (graphModal)
+        graphModal.classList.remove("visible");
 }
 /**
  * Render an array of {@link RankedItem} as `<li>` elements inside the
