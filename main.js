@@ -5607,7 +5607,6 @@ class WeirdGloopService {
                 const resp = await fetch(url, {
                     method: "GET",
                     headers: {
-                        "User-Agent": "RS3-GE-Analyzer-Alt1Plugin/1.0 (contact: github.com/skillbert/alt1minimal)",
                         Accept: "application/json",
                     },
                 });
