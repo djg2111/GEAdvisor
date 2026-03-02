@@ -667,6 +667,71 @@ button:disabled {
   color: var(--text-bright);
 }
 
+/* ── Full Market Scan button ──────────────────────────────────────────────── */
+
+.scan-btn {
+  flex-shrink: 0;
+  font-size: 10px;
+  padding: 2px 8px;
+  background: var(--accent-primary);
+  border: 1px solid var(--border-input);
+  color: var(--text-bright);
+  border-radius: 3px;
+  cursor: pointer;
+  transition: background 0.15s, opacity 0.15s;
+}
+
+.scan-btn:hover {
+  background: var(--accent-hover, var(--accent-primary));
+  filter: brightness(1.15);
+}
+
+.scan-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  filter: none;
+}
+
+/* ── Background sync progress bar ─────────────────────────────────────────── */
+
+.sync-progress {
+  margin: 6px 0;
+  padding: 4px 8px;
+  background: var(--bg-muted);
+  border: 1px solid var(--border-input);
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.sync-progress.hidden {
+  display: none;
+}
+
+.sync-progress-track {
+  flex: 1;
+  height: 8px;
+  background: var(--bg-card, #1e1e2e);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.sync-progress-fill {
+  height: 100%;
+  width: 0%;
+  background: var(--accent-primary);
+  border-radius: 4px;
+  transition: width 0.3s ease;
+}
+
+.sync-progress-text {
+  font-size: 10px;
+  color: var(--text-muted);
+  white-space: nowrap;
+  min-width: 120px;
+}
+
 /* ── Custom filter precision controls ─────────────────────────────────────── */
 
 .custom-filter-group {
@@ -3065,6 +3130,49 @@ class CacheService {
             };
         });
     }
+    /**
+     * Bulk-insert 30+ days of historical snapshots into the `price-history`
+     * store.  Uses a single read-write transaction for atomicity and performance.
+     *
+     * Each entry is keyed by the compound `[name, day]` pair, so duplicate
+     * days are silently overwritten (idempotent).
+     *
+     * @param historyMap - Map of item name → array of daily history entries as
+     *                     returned by {@link WeirdGloopService.fetchHistoricalPrices}.
+     * @returns The number of history rows written.
+     */
+    async bulkInsertHistory(historyMap) {
+        const db = this.ensureOpen();
+        return new Promise((resolve, reject) => {
+            const tx = db.transaction(HISTORY_STORE, "readwrite");
+            const store = tx.objectStore(HISTORY_STORE);
+            let count = 0;
+            for (const [name, entries] of historyMap) {
+                for (const entry of entries) {
+                    const day = new Date(entry.timestamp).toISOString().slice(0, 10);
+                    const record = {
+                        id: 0,
+                        name,
+                        day,
+                        price: entry.price,
+                        volume: entry.volume ?? 0,
+                        timestamp: new Date(entry.timestamp).toISOString(),
+                        fetchedAt: Date.now(),
+                    };
+                    const req = store.put(record);
+                    req.onsuccess = () => { count++; };
+                }
+            }
+            tx.oncomplete = () => {
+                console.log(`[CacheService] Bulk-inserted ${count} historical rows.`);
+                resolve(count);
+            };
+            tx.onerror = () => {
+                console.error("[CacheService] Bulk history insert failed:", tx.error);
+                reject(tx.error);
+            };
+        });
+    }
     // ─── Read Operations ──────────────────────────────────────────────────
     /**
      * Retrieve every cached price record.
@@ -3265,7 +3373,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   WeirdGloopService: () => (/* reexport safe */ _weirdGloopService__WEBPACK_IMPORTED_MODULE_0__.WeirdGloopService),
 /* harmony export */   WikiService: () => (/* reexport safe */ _wikiService__WEBPACK_IMPORTED_MODULE_3__.WikiService),
 /* harmony export */   fetchGECatalogue: () => (/* reexport safe */ _initDataPipeline__WEBPACK_IMPORTED_MODULE_7__.fetchGECatalogue),
-/* harmony export */   initDataPipeline: () => (/* reexport safe */ _initDataPipeline__WEBPACK_IMPORTED_MODULE_7__.initDataPipeline)
+/* harmony export */   initDataPipeline: () => (/* reexport safe */ _initDataPipeline__WEBPACK_IMPORTED_MODULE_7__.initDataPipeline),
+/* harmony export */   runFullMarketScan: () => (/* reexport safe */ _initDataPipeline__WEBPACK_IMPORTED_MODULE_7__.runFullMarketScan)
 /* harmony export */ });
 /* harmony import */ var _weirdGloopService__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./weirdGloopService */ "./services/weirdGloopService.ts");
 /* harmony import */ var _cacheService__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./cacheService */ "./services/cacheService.ts");
@@ -3302,7 +3411,8 @@ __webpack_require__.r(__webpack_exports__);
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   fetchGECatalogue: () => (/* binding */ fetchGECatalogue),
-/* harmony export */   initDataPipeline: () => (/* binding */ initDataPipeline)
+/* harmony export */   initDataPipeline: () => (/* binding */ initDataPipeline),
+/* harmony export */   runFullMarketScan: () => (/* binding */ runFullMarketScan)
 /* harmony export */ });
 /* harmony import */ var _cacheService__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./cacheService */ "./services/cacheService.ts");
 /* harmony import */ var _weirdGloopService__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./weirdGloopService */ "./services/weirdGloopService.ts");
@@ -3345,20 +3455,50 @@ const SEED_ITEMS = [
     "Green h'ween mask",
     "Red h'ween mask",
     "Blue h'ween mask",
+    "Easter egg",
+    "Pumpkin",
+    "Disk of returning",
+    "Black Santa hat",
+    "Fish mask",
+    "Golden cracker",
     // ── High-volume Skilling Supplies ─────────────────────────────────────
     "Raw shark",
     "Shark",
     "Raw rocktail",
     "Rocktail",
+    "Raw sailfish",
+    "Sailfish",
+    "Raw lobster",
+    "Lobster",
+    "Raw swordfish",
+    "Swordfish",
     "Grimy dwarf weed",
     "Dwarf weed",
     "Grimy lantadyme",
     "Lantadyme",
     "Grimy torstol",
     "Torstol",
+    "Grimy snapdragon",
+    "Snapdragon",
+    "Grimy ranarr",
+    "Ranarr",
+    "Grimy kwuarm",
+    "Kwuarm",
+    "Grimy cadantine",
+    "Cadantine",
+    "Grimy avantoe",
+    "Avantoe",
+    "Grimy toadflax",
+    "Toadflax",
+    "Grimy irit",
+    "Irit",
+    "Grimy spirit weed",
+    "Spirit weed",
     "Magic logs",
     "Elder logs",
     "Yew logs",
+    "Maple logs",
+    "Willow logs",
     "Coal",
     "Mithril ore",
     "Adamantite ore",
@@ -3366,6 +3506,32 @@ const SEED_ITEMS = [
     "Runite ore",
     "Gold ore",
     "Iron ore",
+    "Silver ore",
+    "Copper ore",
+    "Tin ore",
+    "Banite ore",
+    "Orichalcite ore",
+    "Drakolith",
+    "Phasmatite",
+    "Necrite ore",
+    "Light animica",
+    "Dark animica",
+    "Pure essence",
+    "Rune essence",
+    "Flax",
+    "Bow string",
+    "Uncut diamond",
+    "Uncut ruby",
+    "Uncut emerald",
+    "Uncut sapphire",
+    "Diamond",
+    "Ruby",
+    "Emerald",
+    "Sapphire",
+    "Crystal flask",
+    "Potion flask",
+    "Vial of water",
+    "Feather",
     // ── Potions & Consumables ─────────────────────────────────────────────
     "Overload (4)",
     "Super restore (4)",
@@ -3373,6 +3539,25 @@ const SEED_ITEMS = [
     "Saradomin brew (4)",
     "Weapon poison+++ (4)",
     "Aggression potion (4)",
+    "Super antifire (4)",
+    "Prayer renewal (4)",
+    "Extreme attack (4)",
+    "Extreme strength (4)",
+    "Extreme defence (4)",
+    "Extreme magic (4)",
+    "Extreme ranging (4)",
+    "Super prayer (4)",
+    "Summoning potion (4)",
+    "Antifire (4)",
+    "Super attack (4)",
+    "Super strength (4)",
+    "Super defence (4)",
+    "Super magic potion (4)",
+    "Super ranging potion (4)",
+    "Adrenaline potion (4)",
+    "Rocktail soup",
+    "Sailfish soup",
+    "Summer pie",
     // ── Runes ─────────────────────────────────────────────────────────────
     "Blood rune",
     "Death rune",
@@ -3384,6 +3569,17 @@ const SEED_ITEMS = [
     "Water rune",
     "Air rune",
     "Earth rune",
+    "Body rune",
+    "Mind rune",
+    "Chaos rune",
+    "Cosmic rune",
+    "Mud rune",
+    "Dust rune",
+    "Lava rune",
+    "Steam rune",
+    "Smoke rune",
+    "Mist rune",
+    "Armadyl rune",
     // ── PvM Drops & Salvage ───────────────────────────────────────────────
     "Dragonfire shield",
     "Abyssal whip",
@@ -3405,6 +3601,37 @@ const SEED_ITEMS = [
     "Malevolent helm",
     "Malevolent cuirass",
     "Malevolent greaves",
+    "Seren godbow",
+    "Staff of Sliske",
+    "Zaros godsword",
+    "Praesul codex",
+    "Inquisitor staff",
+    "Masterwork platebody",
+    "Masterwork platelegs",
+    "Masterwork helm",
+    "Masterwork boots",
+    "Masterwork gloves",
+    "Trimmed masterwork platebody",
+    "Trimmed masterwork platelegs",
+    "Trimmed masterwork helm",
+    "Trimmed masterwork boots",
+    "Trimmed masterwork gloves",
+    "Eldritch crossbow",
+    "Blightbound crossbow",
+    "Fractured Staff of Armadyl",
+    "Scripture of Jas",
+    "Scripture of Wen",
+    "Scripture of Ful",
+    "Cinderbane gloves",
+    "Laceration boots",
+    "Fleeting boots",
+    "Blast diffusion boots",
+    "Essence of Finality amulet",
+    "Amulet of souls",
+    "Reaper necklace",
+    "Deathtouch bracelet",
+    "Ring of death",
+    "Luck of the Dwarves",
     // ── Summoning & Misc ──────────────────────────────────────────────────
     "Spirit shard",
     "Pouch",
@@ -3412,6 +3639,10 @@ const SEED_ITEMS = [
     "Blue charm",
     "Pack yak pouch",
     "Water talisman",
+    "Fire talisman",
+    "Yak-hide",
+    "Unicorn horn",
+    "Swamp tar",
     // ── Alchable / Margin Items ───────────────────────────────────────────
     "Battlestaff",
     "Onyx",
@@ -3419,10 +3650,44 @@ const SEED_ITEMS = [
     "Onyx bolts (e)",
     "Rune bar",
     "Adamant bar",
+    "Mithril bar",
+    "Steel bar",
+    "Iron bar",
+    "Bronze bar",
+    "Gold bar",
+    "Banite bar",
+    "Elder rune bar",
+    "Orichalcite bar",
+    "Drakolith bar",
+    "Phasmatite bar",
+    "Necronium bar",
+    "Light animica bar",
+    "Dark animica bar",
     "Hydrix",
     "Uncut dragonstone",
     "Dragonstone",
     "Bond",
+    "Cannonball",
+    "Broad arrowheads",
+    "Dragon bones",
+    "Frost dragon bones",
+    "Dinosaur bones",
+    "Reinforced dinosaur bones",
+    "Dagannoth bones",
+    "Infernal ashes",
+    "Dragon arrowheads",
+    "Rune arrowheads",
+    "Adamant arrowheads",
+    "Black dragonhide",
+    "Royal dragonhide",
+    "Green dragonhide",
+    "Blue dragonhide",
+    "Red dragonhide",
+    "Rune platebody",
+    "Rune platelegs",
+    "Dragon platelegs",
+    "Dragon plateskirt",
+    "Dragon helm",
 ];
 /**
  * Run the full data-ingest pipeline.
@@ -3466,27 +3731,48 @@ async function initDataPipeline() {
             console.warn("[initDataPipeline] API returned zero records. Cache will remain empty.");
         }
         else {
-            // Step 3b — Enrich records with GE buy limits from the wiki.
+            // Step 3b — Enrich records with GE buy limits and high alch values from the wiki.
             const wiki = new _wikiService__WEBPACK_IMPORTED_MODULE_2__.WikiService();
             const itemNames = Array.from(prices.keys());
             let buyLimits;
+            let alchValues;
             try {
-                buyLimits = await wiki.getBulkBuyLimits(itemNames);
+                [buyLimits, alchValues] = await Promise.all([
+                    wiki.getBulkBuyLimits(itemNames),
+                    wiki.getBulkHighAlchValues(itemNames),
+                ]);
             }
             catch (wikiErr) {
-                console.warn("[initDataPipeline] Wiki buy-limit fetch failed — continuing without limits.", wikiErr);
+                console.warn("[initDataPipeline] Wiki enrichment fetch failed — continuing without limits/alch.", wikiErr);
                 buyLimits = new Map();
+                alchValues = new Map();
             }
             for (const [name, record] of prices) {
                 const limit = buyLimits.get(name);
                 if (limit !== undefined) {
                     record.buyLimit = limit;
                 }
+                const alch = alchValues.get(name);
+                if (alch !== undefined) {
+                    record.highAlch = alch;
+                }
             }
-            console.log(`[initDataPipeline] Enriched ${buyLimits.size} / ${prices.size} records with buy limits.`);
+            console.log(`[initDataPipeline] Enriched ${buyLimits.size} buy limits, ${alchValues.size} alch values for ${prices.size} records.`);
             // Step 3c — Persist enriched records into IndexedDB.
             const written = await cache.bulkInsert(prices);
             console.log(`[initDataPipeline] Wrote ${written} records to cache.`);
+            // Step 3d — Seed 30 days of historical prices for EMA / regression.
+            try {
+                const itemNames = Array.from(prices.keys());
+                const historyMap = await api.fetchHistoricalPrices(itemNames, 30);
+                if (historyMap.size > 0) {
+                    const histWritten = await cache.bulkInsertHistory(historyMap);
+                    console.log(`[initDataPipeline] Seeded ${histWritten} historical rows for ${historyMap.size} items.`);
+                }
+            }
+            catch (histErr) {
+                console.warn("[initDataPipeline] Historical price fetch failed — sparklines may be sparse.", histErr);
+            }
         }
     }
     else {
@@ -3532,6 +3818,93 @@ async function fetchGECatalogue() {
         console.error("[GECatalogue] Failed to fetch catalogue:", err);
         return [];
     }
+}
+/**
+ * Run a **non-blocking** full-market background scan.
+ *
+ * Fetches latest prices + 30-day history for **every** item in the GE
+ * catalogue (~7 000 items) in batches of 100, with a 500 ms delay between
+ * batches to avoid rate-limiting.  Each batch is bulk-inserted into IndexedDB
+ * immediately so progress persists even if the user closes the app mid-scan.
+ *
+ * The UI remains fully interactive during the scan because the function
+ * yields control back to the browser between batches via `setTimeout`.
+ *
+ * @param catalogue       - Pre-fetched GE catalogue entries.
+ * @param onProgress      - Called after every batch with `(done, total)`.
+ * @param signal          - Optional `AbortSignal` to cancel the scan early.
+ * @returns The total number of items successfully fetched and persisted.
+ */
+async function runFullMarketScan(catalogue, onProgress, signal) {
+    if (catalogue.length === 0) {
+        console.warn("[FullMarketScan] Empty catalogue — nothing to scan.");
+        return 0;
+    }
+    const cache = new _cacheService__WEBPACK_IMPORTED_MODULE_0__.CacheService();
+    const api = new _weirdGloopService__WEBPACK_IMPORTED_MODULE_1__.WeirdGloopService();
+    const wiki = new _wikiService__WEBPACK_IMPORTED_MODULE_2__.WikiService();
+    await cache.open();
+    const BATCH_SIZE = 100;
+    const DELAY_MS = 500;
+    const allNames = catalogue.map((e) => e.name);
+    const total = allNames.length;
+    let done = 0;
+    console.log(`[FullMarketScan] Starting scan of ${total} items in batches of ${BATCH_SIZE}…`);
+    for (let i = 0; i < allNames.length; i += BATCH_SIZE) {
+        if (signal?.aborted) {
+            console.log("[FullMarketScan] Aborted by user.");
+            break;
+        }
+        const batchNames = allNames.slice(i, i + BATCH_SIZE);
+        try {
+            // Fetch latest prices for this batch.
+            const prices = await api.fetchLatestPrices(batchNames);
+            if (prices.size > 0) {
+                // Enrich with buy limits + alch values (best-effort).
+                const names = Array.from(prices.keys());
+                try {
+                    const [limits, alchs] = await Promise.all([
+                        wiki.getBulkBuyLimits(names),
+                        wiki.getBulkHighAlchValues(names),
+                    ]);
+                    for (const [name, record] of prices) {
+                        const limit = limits.get(name);
+                        if (limit !== undefined)
+                            record.buyLimit = limit;
+                        const alch = alchs.get(name);
+                        if (alch !== undefined)
+                            record.highAlch = alch;
+                    }
+                }
+                catch {
+                    // Non-critical — continue without enrichment.
+                }
+                // Persist to IndexedDB immediately.
+                await cache.bulkInsert(prices);
+                // Fetch 30-day history for this batch (best-effort).
+                try {
+                    const historyMap = await api.fetchHistoricalPrices(names, 30);
+                    if (historyMap.size > 0) {
+                        await cache.bulkInsertHistory(historyMap);
+                    }
+                }
+                catch {
+                    // Non-critical — skip history for this batch.
+                }
+            }
+        }
+        catch (err) {
+            console.warn(`[FullMarketScan] Batch ${i / BATCH_SIZE + 1} failed:`, err);
+        }
+        done = Math.min(i + BATCH_SIZE, total);
+        onProgress?.(done, total);
+        // Yield to the browser event loop + rate-limit delay.
+        if (i + BATCH_SIZE < allNames.length) {
+            await new Promise((r) => setTimeout(r, DELAY_MS));
+        }
+    }
+    console.log(`[FullMarketScan] Complete. ${done} / ${total} items processed.`);
+    return done;
 }
 
 
@@ -3723,6 +4096,8 @@ class LLMService {
             "6. Keep responses concise and actionable. Use bullet points or numbered lists.",
             "7. Format gold values with standard RS3 abbreviations (K, M, B).",
             "8. If no wiki guide exists for an item, only discuss it from the market-data perspective.",
+            "9. Analyze the '30d Trend Slope' and 'Volatility' metrics provided for each item. A positive slope indicates an upward price trend; a negative slope signals decline. Volatility above 10% signals high risk.",
+            "10. When recommending or discussing an item, explicitly mention whether its linear slope is positive or negative and whether its volatility is high (>10%) or low. Use these to justify your buy/sell/hold advice.",
             "",
             "The following RS3 economic laws are ABSOLUTE. They supersede any conflicting outside knowledge you may have. Apply them to every calculation.",
             "",
@@ -3859,6 +4234,84 @@ __webpack_require__.r(__webpack_exports__);
  * fallback fetch to the Weird Gloop historical API when the local IndexedDB
  * price-history store has insufficient data for sparkline rendering.
  */
+// ─── Pure Time-Series Math ──────────────────────────────────────────────────
+/**
+ * Calculate the Exponential Moving Average of a price series.
+ *
+ * The EMA gives progressively more weight to recent observations.
+ * With the default `alpha = 0.2`, the half-life is roughly 3 observations.
+ *
+ * @param prices - Chronological price array (oldest-first).  Must have ≥ 1 element.
+ * @param alpha  - Smoothing factor in (0, 1].  Higher = more reactive.
+ * @returns The final EMA value, or `0` if the array is empty.
+ */
+function calculateEMA(prices, alpha = 0.2) {
+    if (prices.length === 0)
+        return 0;
+    let ema = prices[0];
+    for (let i = 1; i < prices.length; i++) {
+        ema = alpha * prices[i] + (1 - alpha) * ema;
+    }
+    return ema;
+}
+/**
+ * Calculate the volatility of a price series as the standard deviation of
+ * daily percentage returns.
+ *
+ * A return of `0.05` means the typical daily swing is ±5 %.
+ *
+ * @param prices - Chronological price array (oldest-first).  Needs ≥ 2 elements.
+ * @returns Population standard deviation of daily % changes, or `0` if too few data points.
+ */
+function calculateVolatility(prices) {
+    if (prices.length < 2)
+        return 0;
+    const returns = [];
+    for (let i = 1; i < prices.length; i++) {
+        if (prices[i - 1] === 0)
+            continue;
+        returns.push((prices[i] - prices[i - 1]) / prices[i - 1]);
+    }
+    if (returns.length === 0)
+        return 0;
+    const mean = returns.reduce((s, r) => s + r, 0) / returns.length;
+    const variance = returns.reduce((s, r) => s + (r - mean) ** 2, 0) / returns.length;
+    return Math.sqrt(variance);
+}
+/**
+ * Fit an ordinary least-squares (OLS) linear regression to a price series and
+ * return the slope plus a one-step-ahead prediction.
+ *
+ * The independent variable is a zero-based day index (0, 1, 2, …).
+ *
+ * @param prices - Chronological price array (oldest-first).  Needs ≥ 2 elements.
+ * @returns `{ slope, predictedNext }` where `predictedNext` is the extrapolated
+ *          price for day `N` (one beyond the last observation).
+ *          Both are `0` when there is insufficient data.
+ */
+function calculateLinearTrend(prices) {
+    const n = prices.length;
+    if (n < 2)
+        return { slope: 0, predictedNext: 0 };
+    // Σx, Σy, Σxy, Σx²  where x = 0 … n-1
+    let sumX = 0;
+    let sumY = 0;
+    let sumXY = 0;
+    let sumX2 = 0;
+    for (let i = 0; i < n; i++) {
+        sumX += i;
+        sumY += prices[i];
+        sumXY += i * prices[i];
+        sumX2 += i * i;
+    }
+    const denom = n * sumX2 - sumX * sumX;
+    if (denom === 0)
+        return { slope: 0, predictedNext: prices[n - 1] };
+    const slope = (n * sumXY - sumX * sumY) / denom;
+    const intercept = (sumY - slope * sumX) / n;
+    const predictedNext = intercept + slope * n; // day = n (one step ahead)
+    return { slope, predictedNext };
+}
 /** Default analyser settings. */
 const DEFAULTS = {
     topN: 20,
@@ -3905,10 +4358,10 @@ class MarketAnalyzerService {
             console.warn("[MarketAnalyzer] Cache returned 0 records — nothing to analyse.");
             return [];
         }
-        // Build a volume-SMA map from the last 7 days of history.
-        const avgVolumeMap = await this.buildAvgVolumeMap(7);
-        // Build a price-history map for sparklines.
-        const priceHistoryMap = await this.buildPriceHistoryMap(7);
+        // Build a volume-SMA map from the last 30 days of history.
+        const avgVolumeMap = await this.buildAvgVolumeMap(30);
+        // Build a price-history map for sparklines / EMA / regression.
+        const priceHistoryMap = await this.buildPriceHistoryMap(30);
         const effectiveMinVol = overrides?.minVolume ?? this.minVolume;
         const effectiveMaxVol = overrides?.maxVolume ?? this.maxVolume;
         const effectiveMaxPrice = overrides?.maxPrice ?? this.maxPrice;
@@ -3939,8 +4392,8 @@ class MarketAnalyzerService {
         const matched = allRecords.filter((r) => r.name.toLowerCase().includes(needle));
         if (matched.length === 0)
             return [];
-        const avgVolumeMap = await this.buildAvgVolumeMap(7);
-        const priceHistoryMap = await this.buildPriceHistoryMap(7);
+        const avgVolumeMap = await this.buildAvgVolumeMap(30);
+        const priceHistoryMap = await this.buildPriceHistoryMap(30);
         // Score with no volume/price filters so *every* match is included.
         const scored = this.scoreAndFilter(matched, 0, 0, 0, avgVolumeMap, priceHistoryMap);
         const sorted = this.sortDescending(scored);
@@ -3960,8 +4413,8 @@ class MarketAnalyzerService {
         const matched = allRecords.filter((r) => names.has(r.name));
         if (matched.length === 0)
             return [];
-        const avgVolumeMap = await this.buildAvgVolumeMap(7);
-        const priceHistoryMap = await this.buildPriceHistoryMap(7);
+        const avgVolumeMap = await this.buildAvgVolumeMap(30);
+        const priceHistoryMap = await this.buildPriceHistoryMap(30);
         const scored = this.scoreAndFilter(matched, 0, 0, 0, avgVolumeMap, priceHistoryMap);
         return this.sortDescending(scored);
     }
@@ -4009,7 +4462,10 @@ class MarketAnalyzerService {
             const hype = item.volumeSpikeMultiplier > 0
                 ? ` | 🔥 ${item.volumeSpikeMultiplier}x Vol Spike`
                 : "";
-            return `${rank}. ${item.name} | GE Price: ${price} gp | Buy ≤ ${recBuy} | Sell ≥ ${recSell} | Profit: ${flipPft} gp/ea | Limit: ${limit} | Eff. Vol: ${effVol} | Max 4H Capital: ${cap4h} | Tax Gap: ${this.formatGp(item.taxGap)} gp${risk}${hype}`;
+            const slope = item.linearSlope >= 0 ? `+${item.linearSlope.toFixed(1)}` : item.linearSlope.toFixed(1);
+            const vol = (item.volatility * 100).toFixed(1);
+            const predicted = this.formatGp(Math.round(item.predictedNextPrice));
+            return `${rank}. ${item.name} | GE Price: ${price} gp | Buy ≤ ${recBuy} | Sell ≥ ${recSell} | Profit: ${flipPft} gp/ea | Limit: ${limit} | Eff. Vol: ${effVol} | Max 4H Capital: ${cap4h} | Tax Gap: ${this.formatGp(item.taxGap)} gp | 30d Trend Slope: ${slope} | Volatility: ${vol}% | Predicted 24h Price: ${predicted} gp${risk}${hype}`;
         });
         return [header, ...lines, divider].join("\n");
     }
@@ -4051,17 +4507,24 @@ class MarketAnalyzerService {
                 continue;
             const maxCapitalPer4H = limit != null ? record.price * limit : 0;
             // Tax gap: minimum spread (in gp) needed to break even after 2% GE tax.
+            // Use floor-based tax to match the official RS3 engine rounding.
             const breakEvenSell = Math.ceil(record.price / 0.98);
-            const taxGap = breakEvenSell - record.price;
+            const breakEvenTax = record.price <= 50 ? 0 : Math.floor(breakEvenSell * 0.02);
+            const taxGap = breakEvenTax + (breakEvenSell - record.price - breakEvenTax);
             // Recommended buy price: ~1% below current GE mid-price.
             const recBuyPrice = Math.max(1, Math.floor(record.price * 0.99));
             // Recommended sell price: high enough above the buy price to cover
             // the 2% GE tax and still yield a meaningful margin.
             // Target: sell at ~3% above mid-price → ~2% spread after tax.
-            const recSellPrice = Math.max(recBuyPrice + 1, Math.ceil(record.price * 1.03));
+            let recSellPrice = Math.max(recBuyPrice + 1, Math.ceil(record.price * 1.03));
+            // High Alchemy floor: never recommend selling below the alch value.
+            recSellPrice = Math.max(recSellPrice, record.highAlch || 0);
             // Estimated per-item flip profit: sell − buy − 2% GE tax on the sale.
-            const geTax = Math.floor(recSellPrice * 0.02);
-            const estFlipProfit = recSellPrice - recBuyPrice - geTax;
+            // Official RS3 wiki formula: floor(price * 2%), exempt at ≤ 50 gp.
+            let expectedTax = Math.floor(recSellPrice * 0.02);
+            if (recSellPrice <= 50)
+                expectedTax = 0;
+            const estFlipProfit = recSellPrice - recBuyPrice - expectedTax;
             // Risk flag: only cheap items (< 500 gp) where the absolute tax
             // gap is large relative to realistic spreads.
             const isRisky = record.price < 500;
@@ -4074,6 +4537,10 @@ class MarketAnalyzerService {
             // Price history sparkline data: historical prices + today.
             const histPrices = priceHistoryMap.get(record.name) ?? [];
             const priceHistory = [...histPrices, record.price];
+            // ── Time-series indicators (30-day window) ────────────────────────
+            const ema30d = calculateEMA(priceHistory);
+            const volatility = calculateVolatility(priceHistory);
+            const { slope: linearSlope, predictedNext: predictedNextPrice } = calculateLinearTrend(priceHistory);
             // 7-day price momentum: classify trend based on overall % change.
             let priceTrend = "Stable";
             if (priceHistory.length >= 2 && priceHistory[0] > 0) {
@@ -4099,13 +4566,21 @@ class MarketAnalyzerService {
             else {
                 tradeVelocity = "Very Slow";
             }
+            // ── Scoring adjustments based on predictive indicators ──────────
+            let tradedValue = record.price * effectivePlayerVolume;
+            // Reward upward-trending items (positive linear slope).
+            if (linearSlope > 0)
+                tradedValue *= 1.05;
+            // Penalise highly volatile items (daily σ > 10 %).
+            if (volatility > 0.10)
+                tradedValue *= 0.90;
             result.push({
                 name: record.name,
                 itemId: record.id,
                 price: record.price,
                 recBuyPrice,
                 volume: globalVol,
-                tradedValue: record.price * effectivePlayerVolume,
+                tradedValue,
                 buyLimit: record.buyLimit,
                 effectivePlayerVolume,
                 maxCapitalPer4H,
@@ -4117,6 +4592,10 @@ class MarketAnalyzerService {
                 tradeVelocity,
                 priceHistory,
                 priceTrend,
+                ema30d,
+                volatility,
+                linearSlope,
+                predictedNextPrice,
             });
         }
         return result;
@@ -4419,8 +4898,12 @@ class PortfolioService {
         if (idx === -1)
             return undefined;
         const active = this.flips[idx];
-        const realizedProfit = Math.round(actualSellPrice * 0.98 * active.quantity) -
-            active.buyPrice * active.quantity;
+        // Official RS3 wiki tax formula: floor(price * 2%), exempt at ≤ 50 gp.
+        let taxPerItem = Math.floor(actualSellPrice * 0.02);
+        if (actualSellPrice <= 50)
+            taxPerItem = 0;
+        const netSellPerItem = actualSellPrice - taxPerItem;
+        const realizedProfit = (netSellPerItem * active.quantity) - (active.buyPrice * active.quantity);
         const completed = {
             ...active,
             actualSellPrice,
@@ -4711,6 +5194,61 @@ class WeirdGloopService {
         }
         console.log(`[WeirdGloopService] Successfully fetched ${consolidated.size} / ${itemNames.length} price records.`);
         return consolidated;
+    }
+    /**
+     * Fetch up to 90 days of historical daily prices for every item in
+     * {@link itemNames}.  The Weird Gloop `/last90d` endpoint only supports a
+     * single item per request, so items are fetched in concurrent batches of
+     * {@link HISTORY_CONCURRENCY} to avoid overwhelming the API.
+     *
+     * Individual item failures are logged but do **not** reject the returned
+     * promise — successfully fetched histories are always returned.
+     *
+     * @param itemNames - Canonical RS3 item names.
+     * @param days      - Number of recent days to extract from the 90-day
+     *                    window (default 30).  Pass 90 to keep the full range.
+     * @returns A `Map<itemName, WeirdGloopHistoryEntry[]>` of chronological
+     *          daily snapshots, filtered to the requested window.
+     */
+    async fetchHistoricalPrices(itemNames, days = 30) {
+        if (itemNames.length === 0)
+            return new Map();
+        const HISTORY_CONCURRENCY = 10;
+        const cutoff = Date.now() - days * 24 * 60 * 60 * 1000;
+        const result = new Map();
+        console.log(`[WeirdGloopService] Fetching last90d history for ${itemNames.length} items (keeping last ${days} days)…`);
+        const fetchOne = async (name) => {
+            try {
+                const url = `https://api.weirdgloop.org/exchange/history/rs/last90d?name=${encodeURIComponent(name)}`;
+                const resp = await fetch(url, {
+                    method: "GET",
+                    headers: {
+                        "User-Agent": "RS3-GE-Analyzer-Alt1Plugin/1.0 (contact: github.com/skillbert/alt1minimal)",
+                        Accept: "application/json",
+                    },
+                });
+                if (!resp.ok)
+                    throw new Error(`HTTP ${resp.status}`);
+                const json = await resp.json();
+                const entries = json[name];
+                if (!Array.isArray(entries))
+                    return;
+                const filtered = entries
+                    .filter((e) => e.timestamp >= cutoff)
+                    .sort((a, b) => a.timestamp - b.timestamp);
+                if (filtered.length > 0)
+                    result.set(name, filtered);
+            }
+            catch {
+                // Individual item failure — silently skip.
+            }
+        };
+        for (let i = 0; i < itemNames.length; i += HISTORY_CONCURRENCY) {
+            const batch = itemNames.slice(i, i + HISTORY_CONCURRENCY);
+            await Promise.allSettled(batch.map(fetchOne));
+        }
+        console.log(`[WeirdGloopService] Historical data fetched for ${result.size} / ${itemNames.length} items.`);
+        return result;
     }
     // ─── Private Helpers ──────────────────────────────────────────────────
     /**
@@ -5011,6 +5549,73 @@ class WikiService {
         return map;
     }
     /**
+     * Fetch High Alchemy values in bulk by reading `Module:Exchange/<Item>` pages.
+     * Each Lua module contains an `alchvalue` field with the item's alch price.
+     *
+     * @param itemNames - Canonical RS3 item names.
+     * @returns A `Map<string, number>` keyed by item name → high alch value.
+     */
+    async getBulkHighAlchValues(itemNames) {
+        if (itemNames.length === 0)
+            return new Map();
+        const batches = this.chunkArray(itemNames, WikiService.EXCHANGE_BATCH_SIZE);
+        console.log(`[WikiService] Fetching alch values for ${itemNames.length} items in ${batches.length} batch(es)…`);
+        const settled = await Promise.allSettled(batches.map((batch, idx) => this.fetchAlchValueBatch(batch, idx)));
+        const combined = new Map();
+        for (const result of settled) {
+            if (result.status === "fulfilled") {
+                for (const [name, val] of result.value) {
+                    combined.set(name, val);
+                }
+            }
+            else {
+                console.warn("[WikiService] Alch-value batch failed:", result.reason);
+            }
+        }
+        console.log(`[WikiService] Resolved alch values for ${combined.size} / ${itemNames.length} items.`);
+        return combined;
+    }
+    /**
+     * Fetch a single batch of high alchemy values from `Module:Exchange/<Item>` Lua sources.
+     *
+     * @param batch - Subset of item names.
+     * @param idx   - Batch index for logging.
+     * @returns Map of canonical item name → high alchemy value.
+     */
+    async fetchAlchValueBatch(batch, idx) {
+        const titles = batch
+            .map((n) => `Module:Exchange/${n.replace(/ /g, "_")}`)
+            .join("|");
+        const url = `https://runescape.wiki/api.php?action=query&prop=revisions` +
+            `&rvprop=content&rvslots=main&format=json&origin=*` +
+            `&titles=${encodeURIComponent(titles)}`;
+        const response = await fetch(url, {
+            method: "GET",
+            headers: { Accept: "application/json", "User-Agent": "GE-Market-Analyzer/1.0" },
+        });
+        if (!response.ok) {
+            throw new Error(`[WikiService] Exchange-module HTTP ${response.status} (alch batch ${idx + 1}).`);
+        }
+        const json = await response.json();
+        const map = new Map();
+        const pages = json?.query?.pages;
+        if (!pages)
+            return map;
+        for (const page of Object.values(pages)) {
+            if (!page.title || page.missing !== undefined)
+                continue;
+            const itemName = page.title.replace(/^Module:Exchange\//, "");
+            const luaSrc = page.revisions?.[0]?.slots?.main?.["*"] ?? "";
+            const match = WikiService.ALCH_RE.exec(luaSrc);
+            if (match) {
+                const val = Number(match[1]);
+                if (val > 0)
+                    map.set(itemName, val);
+            }
+        }
+        return map;
+    }
+    /**
      * Split an array into chunks of at most {@link size} elements.
      */
     chunkArray(arr, size) {
@@ -5096,6 +5701,8 @@ WikiService.GUIDE_KEYWORDS = [
 WikiService.EXCHANGE_BATCH_SIZE = 50;
 /** Regex that extracts the `limit = <number>` value from a Lua module source. */
 WikiService.LIMIT_RE = /limit\s*=\s*(\d+)/;
+/** Regex that extracts the `alchvalue = <number>` value from a Lua module source. */
+WikiService.ALCH_RE = /alchvalue\s*=\s*(\d+)/;
 
 
 /***/ },
@@ -5340,6 +5947,7 @@ async function initUI() {
     bindPortfolio();
     bindErrorRetry();
     bindDataManagement();
+    bindFullMarketScan();
     requestNotificationPermission();
     // Initialise shared service singletons.
     cache = new _services__WEBPACK_IMPORTED_MODULE_0__.CacheService();
@@ -5542,6 +6150,70 @@ function bindForceReload() {
         }
         finally {
             els.forceReloadBtn.disabled = false;
+        }
+    });
+}
+// ─── Full Market Background Scan ────────────────────────────────────────────
+/** Abort controller for an in-progress background scan. */
+let scanAbortController = null;
+/**
+ * Bind the "Scan Full Market" button.  When clicked, runs a non-blocking
+ * background scan of all ~7 000 GE items, updating a progress bar in the UI.
+ * The user can continue using the app normally while the scan runs.
+ */
+function bindFullMarketScan() {
+    els.fullMarketScanBtn.addEventListener("click", async () => {
+        // If a scan is already running, abort it.
+        if (scanAbortController) {
+            scanAbortController.abort();
+            scanAbortController = null;
+            els.fullMarketScanBtn.textContent = "\uD83D\uDD0D Scan Full Market";
+            els.syncProgress.classList.add("hidden");
+            return;
+        }
+        if (geCatalogue.length === 0) {
+            try {
+                geCatalogue = await (0,_services__WEBPACK_IMPORTED_MODULE_0__.fetchGECatalogue)();
+            }
+            catch {
+                showError("Could not load item catalogue. Try again later.");
+                return;
+            }
+        }
+        if (geCatalogue.length === 0) {
+            showError("Item catalogue is empty — cannot scan.");
+            return;
+        }
+        // Show progress bar and disable button label.
+        scanAbortController = new AbortController();
+        els.fullMarketScanBtn.textContent = "\u23F9 Cancel Scan";
+        els.syncProgress.classList.remove("hidden");
+        els.syncProgressFill.style.width = "0%";
+        els.syncProgressText.textContent = "Scanning 0 / " + geCatalogue.length.toLocaleString("en-US") + "\u2026";
+        try {
+            await (0,_services__WEBPACK_IMPORTED_MODULE_0__.runFullMarketScan)(geCatalogue, (done, total) => {
+                const pct = Math.round((done / total) * 100);
+                els.syncProgressFill.style.width = pct + "%";
+                els.syncProgressText.textContent =
+                    `Scanning ${done.toLocaleString("en-US")} / ${total.toLocaleString("en-US")}\u2026 (${pct}%)`;
+            }, scanAbortController.signal);
+            // Scan complete — refresh the market panel with the full dataset.
+            cache = new _services__WEBPACK_IMPORTED_MODULE_0__.CacheService();
+            await cache.open();
+            analyzer = new _services__WEBPACK_IMPORTED_MODULE_0__.MarketAnalyzerService(cache);
+            await refreshMarketPanel();
+            els.syncProgressFill.style.width = "100%";
+            els.syncProgressText.textContent = "Full market scan complete \u2714";
+            setTimeout(() => els.syncProgress.classList.add("hidden"), 4000);
+        }
+        catch (err) {
+            console.error("[UIService] Full market scan error:", err);
+            els.syncProgressText.textContent = "Scan failed \u2014 see console.";
+            setTimeout(() => els.syncProgress.classList.add("hidden"), 5000);
+        }
+        finally {
+            scanAbortController = null;
+            els.fullMarketScanBtn.textContent = "\uD83D\uDD0D Scan Full Market";
         }
     });
 }
@@ -7818,6 +8490,10 @@ function resolveElements() {
         favoritesCollapseBtn: q("favorites-collapse-btn"),
         favoritesSortSelect: q("favorites-sort-select"),
         refreshMarketBtn: q("refresh-market-btn"),
+        fullMarketScanBtn: q("full-market-scan-btn"),
+        syncProgress: q("background-sync-progress"),
+        syncProgressFill: q("sync-progress-fill"),
+        syncProgressText: q("sync-progress-text"),
         marketLoading: q("market-loading"),
         marketItems: q("market-items"),
         errorBanner: q("error-banner"),
