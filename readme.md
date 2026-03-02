@@ -15,11 +15,14 @@ Uses a **RAG (Retrieval-Augmented Generation) pipeline** to combine live GE mark
 ### Market Data
 - **Top 20 Markets** — scored and ranked by traded value, flip profit, and volume
 - **Flip recommendations** — buy/sell prices with profit-per-item after 2% GE tax
+- **Trade velocity** — Insta-Flip / Active / Slow / Very Slow badges with explanatory tooltips
 - **Hype detection** — volume spike badges when today's volume exceeds the 7-day average by 1.5×
 - **Canvas sparklines** — 7-day price history on every card
 - **Three view modes** — List, Tile, and Hybrid layouts
-- **Dynamic filters** — volume and price filters with custom slider controls
+- **Per-section sorting** — independent sort controls (Default, A–Z, Price ↓, Profit ↓) on Top 20, Search Results, and Favourites
+- **Dynamic filters** — volume and price filters with themed custom slider controls
 - **Full GE search** — search all ~7,000 tradeable items with on-demand price fetching
+- **External links** — quick Wiki and GE Database links on every card and in the detail modal
 
 ### AI Advisor
 - **Multi-turn RAG chat** — ask questions about items, flipping strategies, or money-making methods
@@ -33,9 +36,12 @@ Uses a **RAG (Retrieval-Augmented Generation) pipeline** to combine live GE mark
 - **History & stats dashboard** — total profit, completed flips, average profit, and average ROI
 
 ### Extras
-- **Favourites** — star any item for quick access in a dedicated collapsible panel
+- **Favourites** — star any item for quick access in a dedicated collapsible panel with its own sort control
 - **Quick-add** — one-click add from any market card to the portfolio form
-- **Persistent state** — all settings, chat history, favourites, and portfolio data saved to localStorage
+- **Three CSS themes** — Classic Dark, OSRS Brown, and RS3 Modern Blue (all themed via CSS variables)
+- **Responsive desktop layout** — wider modals, larger sparklines, and expanded grids at ≥ 800 px
+- **Error recovery UI** — dismissible error banner with retry button for network/cache failures
+- **Persistent state** — all settings, chat history, favourites, sort preferences, and portfolio data saved to localStorage
 - **Tabbed & sidebar layouts** — switch between compact tabbed view or full sidebar mode
 
 ---

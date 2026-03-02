@@ -186,6 +186,8 @@ let els: {
   keyStatus: HTMLElement;
   filterVolume: HTMLSelectElement;
   filterPrice: HTMLSelectElement;
+  top20SortSelect: HTMLSelectElement;
+  searchSortSelect: HTMLSelectElement;
   volumeCustomGroup: HTMLElement;
   volumeMinSlider: HTMLInputElement;
   volumeMinInput: HTMLInputElement;
@@ -200,9 +202,13 @@ let els: {
   favoritesSection: HTMLElement;
   favoritesItems: HTMLElement;
   favoritesCollapseBtn: HTMLButtonElement;
+  favoritesSortSelect: HTMLSelectElement;
   refreshMarketBtn: HTMLButtonElement;
   marketLoading: HTMLElement;
   marketItems: HTMLElement;
+  errorBanner: HTMLElement;
+  errorBannerMsg: HTMLElement;
+  errorRetryBtn: HTMLButtonElement;
   viewListBtn: HTMLButtonElement;
   viewTileBtn: HTMLButtonElement;
   viewHybridBtn: HTMLButtonElement;
@@ -253,6 +259,8 @@ let latestMarketSummary = "";
 let latestWikiText = "";
 /** The top items array, cached for wiki lookups per chat message. */
 let latestTopItems: RankedItem[] = [];
+/** The latest search results, cached for re-sorting without re-fetching. */
+let latestSearchResults: RankedItem[] = [];
 
 /** Currently active view mode for the market panel. */
 let currentView: ViewMode = "list";
@@ -300,6 +308,7 @@ export async function initUI(): Promise<void> {
   bindTabNavigation();
   bindClearChat();
   bindPortfolio();
+  bindErrorRetry();
 
   // Initialise shared service singletons.
   cache = new CacheService();
@@ -309,9 +318,17 @@ export async function initUI(): Promise<void> {
   portfolio = new PortfolioService();
 
   // Run the initial market analysis and render.
-  await refreshMarketPanel();
+  try {
+    await refreshMarketPanel();
+  } catch (err) {
+    console.error("[UIService] Startup: market panel failed:", err);
+    const msg = err instanceof Error ? err.message : "Could not load market data.";
+    showError(msg);
+  }
 
   // Render the favourites section (if any favourites exist).
+  restoreFavSort();
+  bindFavSort();
   await renderFavorites();
   bindFavoritesCollapse();
   bindTop20Collapse();
@@ -319,8 +336,13 @@ export async function initUI(): Promise<void> {
   // Build the full item catalogue for portfolio autocomplete.
   await loadItemCatalogue();
 
-  // Fetch the full GE catalogue (∼7 000 items) for market search.
-  geCatalogue = await fetchGECatalogue();
+  // Fetch the full GE catalogue (~7 000 items) for market search.
+  try {
+    geCatalogue = await fetchGECatalogue();
+  } catch (err) {
+    console.warn("[UIService] GE catalogue fetch failed:", err);
+    geCatalogue = [];
+  }
 
   // Pre-fetch wiki text for the first batch of items so that the first
   // chat message doesn't have to wait for wiki I/O.
@@ -509,8 +531,10 @@ function bindForceReload(): void {
       els.reloadStatus.textContent = "Data reloaded ✓";
     } catch (err) {
       console.error("[UIService] Force reload failed:", err);
-      els.reloadStatus.textContent = "Reload failed — see console.";
+      const msg = err instanceof Error ? err.message : "Reload failed — see console.";
+      els.reloadStatus.textContent = msg;
       els.reloadStatus.classList.add("error");
+      showError(msg);
     } finally {
       els.forceReloadBtn.disabled = false;
     }
@@ -613,27 +637,94 @@ function debounce<T extends (...args: any[]) => void>(fn: T, ms: number): T {
   }) as unknown as T;
 }
 
+// ─── Error Banner ───────────────────────────────────────────────────────────
+
+/**
+ * Show the global error banner with the given message.
+ * Also hides the market-loading spinner so it doesn't compete visually.
+ */
+function showError(message: string): void {
+  els.errorBannerMsg.textContent = message;
+  els.errorBanner.classList.remove("hidden");
+  els.marketLoading.style.display = "none";
+}
+
+/** Hide the global error banner and clear its message. */
+function hideError(): void {
+  els.errorBanner.classList.add("hidden");
+  els.errorBannerMsg.textContent = "";
+}
+
+/**
+ * Wire the error-banner retry button.  Clears the cache, re-runs the full
+ * data pipeline, and refreshes the market panel.
+ */
+function bindErrorRetry(): void {
+  els.errorRetryBtn.addEventListener("click", async () => {
+    hideError();
+    els.marketLoading.style.display = "";
+    els.marketLoading.textContent = "Retrying…";
+
+    try {
+      await cache.clear();
+      await initDataPipeline();
+
+      cache = new CacheService();
+      await cache.open();
+      analyzer = new MarketAnalyzerService(cache);
+
+      await refreshMarketPanel();
+    } catch (err) {
+      console.error("[UIService] Retry failed:", err);
+      const msg = err instanceof Error ? err.message : "Retry failed — see console.";
+      showError(msg);
+    }
+  });
+}
+
 // ─── Market Panel ───────────────────────────────────────────────────────────
 
 /** Whether the market panel is currently showing search results. */
 let isSearchActive = false;
 
+const TOP20_SORT_KEY = "ge-analyzer:top20-sort";
+const SEARCH_SORT_KEY = "ge-analyzer:search-sort";
+
+/**
+ * Sort an array of {@link RankedItem} in place based on the given sort key.
+ * Returns the same array reference for convenience.
+ */
+function applySortOrder(items: RankedItem[], sortKey: string): RankedItem[] {
+  if (sortKey === "alpha") {
+    items.sort((a, b) => a.name.localeCompare(b.name));
+  } else if (sortKey === "price-desc") {
+    items.sort((a, b) => b.price - a.price);
+  } else if (sortKey === "profit-desc") {
+    items.sort((a, b) => b.estFlipProfit - a.estFlipProfit);
+  }
+  return items;
+}
+
 /**
  * Run the market analyzer and render the top-N list into the DOM.
  */
 async function refreshMarketPanel(): Promise<void> {
+  hideError();
   els.marketLoading.style.display = "";
+  els.marketLoading.textContent = "Loading market data…";
+  els.marketLoading.classList.remove("error");
   els.marketItems.innerHTML = "";
 
   try {
     const filters = readFilterConfig();
     latestTopItems = await analyzer.getTopItems(filters);
     latestMarketSummary = analyzer.formatForLLM(latestTopItems);
+    applySortOrder(latestTopItems, els.top20SortSelect.value);
     renderMarketItems(latestTopItems);
   } catch (err) {
     console.error("[UIService] Failed to refresh market panel:", err);
-    els.marketLoading.textContent = "Failed to load market data.";
-    els.marketLoading.classList.add("error");
+    const msg = err instanceof Error ? err.message : "Failed to load market data.";
+    showError(msg);
     return;
   }
 
@@ -697,10 +788,33 @@ function bindMarketFilters(): void {
   // ── Sync slider ↔ text input for budget ───────────────────────────────
   syncSliderAndInput(els.budgetSlider, els.budgetInput);
 
+  // ── Top 20 sort dropdown ───────────────────────────────────────────────
+  const savedTop20Sort = localStorage.getItem(TOP20_SORT_KEY);
+  if (savedTop20Sort) els.top20SortSelect.value = savedTop20Sort;
+
+  els.top20SortSelect.addEventListener("change", () => {
+    localStorage.setItem(TOP20_SORT_KEY, els.top20SortSelect.value);
+    applySortOrder(latestTopItems, els.top20SortSelect.value);
+    renderMarketItems(latestTopItems);
+  });
+
+  // ── Search sort dropdown ──────────────────────────────────────────────
+  const savedSearchSort = localStorage.getItem(SEARCH_SORT_KEY);
+  if (savedSearchSort) els.searchSortSelect.value = savedSearchSort;
+
+  els.searchSortSelect.addEventListener("change", () => {
+    localStorage.setItem(SEARCH_SORT_KEY, els.searchSortSelect.value);
+    if (latestSearchResults.length > 0) {
+      applySortOrder(latestSearchResults, els.searchSortSelect.value);
+      renderSearchResults(latestSearchResults);
+    }
+  });
+
   // ── Refresh button ────────────────────────────────────────────────────
   els.refreshMarketBtn.addEventListener("click", async () => {
     els.marketSearchInput.value = "";
     isSearchActive = false;
+    latestSearchResults = [];
     await refreshMarketPanel();
     // Re-fetch wiki text for the new filtered set so the LLM context stays in sync.
     await prefetchWikiText();
@@ -758,7 +872,9 @@ function bindMarketFilters(): void {
 
           // 4. Now all matched items should be in cache — score them.
           const results = await analyzer.searchItems(query);
-          renderSearchResults(results);
+          latestSearchResults = results;
+          applySortOrder(latestSearchResults, els.searchSortSelect.value);
+          renderSearchResults(latestSearchResults);
 
           if (results.length === 0) {
             els.searchLoading.textContent = `No price data for "${query}".`;
@@ -771,6 +887,7 @@ function bindMarketFilters(): void {
         els.searchLoading.style.display = "none";
       } else if (query.length === 0) {
         isSearchActive = false;
+        latestSearchResults = [];
         els.searchResults.innerHTML = "";
         els.searchLoading.style.display = "none";
       }
@@ -950,6 +1067,10 @@ async function renderFavorites(): Promise<void> {
 
   const items = await analyzer.getItemsByNames(favNames);
 
+  // Apply sort — use the favourites-specific dropdown.
+  const favSort = els.favoritesSortSelect.value;
+  applySortOrder(items, favSort);
+
   els.favoritesItems.innerHTML = "";
   els.favoritesItems.className = `market-items ${currentView}`;
 
@@ -984,6 +1105,22 @@ function bindFavoritesCollapse(): void {
   });
 }
 
+const FAV_SORT_KEY = "ge-analyzer:fav-sort";
+
+/** Restore the persisted favourites sort preference. */
+function restoreFavSort(): void {
+  const saved = localStorage.getItem(FAV_SORT_KEY);
+  if (saved) els.favoritesSortSelect.value = saved;
+}
+
+/** Bind the favourites sort dropdown change event. */
+function bindFavSort(): void {
+  els.favoritesSortSelect.addEventListener("change", () => {
+    localStorage.setItem(FAV_SORT_KEY, els.favoritesSortSelect.value);
+    renderFavorites();
+  });
+}
+
 /** Whether the Top 20 body is collapsed. */
 let top20Collapsed = false;
 
@@ -993,18 +1130,10 @@ function bindTop20Collapse(): void {
     top20Collapsed = !top20Collapsed;
     els.top20CollapseBtn.textContent = top20Collapsed ? "▸" : "▾";
     const hide = top20Collapsed ? "none" : "";
-    // Hide filters, custom groups, loading indicator, and items list.
-    document.getElementById("market-filters")!.style.display = hide;
+    // Hide loading indicator and items list (filters are now global, above search).
     els.marketItems.style.display = hide;
     if (top20Collapsed) {
-      // Always hide when collapsing.
-      els.volumeCustomGroup.style.display = "none";
-      els.budgetCustomGroup.style.display = "none";
       els.marketLoading.style.display = "none";
-    } else {
-      // Restore custom group visibility based on current dropdown selection.
-      els.volumeCustomGroup.style.display = els.filterVolume.value === "custom" ? "" : "none";
-      els.budgetCustomGroup.style.display = els.filterPrice.value === "custom" ? "" : "none";
     }
   });
 }
@@ -1162,12 +1291,34 @@ function buildItemCard(item: RankedItem): HTMLElement {
     quickAddToPortfolio(item);
   });
 
+  // External link: RS3 Wiki.
+  const wikiLink = document.createElement("a");
+  wikiLink.className = "ext-link wiki-link";
+  wikiLink.href = `https://runescape.wiki/w/${encodeURIComponent(item.name)}`;
+  wikiLink.target = "_blank";
+  wikiLink.rel = "noopener noreferrer";
+  wikiLink.textContent = "Wiki";
+  wikiLink.title = "Open on RS3 Wiki";
+  wikiLink.addEventListener("click", (e) => e.stopPropagation());
+
+  // External link: GE Database.
+  const geLink = document.createElement("a");
+  geLink.className = "ext-link ge-link";
+  geLink.href = `https://secure.runescape.com/m=itemdb_rs/viewitem?obj=${item.itemId}`;
+  geLink.target = "_blank";
+  geLink.rel = "noopener noreferrer";
+  geLink.textContent = "GE";
+  geLink.title = "Open on GE Database";
+  geLink.addEventListener("click", (e) => e.stopPropagation());
+
   // Group action buttons in a horizontal row.
   const actions = document.createElement("span");
   actions.className = "card-actions";
   actions.appendChild(popoutBtn);
   actions.appendChild(favBtn);
   actions.appendChild(addFlipCardBtn);
+  actions.appendChild(wikiLink);
+  actions.appendChild(geLink);
   header.appendChild(actions);
 
   // ── Detail panel (hidden until expanded) ──
@@ -1312,6 +1463,26 @@ function showItemModal(item: RankedItem): void {
     quickAddToPortfolio(item);
   });
   mHeader.appendChild(modalAddBtn);
+
+  // External link: RS3 Wiki.
+  const modalWikiLink = document.createElement("a");
+  modalWikiLink.className = "ext-link wiki-link";
+  modalWikiLink.href = `https://runescape.wiki/w/${encodeURIComponent(item.name)}`;
+  modalWikiLink.target = "_blank";
+  modalWikiLink.rel = "noopener noreferrer";
+  modalWikiLink.textContent = "Wiki";
+  modalWikiLink.title = "Open on RS3 Wiki";
+  mHeader.appendChild(modalWikiLink);
+
+  // External link: GE Database.
+  const modalGeLink = document.createElement("a");
+  modalGeLink.className = "ext-link ge-link";
+  modalGeLink.href = `https://secure.runescape.com/m=itemdb_rs/viewitem?obj=${item.itemId}`;
+  modalGeLink.target = "_blank";
+  modalGeLink.rel = "noopener noreferrer";
+  modalGeLink.textContent = "GE";
+  modalGeLink.title = "Open on GE Database";
+  mHeader.appendChild(modalGeLink);
 
   mHeader.appendChild(closeBtn);
 
@@ -2229,6 +2400,8 @@ function resolveElements(): void {
     keyStatus: q("key-status"),
     filterVolume: q<HTMLSelectElement>("filter-volume"),
     filterPrice: q<HTMLSelectElement>("filter-price"),
+    top20SortSelect: q<HTMLSelectElement>("top20-sort-select"),
+    searchSortSelect: q<HTMLSelectElement>("search-sort-select"),
     volumeCustomGroup: q("volume-custom-group"),
     volumeMinSlider: q<HTMLInputElement>("volume-min-slider"),
     volumeMinInput: q<HTMLInputElement>("volume-min-input"),
@@ -2243,9 +2416,13 @@ function resolveElements(): void {
     favoritesSection: q("favorites-section"),
     favoritesItems: q("favorites-items"),
     favoritesCollapseBtn: q<HTMLButtonElement>("favorites-collapse-btn"),
+    favoritesSortSelect: q<HTMLSelectElement>("favorites-sort-select"),
     refreshMarketBtn: q<HTMLButtonElement>("refresh-market-btn"),
     marketLoading: q("market-loading"),
     marketItems: q("market-items"),
+    errorBanner: q("error-banner"),
+    errorBannerMsg: q("error-banner-msg"),
+    errorRetryBtn: q<HTMLButtonElement>("error-retry-btn"),
     viewListBtn: q<HTMLButtonElement>("view-list-btn"),
     viewTileBtn: q<HTMLButtonElement>("view-tile-btn"),
     viewHybridBtn: q<HTMLButtonElement>("view-hybrid-btn"),

@@ -161,7 +161,15 @@ export async function initDataPipeline(): Promise<StoredPriceRecord[]> {
     console.log("[initDataPipeline] Cache is stale — fetching fresh prices…");
 
     // Step 3a — Fetch from API (batched + concurrent).
-    const prices = await api.fetchLatestPrices(SEED_ITEMS);
+    let prices: Map<string, import("./types").WeirdGloopPriceRecord>;
+    try {
+      prices = await api.fetchLatestPrices(SEED_ITEMS);
+    } catch (fetchErr) {
+      console.error("[initDataPipeline] Network error fetching prices:", fetchErr);
+      throw new Error(
+        "Could not reach the Weird Gloop API — check your internet connection and try again."
+      );
+    }
 
     if (prices.size === 0) {
       console.warn(
@@ -171,7 +179,13 @@ export async function initDataPipeline(): Promise<StoredPriceRecord[]> {
       // Step 3b — Enrich records with GE buy limits from the wiki.
       const wiki = new WikiService();
       const itemNames = Array.from(prices.keys());
-      const buyLimits = await wiki.getBulkBuyLimits(itemNames);
+      let buyLimits: Map<string, number>;
+      try {
+        buyLimits = await wiki.getBulkBuyLimits(itemNames);
+      } catch (wikiErr) {
+        console.warn("[initDataPipeline] Wiki buy-limit fetch failed — continuing without limits.", wikiErr);
+        buyLimits = new Map();
+      }
 
       for (const [name, record] of prices) {
         const limit = buyLimits.get(name);

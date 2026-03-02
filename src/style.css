@@ -527,6 +527,24 @@ button:disabled {
   margin: 0;
 }
 
+.market-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* ── Per-section sort selects ─────────────────────────────────────────────── */
+
+.section-sort-select {
+  font-size: 10px;
+  padding: 1px 4px;
+  background: var(--bg-input);
+  border: 1px solid var(--border-input);
+  color: var(--text-muted);
+  border-radius: 3px;
+  cursor: pointer;
+}
+
 /* ── View toggle buttons ──────────────────────────────────────────────────── */
 
 .view-toggle {
@@ -630,6 +648,60 @@ button:disabled {
   height: 16px;
   cursor: pointer;
   accent-color: var(--accent-primary);
+  -webkit-appearance: none;
+  appearance: none;
+  background: transparent;
+}
+
+/* Track */
+.slider-row input[type="range"]::-webkit-slider-runnable-track {
+  height: 4px;
+  border-radius: 2px;
+  background: var(--border-input);
+}
+
+.slider-row input[type="range"]::-moz-range-track {
+  height: 4px;
+  border-radius: 2px;
+  border: none;
+  background: var(--border-input);
+}
+
+/* Thumb */
+.slider-row input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--accent-primary);
+  border: none;
+  margin-top: -5px;
+  transition: background 0.15s;
+}
+
+.slider-row input[type="range"]::-moz-range-thumb {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--accent-primary);
+  border: none;
+}
+
+/* Hover / focus */
+.slider-row input[type="range"]:hover::-webkit-slider-thumb {
+  background: var(--accent-primary-hover);
+}
+
+.slider-row input[type="range"]:hover::-moz-range-thumb {
+  background: var(--accent-primary-hover);
+}
+
+.slider-row input[type="range"]:focus {
+  outline: none;
+}
+
+.slider-row input[type="range"]:focus::-webkit-slider-thumb {
+  box-shadow: 0 0 0 2px var(--accent-focus);
 }
 
 .slider-row input[type="number"] {
@@ -654,6 +726,46 @@ button:disabled {
   font-style: italic;
   font-size: 12px;
   padding: 4px 0;
+}
+
+/* ── Error recovery banner ────────────────────────────────────────────────── */
+
+.error-banner {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  margin: 4px 0 6px;
+  background: var(--accent-red-bg);
+  border: 1px solid var(--accent-red-border);
+  border-radius: 4px;
+  color: var(--accent-red);
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.error-banner.hidden {
+  display: none;
+}
+
+.error-banner span {
+  flex: 1;
+}
+
+.error-banner button {
+  flex-shrink: 0;
+  padding: 4px 12px;
+  font-size: 11px;
+  background: var(--accent-red-border);
+  color: var(--text-bright);
+  border: none;
+  border-radius: 3px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.error-banner button:hover {
+  background: var(--accent-red-border-hover);
 }
 
 .market-empty {
@@ -837,10 +949,24 @@ button:disabled {
 /* ── Search section ────────────────────────────────────────────────────── */
 
 #search-section {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
   margin-bottom: 6px;
 }
 
+#search-section #market-search-input {
+  flex: 1 1 0;
+  min-width: 0;
+}
+
+#search-section .view-toggle {
+  flex-shrink: 0;
+}
+
 #search-results {
+  width: 100%;
   margin-top: 6px;
 }
 
@@ -849,6 +975,7 @@ button:disabled {
 }
 
 #search-loading {
+  width: 100%;
   font-size: 12px;
   color: var(--text-muted);
   padding: 4px 0;
@@ -1001,6 +1128,32 @@ button:disabled {
   background: rgba(78, 201, 176, 0.12);
 }
 
+/* ── External link buttons (Wiki / GE) ─────────────────────────────────────── */
+
+.ext-link {
+  all: unset;
+  cursor: pointer;
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1;
+  color: var(--text-muted);
+  padding: 2px 5px;
+  border-radius: 3px;
+  flex-shrink: 0;
+  text-decoration: none;
+  transition: color 0.15s, background 0.15s;
+}
+
+.ext-link.wiki-link:hover {
+  color: var(--accent-blue-text);
+  background: rgba(86, 156, 214, 0.12);
+}
+
+.ext-link.ge-link:hover {
+  color: var(--accent-gold);
+  background: rgba(240, 192, 64, 0.12);
+}
+
 /* ── Favourites section ────────────────────────────────────────────────────────────── */
 
 .favorites-section {
@@ -1018,6 +1171,22 @@ button:disabled {
   padding: 4px 10px;
   background: var(--bg-panel);
   border-bottom: 1px solid var(--border-section);
+}
+
+.favorites-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+#favorites-sort-select {
+  font-size: 10px;
+  padding: 1px 4px;
+  background: var(--bg-input);
+  border: 1px solid var(--border-input);
+  color: var(--text-muted);
+  border-radius: 3px;
+  cursor: pointer;
 }
 
 .favorites-header h3 {
@@ -1922,4 +2091,71 @@ body[data-layout="sidebar"] #portfolio-view {
   flex-direction: column;
   min-width: 0;
   border-left: 1px solid var(--border-main);
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   Desktop / wide-viewport overrides
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+@media (min-width: 800px) {
+  /* More breathing room on the main content and settings. */
+  #app-content {
+    padding: 0 8px;
+  }
+
+  #market-view {
+    padding: 10px 18px;
+  }
+
+  #settings-panel {
+    padding: 8px 18px;
+  }
+
+  /* Wider modal with larger sparkline. */
+  .item-modal {
+    width: 560px;
+    max-width: 600px;
+  }
+
+  .modal-sparkline {
+    height: 80px;
+  }
+
+  .item-modal-header {
+    padding: 12px 16px;
+  }
+
+  .item-modal-body {
+    padding: 0 4px;
+  }
+
+  .item-modal-details .detail-row {
+    padding: 3px 0;
+  }
+
+  /* Tile view — allow more cards per row on wider screens. */
+  .market-items.tile {
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 6px;
+  }
+
+  /* Hybrid view — wider minimum for richer card content. */
+  .market-items.hybrid {
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 5px;
+  }
+
+  /* Slightly larger sparklines on cards. */
+  .sparkline {
+    height: 36px;
+  }
+
+  /* Advisor chat gets more comfortable padding. */
+  #advisor-view {
+    padding: 10px 18px;
+  }
+
+  #portfolio-view {
+    padding: 10px 18px;
+  }
 }

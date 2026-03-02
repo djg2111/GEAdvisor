@@ -50,8 +50,8 @@ alt1minimal/
     ├── icon.png               # App icon (asset/resource)
     ├── index.html             # Full UI: settings, tabbed layout (market / advisor / portfolio), search, favourites, filters
     ├── index.ts               # Lean entry point: alt1 detection → initDataPipeline() → initUI()
-    ├── style.css              # Dark theme, flexbox, cards/tiles, filters, chat, modals, sparklines, portfolio history (~1700 lines)
-    ├── uiService.ts           # All DOM logic: settings, market render, search, favourites, portfolio, chat RAG (~2200 lines)
+    ├── style.css              # Three themes (Classic Dark, OSRS Brown, RS3 Modern Blue), flexbox, cards, modals, sparklines, responsive desktop breakpoint (~2150 lines)
+    ├── uiService.ts           # All DOM logic: settings, market render, search, favourites, portfolio, chat RAG, error recovery (~2480 lines)
     └── services/
         ├── index.ts               # Barrel re-export of all services + types + constants
         ├── types.ts               # All shared TypeScript interfaces + LLM_PROVIDERS preset array
@@ -111,6 +111,7 @@ Pure math on local data — no network calls:
    - `effectivePlayerVolume = min(volume, buyLimit × 6)` — caps at what one player can trade per day
    - `taxGap = ceil(price / 0.98) - price` — minimum spread to break even after tax
    - `volumeSpikeMultiplier` — ratio of today's volume to 7-day SMA (hype detection at >1.5×)
+   - `tradeVelocity` — categorical speed label based on volume × buy-limit throughput: `"Insta-Flip"` (>50 K), `"Active"` (>5 K), `"Slow"` (>500), `"Very Slow"` (≤500)
    - `isRisky = price < 500` — low-price items where tax eats most spreads
 4. Filters items by `minVolume`, `maxVolume`, `maxPrice`.
 5. Sorts descending by `tradedValue`.
@@ -197,7 +198,7 @@ Manages active flips **and** completed flip history:
 
 ### 4.10 UI Service (`uiService.ts`)
 
-All DOM manipulation isolated here — services remain UI-agnostic. ~2050 lines.
+All DOM manipulation isolated here — services remain UI-agnostic. ~2480 lines.
 
 `initUI()` flow:
 1. Resolves all DOM elements by ID (~50 refs, throws if missing).
@@ -223,9 +224,11 @@ All DOM manipulation isolated here — services remain UI-agnostic. ~2050 lines.
 - `buildItemCard(item)` — creates a market card element with:
   - Jagex sprite, item name, price
   - Flip recommendation badges: Buy ≤, Sell ≥, profit/ea
+  - Trade velocity badge (Insta-Flip / Active / Slow / Very Slow) with explanatory tooltip
   - Hype badge (🔥 Nx Vol) when volume spike > 1.5×
   - Canvas sparkline (7-day price history)
-  - Expandable detail panel (12 rows: GE price, rec buy/sell, flip profit, volumes, buy limit, capital, tax gap, margin)
+  - External links: Wiki and GE Database
+  - Expandable detail panel (12 rows with tooltips: GE price, rec buy/sell, flip profit, volumes, buy limit, capital, tax gap, margin)
   - **Action button group** (`.card-actions`): Popout (↗), Favourite (☆/★), Quick-add to portfolio (+)
 - Multiple cards can be expanded simultaneously.
 - Sprites loaded from `https://secure.runescape.com/m=itemdb_rs/obj_sprite.gif?id={itemId}`.
@@ -241,8 +244,8 @@ All DOM manipulation isolated here — services remain UI-agnostic. ~2050 lines.
 - `getFavorites()` / `toggleFavorite(name)` — read/write helpers.
 - Star button (☆/★) on every card header and in the modal header.
 - Favourited cards get a `.favorited` class with a gold left border.
-- **Favourites panel** (`#favorites-section`): appears between the search bar and Top 20, auto-hides when empty. Collapsible via ▾/▸ button in the header.
-- `renderFavorites()` — calls `analyzer.getItemsByNames(favNames)`, renders cards into `#favorites-items` container. Re-renders on every favourite toggle.
+- **Favourites panel** (`#favorites-section`): appears between the search bar and Top 20, auto-hides when empty. Collapsible via ▾/▸ button in the header. Has its own sort dropdown (`#favorites-sort-select`) persisted to `ge-analyzer:fav-sort`.
+- `renderFavorites()` — calls `analyzer.getItemsByNames(favNames)`, sorts by the favourites sort dropdown, renders cards into `#favorites-items` container. Re-renders on every favourite toggle.
 - Respects the current view mode (list/tile/hybrid).
 
 **Quick-add to portfolio**:
@@ -251,7 +254,7 @@ All DOM manipulation isolated here — services remain UI-agnostic. ~2050 lines.
 - Uses `suppressAutocomplete` flag to prevent the portfolio search dropdown from opening during programmatic form fill. Resets via `requestAnimationFrame`.
 
 **Full GE catalogue search** (`#search-section`):
-- Search input at the top of the market view. Debounced 300ms.
+- Search input at the top of the market view with a per-section sort dropdown (`#search-sort-select`) and view toggle buttons (☰/▦/⊞). Debounced 300ms.
 - Searches the full ~7,000 item GE catalogue (`Module:GEIDs/data.json`) client-side.
 - Items not in cache: fetches prices from Weird Gloop API, buy limits from wiki Cargo API, enriches and inserts into IndexedDB — then scores and renders.
 - Results render into `#search-results` (separate container above Top 20, never replaces it).
@@ -266,7 +269,17 @@ All DOM manipulation isolated here — services remain UI-agnostic. ~2050 lines.
 
 **Collapsible sections**:
 - **Favourites**: ▾/▸ toggle in the section header hides/shows `#favorites-items`.
-- **Top 20**: ▾/▸ toggle in the view-toggle bar hides/shows filters, custom groups, loading indicator, and `#market-items`. Restores custom filter group visibility based on dropdown state when expanding.
+- **Top 20**: ▾/▸ toggle in the header hides/shows `#market-items`.
+
+**Per-section sorting**:
+- Each section (Top 20, Search Results, Favourites) has its own sort `<select>` with options: Default, A–Z, Price ↓, Profit ↓.
+- Sort preference persisted to localStorage per section (`ge-analyzer:top20-sort`, `ge-analyzer:search-sort`, `ge-analyzer:fav-sort`).
+- Shared `applySortOrder(items, sortKey)` helper sorts in place.
+
+**Error recovery**:
+- `showError(msg)` / `hideError()` control a fixed `#error-banner` at the top of the market view.
+- Retry button re-runs `refreshMarketPanel()`.
+- All pipeline and rendering paths wrapped in try/catch with user-facing error messages.
 
 **Dynamic market filters**:
 - `readFilterConfig()` — translates dropdown values into `{ minVolume, maxVolume, maxPrice }` overrides.
@@ -287,7 +300,7 @@ All DOM manipulation isolated here — services remain UI-agnostic. ~2050 lines.
 
 **Force reload**: Button in settings that clears IndexedDB cache, re-runs the full data pipeline, and refreshes the market panel. Shows status indicator.
 
-**Module-scoped state**: `latestMarketSummary`, `latestWikiText`, `latestTopItems`, `allCachedItems`, `geCatalogue`, `currentView`, `llm`, `portfolio`, `favoritesCollapsed`, `top20Collapsed`, `suppressAutocomplete`.
+**Module-scoped state**: `latestMarketSummary`, `latestWikiText`, `latestTopItems`, `latestSearchResults`, `allCachedItems`, `geCatalogue`, `currentView`, `llm`, `portfolio`, `favoritesCollapsed`, `top20Collapsed`, `isSearchActive`, `suppressAutocomplete`.
 
 ### 4.11 Entry Point (`index.ts`)
 
@@ -311,12 +324,13 @@ Lean orchestrator (~50 lines):
   - `<nav id="view-tabs">` — tab buttons: Market Data, Ask Advisor, Portfolio.
   - `<main id="app-content">`:
     - `<section id="market-view">`:
-      - `#search-section` — search input + loading indicator + `#search-results`.
-      - `#favorites-section` (`.favorites-section`) — header with ★ Favourites title + collapse button, `#favorites-items` container.
+      - `#error-banner` — dismissible error banner with retry button (hidden by default).
+      - `#market-filters` — volume / price dropdowns + refresh button (above the search bar).
+      - `#volume-custom-group` and `#budget-custom-group` — themed slider controls (hidden by default).
+      - `#search-section` — search input + `#search-sort-select` + view toggle buttons (☰/▦/⊞) + loading indicator + `#search-results`.
+      - `#favorites-section` (`.favorites-section`) — header with ★ Favourites title + `#favorites-sort-select` + collapse button, `#favorites-items` container.
       - `.top20-section` wrapper:
-        - `#market-header` — "Top 20 Markets" h2 + view toggle buttons (☰/▦/⊞/▾).
-        - `#market-filters` — volume/price dropdowns + refresh button.
-        - `#volume-custom-group` and `#budget-custom-group` — slider controls (hidden by default).
+        - `#market-header` — "Top 20 Markets" h2 + `.market-header-actions` (`#top20-sort-select` + collapse ▾ button).
         - `#market-loading` + `#market-items`.
     - `<section id="advisor-view">` — h2 "Ask the Advisor" + clear button + `#chat-history` + `#chat-input-row`.
     - `<section id="portfolio-view">` — h2 "Active Portfolio" + `#portfolio-sub-nav` (Active Flips / History & Stats toggle):
@@ -326,7 +340,11 @@ Lean orchestrator (~50 lines):
 
 ### 4.13 Stylesheet (`style.css`)
 
-- Dark theme: `#1e1e1e` background, `#d4d4d4` text, Segoe UI / Consolas font stack.
+- **Three themes** using CSS custom properties — switch via `body[data-theme]`:
+  - **Classic Dark** (default `:root`) — `#1e1e1e` background, `#d4d4d4` text.
+  - **OSRS Brown** (`body[data-theme="osrs"]`) — parchment tones, brown accents.
+  - **RS3 Modern Blue** (`body[data-theme="rs3-modern"]`) — dark navy, blue accents.
+- Font stack: Segoe UI / Consolas.
 - `html` and `body` both `width: 100%; height: 100%`.
 - **`#app` uses `height: 95%`** (manually set to fix Alt1 zoom-level scaling issues — do NOT change).
 - **Market panel**: `flex: 0 1 auto`, `max-height: 30%` in non-tabbed layout.
@@ -348,6 +366,12 @@ Lean orchestrator (~50 lines):
 - **Portfolio stats dashboard**: `.portfolio-stats` flex row of `.stat-card` elements. `.stat-value.profit` (green) / `.stat-value.loss` (red).
 - **Completed flip cards**: `.completed-flip-card` with `.win` (green left border + gradient) and `.loss` (red left border + gradient) variants.
 - **Hype indicators**: `.market-card.hype` border glow, `.hype-badge` pulse animation.
+- **Trade velocity badges**: `.velocity-badge` with colour variants (`.velocity-insta`, `.velocity-active`, `.velocity-slow`, `.velocity-veryslow`) and explanatory `title` tooltips.
+- **External links**: `.ext-link` / `.wiki-link` / `.ge-link` on cards and in the detail modal — open RS Wiki and GE Database pages.
+- **Per-section sort selects**: `.section-sort-select` compact dropdown (10 px) in search section, Top 20 header (`.market-header-actions`), and favourites header (`.favorites-header-actions`).
+- **Slider theming**: WebKit (`::-webkit-slider-runnable-track`, `::-webkit-slider-thumb`) and Firefox (`::-moz-range-track`, `::-moz-range-thumb`) pseudo-elements styled via `--border-input` / `--accent-primary` custom properties. Hover and focus states included.
+- **Error banner**: `#error-banner` — fixed top bar with dismiss and retry buttons (hidden by default, shown via JS).
+- **Responsive desktop breakpoint**: `@media (min-width: 800px)` — wider modal (480 px), larger sparklines, wider grid columns for tile/hybrid, increased padding on main sections.
 - **Layout modes**: `body[data-layout="tabbed"]` hides non-active tabs, `body[data-layout="sidebar"]` shows all sections side-by-side.
 - Chat bubbles: user (blue `#264f78`), assistant (dark `#333`), system (italic gray), error (red `#3b1a1a`), thinking (animated dots via CSS `@keyframes`).
 - Thin dark webkit scrollbar styling.
@@ -364,6 +388,10 @@ Lean orchestrator (~50 lines):
 | `ge-analyzer:llm-endpoint` | Custom endpoint URL (only used when provider is `custom`) |
 | `ge-analyzer:view-mode` | Market panel view mode (`list`, `tile`, or `hybrid`) |
 | `ge-analyzer:layout` | Interface layout mode (`tabbed` or `sidebar`) |
+| `ge-analyzer:theme` | CSS theme (`classic`, `osrs`, or `rs3-modern`) |
+| `ge-analyzer:top20-sort` | Top 20 section sort key (`default`, `alpha`, `price-desc`, `profit-desc`) |
+| `ge-analyzer:search-sort` | Search results sort key |
+| `ge-analyzer:fav-sort` | Favourites section sort key |
 | `ge-analyzer:chat-history` | Serialised LLM chat conversation (max 50 messages) |
 | `ge-analyzer:favorites` | JSON array of favourited item names |
 | `ge-analyzer:portfolio` | Serialised `ActiveFlip[]` portfolio data |
@@ -381,7 +409,7 @@ All defined in `src/services/types.ts`:
 | `WeirdGloopLatestResponse` | `{ [itemName: string]: WeirdGloopPriceRecord }` |
 | `StoredPriceRecord` | Extends API record with `name` (keyPath) + `fetchedAt` (TTL) |
 | `HistoricalPriceRecord` | Extends `StoredPriceRecord` with `day` (ISO date, compound key with `name`) |
-| `RankedItem` | 17 fields: `name`, `itemId`, `price`, `recBuyPrice`, `volume`, `tradedValue`, `buyLimit?`, `effectivePlayerVolume`, `maxCapitalPer4H`, `taxGap`, `recSellPrice`, `estFlipProfit`, `isRisky`, `volumeSpikeMultiplier`, `priceHistory` |
+| `RankedItem` | 18 fields: `name`, `itemId`, `price`, `recBuyPrice`, `volume`, `tradedValue`, `buyLimit?`, `effectivePlayerVolume`, `maxCapitalPer4H`, `taxGap`, `recSellPrice`, `estFlipProfit`, `isRisky`, `volumeSpikeMultiplier`, `tradeVelocity`, `priceHistory` |
 | `MarketAnalyzerConfig` | `topN` (20), `minVolume` (0), `maxVolume?`, `maxPrice?` |
 | `CacheServiceConfig` | `dbName`, `storeName`, `ttlMs` (default 24h) |
 | `WeirdGloopServiceConfig` | `batchSize` (default 100) |
@@ -451,6 +479,7 @@ Everything below is **complete and verified** (builds with 0 errors):
 - [x] Player-centric scoring (effective player volume, max capital per 4h, buy-limit constraints)
 - [x] Flip profit formula: buy at 0.99×, sell at 1.03×, ~2% net margin after 2% GE tax
 - [x] Volume spike / hype detection (7-day SMA comparison, >1.5× threshold)
+- [x] Trade velocity scoring (Insta-Flip / Active / Slow / Very Slow badges with tooltips)
 - [x] Canvas sparklines (7-day price history, gradient line chart)
 - [x] Wiki service (two-step search → extract guide fetching + fallback to base item page + Cargo buy-limit API)
 - [x] LLM service (multi-provider, multi-turn chat, strict anti-hallucination + economic rules prompt)
@@ -464,12 +493,14 @@ Everything below is **complete and verified** (builds with 0 errors):
 - [x] Market item cards with Jagex sprites, flip badges, sparklines, expandable detail panels
 - [x] Floating item detail modal (centred overlay, enlarged sparkline, full data)
 - [x] Dynamic market filters: Trading Volume (Any/High/Low/Custom), Max Price (Unlimited/10M/100M/500M/Custom)
-- [x] Custom volume/budget slider controls with synced text inputs
+- [x] Custom volume/budget slider controls with synced text inputs (themed per CSS theme)
 - [x] Market refresh button (re-runs filtering pipeline with current filter config)
+- [x] Per-section sort controls (Top 20, Search Results, Favourites each have independent sort dropdowns persisted to localStorage)
 - [x] Force Reload Data button (clears cache, re-fetches, re-enriches)
 - [x] Full GE catalogue search bar (searches ~7,000 items, on-demand price/buy-limit fetch)
 - [x] Separate search results section (above Top 20, never replaces it)
-- [x] Favourites system (star toggle on cards + modal, localStorage persistence, dedicated panel with collapse)
+- [x] External links on market cards and detail modal (RS Wiki + GE Database)
+- [x] Favourites system (star toggle on cards + modal, localStorage persistence, dedicated panel with collapse + per-section sort)
 - [x] Quick-add to portfolio (+ button on cards + modal, pre-fills flip form, switches to portfolio tab)
 - [x] Collapsible sections (Favourites ▾/▸ and Top 20 ▾/▸ toggles)
 - [x] Active flip portfolio with localStorage persistence
@@ -482,7 +513,8 @@ Everything below is **complete and verified** (builds with 0 errors):
 - [x] Chat history persistence (localStorage, max 50 messages, clear button)
 - [x] Multi-turn LLM conversation with RAG context
 - [x] Full HTML UI (settings panel, tabbed/sidebar layout, market/advisor/portfolio sections)
-- [x] Dark-themed CSS (~1700 lines — cards, tiles, grids, modals, sparklines, filters, chat, portfolio, completed flips, stats, badges)
+- [x] Dark-themed CSS (~2150 lines — three themes, cards, tiles, grids, modals, sparklines, filters, chat, portfolio, velocity badges, external links, responsive desktop breakpoint)
+- [x] Error recovery UI (dismissible error banner with retry button, try/catch wrappers across pipeline and UI)
 - [x] Webpack build passes (`npm run build` — 0 errors, 0 warnings)
 - [x] CSS scaling fix (`#app` height 95% for Alt1 zoom compatibility)
 
@@ -506,6 +538,7 @@ Everything below is **complete and verified** (builds with 0 errors):
 | Favourites/action buttons vertical in tile view | Tile `flex-direction: column` stacked all header children | Wrapped action buttons in `.card-actions` horizontal flex container |
 | Portfolio dropdown opens on "Add Flip" click | `handleAddFlip()` called `flipItemName.focus()` after clearing form | Changed to `flipItemName.blur()` to prevent autocomplete trigger |
 | Portfolio dropdown opens on quick-add from card | Tab switch + form fill triggered focus event on name input | Added `suppressAutocomplete` flag, guard in `updateSuggestions()`, reset via `requestAnimationFrame` |
+| Search results rendering inline after view toggle move | Moving `#view-toggle` into `#search-section` (flex container) caused `#search-results` and `#search-loading` to flow beside the input | Added `width: 100%` to both elements to force them onto their own row in the flex-wrap container |
 
 ---
 
@@ -514,12 +547,12 @@ Everything below is **complete and verified** (builds with 0 errors):
 These were discussed or implied but never started:
 
 - ~~**Improved wiki title mapping**~~: ✅ Implemented — two-step MediaWiki search → extract strategy with fallback (see §4.5).
-- **Alt1 overlay integration**: Capture game state, integrate with Alt1's screen-reading capabilities.
-- **Error recovery UI**: Surface cache/network errors more visibly in the market panel.
-- **Item detail links**: Link expanded market cards to the RS3 Wiki or GE database pages.
-- **Responsive mobile layout**: Current CSS is optimized for the Alt1 overlay viewport; could add media queries for wider screens.
-- **Favourites sorting**: Sort favourited items by custom criteria (drag-to-reorder, alphabetical, profit).
+- ~~**Error recovery UI**~~: ✅ Implemented — dismissible error banner with retry button, try/catch wrappers across pipeline and UI.
+- ~~**Item detail links**~~: ✅ Implemented — Wiki and GE Database links on every card and in the detail modal.
+- ~~**Responsive mobile layout**~~: ✅ Implemented — `@media (min-width: 800px)` desktop breakpoint with wider modals, larger sparklines, expanded grids.
+- ~~**Favourites sorting**~~: ✅ Implemented — per-section sort dropdowns on Favourites, Top 20, and Search Results.
 - ~~**Portfolio profit tracking**~~: ✅ Implemented — completed flips with actual sell price, realised profit, stats dashboard (see §4.9).
+- **Alt1 overlay integration**: Capture game state, integrate with Alt1's screen-reading capabilities.
 - **Price alerts**: Notify when a favourited item hits a target price.
 - **Export/import**: Export favourites + portfolio data as JSON for backup/sharing.
 

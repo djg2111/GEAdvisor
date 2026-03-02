@@ -27,7 +27,9 @@ npx serve dist --listen 8080   # local dev server
 - **Services use constructor injection**: e.g. `new MarketAnalyzerService(cacheService)`, `new LLMService({ apiKey, endpoint, model })`
 - **LLMService accepts `Partial<LLMConfig>`** — all fields optional (defaults to Groq). API key omitted = no Authorization header (for self-hosted models)
 - **Runtime filter overrides**: `analyzer.getTopItems(overrides?)` merges `Partial<MarketAnalyzerConfig>` at call time — don't reconstruct the service for filter changes
-- **localStorage keys** are prefixed `ge-analyzer:` (e.g. `ge-analyzer:llm-provider`, `ge-analyzer:view-mode`)
+- **localStorage keys** are prefixed `ge-analyzer:` (e.g. `ge-analyzer:llm-provider`, `ge-analyzer:view-mode`, `ge-analyzer:top20-sort`, `ge-analyzer:theme`)
+- **Per-section sort controls**: Top 20, Search Results, and Favourites each have their own sort `<select>` and localStorage key (`ge-analyzer:top20-sort`, `ge-analyzer:search-sort`, `ge-analyzer:fav-sort`). Shared `applySortOrder()` helper sorts in place — do not add a global sort.
+- **Three CSS themes**: Classic Dark (`:root`), OSRS Brown (`body[data-theme="osrs"]`), RS3 Modern Blue (`body[data-theme="rs3-modern"]`) — all via CSS custom properties. New UI elements must use `var(--*)` tokens, never hard-coded colours.
 - **Provider presets** in `LLM_PROVIDERS` array (`types.ts`) — each has `endpoint`, `defaultModel`, `keyPlaceholder`, and curated `models[]` with `recommended` flags
 - **Barrel imports**: Always import services/types from `./services` (the barrel), not from individual files like `./services/types`
 
@@ -35,12 +37,24 @@ npx serve dist --listen 8080   # local dev server
 
 | File | Responsibility |
 |------|---------------|
-| `uiService.ts` | **All** DOM manipulation, event binding, localStorage, rendering |
+| `uiService.ts` | **All** DOM manipulation, event binding, localStorage, rendering (~2 480 lines) |
 | `services/types.ts` | Every shared interface + `LLM_PROVIDERS` constant |
 | `services/coreKnowledge.ts` | Static RS3 economic rules (GE tax, buy limits, margin checking, high alch) |
 | `services/llmService.ts` | OpenAI-compatible chat-completion client; builds system + user prompt |
-| `services/marketAnalyzerService.ts` | Pure math: score → filter → rank → format (no network) |
+| `services/marketAnalyzerService.ts` | Pure math: score → filter → rank → format (no network). Includes trade velocity scoring. |
 | `services/initDataPipeline.ts` | Startup orchestrator + `SEED_ITEMS` list (~100 RS3 items) |
+| `services/portfolioService.ts` | Active flip tracker + completed flip history with P&L stats (localStorage) |
+| `services/wikiService.ts` | RS Wiki MediaWiki API client + Cargo buy-limit API (two-step search → extract) |
+| `style.css` | Three themes, cards/tiles/grids, modals, sparklines, velocity badges, slider theming, responsive `@media (min-width: 800px)` breakpoint (~2 150 lines) |
+
+## UI Layout (index.html, top → bottom)
+
+1. `#error-banner` — dismissible error bar with retry (hidden by default)
+2. `#market-filters` — volume / price dropdowns + refresh button
+3. Custom slider groups (volume min/max, budget) — shown when "Custom" selected
+4. `#search-section` — search input + `#search-sort-select` + view toggle (☰ ▦ ⊞) + `#search-results`
+5. `#favorites-section` — ★ header + `#favorites-sort-select` + collapse button + `#favorites-items`
+6. `.top20-section` → `#market-header` (h2 + `.market-header-actions`: `#top20-sort-select` + collapse ▾) + `#market-items`
 
 ## Gotchas
 
@@ -49,6 +63,9 @@ npx serve dist --listen 8080   # local dev server
 - Market panel `max-height: 30%`, chat panel `flex: 1 1 0` with `min-height: 120px` — this flex balance is intentional
 - When editing DOM ref resolution in `uiService.ts`, verify **all** existing refs survive — past refactors accidentally dropped refs
 - Model `<input>` uses `<datalist>` — do not auto-fill the value on provider change (it pre-filters the dropdown); set placeholder instead
+- `#search-results` and `#search-loading` must have `width: 100%` to stay below the flex-row search bar — do not remove this
+- Modal section in `uiService.ts` uses literal JS unicode escape sequences — use Node.js scripts for safe text replacement if needed
+- Slider pseudo-element styles (`::-webkit-slider-*` / `::-moz-range-*`) must stay in **separate rule blocks** per browser spec
 
 ## Full Context
 
