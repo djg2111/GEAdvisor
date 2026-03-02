@@ -88,6 +88,7 @@ npx serve dist --listen 8080   # local dev server
 - Modal section in `uiService.ts` uses literal JS unicode escape sequences — use Node.js scripts for safe text replacement if needed
 - Slider pseudo-element styles (`::-webkit-slider-*` / `::-moz-range-*`) must stay in **separate rule blocks** per browser spec
 - `fetchLatestPrices` dispatches batches **sequentially** (not via `Promise.allSettled`) — do not revert to concurrent dispatch or the API will rate-limit aggressively
+- **Do not set `User-Agent` (or other non-safelisted headers) in browser `fetch()` calls** — Firefox honours the header (triggering a CORS preflight the API doesn't support), while Chrome silently strips it. Caused cross-origin failures on Firefox but not Chrome (March 2026).
 
 ## Full Context
 
