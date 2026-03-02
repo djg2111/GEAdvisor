@@ -445,10 +445,10 @@ export type ScanProgressCallback = (done: number, total: number) => void;
 /**
  * Run a **non-blocking** full-market background scan.
  *
- * Fetches latest prices + 30-day history for **every** item in the GE
- * catalogue (~7 000 items) in batches of 100, with a 500 ms delay between
- * batches to avoid rate-limiting.  Each batch is bulk-inserted into IndexedDB
- * immediately so progress persists even if the user closes the app mid-scan.
+ * Fetches latest prices + history for **every** item in the GE catalogue
+ * (~7 000 items) in batches of 100, with a 500 ms delay between batches to
+ * avoid rate-limiting.  Each batch is bulk-inserted into IndexedDB immediately
+ * so progress persists even if the user closes the app mid-scan.
  *
  * The UI remains fully interactive during the scan because the function
  * yields control back to the browser between batches via `setTimeout`.
@@ -456,12 +456,16 @@ export type ScanProgressCallback = (done: number, total: number) => void;
  * @param catalogue       - Pre-fetched GE catalogue entries.
  * @param onProgress      - Called after every batch with `(done, total)`.
  * @param signal          - Optional `AbortSignal` to cancel the scan early.
+ * @param deepHistory     - When `true`, fetches 90-day history instead of
+ *                          the default 30-day window (~3–5× slower).
  * @returns The total number of items successfully fetched and persisted.
  */
+// Optional deep history during full scan – March 2026
 export async function runFullMarketScan(
   catalogue: GECatalogueEntry[],
   onProgress?: ScanProgressCallback,
   signal?: AbortSignal,
+  deepHistory: boolean = false,
 ): Promise<number> {
   if (catalogue.length === 0) {
     console.warn("[FullMarketScan] Empty catalogue — nothing to scan.");
@@ -475,10 +479,13 @@ export async function runFullMarketScan(
   await cache.open();
 
   const BATCH_SIZE = 100;
-  const DELAY_MS = 500;
+  const BASE_DELAY_MS = 1_500;         // default pause between batches
+  const MAX_DELAY_MS  = 30_000;        // ceiling for adaptive backoff
   const allNames = catalogue.map((e) => e.name);
   const total = allNames.length;
   let done = 0;
+  let currentDelay = BASE_DELAY_MS;    // adapts when batches return empty
+  let consecutiveEmpty = 0;            // tracks back-to-back 0-result batches
 
   console.log(`[FullMarketScan] Starting scan of ${total} items in batches of ${BATCH_SIZE}…`);
 
@@ -495,6 +502,10 @@ export async function runFullMarketScan(
       const prices: Map<string, WeirdGloopPriceRecord> = await api.fetchLatestPrices(batchNames);
 
       if (prices.size > 0) {
+        // Successful fetch — reset adaptive delay.
+        consecutiveEmpty = 0;
+        currentDelay = BASE_DELAY_MS;
+
         // Enrich with buy limits + alch values (best-effort).
         const names = Array.from(prices.keys());
         try {
@@ -515,26 +526,47 @@ export async function runFullMarketScan(
         // Persist to IndexedDB immediately.
         await cache.bulkInsert(prices);
 
-        // Fetch 30-day history for this batch (best-effort).
+        // Fetch history for this batch (best-effort).
+        // Optional deep history during full scan – March 2026
+        const historyDays = deepHistory ? 90 : 30;
         try {
-          const historyMap = await api.fetchHistoricalPrices(names, 30);
+          const historyMap = await api.fetchHistoricalPrices(names, historyDays);
           if (historyMap.size > 0) {
             await cache.bulkInsertHistory(historyMap);
           }
         } catch {
           // Non-critical — skip history for this batch.
         }
+      } else {
+        // Batch returned 0 results — likely rate-limited.  Back off.
+        consecutiveEmpty++;
+        currentDelay = Math.min(
+          BASE_DELAY_MS * Math.pow(2, consecutiveEmpty),
+          MAX_DELAY_MS,
+        );
+        console.warn(
+          `[FullMarketScan] Batch ${i / BATCH_SIZE + 1} returned 0 results ` +
+          `(${consecutiveEmpty} consecutive). Next delay: ${(currentDelay / 1000).toFixed(1)}s`
+        );
       }
     } catch (err) {
-      console.warn(`[FullMarketScan] Batch ${i / BATCH_SIZE + 1} failed:`, err);
+      consecutiveEmpty++;
+      currentDelay = Math.min(
+        BASE_DELAY_MS * Math.pow(2, consecutiveEmpty),
+        MAX_DELAY_MS,
+      );
+      console.warn(
+        `[FullMarketScan] Batch ${i / BATCH_SIZE + 1} failed (delay → ${(currentDelay / 1000).toFixed(1)}s):`,
+        err,
+      );
     }
 
     done = Math.min(i + BATCH_SIZE, total);
     onProgress?.(done, total);
 
-    // Yield to the browser event loop + rate-limit delay.
+    // Yield to the browser event loop + adaptive rate-limit delay.
     if (i + BATCH_SIZE < allNames.length) {
-      await new Promise((r) => setTimeout(r, DELAY_MS));
+      await new Promise((r) => setTimeout(r, currentDelay));
     }
   }
 

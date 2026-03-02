@@ -18,6 +18,7 @@ export type {
   WeirdGloopHistoryEntry,
   WeirdGloopHistoryResponse,
   StoredPriceRecord,
+  HistoricalPriceRecord,
   RankedItem,
   WikiGuideResult,
   LLMConfig,

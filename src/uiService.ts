@@ -24,7 +24,7 @@ import {
   WeirdGloopService,
   WikiService,
 } from "./services";
-import type { ActiveFlip, CompletedFlip, FavoriteItem, GECatalogueEntry, LLMProvider, MarketAnalyzerConfig, RankedItem, StoredPriceRecord } from "./services";
+import type { ActiveFlip, CompletedFlip, FavoriteItem, GECatalogueEntry, HistoricalPriceRecord, LLMProvider, MarketAnalyzerConfig, RankedItem, StoredPriceRecord } from "./services";
 
 // ─── Constants ──────────────────────────────────────────────────────────────
 
@@ -63,6 +63,9 @@ const LS_CHAT_HISTORY = "ge-analyzer:chat-history";
 
 /** `localStorage` key for the user's favourited item names (JSON array). */
 const LS_FAVORITES = "ge-analyzer:favorites";
+
+/** `localStorage` key for “deep history” checkbox preference (boolean string). */
+const LS_DEEP_HISTORY = "ge-analyzer:deep-history";
 
 /** Maximum number of messages (user + assistant) persisted to localStorage. */
 const MAX_SAVED_MESSAGES = 50;
@@ -259,6 +262,7 @@ let els: {
   favoritesSortSelect: HTMLSelectElement;
   refreshMarketBtn: HTMLButtonElement;
   fullMarketScanBtn: HTMLButtonElement;
+  deepHistoryCheckbox: HTMLInputElement;
   syncProgress: HTMLElement;
   syncProgressFill: HTMLElement;
   syncProgressText: HTMLElement;
@@ -306,7 +310,14 @@ let els: {
   exportDataBtn: HTMLButtonElement;
   importDataBtn: HTMLButtonElement;
   importFileInput: HTMLInputElement;
+  historyRangeSelect: HTMLSelectElement;
+  completedFlipsFilter: HTMLInputElement;
+  exportCsvBtn: HTMLButtonElement;
 };
+
+// ─── Completed-flips sort state ─────────────────────────────────────────────
+let completedFlipsSortCol: "date" | "item" | "profit" | "roi" = "date";
+let completedFlipsSortAsc = false; // default descending (newest first)
 
 // ─── Shared service instances (initialised once) ────────────────────────────
 
@@ -420,6 +431,8 @@ export async function initUI(): Promise<void> {
   renderCompletedFlips();
   startPortfolioTimer();
   bindPortfolioSubNav();
+  bindCompletedFlipsFilter();
+  bindCsvExport();
 }
 
 // ─── Settings (API Key) ─────────────────────────────────────────────────────
@@ -610,12 +623,38 @@ function bindForceReload(): void {
 /** Abort controller for an in-progress background scan. */
 let scanAbortController: AbortController | null = null;
 
+/** Whether the deep-history warning toast has been shown this session. */
+let deepHistoryWarned = false;
+
 /**
- * Bind the "Scan Full Market" button.  When clicked, runs a non-blocking
- * background scan of all ~7 000 GE items, updating a progress bar in the UI.
- * The user can continue using the app normally while the scan runs.
+ * Bind the "Scan Full Market" button and the deep-history checkbox.
+ * When clicked, runs a non-blocking background scan of all ~7 000 GE items,
+ * updating a progress bar in the UI.  The user can continue using the app
+ * normally while the scan runs.
+ *
+ * The deep-history checkbox (persisted in localStorage) controls whether
+ * 90-day history is fetched for every item (~3–5× slower).
  */
+// Optional deep history during full scan – March 2026
 function bindFullMarketScan(): void {
+  // ── Restore persisted deep-history preference ──
+  const savedDeep = localStorage.getItem(LS_DEEP_HISTORY) === "true";
+  els.deepHistoryCheckbox.checked = savedDeep;
+
+  // ── Persist + warn on checkbox toggle ──
+  els.deepHistoryCheckbox.addEventListener("change", () => {
+    const checked = els.deepHistoryCheckbox.checked;
+    localStorage.setItem(LS_DEEP_HISTORY, String(checked));
+    if (checked && !deepHistoryWarned) {
+      deepHistoryWarned = true;
+      showToast(
+        "Deep history enabled \u2014 full scans may take 3\u201310 minutes depending on connection.",
+        "info",
+        8000,
+      );
+    }
+  });
+
   els.fullMarketScanBtn.addEventListener("click", async () => {
     // If a scan is already running, abort it.
     if (scanAbortController) {
@@ -636,16 +675,20 @@ function bindFullMarketScan(): void {
     }
 
     if (geCatalogue.length === 0) {
-      showError("Item catalogue is empty — cannot scan.");
+      showError("Item catalogue is empty \u2014 cannot scan.");
       return;
     }
 
-    // Show progress bar and disable button label.
+    const deepHistory = els.deepHistoryCheckbox.checked;
+    const deepLabel = deepHistory ? " (deep history: ON)" : "";
+
+    // Show progress bar and update button label.
     scanAbortController = new AbortController();
     els.fullMarketScanBtn.textContent = "\u23F9 Cancel Scan";
     els.syncProgress.classList.remove("hidden");
     els.syncProgressFill.style.width = "0%";
-    els.syncProgressText.textContent = "Scanning 0 / " + geCatalogue.length.toLocaleString("en-US") + "\u2026";
+    els.syncProgressText.textContent =
+      "Scanning 0 / " + geCatalogue.length.toLocaleString("en-US") + "\u2026" + deepLabel;
 
     try {
       await runFullMarketScan(
@@ -654,9 +697,10 @@ function bindFullMarketScan(): void {
           const pct = Math.round((done / total) * 100);
           els.syncProgressFill.style.width = pct + "%";
           els.syncProgressText.textContent =
-            `Scanning ${done.toLocaleString("en-US")} / ${total.toLocaleString("en-US")}\u2026 (${pct}%)`;
+            `Scanning ${done.toLocaleString("en-US")} / ${total.toLocaleString("en-US")}\u2026 (${pct}%)${deepLabel}`;
         },
         scanAbortController.signal,
+        deepHistory,
       );
 
       // Scan complete — refresh the market panel with the full dataset.
@@ -1281,8 +1325,8 @@ function setViewMode(mode: ViewMode): void {
   if (latestTopItems.length > 0) {
     renderMarketItems(latestTopItems);
   }
-  // Re-render favourites in new view mode.
-  renderFavorites();
+  // Re-render favourites in new view mode (guard: analyzer may not exist yet).
+  if (analyzer) renderFavorites();
 }
 
 // ─── Market Item Rendering ──────────────────────────────────────────────────
@@ -1489,7 +1533,7 @@ function drawGraphChart(canvas: HTMLCanvasElement, data: number[]): void {
   // Trend colour.
   const first = data[0];
   const last = data[data.length - 1];
-  const lineColour = last > first ? "#4ec9b0" : last < first ? "#f44747" : "#888";
+  const lineColour = last > first ? "#4ec9b0" : last < first ? "#f44747" : "#888888";
 
   // ── Gradient fill under curve ──
   ctx.beginPath();
@@ -1763,6 +1807,45 @@ function buildItemCard(item: RankedItem): HTMLElement {
     trendBadge.textContent = "\uD83D\uDCC8 Rising";
     trendBadge.title = "Price has risen more than 5% over the last 7 days \u2014 positive momentum.";
     flipWrap.appendChild(trendBadge);
+  }
+
+  // Usability enhancement – March 2026: predictive analytics badges.
+  const predictiveWrap = document.createElement("span");
+  predictiveWrap.className = "predictive-badges";
+
+  // EMA Trend badge.
+  if (item.ema30d > 0 && item.price > 0) {
+    const emaPct = ((item.price - item.ema30d) / item.ema30d) * 100;
+    const emaDir = emaPct > 0 ? "up" : emaPct < 0 ? "down" : "";
+    const emaBadge = document.createElement("span");
+    emaBadge.className = `ema-badge ${emaDir}`;
+    emaBadge.textContent = `EMA ${emaPct >= 0 ? "\u2191" : "\u2193"}${Math.abs(emaPct).toFixed(1)}%`;
+    emaBadge.title = `30-day Exponential Moving Average: ${formatGpShort(Math.round(item.ema30d))} gp. Current price is ${Math.abs(emaPct).toFixed(1)}% ${emaPct >= 0 ? "above" : "below"} the EMA — ${emaPct > 2 ? "bullish signal" : emaPct < -2 ? "bearish signal" : "near average"}.`;
+    predictiveWrap.appendChild(emaBadge);
+  }
+
+  // Predicted 24h badge.
+  if (item.predictedNextPrice > 0 && item.price > 0) {
+    const predPct = ((item.predictedNextPrice - item.price) / item.price) * 100;
+    const predDir = predPct > 0.1 ? "up" : predPct < -0.1 ? "down" : "neutral";
+    const predBadge = document.createElement("span");
+    predBadge.className = `predicted-badge ${predDir}`;
+    predBadge.textContent = `24h ${predPct >= 0 ? "+" : ""}${predPct.toFixed(1)}%`;
+    predBadge.title = `Linear-regression predicted next-day price: ${formatGpShort(Math.round(item.predictedNextPrice))} gp. Based on the slope of recent price history (${item.linearSlope >= 0 ? "+" : ""}${formatGpShort(Math.round(item.linearSlope))} gp/day).`;
+    predictiveWrap.appendChild(predBadge);
+  }
+
+  // Volatility badge.
+  if (item.volatility > 0) {
+    const volBadge = document.createElement("span");
+    volBadge.className = "vol-badge";
+    volBadge.textContent = `Vol ${(item.volatility * 100).toFixed(1)}%`;
+    volBadge.title = `Daily price volatility: ${(item.volatility * 100).toFixed(1)}% std deviation of daily % changes. Higher values mean wider price swings — more risk but potentially faster flips.`;
+    predictiveWrap.appendChild(volBadge);
+  }
+
+  if (predictiveWrap.childElementCount > 0) {
+    flipWrap.appendChild(predictiveWrap);
   }
 
   header.appendChild(flipWrap);
@@ -2190,54 +2273,164 @@ function ensureGraphModal(): HTMLElement {
   return backdrop;
 }
 
+// Usability fix: on-demand history for graphs – March 2026
+
 /**
- * Fetch 7-day price history for a single item from the Weird Gloop API.
- * Returns chronological daily prices (excluding today) or an empty array on failure.
+ * Ensure the IndexedDB cache has sufficient history for an item, fetching
+ * from the Weird Gloop API on demand if needed.
+ *
+ * @param itemName - Canonical RS3 item name.
+ * @param days     - Desired history depth (default 90 — always fetch the
+ *                   maximum so shorter ranges are covered too).
+ * @returns Chronological daily prices (oldest-first, excluding today) within
+ *          the requested window, or an empty array on failure.
  */
-async function fetchItemHistory(name: string): Promise<number[]> {
-  try {
-    const url = `https://api.weirdgloop.org/exchange/history/rs/last90d?name=${encodeURIComponent(name)}`;
-    const resp = await fetch(url, {
-      headers: {
-        "User-Agent": "RS3-GE-Analyzer-Alt1Plugin/1.0",
-        Accept: "application/json",
-      },
-    });
-    if (!resp.ok) return [];
-    const json = await resp.json() as Record<string, Array<{ timestamp: number; price: number }>>;
-    const entries = json[name];
-    if (!Array.isArray(entries)) return [];
-
-    const cutoff = new Date();
-    cutoff.setDate(cutoff.getDate() - 7);
-    const cutoffMs = cutoff.getTime();
-    const todayStr = new Date().toISOString().slice(0, 10);
-
-    const dayMap = new Map<string, number>();
-    for (const e of entries) {
-      if (e.timestamp < cutoffMs) continue;
-      const day = new Date(e.timestamp).toISOString().slice(0, 10);
-      if (day === todayStr) continue;
-      dayMap.set(day, e.price);
-    }
-    const sorted = [...dayMap.entries()].sort((a, b) => (a[0] < b[0] ? -1 : 1));
-    return sorted.map((d) => d[1]);
-  } catch {
-    return [];
+async function ensureItemHistory(itemName: string, days: number = 90): Promise<number[]> {
+  // 1. Check the cache first.
+  const cached = await cache.getHistoricalRecords(itemName, days);
+  if (cached.length >= 7) {
+    // Sufficient data already cached — return prices oldest-first.
+    return cached.map((r) => r.price);
   }
+
+  // 2. Cache is sparse or empty — fetch from API and persist.
+  try {
+    const api = new WeirdGloopService();
+    const historyMap = await api.fetchHistoricalPrices([itemName], days);
+    if (historyMap.size > 0) {
+      await cache.bulkInsertHistory(historyMap);
+    }
+
+    // 3. Re-read from cache (now populated) to get normalised records.
+    const fresh = await cache.getHistoricalRecords(itemName, days);
+    return fresh.map((r) => r.price);
+  } catch (err) {
+    console.warn(`[ensureItemHistory] Failed for "${itemName}":`, err);
+    // Return whatever partial cache data we had.
+    return cached.map((r) => r.price);
+  }
+}
+
+/**
+ * Fetch price history for a single item, preferring the IndexedDB cache and
+ * falling back to a direct API call.  The returned array is filtered to the
+ * requested range (7 / 30 / 90 days).
+ *
+ * @param name  - Canonical RS3 item name.
+ * @param range - Number of days: 7, 30, or 90.  Defaults to 7.
+ * @returns Chronological daily prices (excluding today) or an empty array on failure.
+ */
+async function fetchItemHistory(name: string, range: number = 7): Promise<number[]> {
+  // ensureItemHistory always fetches 90 days; we slice to the requested range afterward.
+  const allPrices = await ensureItemHistory(name, 90);
+  if (allPrices.length === 0) return [];
+
+  // Client-side trim to requested range.
+  if (range >= 90 || allPrices.length <= range) return allPrices;
+  return allPrices.slice(-range);
+}
+
+/**
+ * Refresh the graph modal chart with a new history range.
+ * Called when the in-modal range dropdown changes.
+ */
+// Usability fix: on-demand history for graphs – March 2026
+async function refreshItemGraph(item: RankedItem, range: number): Promise<void> {
+  const backdrop = ensureGraphModal();
+  const mBody = backdrop.querySelector("#graph-modal-body") as HTMLElement;
+
+  // Show loading while fetching / checking cache.
+  const canvas = mBody.querySelector<HTMLCanvasElement>(".graph-modal-canvas");
+  if (canvas) {
+    const ctx = canvas.getContext("2d");
+    if (ctx) {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.font = "12px 'Segoe UI', sans-serif";
+      ctx.fillStyle = "#888";
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.fillText("Fetching history\u2026", canvas.width / 2, canvas.height / 2);
+    }
+  }
+
+  let fetched: number[];
+  try {
+    fetched = await fetchItemHistory(item.name, range);
+  } catch {
+    showToast("History unavailable \u2014 could not fetch price data.", "info");
+    fetched = [];
+  }
+  const hist = fetched.length > 0 ? [...fetched, item.price] : [item.price];
+
+  const hasData = hist.length >= 2;
+  const currentPrice = item.price;
+  const oldestPrice = hasData ? hist[0] : currentPrice;
+  const highPrice = hasData ? Math.max(...hist) : currentPrice;
+  const lowPrice = hasData ? Math.min(...hist) : currentPrice;
+  const pctChange = oldestPrice > 0 ? ((currentPrice - oldestPrice) / oldestPrice) * 100 : 0;
+  const absChange = currentPrice - oldestPrice;
+  const volatility = hasData ? ((highPrice - lowPrice) / lowPrice) * 100 : 0;
+
+  const trendLabel = pctChange < -5 ? "Downtrend" : pctChange > 5 ? "Uptrend" : "Stable";
+  const trendColour = trendLabel === "Uptrend" ? "var(--accent-green-bright, #4ec9b0)"
+    : trendLabel === "Downtrend" ? "var(--accent-red, #f44747)" : "var(--text-muted, #888)";
+  const trendIcon = trendLabel === "Uptrend" ? "\uD83D\uDCC8" : trendLabel === "Downtrend" ? "\u26A0\uFE0F" : "\u27A1\uFE0F";
+
+  // Preserve range dropdown and update stats.
+  const statsEl = mBody.querySelector(".graph-stats") as HTMLElement;
+  if (statsEl) {
+    statsEl.innerHTML =
+      `<div class="graph-stat-row">` +
+        `<span class="graph-stat-label">${range}-Day Trend</span>` +
+        `<span class="graph-stat-value" style="color:${trendColour}">${trendIcon} ${trendLabel}</span>` +
+      `</div>` +
+      `<div class="graph-stat-row">` +
+        `<span class="graph-stat-label">Change</span>` +
+        `<span class="graph-stat-value" style="color:${trendColour}">${absChange >= 0 ? "+" : ""}${formatGpShort(absChange)} gp (${pctChange >= 0 ? "+" : ""}${pctChange.toFixed(1)}%)</span>` +
+      `</div>` +
+      `<div class="graph-stat-row">` +
+        `<span class="graph-stat-label">Current Price</span>` +
+        `<span class="graph-stat-value">${currentPrice.toLocaleString("en-US")} gp</span>` +
+      `</div>` +
+      `<div class="graph-stat-row">` +
+        `<span class="graph-stat-label">${range}-Day High</span>` +
+        `<span class="graph-stat-value">${highPrice.toLocaleString("en-US")} gp</span>` +
+      `</div>` +
+      `<div class="graph-stat-row">` +
+        `<span class="graph-stat-label">${range}-Day Low</span>` +
+        `<span class="graph-stat-value">${lowPrice.toLocaleString("en-US")} gp</span>` +
+      `</div>` +
+      `<div class="graph-stat-row">` +
+        `<span class="graph-stat-label">Volatility</span>` +
+        `<span class="graph-stat-value">${volatility.toFixed(1)}%</span>` +
+      `</div>` +
+      `<div class="graph-stat-row">` +
+        `<span class="graph-stat-label">Data Points</span>` +
+        `<span class="graph-stat-value">${hist.length} day${hist.length !== 1 ? "s" : ""}</span>` +
+      `</div>`;
+  }
+
+  requestAnimationFrame(() => {
+    if (canvas) drawGraphChart(canvas, hist);
+  });
 }
 
 /**
  * Populate the graph modal with a specific item\u2019s price chart and
  * momentum analytics, then show it.
  *
- * If the item has fewer than 2 data points, an on-demand API fetch is
- * attempted before rendering to backfill the chart.
+ * Uses the cache-first {@link ensureItemHistory} flow: checks IndexedDB for
+ * existing history, fetches from the Weird Gloop API on demand if fewer than
+ * 7 data points are cached, then persists the result for future use.
  */
+// Usability fix: on-demand history for graphs – March 2026
 async function showGraphModal(item: RankedItem): Promise<void> {
   const backdrop = ensureGraphModal();
   const mHeader = backdrop.querySelector("#graph-modal-header") as HTMLElement;
   const mBody = backdrop.querySelector("#graph-modal-body") as HTMLElement;
+
+  // Read the current range from the market-filters dropdown.
+  const range = parseInt(els.historyRangeSelect.value, 10) || 7;
 
   // \u2500\u2500 Header \u2500\u2500
   const closeBtn = mHeader.querySelector(".item-modal-close") as HTMLElement;
@@ -2259,26 +2452,36 @@ async function showGraphModal(item: RankedItem): Promise<void> {
   mHeader.appendChild(title);
   mHeader.appendChild(closeBtn);
 
-  // ── On-demand history fetch if data is sparse ──
-  if (item.priceHistory.length < 2) {
-    // Show a loading state immediately.
-    mBody.innerHTML = `<div style="text-align:center;padding:24px;color:#888;">Loading price history\u2026</div>`;
-    backdrop.classList.add("visible");
+  // ── On-demand history fetch (cache-first, API fallback) ──
+  // Usability fix: on-demand history for graphs – March 2026
+  mBody.innerHTML = `<div class="graph-loading-msg" style="text-align:center;padding:24px;color:#888;">Checking cached history\u2026</div>`;
+  backdrop.classList.add("visible");
 
-    const fetched = await fetchItemHistory(item.name);
-    if (fetched.length > 0) {
-      // Rebuild priceHistory: historical days + today's price.
-      item.priceHistory = [...fetched, item.price];
-      // Re-classify trend.
-      if (item.priceHistory.length >= 2 && item.priceHistory[0] > 0) {
-        const pct = (item.price - item.priceHistory[0]) / item.priceHistory[0];
-        item.priceTrend = pct < -0.05 ? "Downtrend" : pct > 0.05 ? "Uptrend" : "Stable";
-      }
-    }
+  // Quick cache probe to decide loading message.
+  const cachedCount = (await cache.getHistoricalRecords(item.name, 90)).length;
+  if (cachedCount < 7) {
+    const loadingEl = mBody.querySelector(".graph-loading-msg");
+    if (loadingEl) loadingEl.textContent = "Fetching price history\u2026";
   }
 
-  const hist = item.priceHistory;
+  let fetched: number[];
+  try {
+    fetched = await fetchItemHistory(item.name, range);
+  } catch {
+    showToast("History unavailable \u2014 could not fetch price data.", "info");
+    fetched = [];
+  }
+  const hist = fetched.length > 0 ? [...fetched, item.price] : (item.priceHistory.length >= 2 ? item.priceHistory : [item.price]);
   const hasData = hist.length >= 2;
+
+  // Update item priceHistory if we got fresh data and range is 7d.
+  if (fetched.length > 0 && range <= 7) {
+    item.priceHistory = [...fetched, item.price];
+    if (item.priceHistory.length >= 2 && item.priceHistory[0] > 0) {
+      const pct = (item.price - item.priceHistory[0]) / item.priceHistory[0];
+      item.priceTrend = pct < -0.05 ? "Downtrend" : pct > 0.05 ? "Uptrend" : "Stable";
+    }
+  }
 
   // Compute momentum stats.
   const currentPrice = item.price;
@@ -2290,16 +2493,25 @@ async function showGraphModal(item: RankedItem): Promise<void> {
   const volatility = hasData ? ((highPrice - lowPrice) / lowPrice) * 100 : 0;
 
   // Trend direction and colour.
-  const trendLabel = item.priceTrend;
+  const trendLabel = pctChange < -5 ? "Downtrend" : pctChange > 5 ? "Uptrend" : "Stable";
   const trendColour = trendLabel === "Uptrend" ? "var(--accent-green-bright, #4ec9b0)"
     : trendLabel === "Downtrend" ? "var(--accent-red, #f44747)" : "var(--text-muted, #888)";
   const trendIcon = trendLabel === "Uptrend" ? "\uD83D\uDCC8" : trendLabel === "Downtrend" ? "\u26A0\uFE0F" : "\u27A1\uFE0F";
 
+  // Build range selector row inside the modal.
+  const rangeOptions = [7, 30, 90].map((d) =>
+    `<option value="${d}"${d === range ? " selected" : ""}>History: ${d} days</option>`
+  ).join("");
+
   mBody.innerHTML =
+    `<div class="graph-modal-range-row">` +
+      `<label>Range:</label>` +
+      `<select class="graph-range-inline">${rangeOptions}</select>` +
+    `</div>` +
     `<canvas class="graph-modal-canvas" width="480" height="180"></canvas>` +
     `<div class="graph-stats">` +
       `<div class="graph-stat-row">` +
-        `<span class="graph-stat-label">7-Day Trend</span>` +
+        `<span class="graph-stat-label">${range}-Day Trend</span>` +
         `<span class="graph-stat-value" style="color:${trendColour}">${trendIcon} ${trendLabel}</span>` +
       `</div>` +
       `<div class="graph-stat-row">` +
@@ -2311,11 +2523,11 @@ async function showGraphModal(item: RankedItem): Promise<void> {
         `<span class="graph-stat-value">${currentPrice.toLocaleString("en-US")} gp</span>` +
       `</div>` +
       `<div class="graph-stat-row">` +
-        `<span class="graph-stat-label">7-Day High</span>` +
+        `<span class="graph-stat-label">${range}-Day High</span>` +
         `<span class="graph-stat-value">${highPrice.toLocaleString("en-US")} gp</span>` +
       `</div>` +
       `<div class="graph-stat-row">` +
-        `<span class="graph-stat-label">7-Day Low</span>` +
+        `<span class="graph-stat-label">${range}-Day Low</span>` +
         `<span class="graph-stat-value">${lowPrice.toLocaleString("en-US")} gp</span>` +
       `</div>` +
       `<div class="graph-stat-row">` +
@@ -2328,8 +2540,18 @@ async function showGraphModal(item: RankedItem): Promise<void> {
       `</div>` +
     `</div>`;
 
+  // Bind inline range dropdown.
+  const inlineRange = mBody.querySelector<HTMLSelectElement>(".graph-range-inline");
+  if (inlineRange) {
+    inlineRange.addEventListener("change", () => {
+      const newRange = parseInt(inlineRange.value, 10) || 7;
+      // Sync the global dropdown.
+      els.historyRangeSelect.value = String(newRange);
+      refreshItemGraph(item, newRange);
+    });
+  }
+
   // Draw the chart after the modal is in the DOM.
-  backdrop.classList.add("visible");
   requestAnimationFrame(() => {
     const canvas = mBody.querySelector<HTMLCanvasElement>(".graph-modal-canvas");
     if (canvas) drawGraphChart(canvas, hist);
@@ -2875,27 +3097,119 @@ function buildFlipCard(flip: ActiveFlip): HTMLElement {
 // ─── Completed Flips (History & Stats) ──────────────────────────────────────
 
 /**
- * Render the completed-flips list and the stats dashboard header.
+ * Render the completed-flips list as a sortable <table> and the stats dashboard header.
+ * Supports column sort (click headers) and text filtering.
  */
+// Usability enhancement – March 2026
 function renderCompletedFlips(): void {
   renderPortfolioStats();
 
   const container = els.completedFlipsList;
   container.innerHTML = "";
 
-  const flips = portfolio.getCompletedFlips();
+  let flips = portfolio.getCompletedFlips();
+
+  // Apply text filter.
+  const filterText = els.completedFlipsFilter.value.trim().toLowerCase();
+  if (filterText) {
+    flips = flips.filter((f) => {
+      const profitStr = String(f.realizedProfit);
+      return f.itemName.toLowerCase().includes(filterText) || profitStr.includes(filterText);
+    });
+  }
 
   if (flips.length === 0) {
     const empty = document.createElement("div");
     empty.className = "portfolio-empty";
-    empty.textContent = "No completed flips yet. Use the ✓ button on an active flip to log a sale.";
+    empty.textContent = filterText
+      ? "No flips match the current filter."
+      : "No completed flips yet. Use the \u2713 button on an active flip to log a sale.";
     container.appendChild(empty);
     return;
   }
 
-  for (const flip of flips) {
-    container.appendChild(buildCompletedFlipCard(flip));
+  // Sort flips.
+  const dir = completedFlipsSortAsc ? 1 : -1;
+  flips.sort((a, b) => {
+    switch (completedFlipsSortCol) {
+      case "date": return dir * (a.completedAt - b.completedAt);
+      case "item": return dir * a.itemName.localeCompare(b.itemName);
+      case "profit": return dir * (a.realizedProfit - b.realizedProfit);
+      case "roi": {
+        const roiA = a.buyPrice * a.quantity > 0 ? a.realizedProfit / (a.buyPrice * a.quantity) : 0;
+        const roiB = b.buyPrice * b.quantity > 0 ? b.realizedProfit / (b.buyPrice * b.quantity) : 0;
+        return dir * (roiA - roiB);
+      }
+      default: return 0;
+    }
+  });
+
+  const table = document.createElement("table");
+  table.className = "completed-flips-table";
+
+  // Header row.
+  const thead = document.createElement("thead");
+  const headerRow = document.createElement("tr");
+  const columns: { key: typeof completedFlipsSortCol; label: string }[] = [
+    { key: "date", label: "Date" },
+    { key: "item", label: "Item" },
+    { key: "profit", label: "Profit" },
+    { key: "roi", label: "ROI" },
+  ];
+
+  for (const col of columns) {
+    const th = document.createElement("th");
+    const arrow = completedFlipsSortCol === col.key
+      ? (completedFlipsSortAsc ? " \u25B2" : " \u25BC")
+      : "";
+    th.innerHTML = `${col.label}<span class="sort-arrow">${arrow}</span>`;
+    th.addEventListener("click", () => {
+      if (completedFlipsSortCol === col.key) {
+        completedFlipsSortAsc = !completedFlipsSortAsc;
+      } else {
+        completedFlipsSortCol = col.key;
+        completedFlipsSortAsc = col.key === "item"; // alphabetical default asc
+      }
+      renderCompletedFlips();
+    });
+    headerRow.appendChild(th);
   }
+  thead.appendChild(headerRow);
+  table.appendChild(thead);
+
+  // Body rows.
+  const tbody = document.createElement("tbody");
+  for (const flip of flips) {
+    const row = document.createElement("tr");
+    row.className = flip.realizedProfit > 0 ? "win" : "loss";
+
+    const dateCell = document.createElement("td");
+    dateCell.textContent = new Date(flip.completedAt).toLocaleDateString("en-GB", {
+      day: "numeric", month: "short", year: "2-digit",
+    });
+
+    const itemCell = document.createElement("td");
+    itemCell.textContent = flip.itemName;
+
+    const profitCell = document.createElement("td");
+    profitCell.className = `profit-cell ${flip.realizedProfit > 0 ? "win" : "loss"}`;
+    profitCell.textContent = `${formatGpShort(flip.realizedProfit)} gp`;
+
+    const roi = flip.buyPrice * flip.quantity > 0
+      ? (flip.realizedProfit / (flip.buyPrice * flip.quantity)) * 100
+      : 0;
+    const roiCell = document.createElement("td");
+    roiCell.className = `profit-cell ${roi >= 0 ? "win" : "loss"}`;
+    roiCell.textContent = `${roi >= 0 ? "+" : ""}${roi.toFixed(1)}%`;
+
+    row.appendChild(dateCell);
+    row.appendChild(itemCell);
+    row.appendChild(profitCell);
+    row.appendChild(roiCell);
+    tbody.appendChild(row);
+  }
+  table.appendChild(tbody);
+  container.appendChild(table);
 }
 
 /**
@@ -2919,9 +3233,59 @@ function renderPortfolioStats(): void {
 }
 
 /**
- * Build a single completed-flip card DOM element.
+ * Bind the completed-flips filter input to re-render on typing.
  */
-function buildCompletedFlipCard(flip: CompletedFlip): HTMLElement {
+// Usability enhancement – March 2026
+function bindCompletedFlipsFilter(): void {
+  els.completedFlipsFilter.addEventListener("input", () => {
+    renderCompletedFlips();
+  });
+}
+
+/**
+ * Generate a CSV string from all completed flips and trigger a download.
+ */
+// Usability enhancement – March 2026
+function exportCompletedFlipsCsv(): void {
+  const flips = portfolio.getCompletedFlips();
+  if (flips.length === 0) {
+    alert("No completed flips to export.");
+    return;
+  }
+
+  const header = "Item,Buy Price,Qty,Sell Price,Realised Profit,Date";
+  const rows = flips.map((f) => {
+    const dateStr = new Date(f.completedAt).toISOString().slice(0, 10);
+    // Escape item names that might contain commas.
+    const safeName = f.itemName.includes(",") ? `"${f.itemName}"` : f.itemName;
+    return `${safeName},${f.buyPrice},${f.quantity},${f.actualSellPrice},${f.realizedProfit},${dateStr}`;
+  });
+
+  const csv = [header, ...rows].join("\n");
+  const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+  const url = URL.createObjectURL(blob);
+
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "ge-advisor-flips.csv";
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+/**
+ * Bind the CSV export button click handler.
+ */
+function bindCsvExport(): void {
+  els.exportCsvBtn.addEventListener("click", exportCompletedFlipsCsv);
+}
+
+/**
+ * Build a single completed-flip card DOM element.
+ * @deprecated Replaced by table-based rendering in {@link renderCompletedFlips}.
+ */
+function _buildCompletedFlipCard(flip: CompletedFlip): HTMLElement {
   const card = document.createElement("div");
   card.className = `completed-flip-card ${flip.realizedProfit > 0 ? "win" : "loss"}`;
 
@@ -3216,6 +3580,7 @@ function resolveElements(): void {
     favoritesSortSelect: q<HTMLSelectElement>("favorites-sort-select"),
     refreshMarketBtn: q<HTMLButtonElement>("refresh-market-btn"),
     fullMarketScanBtn: q<HTMLButtonElement>("full-market-scan-btn"),
+    deepHistoryCheckbox: q<HTMLInputElement>("deep-history-checkbox"),
     syncProgress: q("background-sync-progress"),
     syncProgressFill: q("sync-progress-fill"),
     syncProgressText: q("sync-progress-text"),
@@ -3263,6 +3628,9 @@ function resolveElements(): void {
     exportDataBtn: q<HTMLButtonElement>("export-data-btn"),
     importDataBtn: q<HTMLButtonElement>("import-data-btn"),
     importFileInput: q<HTMLInputElement>("import-file-input"),
+    historyRangeSelect: q<HTMLSelectElement>("history-range-select"),
+    completedFlipsFilter: q<HTMLInputElement>("completed-flips-filter"),
+    exportCsvBtn: q<HTMLButtonElement>("export-csv-btn"),
   };
 }
 

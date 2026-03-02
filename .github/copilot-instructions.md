@@ -14,8 +14,8 @@ RS3 Alt1 Toolkit plugin using a RAG pipeline: `Weird Gloop API → IndexedDB cac
 - LLM prompts must forbid hallucinating prices/volumes/game mechanics; only use data passed in the user message
 - **Keep docs in sync**: After completing any feature, bug fix, or refactor, update **all three** documentation files before considering the task done:
   1. `.github/copilot-instructions.md` — update File Roles, UI Layout, Key Patterns, or Gotchas if the change affects architecture, DOM structure, conventions, or known pitfalls.
-  2. `readme.md` — update the Features list or any other section that the change touches (e.g. new UI capabilities, new service, removed feature).
-  3. `HANDOFF.md` — update the relevant deep-dive section(s), localStorage keys table, types table, current-status checklist, and past-issues table as applicable.
+  2. `readme.md` — update the Features list or any other section that the change touches (e.g. new UI capabilities, new service, removed feature). **If you add or rename a `##`/`###` heading, update the Table of Contents at the top of the file to match.**
+  3. `HANDOFF.md` — update the relevant deep-dive section(s), localStorage keys table, types table, current-status checklist, and past-issues table as applicable. **If you add or rename a `##`/`###` heading (including new `4.x` subsections), update the Table of Contents at the top of the file to match.**
 
 ## Build & Verify
 
@@ -31,37 +31,47 @@ npx serve dist --listen 8080   # local dev server
 - **Services use constructor injection**: e.g. `new MarketAnalyzerService(cacheService)`, `new LLMService({ apiKey, endpoint, model })`
 - **LLMService accepts `Partial<LLMConfig>`** — all fields optional (defaults to Groq). API key omitted = no Authorization header (for self-hosted models)
 - **Runtime filter overrides**: `analyzer.getTopItems(overrides?)` merges `Partial<MarketAnalyzerConfig>` at call time — don't reconstruct the service for filter changes
-- **localStorage keys** are prefixed `ge-analyzer:` (e.g. `ge-analyzer:llm-provider`, `ge-analyzer:view-mode`, `ge-analyzer:top20-sort`, `ge-analyzer:theme`)
+- **localStorage keys** are prefixed `ge-analyzer:` (e.g. `ge-analyzer:llm-provider`, `ge-analyzer:view-mode`, `ge-analyzer:top20-sort`, `ge-analyzer:theme`, `ge-analyzer:deep-history`)
 - **Favourites use `FavoriteItem[]`** (not plain strings) — stored in `ge-analyzer:favorites` as `{ name, targetBuy?, targetSell? }`. Legacy `string[]` format auto-migrates on first load via `loadFavorites()`.
 - **Price alert dedup**: `firedAlerts` Set (session-scoped) prevents the same alert from firing repeatedly. Alerts trigger both a DOM toast (`#toast-container`) and a native `Notification` (if permission granted).
 - **Inline alert popover**: Each item card has a 🔔 button in `.card-actions` that toggles a `.card-alert-popover` with compact buy/sell inputs — only one popover open at a time per list. The full modal also retains its own alert inputs.
 - **Per-section sort controls**: Top 20, Search Results, and Favourites each have their own sort `<select>` and localStorage key (`ge-analyzer:top20-sort`, `ge-analyzer:search-sort`, `ge-analyzer:fav-sort`). Shared `applySortOrder()` helper sorts in place — do not add a global sort.
+- **History-range selector**: `<select id="history-range-select">` in `#market-filters` (7/30/90 days). Also rendered inline inside the graph modal — changing either syncs the other. `fetchItemHistory(name, range)` delegates to `ensureItemHistory` (cache-first, API fallback) then slices to the requested range.
+- **On-demand graph history**: `ensureItemHistory(itemName, 90)` checks IndexedDB first; if < 7 data points are cached it fetches via `WeirdGloopService.fetchHistoricalPrices`, persists via `cache.bulkInsertHistory`, then returns prices. The graph modal shows dynamic loading text ("Checking cached history…" → "Fetching price history…") and a toast on failure.
+- **Predictive badges**: `buildItemCard` appends `.predictive-badges` (EMA, predicted 24h, volatility) after the momentum badges. Values come from `RankedItem.ema30d`, `.predictedNextPrice`, `.volatility`.
+- **Completed flips table**: `renderCompletedFlips()` renders a `<table class="completed-flips-table">` with clickable sort headers. Module-scoped `completedFlipsSortCol`/`completedFlipsSortAsc` track state.
+- **CSV export**: `#export-csv-btn` in the portfolio history toolbar triggers `exportCompletedFlipsCsv()` — generates a data-URL CSV download of all `CompletedFlip` entries.
 - **Three CSS themes**: Classic Dark (`:root`), OSRS Brown (`body[data-theme="osrs"]`), RS3 Modern Blue (`body[data-theme="rs3-modern"]`) — all via CSS custom properties. New UI elements must use `var(--*)` tokens, never hard-coded colours.
 - **Provider presets** in `LLM_PROVIDERS` array (`types.ts`) — each has `endpoint`, `defaultModel`, `keyPlaceholder`, and curated `models[]` with `recommended` flags
 - **Barrel imports**: Always import services/types from `./services` (the barrel), not from individual files like `./services/types`
+- **`HistoricalPriceRecord`** is re-exported from the barrel (`services/index.ts`) — use it in uiService for typed cache reads
+- **Deep-history scan checkbox**: `#deep-history-checkbox` next to the scan button; persisted in `ge-analyzer:deep-history`. When checked, `runFullMarketScan(..., deepHistory=true)` fetches 90-day history instead of 30-day per batch (~3–5× slower). One-time warning toast on enable.
+- **Rate-limit retry & adaptive backoff**: `WeirdGloopService.fetchWithRetry()` retries 429s and network errors with exponential backoff (MAX_RETRIES=4, BACKOFF_BASE_MS=2 000 ms). `fetchLatestPrices` dispatches batches **sequentially** (not concurrently) with 300 ms inter-batch pauses. History fetches use concurrency groups of 10 with HISTORY_GROUP_DELAY_MS=300 ms between groups. `runFullMarketScan` uses 1 500 ms inter-batch delay with adaptive backoff: consecutive empty batches double the delay up to a 30 s ceiling; delay resets to baseline on a successful batch.
 
 ## File Roles
 
 | File | Responsibility |
 |------|---------------|
-| `uiService.ts` | **All** DOM manipulation, event binding, localStorage, rendering (~2 870 lines) |
+| `uiService.ts` | **All** DOM manipulation, event binding, localStorage, rendering (~3 580 lines) |
 | `services/types.ts` | Every shared interface + `LLM_PROVIDERS` constant |
 | `services/coreKnowledge.ts` | Static RS3 economic rules (GE tax, buy limits, margin checking, high alch) |
 | `services/llmService.ts` | OpenAI-compatible chat-completion client; builds system + user prompt |
 | `services/marketAnalyzerService.ts` | Score → filter → rank → format. Includes trade velocity scoring, 7-day price momentum classification, and sparse-history fallback to Weird Gloop `last90d` API for chart data. |
-| `services/initDataPipeline.ts` | Startup orchestrator + `SEED_ITEMS` list (~100 RS3 items) |
+| `services/initDataPipeline.ts` | Startup orchestrator + `SEED_ITEMS` list (~100 RS3 items). `runFullMarketScan` uses adaptive inter-batch backoff (1.5 s baseline, 30 s ceiling) |
 | `services/portfolioService.ts` | Active flip tracker + completed flip history with P&L stats (localStorage) |
+| `services/weirdGloopService.ts` | Weird Gloop RS3 GE API client — batched sequential fetching with `fetchWithRetry()` exponential backoff (429 / network errors) |
 | `services/wikiService.ts` | RS Wiki MediaWiki API client + Cargo buy-limit API (two-step search → extract) |
-| `style.css` | Three themes, cards/tiles/grids, modals, dedicated graph modal, velocity badges, slider theming, toast notifications, alert inputs, inline alert popovers, data-mgmt buttons, responsive `@media (min-width: 800px)` breakpoint (~2 440 lines) |
+| `style.css` | Three themes, cards/tiles/grids, modals, dedicated graph modal, velocity badges, slider theming, toast notifications, alert inputs, inline alert popovers, data-mgmt buttons, predictive badges, completed-flips table, CSV export button, responsive `@media (min-width: 800px)` breakpoint (~2 700 lines) |
 
 ## UI Layout (index.html, top → bottom)
 
-1. `#error-banner` — dismissible error bar with retry (hidden by default)
-2. `#market-filters` — volume / price dropdowns + refresh button
+1. `#background-sync-progress` — scan progress bar (hidden by default, shown during full market scan)
+2. `#error-banner` — dismissible error bar with retry (hidden by default)
+3. `#market-filters` — volume / price dropdowns + refresh button
 3. Custom slider groups (volume min/max, budget) — shown when "Custom" selected
 4. `#search-section` — search input + `#search-sort-select` + view toggle (☰ ▦ ⊞) + `#search-results`
 5. `#favorites-section` — ★ header + `#favorites-sort-select` + collapse button + `#favorites-items`
-6. `.top20-section` → `#market-header` (h2 + `.market-header-actions`: `#top20-sort-select` + collapse ▾) + `#market-items`
+6. `.top20-section` → `#market-header` (h2 + `.market-header-actions`: `#full-market-scan-btn` + `#deep-history-checkbox` + `#top20-sort-select` + collapse ▾) + `#market-items`
 
 ## Gotchas
 
@@ -73,6 +83,7 @@ npx serve dist --listen 8080   # local dev server
 - `#search-results` and `#search-loading` must have `width: 100%` to stay below the flex-row search bar — do not remove this
 - Modal section in `uiService.ts` uses literal JS unicode escape sequences — use Node.js scripts for safe text replacement if needed
 - Slider pseudo-element styles (`::-webkit-slider-*` / `::-moz-range-*`) must stay in **separate rule blocks** per browser spec
+- `fetchLatestPrices` dispatches batches **sequentially** (not via `Promise.allSettled`) — do not revert to concurrent dispatch or the API will rate-limit aggressively
 
 ## Full Context
 

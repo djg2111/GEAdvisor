@@ -40,6 +40,13 @@ export class WeirdGloopService {
   /** Maximum items per HTTP request. */
   private readonly batchSize: number;
 
+  /** Maximum retry attempts on 429 / transient errors. */
+  private static readonly MAX_RETRIES = 4;
+  /** Base delay (ms) for exponential backoff — doubled on each retry. */
+  private static readonly BACKOFF_BASE_MS = 2_000;
+  /** Small pause (ms) between sequential history-concurrency groups. */
+  private static readonly HISTORY_GROUP_DELAY_MS = 300;
+
   /**
    * Create a new service instance.
    * @param config - Optional overrides for batch size, etc.
@@ -75,19 +82,21 @@ export class WeirdGloopService {
       `[WeirdGloopService] Fetching ${itemNames.length} items in ${batches.length} batch(es) of up to ${this.batchSize}…`
     );
 
-    const settled = await Promise.allSettled(
-      batches.map((batch, idx) => this.fetchBatch(batch, idx))
-    );
-
+    // Execute batches sequentially to stay within API rate limits.
     const consolidated = new Map<string, WeirdGloopPriceRecord>();
 
-    for (const result of settled) {
-      if (result.status === "fulfilled") {
-        for (const [name, record] of Object.entries(result.value)) {
+    for (let idx = 0; idx < batches.length; idx++) {
+      try {
+        const json = await this.fetchBatch(batches[idx], idx);
+        for (const [name, record] of Object.entries(json)) {
           consolidated.set(name, record);
         }
-      } else {
-        console.error("[WeirdGloopService] Batch failed:", result.reason);
+      } catch (err) {
+        console.error("[WeirdGloopService] Batch failed:", err);
+      }
+      // Brief pause between batches to avoid rate-limiting.
+      if (idx < batches.length - 1) {
+        await WeirdGloopService.sleep(300);
       }
     }
 
@@ -127,34 +136,27 @@ export class WeirdGloopService {
     );
 
     const fetchOne = async (name: string): Promise<void> => {
-      try {
-        const url = `https://api.weirdgloop.org/exchange/history/rs/last90d?name=${encodeURIComponent(name)}`;
-        const resp = await fetch(url, {
-          method: "GET",
-          headers: {
-            "User-Agent":
-              "RS3-GE-Analyzer-Alt1Plugin/1.0 (contact: github.com/skillbert/alt1minimal)",
-            Accept: "application/json",
-          },
-        });
-        if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
-        const json: WeirdGloopHistoryResponse = await resp.json();
-        const entries = json[name];
-        if (!Array.isArray(entries)) return;
+      const url = `https://api.weirdgloop.org/exchange/history/rs/last90d?name=${encodeURIComponent(name)}`;
+      const resp = await WeirdGloopService.fetchWithRetry(url);
+      if (!resp) return;                                    // all retries exhausted
+      const json: WeirdGloopHistoryResponse = await resp.json();
+      const entries = json[name];
+      if (!Array.isArray(entries)) return;
 
-        const filtered = entries
-          .filter((e) => e.timestamp >= cutoff)
-          .sort((a, b) => a.timestamp - b.timestamp);
+      const filtered = entries
+        .filter((e) => e.timestamp >= cutoff)
+        .sort((a, b) => a.timestamp - b.timestamp);
 
-        if (filtered.length > 0) result.set(name, filtered);
-      } catch {
-        // Individual item failure — silently skip.
-      }
+      if (filtered.length > 0) result.set(name, filtered);
     };
 
     for (let i = 0; i < itemNames.length; i += HISTORY_CONCURRENCY) {
       const batch = itemNames.slice(i, i + HISTORY_CONCURRENCY);
       await Promise.allSettled(batch.map(fetchOne));
+      // Small pause between concurrent groups to stay under rate limit.
+      if (i + HISTORY_CONCURRENCY < itemNames.length) {
+        await WeirdGloopService.sleep(WeirdGloopService.HISTORY_GROUP_DELAY_MS);
+      }
     }
 
     console.log(
@@ -183,18 +185,10 @@ export class WeirdGloopService {
 
     console.debug(`[WeirdGloopService] Batch ${batchIdx}: requesting ${batch.length} items…`);
 
-    const response = await fetch(url, {
-      method: "GET",
-      headers: {
-        // Weird Gloop asks consumers to set a descriptive User-Agent.
-        "User-Agent": "RS3-GE-Analyzer-Alt1Plugin/1.0 (contact: github.com/skillbert/alt1minimal)",
-        Accept: "application/json",
-      },
-    });
-
-    if (!response.ok) {
+    const response = await WeirdGloopService.fetchWithRetry(url);
+    if (!response) {
       throw new Error(
-        `[WeirdGloopService] Batch ${batchIdx} HTTP ${response.status}: ${response.statusText}`
+        `[WeirdGloopService] Batch ${batchIdx}: all retries exhausted`
       );
     }
 
@@ -203,6 +197,68 @@ export class WeirdGloopService {
       `[WeirdGloopService] Batch ${batchIdx}: received ${Object.keys(json).length} records.`
     );
     return json;
+  }
+
+  // ─── Rate-Limit Helpers ───────────────────────────────────────────────
+
+  /**
+   * Fetch a URL with automatic retry + exponential backoff on 429 and
+   * transient network errors.  Returns `null` when all retries are
+   * exhausted so callers can degrade gracefully.
+   *
+   * @param url        - Fully-qualified URL to request.
+   * @param maxRetries - Override for {@link MAX_RETRIES}.
+   * @returns The successful `Response`, or `null` after all attempts fail.
+   */
+  private static async fetchWithRetry(
+    url: string,
+    maxRetries: number = WeirdGloopService.MAX_RETRIES,
+  ): Promise<Response | null> {
+    for (let attempt = 0; attempt <= maxRetries; attempt++) {
+      try {
+        const resp = await fetch(url, {
+          method: "GET",
+          headers: {
+            "User-Agent":
+              "RS3-GE-Analyzer-Alt1Plugin/1.0 (contact: github.com/skillbert/alt1minimal)",
+            Accept: "application/json",
+          },
+        });
+
+        if (resp.ok) return resp;
+
+        // Rate-limited — back off and retry.
+        if (resp.status === 429) {
+          const delay = WeirdGloopService.BACKOFF_BASE_MS * Math.pow(2, attempt);
+          console.warn(
+            `[WeirdGloopService] 429 rate-limited (attempt ${attempt + 1}/${maxRetries + 1}). ` +
+            `Waiting ${(delay / 1000).toFixed(1)}s before retry…`
+          );
+          await WeirdGloopService.sleep(delay);
+          continue;
+        }
+
+        // Non-retryable HTTP error.
+        console.error(`[WeirdGloopService] HTTP ${resp.status} for ${url.slice(0, 120)}`);
+        return null;
+      } catch (err) {
+        // Network / CORS error — often accompanies a 429 that the browser
+        // blocks before we even see the status.  Treat it as retryable.
+        const delay = WeirdGloopService.BACKOFF_BASE_MS * Math.pow(2, attempt);
+        console.warn(
+          `[WeirdGloopService] Network error (attempt ${attempt + 1}/${maxRetries + 1}). ` +
+          `Waiting ${(delay / 1000).toFixed(1)}s… [${(err as Error).message}]`
+        );
+        await WeirdGloopService.sleep(delay);
+      }
+    }
+    console.error(`[WeirdGloopService] All ${maxRetries + 1} attempts failed for ${url.slice(0, 120)}`);
+    return null;
+  }
+
+  /** Promise-based sleep helper. */
+  private static sleep(ms: number): Promise<void> {
+    return new Promise((r) => setTimeout(r, ms));
   }
 
   /**

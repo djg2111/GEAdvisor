@@ -659,6 +659,23 @@ button:disabled {
   filter: none;
 }
 
+/* ── Deep-history checkbox label ──────────────────────────────────────────── */
+
+.deep-history-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 10px;
+  color: var(--text-muted);
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.deep-history-label input[type="checkbox"] {
+  margin: 0;
+  accent-color: var(--accent-primary);
+}
+
 /* ── Background sync progress bar ─────────────────────────────────────────── */
 
 .sync-progress {
@@ -2204,6 +2221,185 @@ button:disabled {
 
 .completed-flip-profit.loss {
   color: var(--accent-red);
+}
+
+/* ── Predictive analytics badges on market cards ────────────────────────────── */
+
+.predictive-badges {
+  display: flex;
+  gap: 3px;
+  flex-wrap: wrap;
+  align-items: center;
+  margin-top: 2px;
+}
+
+.ema-badge,
+.predicted-badge,
+.vol-badge {
+  font-size: 10px;
+  padding: 1px 6px;
+  border-radius: 3px;
+  white-space: nowrap;
+  cursor: help;
+}
+
+.ema-badge {
+  background: rgba(86, 156, 214, 0.18);
+  color: var(--accent-blue-text);
+}
+
+.ema-badge.up {
+  color: var(--accent-green-bright);
+  background: rgba(39, 174, 96, 0.15);
+}
+
+.ema-badge.down {
+  color: var(--accent-red);
+  background: rgba(244, 71, 71, 0.15);
+}
+
+.predicted-badge {
+  font-weight: 600;
+}
+
+.predicted-badge.up {
+  color: var(--accent-green-bright);
+  background: rgba(39, 174, 96, 0.15);
+}
+
+.predicted-badge.down {
+  color: var(--accent-red);
+  background: rgba(244, 71, 71, 0.15);
+}
+
+.predicted-badge.neutral {
+  color: var(--text-muted);
+  background: rgba(136, 136, 136, 0.15);
+}
+
+.vol-badge {
+  background: rgba(240, 192, 64, 0.15);
+  color: var(--accent-gold);
+}
+
+/* ── Completed flips table ─────────────────────────────────────────────────── */
+
+.portfolio-history-toolbar {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 8px;
+  align-items: center;
+}
+
+.portfolio-history-toolbar input[type="text"] {
+  flex: 1;
+  padding: 4px 8px;
+  font-size: 11px;
+  border: 1px solid var(--border-input);
+  border-radius: 3px;
+  background: var(--bg-input);
+  color: var(--text-main);
+}
+
+.portfolio-history-toolbar input[type="text"]::placeholder {
+  color: var(--text-muted);
+  opacity: 0.6;
+}
+
+#export-csv-btn {
+  padding: 4px 10px;
+  font-size: 11px;
+  white-space: nowrap;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-input);
+  border-radius: 3px;
+  color: var(--text-main);
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+#export-csv-btn:hover {
+  background: var(--accent-primary);
+  color: var(--text-bright);
+}
+
+.completed-flips-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 11px;
+}
+
+.completed-flips-table th {
+  text-align: left;
+  padding: 4px 8px;
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--text-heading);
+  border-bottom: 2px solid var(--border-main);
+  cursor: pointer;
+  user-select: none;
+  white-space: nowrap;
+  background: var(--bg-elevated);
+}
+
+.completed-flips-table th:hover {
+  color: var(--text-bright);
+}
+
+.completed-flips-table th .sort-arrow {
+  margin-left: 2px;
+  font-size: 9px;
+  color: var(--text-muted);
+}
+
+.completed-flips-table td {
+  padding: 4px 8px;
+  border-bottom: 1px solid var(--border-main);
+  color: var(--text-main);
+  white-space: nowrap;
+}
+
+.completed-flips-table tr.win td:first-child {
+  border-left: 3px solid var(--accent-green-bright);
+}
+
+.completed-flips-table tr.loss td:first-child {
+  border-left: 3px solid var(--accent-red-dark);
+}
+
+.completed-flips-table .profit-cell {
+  font-weight: 600;
+}
+
+.completed-flips-table .profit-cell.win {
+  color: var(--accent-green);
+}
+
+.completed-flips-table .profit-cell.loss {
+  color: var(--accent-red);
+}
+
+/* ── Graph modal history-range dropdown ──────────────────────────────────── */
+
+.graph-modal-range-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
+.graph-modal-range-row label {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.graph-modal-range-row select {
+  padding: 2px 6px;
+  font-size: 11px;
+  background: var(--bg-input);
+  color: var(--text-main);
+  border: 1px solid var(--border-input);
+  border-radius: 3px;
 }
 
 /* ── Complete flip button ───────────────────────────────────────────────────── */

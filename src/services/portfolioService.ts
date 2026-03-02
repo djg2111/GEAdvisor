@@ -94,6 +94,8 @@ export class PortfolioService {
    * Mark an active flip as completed, calculate realised profit, and move it
    * to the history ledger.
    *
+   * Tax is rounded DOWN per item per official wiki mechanics (exempt ≤50 gp).
+   *
    * @param id              - Unique ID of the active flip to complete.
    * @param actualSellPrice - The per-item price the flip was actually sold at.
    * @returns The completed flip record, or `undefined` if the ID was not found.
@@ -103,12 +105,12 @@ export class PortfolioService {
     if (idx === -1) return undefined;
 
     const active = this.flips[idx];
-    // Official RS3 wiki tax formula: floor(price * 2%), exempt at ≤ 50 gp.
-    let taxPerItem = Math.floor(actualSellPrice * 0.02);
-    if (actualSellPrice <= 50) taxPerItem = 0;
+    const taxPerItem = (actualSellPrice <= 50) ? 0 : Math.floor(actualSellPrice * 0.02);
     const netSellPerItem = actualSellPrice - taxPerItem;
-    const realizedProfit =
-      (netSellPerItem * active.quantity) - (active.buyPrice * active.quantity);
+    const realizedProfit = (netSellPerItem * active.quantity) - (active.buyPrice * active.quantity);
+
+    // Temporary debug log for tax verification — remove after testing.
+    console.log(`[PortfolioService] completeFlip: taxPerItem=${taxPerItem}, netSellPerItem=${netSellPerItem}`);
 
     const completed: CompletedFlip = {
       ...active,

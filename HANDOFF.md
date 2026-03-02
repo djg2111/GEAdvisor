@@ -4,6 +4,38 @@
 
 ---
 
+## Table of Contents
+
+- [1. Project Overview](#1-project-overview)
+- [2. Standing Rules & Constraints](#2-standing-rules--constraints)
+- [3. File Structure](#3-file-structure)
+- [4. Architecture Deep-Dive](#4-architecture-deep-dive)
+  - [4.1 Data Pipeline](#41-data-pipeline-initdatapipelinets)
+  - [4.2 Weird Gloop Service](#42-weird-gloop-service-weirdgloopservicets)
+  - [4.3 Cache Service](#43-cache-service-cacheservicets)
+  - [4.4 Market Analyzer Service](#44-market-analyzer-service-marketanalyzerservicets)
+  - [4.5 Wiki Service](#45-wiki-service-wikiservicets)
+  - [4.6 Core Knowledge Base](#46-core-knowledge-base-coreknowledgets)
+  - [4.7 LLM Service](#47-llm-service-llmservicets)
+  - [4.8 LLM Provider System](#48-llm-provider-system-typests)
+  - [4.9 Portfolio Service](#49-portfolio-service-portfolioservicets)
+  - [4.10 UI Service](#410-ui-service-uiservicets)
+  - [4.11 Entry Point](#411-entry-point-indexts)
+  - [4.12 HTML Structure](#412-html-structure-indexhtml)
+  - [4.13 Stylesheet](#413-stylesheet-stylecss)
+- [5. localStorage Keys](#5-localstorage-keys)
+- [6. Key Types Reference](#6-key-types-reference)
+- [7. Build & Serve](#7-build--serve)
+  - [Build](#build)
+  - [Serve locally](#serve-locally)
+  - [TypeScript type-check](#typescript-type-check)
+  - [Webpack config notes](#webpack-config-notes)
+- [8. Current Status](#8-current-status)
+- [9. Past Issues & Resolutions](#9-past-issues--resolutions)
+- [10. Potential Next Steps](#10-potential-next-steps-not-started)
+
+---
+
 ## 1. Project Overview
 
 This is a **RuneScape 3 Alt1 Toolkit plugin** called the **GE Market Analyzer**. It is an intelligent Grand Exchange market analyzer and money-making instructor that uses a **RAG (Retrieval-Augmented Generation)** pipeline:
@@ -51,7 +83,7 @@ alt1minimal/
     ├── index.html             # Full UI: settings, tabbed layout (market / advisor / portfolio), search, favourites, filters
     ├── index.ts               # Lean entry point: alt1 detection → initDataPipeline() → initUI()
     ├── style.css              # Three themes (Classic Dark, OSRS Brown, RS3 Modern Blue), flexbox, cards, modals, graph modal, toasts, inline alert popovers, data-mgmt, responsive desktop breakpoint (~2440 lines)
-    ├── uiService.ts           # All DOM logic: settings, market render, search, favourites, portfolio, chat RAG, error recovery, price alerts, data export/import (~2840 lines)
+    ├── uiService.ts           # All DOM logic: settings, market render, search, favourites, portfolio, chat RAG, error recovery, price alerts, data export/import, CSV export, sortable flips table (~3100 lines)
     └── services/
         ├── index.ts               # Barrel re-export of all services + types + constants
         ├── types.ts               # All shared TypeScript interfaces + LLM_PROVIDERS preset array
@@ -79,14 +111,24 @@ Called once at startup from `index.ts`:
 
 **Seed items** (~100): Curated list of heavily-traded RS3 items including rares, skilling supplies, potions, runes, PvM drops, summoning materials, and alchables. Defined as `SEED_ITEMS` array in `initDataPipeline.ts`.
 
+**`runFullMarketScan(catalogue, onProgress?, signal?, deepHistory?)`**: Non-blocking background scan of all ~7,000 items in batches of 100 with **adaptive inter-batch delay** (1 500 ms baseline). Consecutive empty batches double the delay up to a 30 s ceiling; delay resets to 1 500 ms on a successful batch. Fetches latest prices + buy limits + high alch values + history (30-day by default, 90-day when `deepHistory=true`) per batch, bulk-inserts into IndexedDB immediately (resume-safe). Supports `AbortSignal` for user cancellation. Progress callback `(done, total)` drives the UI progress bar.
+
 **`fetchGECatalogue()`**: Fetches the full RS Wiki `Module:GEIDs/data.json` (~7,000 GE-tradeable items, ~215KB). Returns a sorted `GECatalogueEntry[]` used for the market search bar.
 
-### 4.2 Weird Gloop API Service (`weirdGloopService.ts`)
+**`runFullMarketScan(catalogue, onProgress?, signal?, deepHistory?)`** also exported from `initDataPipeline.ts` — see §4.1 above for full description.
 
 - Endpoint: `https://api.weirdgloop.org/exchange/history/rs/latest?name=ITEM1|ITEM2`
 - Items are pipe-delimited, batched in groups of 100.
-- All batches fire concurrently via `Promise.allSettled` — one failure doesn't abort others.
+- Batches are dispatched **sequentially** with 300 ms inter-batch pauses (was concurrent `Promise.allSettled` — changed to avoid API rate-limiting). Individual batch failures are logged but do not abort the scan.
+- All HTTP calls go through `WeirdGloopService.fetchWithRetry()` — exponential backoff on 429 and network errors (MAX_RETRIES=4, BACKOFF_BASE_MS=2 000 ms).
 - Returns `Map<string, WeirdGloopPriceRecord>`.
+
+### 4.2 Weird Gloop Service (`weirdGloopService.ts`)
+
+- **`fetchWithRetry(url, maxRetries?)`** — private static helper. On HTTP 429 or network `TypeError`, retries up to `MAX_RETRIES` (4) times with exponential backoff: delay = `BACKOFF_BASE_MS` (2 000 ms) × 2^attempt. Non-retryable HTTP errors return `null`.
+- **`fetchLatestPrices(itemNames)`** — sequential batch dispatch (one request at a time, 300 ms pause between batches). Each batch uses `fetchWithRetry`. Returns `Map<string, WeirdGloopPriceRecord>`.
+- **`fetchHistoricalPrices(itemNames, days)`** — individual item fetches within concurrency groups of `HISTORY_CONCURRENCY` (10) via `Promise.allSettled`. Each call uses `fetchWithRetry`. Groups are separated by `HISTORY_GROUP_DELAY_MS` (300 ms).
+- **Static constants**: `MAX_RETRIES = 4`, `BACKOFF_BASE_MS = 2_000`, `HISTORY_GROUP_DELAY_MS = 300`.
 
 ### 4.3 Cache Service (`cacheService.ts`)
 
@@ -192,10 +234,15 @@ Manages active flips **and** completed flip history:
 - `getCompletedFlips()` — returns a shallow copy of completed flips, newest first.
 - `getPortfolioStats()` — aggregates across all completed flips: `{ totalProfit, totalFlips, avgProfit, avgRoi }`. Avg ROI = total profit ÷ total capital invested.
 
+**Completed flips UI** (March 2026 usability update):
+- Rendered as a `<table class="completed-flips-table">` with sortable column headers (Date, Item, Profit, ROI). Click a header to toggle ascending/descending. Sort state tracked by module-scoped `completedFlipsSortCol` / `completedFlipsSortAsc`.
+- `#completed-flips-filter` text input above the table filters by item name or profit value.
+- `#export-csv-btn` generates a CSV download of all completed flips (Item, Buy Price, Qty, Sell Price, Realised Profit, Date) via data URL.
+
 **Portfolio sub-navigation** (HTML + CSS):
 - Two toggle buttons: "Active Flips" / "History & Stats". Switching to history calls `renderCompletedFlips()` + `renderPortfolioStats()`.
 - **Stats dashboard**: 4 `.stat-card` elements — Total Profit, Completed Flips, Avg Profit, Avg ROI. Values colour-coded green (profit) / red (loss).
-- **Completed flip cards**: `.completed-flip-card` with `.win` (green left border + subtle green gradient) or `.loss` (red left border + red gradient) variants. Shows item name, completion date, buy/sold/qty/P&L details.
+- **Completed flip cards**: `.completed-flips-table` (sortable `<table>`) replaced the original `.completed-flip-card` elements. Columns: Date, Item, Profit, ROI. Row classes `.win`/`.loss` drive left-border colour. Table headers are click-sortable with sort arrows.
 
 ### 4.10 UI Service (`uiService.ts`)
 
@@ -227,7 +274,8 @@ All DOM manipulation isolated here — services remain UI-agnostic. ~2480 lines.
   - Flip recommendation badges: Buy ≤, Sell ≥, profit/ea
   - Trade velocity badge (Insta-Flip / Active / Slow / Very Slow) with explanatory tooltip
   - Hype badge (🔥 Nx Vol) when volume spike > 1.5×
-  - **Graph button** (📊) — opens the dedicated graph modal with enlarged 7-day area chart and momentum stats
+  - **Predictive analytics badges** (March 2026): EMA trend (↑/↓ % vs 30-day EMA), predicted 24h price change (linear regression), daily volatility %. Shown in a `.predictive-badges` wrapper after the momentum badges.
+  - **Graph button** (📊) — opens the dedicated graph modal with an enlarged area chart, momentum stats, and an **inline range selector** (7/30/90 days) that syncs with the global `#history-range-select`. Uses **on-demand history** (`ensureItemHistory`): checks IndexedDB cache first, fetches from API if < 7 data points, persists via `bulkInsertHistory`, then renders.
   - External links: Wiki and GE Database
   - Expandable detail panel (12 rows with tooltips: GE price, rec buy/sell, flip profit, volumes, buy limit, capital, tax gap, margin)
   - **Action button group** (`.card-actions`): Popout (↗), Favourite (☆/★), Alert (🔔), Graph (📊), Quick-add to portfolio (+)
@@ -336,13 +384,14 @@ Lean orchestrator (~50 lines):
   - `<nav id="view-tabs">` — tab buttons: Market Data, Ask Advisor, Portfolio.
   - `<main id="app-content">`:
     - `<section id="market-view">`:
+      - `#background-sync-progress` — scan progress bar (hidden by default, relocated to top of market view).
       - `#error-banner` — dismissible error banner with retry button (hidden by default).
       - `#market-filters` — volume / price dropdowns + refresh button (above the search bar).
       - `#volume-custom-group` and `#budget-custom-group` — themed slider controls (hidden by default).
       - `#search-section` — search input + `#search-sort-select` + view toggle buttons (☰/▦/⊞) + loading indicator + `#search-results`.
       - `#favorites-section` (`.favorites-section`) — header with ★ Favourites title + `#favorites-sort-select` + collapse button, `#favorites-items` container.
       - `.top20-section` wrapper:
-        - `#market-header` — "Top 20 Markets" h2 + `.market-header-actions` (`#top20-sort-select` + collapse ▾ button).
+        - `#market-header` — "Top 20 Markets" h2 + `.market-header-actions` (`#full-market-scan-btn` + `#deep-history-checkbox` + `#top20-sort-select` + collapse ▾ button).
         - `#market-loading` + `#market-items`.
     - `<section id="advisor-view">` — h2 "Ask the Advisor" + clear button + `#chat-history` + `#chat-input-row`.
     - `<section id="portfolio-view">` — h2 "Active Portfolio" + `#portfolio-sub-nav` (Active Flips / History & Stats toggle):
@@ -370,7 +419,7 @@ Lean orchestrator (~50 lines):
 - **Quick-add button**: `.quick-add-btn` teal on hover (`#4ec9b0`).
 - **Favourites section**: `.favorites-section` with border, rounded corners, dark header (`#252526`), gold ★ title.
 - **Top 20 section**: `.top20-section` with matching border/rounded styling. `#market-header` gets dark header background when inside the section.
-- **Graph modal**: `.graph-modal-backdrop` with centred `.graph-modal` (max 520px). Header with sprite + title + close button. Body contains a large `<canvas class="graph-modal-canvas">` (480×140) drawn via `drawSparkline()`, followed by `.graph-stats` — a column of `.graph-stat-row` elements showing 7-Day Trend (with colour + icon), Change (absolute + percentage), Current Price, 7-Day High, 7-Day Low, Volatility %, and Data Points count. Lazy singleton pattern (`ensureGraphModal()`).
+- **Graph modal**: `.graph-modal-backdrop` with centred `.graph-modal` (max 520px). Header with sprite + title + close button. Body contains a `.graph-loading-msg` placeholder (dynamic text: "Checking cached history…" → "Fetching price history…"), a large `<canvas class="graph-modal-canvas">` (480×140) drawn via `drawGraphChart()`, followed by `.graph-stats` — a column of `.graph-stat-row` elements showing N-Day Trend (with colour + icon), Change (absolute + percentage), Current Price, N-Day High, N-Day Low, Volatility %, and Data Points count. Lazy singleton pattern (`ensureGraphModal()`). History is loaded via `ensureItemHistory()` (cache-first, API fallback).
 - **Floating modal**: `.item-modal-backdrop` with centred `.item-modal` (max 400px, slide-in animation `modal-in`).
 - **Flip badges**: `.flip-badges` with flex-wrap. `.buy-badge`, `.sell-badge`, `.profit-badge`, `.hype-badge`. Responsive wrapping with `min-width: 60px` on `.item-name`.
 - **Portfolio**: `.portfolio-form`, `.autocomplete-wrap`, `.flip-card` with countdown timer styling, `.flip-card-actions` horizontal button group (✓ + ✕).
@@ -411,6 +460,7 @@ Lean orchestrator (~50 lines):
 | `ge-analyzer:favorites` | JSON array of `FavoriteItem` objects (`{ name, targetBuy?, targetSell? }`) — auto-migrates from legacy `string[]` |
 | `ge-analyzer:portfolio` | Serialised `ActiveFlip[]` portfolio data |
 | `ge-analyzer:portfolio-history` | Serialised `CompletedFlip[]` completed flip history |
+| `ge-analyzer:deep-history` | Deep-history checkbox state (`"true"` / `"false"`, default false) |
 
 ---
 
@@ -487,7 +537,7 @@ npx tsc --noEmit
 
 Everything below is **complete and verified** (builds with 0 errors):
 
-- [x] Weird Gloop API service (batched, concurrent fetching)
+- [x] Weird Gloop API service (batched sequential fetching with `fetchWithRetry` exponential backoff)
 - [x] IndexedDB cache service v2 (TTL-based staleness, bulk insert, prices + price-history stores)
 - [x] Data pipeline orchestrator (seed list of ~100 items, buy-limit enrichment from wiki)
 - [x] Full GE catalogue fetch (~7,000 items from `Module:GEIDs/data.json`)
@@ -497,7 +547,7 @@ Everything below is **complete and verified** (builds with 0 errors):
 - [x] Volume spike / hype detection (7-day SMA comparison, >1.5× threshold)
 - [x] Trade velocity scoring (Insta-Flip / Active / Slow / Very Slow badges with tooltips)
 - [x] Price momentum / trend classification (Uptrend / Downtrend / Stable based on 7-day % change, with falling-knife warning badges)
-- [x] Dedicated graph modal (📊 button on cards → full chart + momentum stats: trend, % change, high/low, volatility, data points)
+- [x] Dedicated graph modal (📊 button on cards → full chart + momentum stats: trend, % change, high/low, volatility, data points) — with **on-demand cache-first history** (`ensureItemHistory`)
 - [x] Wiki service (two-step search → extract guide fetching + fallback to base item page + Cargo buy-limit API)
 - [x] LLM service (multi-provider, multi-turn chat, strict anti-hallucination + economic rules prompt)
 - [x] Core knowledge base (RS3 economic rules: GE tax, buy limits, margin checking, high alch)
@@ -515,6 +565,8 @@ Everything below is **complete and verified** (builds with 0 errors):
 - [x] Per-section sort controls (Top 20, Search Results, Favourites each have independent sort dropdowns persisted to localStorage)
 - [x] Force Reload Data button (clears cache, re-fetches, re-enriches)
 - [x] Full GE catalogue search bar (searches ~7,000 items, on-demand price/buy-limit fetch)
+- [x] Full market background scan with progress bar, cancel support, and optional 90-day deep history checkbox (persisted in localStorage)
+- [x] Rate-limit retry with exponential backoff (429 / network errors) in `WeirdGloopService`; adaptive inter-batch backoff (1.5 s → 30 s ceiling) in `runFullMarketScan`
 - [x] Separate search results section (above Top 20, never replaces it)
 - [x] External links on market cards and detail modal (RS Wiki + GE Database)
 - [x] Favourites system (star toggle on cards + modal, localStorage persistence, dedicated panel with collapse + per-section sort)
@@ -557,6 +609,8 @@ Everything below is **complete and verified** (builds with 0 errors):
 | Portfolio dropdown opens on "Add Flip" click | `handleAddFlip()` called `flipItemName.focus()` after clearing form | Changed to `flipItemName.blur()` to prevent autocomplete trigger |
 | Portfolio dropdown opens on quick-add from card | Tab switch + form fill triggered focus event on name input | Added `suppressAutocomplete` flag, guard in `updateSuggestions()`, reset via `requestAnimationFrame` |
 | Search results rendering inline after view toggle move | Moving `#view-toggle` into `#search-section` (flex container) caused `#search-results` and `#search-loading` to flow beside the input | Added `width: 100%` to both elements to force them onto their own row in the flex-wrap container |
+| Graph modal showing no data / stuck on "Loading price history…" | Full market scan fetches current prices but not deep history; `fetchItemHistory` always hit the API directly (no cache) | Implemented `ensureItemHistory()` cache-first flow: checks IndexedDB for ≥ 7 data points, fetches via `WeirdGloopService.fetchHistoricalPrices` on demand, persists via `bulkInsertHistory`, dynamic loading text + error toast (March 2026) |
+| API 429 rate-limiting during full market scan | Concurrent `Promise.allSettled` dispatch in `fetchLatestPrices` overwhelmed the Weird Gloop API after ~2 batches | Switched to sequential batch dispatch with 300 ms pauses; added `fetchWithRetry()` with exponential backoff (MAX_RETRIES=4, base 2 s); increased `runFullMarketScan` inter-batch delay from 500 ms to 1 500 ms with adaptive doubling (ceiling 30 s) on consecutive empty batches (March 2026) |
 
 ---
 
