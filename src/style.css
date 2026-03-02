@@ -714,6 +714,13 @@ button:disabled {
   white-space: nowrap;
 }
 
+.buy-badge[title],
+.sell-badge[title],
+.profit-badge[title],
+.velocity-badge[title] {
+  cursor: help;
+}
+
 .buy-badge {
   background: var(--badge-buy-bg);
   color: var(--accent-blue-text);
@@ -746,6 +753,36 @@ button:disabled {
   color: var(--accent-gold-hype);
   font-weight: 600;
   animation: hype-pulse 2s ease-in-out infinite;
+}
+
+/* ── Trade velocity badges ────────────────────────────────────────────── */
+
+.velocity-badge {
+  font-size: 10px;
+  padding: 1px 6px;
+  border-radius: 3px;
+  white-space: nowrap;
+  font-weight: 600;
+}
+
+.velocity-insta {
+  background: rgba(39, 174, 96, 0.18);
+  color: var(--accent-green-bright);
+}
+
+.velocity-active {
+  background: rgba(86, 156, 214, 0.18);
+  color: var(--accent-blue-text);
+}
+
+.velocity-slow {
+  background: rgba(240, 192, 64, 0.18);
+  color: var(--accent-gold);
+}
+
+.velocity-veryslow {
+  background: rgba(136, 136, 136, 0.18);
+  color: var(--text-muted);
 }
 
 @keyframes hype-pulse {
@@ -1092,6 +1129,11 @@ button:disabled {
   color: var(--text-muted);
 }
 
+.item-modal-details .detail-label[title] {
+  cursor: help;
+  border-bottom: 1px dotted var(--text-dimmed);
+}
+
 .item-modal-details .detail-value {
   color: var(--text-main);
   font-weight: 600;
@@ -1106,6 +1148,11 @@ button:disabled {
 
 .detail-label {
   color: var(--text-muted);
+}
+
+.detail-label[title] {
+  cursor: help;
+  border-bottom: 1px dotted var(--text-dimmed);
 }
 
 .detail-value {

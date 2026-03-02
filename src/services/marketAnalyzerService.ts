@@ -294,6 +294,20 @@ export class MarketAnalyzerService {
       const histPrices = priceHistoryMap.get(record.name) ?? [];
       const priceHistory = [...histPrices, record.price];
 
+      // Trade velocity: qualitative speed tier based on hourly volume vs buy limit.
+      const hourlyVolume = Math.floor(globalVol / 24);
+      const safeBuyLimit = (limit != null && limit > 0) ? limit : 0;
+      let tradeVelocity: "Insta-Flip" | "Active" | "Slow" | "Very Slow";
+      if (hourlyVolume > 5000 || (safeBuyLimit > 0 && hourlyVolume > safeBuyLimit * 5)) {
+        tradeVelocity = "Insta-Flip";
+      } else if (hourlyVolume > 500 || (safeBuyLimit > 0 && hourlyVolume > safeBuyLimit)) {
+        tradeVelocity = "Active";
+      } else if (hourlyVolume > 50) {
+        tradeVelocity = "Slow";
+      } else {
+        tradeVelocity = "Very Slow";
+      }
+
       result.push({
         name: record.name,
         itemId: record.id,
@@ -309,6 +323,7 @@ export class MarketAnalyzerService {
         estFlipProfit,
         isRisky,
         volumeSpikeMultiplier,
+        tradeVelocity,
         priceHistory,
       });
     }

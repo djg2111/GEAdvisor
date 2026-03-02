@@ -131,6 +131,12 @@ export interface RankedItem {
    * A value of `2.3` means 230 % of the average — a significant hype spike.
    */
   volumeSpikeMultiplier: number;  /**
+   * Qualitative trade-speed tier derived from the item's estimated hourly
+   * volume relative to its 4-hour buy limit.  Helps set realistic
+   * expectations for how quickly a flip can complete.
+   */
+  tradeVelocity: "Insta-Flip" | "Active" | "Slow" | "Very Slow";
+  /**
    * Chronological daily prices over the last 7 days (oldest-first).
    * Empty when there is no historical data yet.
    */
