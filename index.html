@@ -83,6 +83,16 @@
 					<button id="force-reload-btn" class="danger-btn" type="button">⟳ Force Reload Data</button>
 					<span id="reload-status" class="status-hint"></span>
 				</div>
+
+				<!-- Data Management (export / import) -->
+				<div class="settings-field data-mgmt" style="margin-top:10px">
+					<label>Data Management</label>
+					<div class="settings-row">
+						<button id="export-data-btn" type="button">⬇ Export Data</button>
+						<button id="import-data-btn" type="button">⬆ Import Data</button>
+					</div>
+					<input id="import-file-input" type="file" accept=".json" style="display:none" />
+				</div>
 			</div>
 		</details>
 

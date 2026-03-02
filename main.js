@@ -360,6 +360,30 @@ body {
   cursor: not-allowed;
 }
 
+/* ── Data management buttons ──────────────────────────────────────────────── */
+
+.data-mgmt .settings-row {
+  margin-top: 4px;
+}
+
+.data-mgmt button {
+  flex: 1;
+  font-size: 11px;
+  padding: 5px 8px;
+  background: var(--bg-input);
+  border: 1px solid var(--border-input);
+  color: var(--text-primary);
+  border-radius: 3px;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.data-mgmt button:hover {
+  background: var(--bg-muted);
+  border-color: var(--accent-blue-text);
+  color: var(--accent-blue-text);
+}
+
 /* ── Settings field helpers ───────────────────────────────────────────────── */
 
 .settings-field {
@@ -1159,6 +1183,78 @@ button:disabled {
 .quick-add-btn:hover {
   color: var(--accent-teal);
   background: rgba(78, 201, 176, 0.12);
+}
+
+/* ── Alert bell button (inline on card) ────────────────────────────────────── */
+
+.alert-btn {
+  all: unset;
+  cursor: pointer;
+  font-size: 13px;
+  line-height: 1;
+  color: var(--text-muted);
+  padding: 2px 4px;
+  border-radius: 3px;
+  flex-shrink: 0;
+  opacity: 0.55;
+  transition: color 0.15s, opacity 0.15s, transform 0.15s;
+}
+
+.alert-btn:hover {
+  opacity: 1;
+  transform: scale(1.15);
+}
+
+.alert-btn.alert-active {
+  opacity: 1;
+  color: var(--accent-gold);
+  filter: drop-shadow(0 0 2px rgba(240, 192, 64, 0.5));
+}
+
+/* ── Inline card alert popover ─────────────────────────────────────────────── */
+
+.card-alert-popover {
+  display: none;
+  padding: 6px 10px;
+  background: var(--bg-muted);
+  border: 1px solid var(--border-section);
+  border-top: none;
+  border-radius: 0 0 4px 4px;
+  gap: 4px;
+}
+
+.card-alert-popover.open {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.card-alert-row {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.card-alert-row label {
+  font-size: 10px;
+  color: var(--text-muted);
+  white-space: nowrap;
+  min-width: 34px;
+}
+
+.card-alert-row input[type="number"] {
+  width: 80px;
+  padding: 2px 5px;
+  font-size: 10px;
+  background: var(--bg-input);
+  border: 1px solid var(--border-input);
+  color: var(--text-primary);
+  border-radius: 3px;
+}
+
+.card-alert-row input[type="number"]::placeholder {
+  color: var(--text-muted);
+  opacity: 0.6;
 }
 
 /* ── External link buttons (Wiki / GE) ─────────────────────────────────────── */
@@ -2124,6 +2220,102 @@ body[data-layout="sidebar"] #portfolio-view {
   flex-direction: column;
   min-width: 0;
   border-left: 1px solid var(--border-main);
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   Toast Notifications
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+#toast-container {
+  position: fixed;
+  top: 8px;
+  right: 8px;
+  z-index: 900;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  pointer-events: none;
+  max-width: 320px;
+}
+
+.toast {
+  padding: 8px 12px;
+  border-radius: 4px;
+  font-size: 11px;
+  line-height: 1.4;
+  color: var(--text-primary);
+  background: var(--bg-panel);
+  border-left: 3px solid var(--accent-primary);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+  opacity: 0;
+  transform: translateX(30px);
+  transition: opacity 0.3s ease, transform 0.3s ease;
+  pointer-events: auto;
+}
+
+.toast.show {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.toast-buy {
+  border-left-color: #4ec9b0;
+}
+
+.toast-sell {
+  border-left-color: #f0c040;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   Modal — Price Alert Inputs
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+.alert-inputs {
+  margin-top: 8px;
+  padding: 8px 10px;
+  background: var(--bg-muted);
+  border-radius: 4px;
+  border: 1px solid var(--border-section);
+}
+
+.alert-inputs-title {
+  margin: 0 0 6px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-heading);
+}
+
+.alert-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+
+.alert-row:last-child {
+  margin-bottom: 0;
+}
+
+.alert-row label {
+  font-size: 10px;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+.alert-row input[type="number"] {
+  width: 120px;
+  padding: 2px 6px;
+  font-size: 10px;
+  background: var(--bg-input);
+  border: 1px solid var(--border-input);
+  color: var(--text-primary);
+  border-radius: 3px;
+}
+
+.alert-row input[type="number"]::placeholder {
+  color: var(--text-muted);
+  opacity: 0.6;
 }
 
 /* ══════════════════════════════════════════════════════════════════════════════
@@ -4805,28 +4997,74 @@ const DETAIL_TIPS = {
     "Est. Margin (2% tax)": "The flat gp amount the 2% GE tax takes from one sale at the current price.",
 };
 // ─── Favorites helpers ──────────────────────────────────────────────────────
-/** Return the Set of favourited item names from localStorage. */
-function getFavorites() {
+/**
+ * Load the persisted favourites list, auto-migrating from the legacy
+ * `string[]` format to `FavoriteItem[]` on first access.
+ */
+function loadFavorites() {
     try {
         const raw = localStorage.getItem(LS_FAVORITES);
-        return raw ? new Set(JSON.parse(raw)) : new Set();
+        if (!raw)
+            return [];
+        const parsed = JSON.parse(raw);
+        if (!Array.isArray(parsed))
+            return [];
+        // Legacy format: plain string array → migrate to FavoriteItem[].
+        if (parsed.length > 0 && typeof parsed[0] === "string") {
+            const migrated = parsed.map((name) => ({ name }));
+            localStorage.setItem(LS_FAVORITES, JSON.stringify(migrated));
+            return migrated;
+        }
+        return parsed;
     }
     catch {
-        return new Set();
+        return [];
     }
+}
+/** Persist the favourites list. */
+function saveFavorites(favs) {
+    localStorage.setItem(LS_FAVORITES, JSON.stringify(favs));
+}
+/** Return the Set of favourited item names from localStorage. */
+function getFavorites() {
+    return new Set(loadFavorites().map((f) => f.name));
 }
 /** Toggle an item's favourite status and persist the result. Returns the new state. */
 function toggleFavorite(name) {
-    const favs = getFavorites();
-    const isFav = favs.has(name);
-    if (isFav)
-        favs.delete(name);
-    else
-        favs.add(name);
-    localStorage.setItem(LS_FAVORITES, JSON.stringify([...favs]));
-    // Re-render the favourites panel asynchronously.
+    const favs = loadFavorites();
+    const idx = favs.findIndex((f) => f.name === name);
+    if (idx >= 0) {
+        favs.splice(idx, 1);
+        saveFavorites(favs);
+        renderFavorites();
+        return false;
+    }
+    favs.push({ name });
+    saveFavorites(favs);
     renderFavorites();
-    return !isFav;
+    return true;
+}
+/**
+ * Read the alert thresholds for a specific favourited item.
+ * Returns `undefined` if the item is not favourited.
+ */
+function getFavoriteAlerts(name) {
+    return loadFavorites().find((f) => f.name === name);
+}
+/**
+ * Update the price-alert thresholds for a favourited item.
+ * Creates the favourite entry if it doesn't already exist.
+ */
+function setFavoriteAlerts(name, targetBuy, targetSell) {
+    const favs = loadFavorites();
+    let entry = favs.find((f) => f.name === name);
+    if (!entry) {
+        entry = { name };
+        favs.push(entry);
+    }
+    entry.targetBuy = targetBuy;
+    entry.targetSell = targetSell;
+    saveFavorites(favs);
 }
 /** When true, the next autocomplete open is suppressed. */
 let suppressAutocomplete = false;
@@ -4906,6 +5144,8 @@ async function initUI() {
     bindClearChat();
     bindPortfolio();
     bindErrorRetry();
+    bindDataManagement();
+    requestNotificationPermission();
     // Initialise shared service singletons.
     cache = new _services__WEBPACK_IMPORTED_MODULE_0__.CacheService();
     await cache.open();
@@ -5209,6 +5449,97 @@ function hideError() {
     els.errorBanner.classList.add("hidden");
     els.errorBannerMsg.textContent = "";
 }
+// ─── Toast Notifications ────────────────────────────────────────────────────
+/** Lazily-created toast container (fixed to top-right of viewport). */
+let toastContainer = null;
+/** Ensure the toast container exists in the DOM. */
+function ensureToastContainer() {
+    if (toastContainer)
+        return toastContainer;
+    toastContainer = document.createElement("div");
+    toastContainer.id = "toast-container";
+    document.body.appendChild(toastContainer);
+    return toastContainer;
+}
+/**
+ * Show a toast notification. Automatically removes itself after `durationMs`.
+ * @param message - The text to display.
+ * @param type - Visual variant (`"info"`, `"buy"`, or `"sell"`).
+ * @param durationMs - How long the toast stays visible (default 6 000 ms).
+ */
+function showToast(message, type = "info", durationMs = 6000) {
+    const container = ensureToastContainer();
+    const toast = document.createElement("div");
+    toast.className = `toast toast-${type}`;
+    toast.textContent = message;
+    container.appendChild(toast);
+    // Trigger the entrance animation on the next frame.
+    requestAnimationFrame(() => toast.classList.add("show"));
+    setTimeout(() => {
+        toast.classList.remove("show");
+        toast.addEventListener("transitionend", () => toast.remove());
+        // Safety fallback in case transitionend doesn't fire.
+        setTimeout(() => toast.remove(), 500);
+    }, durationMs);
+}
+// ─── Price Alert Engine ─────────────────────────────────────────────────────
+/** Set of "name|direction" keys that have already fired in this session to avoid spam. */
+const firedAlerts = new Set();
+/**
+ * Request browser notification permission once (no-ops after the first call).
+ * Safe to call on every refresh — the browser only shows the prompt once.
+ */
+function requestNotificationPermission() {
+    if (typeof Notification !== "undefined" && Notification.permission === "default") {
+        Notification.requestPermission().catch(() => { });
+    }
+}
+/**
+ * Check every favourited item's price against its alert thresholds.
+ * Fires a native browser `Notification` (if granted) **and** a DOM toast for
+ * each threshold breach.  Each alert fires at most once per session per
+ * direction (`buy` / `sell`) to prevent spam.
+ *
+ * @param items - The latest scored items to check (typically all cached items).
+ */
+function checkPriceAlerts(items) {
+    const favs = loadFavorites();
+    if (favs.length === 0)
+        return;
+    // Build a quick lookup by name.
+    const priceMap = new Map();
+    for (const it of items)
+        priceMap.set(it.name, it.price);
+    for (const fav of favs) {
+        const currentPrice = priceMap.get(fav.name);
+        if (currentPrice == null)
+            continue;
+        // ── Buy alert: price dropped to or below target ────────────────────
+        if (fav.targetBuy && currentPrice <= fav.targetBuy) {
+            const key = `${fav.name}|buy`;
+            if (!firedAlerts.has(key)) {
+                firedAlerts.add(key);
+                const msg = `\uD83D\uDCC9 ${fav.name} has dropped to ${formatGpShort(currentPrice)} gp (target: \u2264${formatGpShort(fav.targetBuy)} gp)`;
+                showToast(msg, "buy");
+                if (typeof Notification !== "undefined" && Notification.permission === "granted") {
+                    new Notification("GE Price Alert — Buy", { body: msg, icon: spriteUrl(0) });
+                }
+            }
+        }
+        // ── Sell alert: price rose to or above target ──────────────────────
+        if (fav.targetSell && currentPrice >= fav.targetSell) {
+            const key = `${fav.name}|sell`;
+            if (!firedAlerts.has(key)) {
+                firedAlerts.add(key);
+                const msg = `\uD83D\uDCC8 ${fav.name} has risen to ${formatGpShort(currentPrice)} gp (target: \u2265${formatGpShort(fav.targetSell)} gp)`;
+                showToast(msg, "sell");
+                if (typeof Notification !== "undefined" && Notification.permission === "granted") {
+                    new Notification("GE Price Alert — Sell", { body: msg, icon: spriteUrl(0) });
+                }
+            }
+        }
+    }
+}
 /**
  * Wire the error-banner retry button.  Clears the cache, re-runs the full
  * data pipeline, and refreshes the market panel.
@@ -5231,6 +5562,84 @@ function bindErrorRetry() {
             const msg = err instanceof Error ? err.message : "Retry failed — see console.";
             showError(msg);
         }
+    });
+}
+// ─── Data Management (Export / Import) ──────────────────────────────────────
+/** localStorage keys included in the JSON backup. */
+const EXPORT_KEYS = [
+    "ge-analyzer:favorites",
+    "ge-analyzer:portfolio",
+    "ge-analyzer:portfolio-history",
+    "ge-analyzer:theme",
+];
+/**
+ * Wire click handlers for the Export Data / Import Data buttons and the
+ * hidden file `<input>`.
+ */
+function bindDataManagement() {
+    // ── Export ──────────────────────────────────────────────────────────────
+    els.exportDataBtn.addEventListener("click", () => {
+        const payload = {};
+        for (const key of EXPORT_KEYS) {
+            const raw = localStorage.getItem(key);
+            if (raw !== null) {
+                try {
+                    payload[key] = JSON.parse(raw);
+                }
+                catch {
+                    payload[key] = raw;
+                }
+            }
+        }
+        const json = JSON.stringify(payload, null, 2);
+        const blob = new Blob([json], { type: "application/json" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "ge-analyzer-backup.json";
+        document.body.appendChild(a);
+        a.click();
+        // Clean up.
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    });
+    // ── Import ─────────────────────────────────────────────────────────────
+    els.importDataBtn.addEventListener("click", () => {
+        // Reset so the same file can be re-imported if needed.
+        els.importFileInput.value = "";
+        els.importFileInput.click();
+    });
+    els.importFileInput.addEventListener("change", () => {
+        const file = els.importFileInput.files?.[0];
+        if (!file)
+            return;
+        const reader = new FileReader();
+        reader.onload = () => {
+            try {
+                const data = JSON.parse(reader.result);
+                if (typeof data !== "object" || data === null) {
+                    throw new Error("Invalid backup format.");
+                }
+                let restoredCount = 0;
+                for (const key of EXPORT_KEYS) {
+                    if (key in data) {
+                        localStorage.setItem(key, JSON.stringify(data[key]));
+                        restoredCount++;
+                    }
+                }
+                if (restoredCount === 0) {
+                    alert("No recognised data keys found in the file.");
+                    return;
+                }
+                alert("Data imported successfully!");
+                window.location.reload();
+            }
+            catch (err) {
+                console.error("[UIService] Import failed:", err);
+                alert("Import failed — the file does not contain valid JSON.");
+            }
+        };
+        reader.readAsText(file);
     });
 }
 // ─── Market Panel ───────────────────────────────────────────────────────────
@@ -5269,6 +5678,12 @@ async function refreshMarketPanel() {
         latestMarketSummary = analyzer.formatForLLM(latestTopItems);
         applySortOrder(latestTopItems, els.top20SortSelect.value);
         renderMarketItems(latestTopItems);
+        // Check price alerts against ALL cached items (not just filtered top 20).
+        try {
+            const allItems = await analyzer.getTopItems({ topN: 99999, minVolume: 0 });
+            checkPriceAlerts(allItems);
+        }
+        catch { /* non-critical — skip alerts on failure */ }
     }
     catch (err) {
         console.error("[UIService] Failed to refresh market panel:", err);
@@ -5786,11 +6201,69 @@ function buildItemCard(item) {
     geLink.textContent = "GE";
     geLink.title = "Open on GE Database";
     geLink.addEventListener("click", (e) => e.stopPropagation());
+    // ── Inline alert popover (hidden until bell clicked) ──
+    const alertPopover = document.createElement("div");
+    alertPopover.className = "card-alert-popover";
+    alertPopover.innerHTML =
+        `<div class="card-alert-row">` +
+            `<label>Buy \u2264</label>` +
+            `<input class="card-alert-buy" type="number" min="0" placeholder="gp" />` +
+            `</div>` +
+            `<div class="card-alert-row">` +
+            `<label>Sell \u2265</label>` +
+            `<input class="card-alert-sell" type="number" min="0" placeholder="gp" />` +
+            `</div>`;
+    // Prevent card expand/collapse when interacting with the popover.
+    alertPopover.addEventListener("click", (e) => e.stopPropagation());
+    // Pre-fill existing alert thresholds.
+    const existingAlert = getFavoriteAlerts(item.name);
+    const popBuyInput = alertPopover.querySelector(".card-alert-buy");
+    const popSellInput = alertPopover.querySelector(".card-alert-sell");
+    if (existingAlert?.targetBuy)
+        popBuyInput.value = String(existingAlert.targetBuy);
+    if (existingAlert?.targetSell)
+        popSellInput.value = String(existingAlert.targetSell);
+    /** Persist inline alert values. Auto-favourites the item if thresholds are set. */
+    const saveInlineAlerts = () => {
+        const bv = popBuyInput.value ? Number(popBuyInput.value) : undefined;
+        const sv = popSellInput.value ? Number(popSellInput.value) : undefined;
+        if ((bv || sv) && !getFavorites().has(item.name)) {
+            toggleFavorite(item.name);
+            favBtn.textContent = "\u2605";
+            card.classList.add("favorited");
+        }
+        setFavoriteAlerts(item.name, bv, sv);
+        // Update bell active state.
+        alertBtn.classList.toggle("alert-active", !!(bv || sv));
+    };
+    popBuyInput.addEventListener("change", saveInlineAlerts);
+    popSellInput.addEventListener("change", saveInlineAlerts);
+    // Bell button — toggles the inline alert popover.
+    const alertBtn = document.createElement("button");
+    alertBtn.className = "alert-btn";
+    alertBtn.textContent = "\uD83D\uDD14";
+    alertBtn.title = "Set price alerts";
+    // Show active state if thresholds already exist.
+    if (existingAlert?.targetBuy || existingAlert?.targetSell) {
+        alertBtn.classList.add("alert-active");
+    }
+    alertBtn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        const isOpen = alertPopover.classList.toggle("open");
+        // Close any other open popovers in the same list.
+        if (isOpen) {
+            card.parentElement?.querySelectorAll(".card-alert-popover.open").forEach((el) => {
+                if (el !== alertPopover)
+                    el.classList.remove("open");
+            });
+        }
+    });
     // Group action buttons in a horizontal row.
     const actions = document.createElement("span");
     actions.className = "card-actions";
     actions.appendChild(popoutBtn);
     actions.appendChild(favBtn);
+    actions.appendChild(alertBtn);
     actions.appendChild(addFlipCardBtn);
     actions.appendChild(wikiLink);
     actions.appendChild(geLink);
@@ -5826,6 +6299,7 @@ function buildItemCard(item) {
     // Attach price data for post-render drawing.
     sparkCanvas.__priceHistory = item.priceHistory;
     card.appendChild(header);
+    card.appendChild(alertPopover);
     card.appendChild(sparkCanvas);
     card.appendChild(detail);
     return card;
@@ -5977,12 +6451,48 @@ function showItemModal(item) {
     mBody.innerHTML =
         `<div class="item-modal-badges">${badgesHtml}</div>` +
             `<canvas class="sparkline modal-sparkline" width="340" height="60"></canvas>` +
-            `<div class="item-modal-details">${rows}</div>`;
+            `<div class="item-modal-details">${rows}</div>` +
+            `<div class="alert-inputs">` +
+            `<h4 class="alert-inputs-title">\uD83D\uDD14 Price Alerts</h4>` +
+            `<div class="alert-row">` +
+            `<label for="modal-alert-buy">Alert if drops below</label>` +
+            `<input id="modal-alert-buy" type="number" min="0" placeholder="Buy target (gp)" />` +
+            `</div>` +
+            `<div class="alert-row">` +
+            `<label for="modal-alert-sell">Alert if rises above</label>` +
+            `<input id="modal-alert-sell" type="number" min="0" placeholder="Sell target (gp)" />` +
+            `</div>` +
+            `</div>`;
     // Draw the sparkline.
     const canvas = mBody.querySelector("canvas.modal-sparkline");
     if (canvas && item.priceHistory.length >= 2) {
         drawSparkline(canvas, item.priceHistory);
     }
+    // ── Price alert inputs ──────────────────────────────────────────────────
+    const alertBuyInput = mBody.querySelector("#modal-alert-buy");
+    const alertSellInput = mBody.querySelector("#modal-alert-sell");
+    // Pre-fill with existing alert thresholds (if any).
+    const existing = getFavoriteAlerts(item.name);
+    if (existing?.targetBuy)
+        alertBuyInput.value = String(existing.targetBuy);
+    if (existing?.targetSell)
+        alertSellInput.value = String(existing.targetSell);
+    /** Persist alert values on change. Auto-favourites the item if thresholds are set. */
+    const saveAlertValues = () => {
+        const buyVal = alertBuyInput.value ? Number(alertBuyInput.value) : undefined;
+        const sellVal = alertSellInput.value ? Number(alertSellInput.value) : undefined;
+        // Setting an alert implicitly favourites the item.
+        if ((buyVal || sellVal) && !getFavorites().has(item.name)) {
+            toggleFavorite(item.name);
+            // Update the modal's favourite button.
+            const favBtn = itemModal?.querySelector(".modal-fav-btn");
+            if (favBtn)
+                favBtn.textContent = "\u2605";
+        }
+        setFavoriteAlerts(item.name, buyVal, sellVal);
+    };
+    alertBuyInput.addEventListener("change", saveAlertValues);
+    alertSellInput.addEventListener("change", saveAlertValues);
     backdrop.classList.add("visible");
 }
 /** Hide the floating item detail modal. */
@@ -6808,6 +7318,9 @@ function resolveElements() {
         statAvgProfit: q("stat-avg-profit"),
         statAvgRoi: q("stat-avg-roi"),
         completedFlipsList: q("completed-flips-list"),
+        exportDataBtn: q("export-data-btn"),
+        importDataBtn: q("import-data-btn"),
+        importFileInput: q("import-file-input"),
     };
 }
 // ─── Formatting utilities ───────────────────────────────────────────────────
