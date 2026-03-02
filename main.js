@@ -608,6 +608,33 @@ button:disabled {
 .view-toggle {
   display: flex;
   gap: 2px;
+  align-items: center;
+}
+
+/* Compact tiles toggle – March 2026 */
+.compact-toggle-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 11px;
+  color: var(--text-muted);
+  cursor: pointer;
+  margin-left: 4px;
+  white-space: nowrap;
+  user-select: none;
+}
+.compact-toggle-label input[type="checkbox"] {
+  margin: 0;
+  accent-color: var(--accent-primary);
+  cursor: pointer;
+}
+.compact-toggle-label:hover {
+  color: var(--text-main);
+}
+
+/* Hide predictive badges in compact tile/hybrid mode */
+.predictive-badges.compact-hidden {
+  display: none;
 }
 
 .view-btn {
@@ -4296,10 +4323,96 @@ async function initDataPipeline() {
     else {
         console.log("[initDataPipeline] Cache is fresh — skipping API fetch.");
     }
-    // Step 4 — Return all cached data for downstream consumers.
+    // ── Health checks: repair missing enrichment / history even on a fresh cache ──
     const records = await cache.getAll();
-    console.log(`[initDataPipeline] Pipeline complete. ${records.length} records available.`);
-    return records;
+    // Health check A — Re-enrich records missing highAlch or buyLimit.
+    // This recovers from earlier wiki fetch failures (e.g. CORS, network).
+    const missingAlch = records.filter((r) => r.highAlch == null);
+    const missingLimit = records.filter((r) => r.buyLimit == null);
+    if (missingAlch.length > records.length * 0.5 || missingLimit.length > records.length * 0.5) {
+        console.log(`[initDataPipeline] Enrichment health check: ${missingAlch.length}/${records.length} missing highAlch, ` +
+            `${missingLimit.length}/${records.length} missing buyLimit — re-enriching…`);
+        const wiki = new _wikiService__WEBPACK_IMPORTED_MODULE_2__.WikiService();
+        const namesToEnrich = records.map((r) => r.name);
+        try {
+            const [limits, alchs] = await Promise.all([
+                missingLimit.length > records.length * 0.5
+                    ? wiki.getBulkBuyLimits(namesToEnrich)
+                    : Promise.resolve(new Map()),
+                missingAlch.length > records.length * 0.5
+                    ? wiki.getBulkHighAlchValues(namesToEnrich)
+                    : Promise.resolve(new Map()),
+            ]);
+            // Build a map for quick update of enriched records.
+            const priceMap = new Map();
+            for (const r of records) {
+                const limit = limits.get(r.name);
+                const alch = alchs.get(r.name);
+                let updated = false;
+                if (limit !== undefined && r.buyLimit == null) {
+                    r.buyLimit = limit;
+                    updated = true;
+                }
+                if (alch !== undefined && r.highAlch == null) {
+                    r.highAlch = alch;
+                    updated = true;
+                }
+                if (updated) {
+                    priceMap.set(r.name, {
+                        id: r.id,
+                        timestamp: r.timestamp,
+                        price: r.price,
+                        volume: r.volume,
+                        buyLimit: r.buyLimit,
+                        highAlch: r.highAlch,
+                    });
+                }
+            }
+            if (priceMap.size > 0) {
+                await cache.bulkInsert(priceMap);
+                console.log(`[initDataPipeline] Re-enriched ${priceMap.size} records.`);
+            }
+        }
+        catch (enrichErr) {
+            console.warn("[initDataPipeline] Re-enrichment failed:", enrichErr);
+        }
+    }
+    // Health check B — Re-seed history if the history store is sparse.
+    // This recovers from earlier history fetch failures.
+    try {
+        const recentHistory = await cache.getRecentHistory(30);
+        const today = new Date().toISOString().slice(0, 10);
+        // Count items with ≥ 2 non-today data points.
+        const grouped = new Map();
+        for (const h of recentHistory) {
+            if (h.day === today)
+                continue;
+            grouped.set(h.name, (grouped.get(h.name) ?? 0) + 1);
+        }
+        const itemsWithSufficientHistory = [...grouped.values()].filter((c) => c >= 2).length;
+        if (records.length > 0 && itemsWithSufficientHistory < records.length * 0.3) {
+            console.log(`[initDataPipeline] History health check: only ${itemsWithSufficientHistory}/${records.length} items ` +
+                `have ≥ 2 days of history — re-seeding…`);
+            const api = new _weirdGloopService__WEBPACK_IMPORTED_MODULE_1__.WeirdGloopService();
+            const namesToSeed = records.map((r) => r.name);
+            const historyMap = await api.fetchHistoricalPrices(namesToSeed, 30);
+            if (historyMap.size > 0) {
+                await cache.bulkInsertHistory(historyMap);
+                console.log(`[initDataPipeline] Re-seeded ${historyMap.size} items with historical data.`);
+            }
+        }
+        else {
+            console.log(`[initDataPipeline] History health check: ${itemsWithSufficientHistory}/${records.length} items OK.`);
+        }
+    }
+    catch (histHealthErr) {
+        console.warn("[initDataPipeline] History health check failed:", histHealthErr);
+    }
+    // Step 4 — Return all cached data for downstream consumers.
+    // Re-read in case health checks updated records.
+    const finalRecords = await cache.getAll();
+    console.log(`[initDataPipeline] Pipeline complete. ${finalRecords.length} records available.`);
+    return finalRecords;
 }
 /**
  * Fetch the full RS3 GE item catalogue from the RS Wiki.
@@ -6147,7 +6260,7 @@ class WikiService {
         console.debug(`[WikiService] Buy-limit batch ${idx + 1}: ${batch.length} items`);
         const response = await fetch(url, {
             method: "GET",
-            headers: { Accept: "application/json", "User-Agent": "GE-Market-Analyzer/1.0" },
+            headers: { Accept: "application/json" },
         });
         if (!response.ok) {
             throw new Error(`[WikiService] Exchange-module HTTP ${response.status} ${response.statusText} (batch ${idx + 1}).`);
@@ -6217,7 +6330,7 @@ class WikiService {
             `&titles=${encodeURIComponent(titles)}`;
         const response = await fetch(url, {
             method: "GET",
-            headers: { Accept: "application/json", "User-Agent": "GE-Market-Analyzer/1.0" },
+            headers: { Accept: "application/json" },
         });
         if (!response.ok) {
             throw new Error(`[WikiService] Exchange-module HTTP ${response.status} (alch batch ${idx + 1}).`);
@@ -6372,6 +6485,9 @@ const WIKI_GUIDE_COUNT = 5;
 const SPRITE_BASE = "https://secure.runescape.com/m=itemdb_rs/obj_sprite.gif?id=";
 /** `localStorage` key for persisted view mode preference. */
 const LS_VIEW_MODE = "ge-analyzer:view-mode";
+// Compact tiles toggle – reduces predictive badge clutter in grid view – March 2026
+/** `localStorage` key for persisted compact-tiles preference. */
+const LS_COMPACT_TILES = "ge-analyzer:compact-tiles";
 /** `localStorage` key for persisted interface layout preference. */
 const LS_LAYOUT = "ge-analyzer:layout";
 /** `localStorage` key for persisted theme preference. */
@@ -6549,6 +6665,8 @@ let latestTopItems = [];
 let latestSearchResults = [];
 /** Currently active view mode for the market panel. */
 let currentView = "list";
+/** Whether compact-tiles mode is enabled (hides predictive badges in tile/hybrid view). */
+let compactMode = false;
 /** Shared LLM service instance — persists conversation history across sends. */
 let llm = null;
 /** Portfolio service singleton. */
@@ -7406,6 +7524,20 @@ function bindViewToggle() {
     els.viewListBtn.addEventListener("click", () => setViewMode("list"));
     els.viewTileBtn.addEventListener("click", () => setViewMode("tile"));
     els.viewHybridBtn.addEventListener("click", () => setViewMode("hybrid"));
+    // Compact tiles toggle – reduces predictive badge clutter in grid view – March 2026
+    compactMode = localStorage.getItem(LS_COMPACT_TILES) === "true";
+    els.compactTilesToggle.checked = compactMode;
+    els.compactTilesToggle.addEventListener("change", () => {
+        compactMode = els.compactTilesToggle.checked;
+        localStorage.setItem(LS_COMPACT_TILES, compactMode ? "true" : "false");
+        // Re-render all market panels with the new compact preference.
+        if (latestTopItems.length > 0)
+            renderMarketItems(latestTopItems);
+        if (analyzer)
+            renderFavorites();
+        if (latestSearchResults.length > 0)
+            renderSearchResults(latestSearchResults);
+    });
 }
 /**
  * Switch the market panel to a new view mode and re-render.
@@ -7861,10 +7993,15 @@ function buildItemCard(item) {
         flipWrap.appendChild(trendBadge);
     }
     // Usability enhancement – March 2026: predictive analytics badges.
+    // Compact tiles toggle – hides these badges in tile/hybrid view – March 2026
+    const showPredictiveBadges = !compactMode || currentView === "list";
     const predictiveWrap = document.createElement("span");
     predictiveWrap.className = "predictive-badges";
+    if (compactMode && currentView !== "list") {
+        predictiveWrap.classList.add("compact-hidden");
+    }
     // EMA Trend badge.
-    if (item.ema30d > 0 && item.price > 0) {
+    if (showPredictiveBadges && item.ema30d > 0 && item.price > 0) {
         const emaPct = ((item.price - item.ema30d) / item.ema30d) * 100;
         const emaDir = emaPct > 0 ? "up" : emaPct < 0 ? "down" : "";
         const emaBadge = document.createElement("span");
@@ -7874,7 +8011,7 @@ function buildItemCard(item) {
         predictiveWrap.appendChild(emaBadge);
     }
     // Predicted 24h badge.
-    if (item.predictedNextPrice > 0 && item.price > 0) {
+    if (showPredictiveBadges && item.predictedNextPrice > 0 && item.price > 0) {
         const predPct = ((item.predictedNextPrice - item.price) / item.price) * 100;
         const predDir = predPct > 0.1 ? "up" : predPct < -0.1 ? "down" : "neutral";
         const predBadge = document.createElement("span");
@@ -7884,7 +8021,7 @@ function buildItemCard(item) {
         predictiveWrap.appendChild(predBadge);
     }
     // Volatility badge.
-    if (item.volatility > 0) {
+    if (showPredictiveBadges && item.volatility > 0) {
         const volBadge = document.createElement("span");
         volBadge.className = "vol-badge";
         volBadge.textContent = `Vol ${(item.volatility * 100).toFixed(1)}%`;
@@ -9999,6 +10136,7 @@ function resolveElements() {
         viewListBtn: q("view-list-btn"),
         viewTileBtn: q("view-tile-btn"),
         viewHybridBtn: q("view-hybrid-btn"),
+        compactTilesToggle: q("compact-tiles-toggle"),
         top20CollapseBtn: q("top20-collapse-btn"),
         chatHistory: q("chat-history"),
         chatInput: q("chat-input"),
