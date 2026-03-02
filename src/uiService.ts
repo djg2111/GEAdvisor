@@ -248,6 +248,8 @@ function quickAddToPortfolio(item: RankedItem): void {
 let els: {
   alt1Status: HTMLElement;
   providerSelect: HTMLSelectElement;
+  providerCostHint: HTMLElement;
+  setupGuideBtn: HTMLButtonElement;
   customEndpointGroup: HTMLElement;
   customEndpointInput: HTMLInputElement;
   modelInput: HTMLInputElement;
@@ -460,15 +462,31 @@ export async function initUI(onStatus?: (msg: string, step: string) => void): Pr
 // ─── Settings (API Key) ─────────────────────────────────────────────────────
 
 /**
+ * Map a {@link ProviderCostTier} to a short human-readable badge label.
+ */
+function costTierBadge(tier: string): string {
+  switch (tier) {
+    case "free":        return "\u2705 FREE";
+    case "free-tier":   return "\u{1F193} Free Tier";
+    case "low-cost":    return "\uD83D\uDCB2 Low Cost";
+    case "paid":        return "\uD83D\uDCB3 Paid";
+    case "self-hosted": return "\uD83D\uDDA5\uFE0F Self-hosted";
+    default:            return "";
+  }
+}
+
+/**
  * Populate the provider `<select>` element from the {@link LLM_PROVIDERS}
- * preset array.
+ * preset array, annotating each option with its cost tier badge.
  */
 function populateProviderDropdown(): void {
   els.providerSelect.innerHTML = "";
   for (const p of LLM_PROVIDERS) {
     const opt = document.createElement("option");
     opt.value = p.id;
-    opt.textContent = p.label;
+    const badge = costTierBadge(p.costTier);
+    opt.textContent = badge ? `${p.label}  ${badge}` : p.label;
+    if (p.id === "groq") opt.textContent += " \u2B50 Recommended";
     els.providerSelect.appendChild(opt);
   }
 }
@@ -504,7 +522,8 @@ function restoreSettings(): void {
 
 /**
  * Update UI elements that depend on the active provider selection:
- * placeholder text, custom endpoint visibility, model datalist, model placeholder.
+ * placeholder text, custom endpoint visibility, model datalist, model placeholder,
+ * cost tier hint, and setup guide button visibility.
  */
 function applyProviderUI(provider: LLMProvider): void {
   // Toggle custom endpoint field visibility.
@@ -513,6 +532,14 @@ function applyProviderUI(provider: LLMProvider): void {
   // Update placeholders.
   els.apiKeyInput.placeholder = provider.keyPlaceholder;
   els.modelInput.placeholder = provider.defaultModel || "(enter model name)";
+
+  // Cost tier hint.
+  const badge = costTierBadge(provider.costTier);
+  els.providerCostHint.textContent = badge ? `${badge} \u2014 ${provider.costNote}` : provider.costNote;
+  els.providerCostHint.className = `provider-cost-hint tier-${provider.costTier}`;
+
+  // Show/hide setup guide button (only useful for cloud providers with a signup URL).
+  els.setupGuideBtn.classList.toggle("hidden", !provider.signupUrl);
 
   // Rebuild datalist options for this provider's model catalogue.
   populateModelDatalist(provider);
@@ -531,6 +558,160 @@ function populateModelDatalist(provider: LLMProvider): void {
     opt.label = m.recommended ? `★ ${m.label} (recommended)` : m.label;
     els.modelOptions.appendChild(opt);
   }
+}
+
+// ─── API Key Setup Guide Modal ──────────────────────────────────────────────
+
+/** Lazily-created singleton setup guide modal. */
+let setupGuideModal: HTMLElement | null = null;
+
+/**
+ * Provider-specific setup instructions.  Keyed by provider ID.
+ * Each entry has numbered steps and an optional note.
+ */
+const SETUP_GUIDES: Record<string, { steps: string[]; note?: string }> = {
+  groq: {
+    steps: [
+      'Go to <a href="https://console.groq.com" target="_blank" rel="noopener">console.groq.com</a> and click <strong>Sign Up</strong> (Google / GitHub / email).',
+      "No credit card is required \u2014 the free tier is generous enough for this plugin.",
+      'Once logged in, navigate to <strong>API Keys</strong> in the left sidebar (or visit <a href="https://console.groq.com/keys" target="_blank" rel="noopener">console.groq.com/keys</a>).',
+      'Click <strong>Create API Key</strong>, give it a name (e.g. "GE Analyzer"), and copy the key.',
+      "Paste the key into the <em>API Key</em> field above and click <strong>Save</strong>.",
+      "Select a model (the default <strong>Llama 3 8B</strong> works great) and you\u2019re ready to go!",
+    ],
+    note: "Groq\u2019s free tier allows thousands of requests per day with fast inference \u2014 perfect for this plugin. Rate limits reset daily.",
+  },
+  openai: {
+    steps: [
+      'Go to <a href="https://platform.openai.com/signup" target="_blank" rel="noopener">platform.openai.com</a> and create an account.',
+      "Add a payment method under <strong>Settings \u2192 Billing</strong>.",
+      'Navigate to <a href="https://platform.openai.com/api-keys" target="_blank" rel="noopener">API Keys</a> and click <strong>Create new secret key</strong>.',
+      "Copy the key, paste it above, and click <strong>Save</strong>.",
+    ],
+    note: "OpenAI charges per token. GPT-4o Mini is very affordable for this use case.",
+  },
+  openrouter: {
+    steps: [
+      'Go to <a href="https://openrouter.ai" target="_blank" rel="noopener">openrouter.ai</a> and sign up.',
+      "Some models (e.g. Llama 3 8B) are free to use \u2014 no payment needed.",
+      'Navigate to <a href="https://openrouter.ai/keys" target="_blank" rel="noopener">Keys</a> and create a new API key.',
+      "Paste the key above and click <strong>Save</strong>.",
+    ],
+    note: "OpenRouter aggregates many providers. Look for the \u26A1 icon on their site to find free models.",
+  },
+  together: {
+    steps: [
+      'Go to <a href="https://api.together.xyz" target="_blank" rel="noopener">api.together.xyz</a> and create an account.',
+      "New accounts receive <strong>$5 in free credit</strong> \u2014 no card required.",
+      'Navigate to <a href="https://api.together.xyz/settings/api-keys" target="_blank" rel="noopener">Settings \u2192 API Keys</a> and create a key.',
+      "Paste the key above and click <strong>Save</strong>.",
+    ],
+  },
+  mistral: {
+    steps: [
+      'Go to <a href="https://console.mistral.ai" target="_blank" rel="noopener">console.mistral.ai</a> and create an account.',
+      'Navigate to <a href="https://console.mistral.ai/api-keys" target="_blank" rel="noopener">API Keys</a> and generate a key.',
+      "Paste the key above and click <strong>Save</strong>.",
+    ],
+    note: "Mistral offers competitive per-token pricing, especially for their smaller models.",
+  },
+};
+
+/** Create (once) and return the setup guide modal backdrop + shell. */
+function ensureSetupGuideModal(): HTMLElement {
+  if (setupGuideModal) return setupGuideModal;
+
+  const backdrop = document.createElement("div");
+  backdrop.className = "setup-guide-backdrop";
+  backdrop.addEventListener("click", (e) => {
+    if (e.target === backdrop) backdrop.classList.remove("visible");
+  });
+
+  const modal = document.createElement("div");
+  modal.className = "setup-guide-modal";
+  modal.setAttribute("role", "dialog");
+  modal.setAttribute("aria-modal", "true");
+
+  backdrop.appendChild(modal);
+  document.body.appendChild(backdrop);
+
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && backdrop.classList.contains("visible")) {
+      backdrop.classList.remove("visible");
+    }
+  });
+
+  setupGuideModal = backdrop;
+  return backdrop;
+}
+
+/**
+ * Show the API-key setup guide modal for the currently selected provider.
+ * Falls back to a generic message if no guide is available.
+ */
+function showSetupGuide(): void {
+  const provider = getProviderById(els.providerSelect.value);
+  const backdrop = ensureSetupGuideModal();
+  const modal = backdrop.querySelector(".setup-guide-modal") as HTMLElement;
+
+  const guide = SETUP_GUIDES[provider.id];
+  const badge = costTierBadge(provider.costTier);
+
+  let html = '<div class="setup-guide-header">';
+  html += `<h3>Setup Guide: ${provider.label}</h3>`;
+  html += '<button class="setup-guide-close" aria-label="Close">\u00D7</button>';
+  html += "</div>";
+
+  // Cost tier banner
+  html += `<div class="setup-guide-tier tier-${provider.costTier}">`;
+  html += `<span class="tier-badge">${badge}</span>`;
+  html += `<span>${provider.costNote}</span>`;
+  html += "</div>";
+
+  if (guide) {
+    html += '<ol class="setup-guide-steps">';
+    for (const step of guide.steps) {
+      html += `<li>${step}</li>`;
+    }
+    html += "</ol>";
+    if (guide.note) {
+      html += `<div class="setup-guide-note">\uD83D\uDCA1 ${guide.note}</div>`;
+    }
+  } else {
+    html += "<p>Visit your provider\u2019s dashboard to create an API key, then paste it into the API Key field and click Save.</p>";
+  }
+
+  // Quick link
+  if (provider.signupUrl) {
+    html += `<a class="setup-guide-link" href="${provider.signupUrl}" target="_blank" rel="noopener">\u2192 Open ${provider.label} API Keys page</a>`;
+  }
+
+  // Provider comparison table (always shown)
+  html += '<div class="setup-guide-comparison">';
+  html += "<h4>Provider Comparison</h4>";
+  html += '<table class="provider-comparison-table"><thead><tr>';
+  html += "<th>Provider</th><th>Cost</th><th>Notes</th>";
+  html += "</tr></thead><tbody>";
+  for (const p of LLM_PROVIDERS) {
+    if (p.id === "custom") continue;
+    const isActive = p.id === provider.id;
+    const rowBadge = costTierBadge(p.costTier);
+    html += `<tr class="${isActive ? "active-row" : ""}">`;
+    html += `<td>${p.label}${p.id === "groq" ? " \u2B50" : ""}</td>`;
+    html += `<td><span class="tier-badge-sm tier-${p.costTier}">${rowBadge}</span></td>`;
+    html += `<td>${p.costNote}</td>`;
+    html += "</tr>";
+  }
+  html += "</tbody></table>";
+  html += "</div>";
+
+  modal.innerHTML = html;
+
+  // Bind close button.
+  const closeBtn = modal.querySelector(".setup-guide-close");
+  closeBtn?.addEventListener("click", () => backdrop.classList.remove("visible"));
+
+  backdrop.classList.add("visible");
 }
 
 /**
@@ -601,6 +782,9 @@ function bindSettingsEvents(): void {
     // clicks into it.  The placeholder already shows the default model.
     els.modelInput.value = "";
   });
+
+  // Setup guide button.
+  els.setupGuideBtn.addEventListener("click", showSetupGuide);
 }
 
 /**
@@ -4185,6 +4369,8 @@ function resolveElements(): void {
   els = {
     alt1Status: q("alt1-status"),
     providerSelect: q<HTMLSelectElement>("provider-select"),
+    providerCostHint: q("provider-cost-hint"),
+    setupGuideBtn: q<HTMLButtonElement>("setup-guide-btn"),
     customEndpointGroup: q("custom-endpoint-group"),
     customEndpointInput: q<HTMLInputElement>("custom-endpoint-input"),
     modelInput: q<HTMLInputElement>("model-input"),

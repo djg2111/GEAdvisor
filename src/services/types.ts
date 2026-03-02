@@ -309,6 +309,9 @@ export interface ModelOption {
   recommended?: boolean;
 }
 
+/** Cost tier for an LLM API provider. Shown as a badge in the settings dropdown. */
+export type ProviderCostTier = "free" | "free-tier" | "low-cost" | "paid" | "self-hosted";
+
 /** Describes an LLM API provider the user can choose from the settings panel. */
 export interface LLMProvider {
   /** Unique identifier (used as `<option>` value). */
@@ -327,6 +330,12 @@ export interface LLMProvider {
    * provider is chosen. Users can still type any model name.
    */
   models: readonly ModelOption[];
+  /** Pricing tier used to render a badge next to the provider name. */
+  costTier: ProviderCostTier;
+  /** Short note about pricing (e.g. "Free tier available — no credit card"). */
+  costNote: string;
+  /** URL where the user can sign up and obtain an API key (omitted for custom). */
+  signupUrl?: string;
 }
 
 /** Built-in provider presets. The last entry (`custom`) uses user-supplied values. */
@@ -345,6 +354,9 @@ export const LLM_PROVIDERS: readonly LLMProvider[] = [
       { id: "gemma2-9b-it",        label: "Gemma 2 9B" },
       { id: "mixtral-8x7b-32768",  label: "Mixtral 8×7B" },
     ],
+    costTier: "free",
+    costNote: "Generous free tier — no credit card required",
+    signupUrl: "https://console.groq.com/keys",
   },
   {
     id: "openai",
@@ -359,6 +371,9 @@ export const LLM_PROVIDERS: readonly LLMProvider[] = [
       { id: "gpt-3.5-turbo", label: "GPT-3.5 Turbo" },
       { id: "o3-mini",       label: "o3-mini" },
     ],
+    costTier: "paid",
+    costNote: "Pay-as-you-go — requires billing setup",
+    signupUrl: "https://platform.openai.com/api-keys",
   },
   {
     id: "openrouter",
@@ -374,6 +389,9 @@ export const LLM_PROVIDERS: readonly LLMProvider[] = [
       { id: "google/gemma-2-9b-it",              label: "Gemma 2 9B" },
       { id: "openai/gpt-4o-mini",                label: "GPT-4o Mini (OpenAI)" },
     ],
+    costTier: "free-tier",
+    costNote: "Free tier for select models — credit for paid models",
+    signupUrl: "https://openrouter.ai/keys",
   },
   {
     id: "together",
@@ -387,6 +405,9 @@ export const LLM_PROVIDERS: readonly LLMProvider[] = [
       { id: "mistralai/Mixtral-8x7B-Instruct-v0.1", label: "Mixtral 8×7B" },
       { id: "togethercomputer/RedPajama-INCITE-7B-Chat", label: "RedPajama 7B" },
     ],
+    costTier: "free-tier",
+    costNote: "Free tier with $5 credit on signup",
+    signupUrl: "https://api.together.xyz/settings/api-keys",
   },
   {
     id: "mistral",
@@ -401,6 +422,9 @@ export const LLM_PROVIDERS: readonly LLMProvider[] = [
       { id: "open-mistral-7b",       label: "Mistral 7B (Open)" },
       { id: "open-mixtral-8x7b",     label: "Mixtral 8×7B (Open)" },
     ],
+    costTier: "low-cost",
+    costNote: "Pay-as-you-go — competitively priced",
+    signupUrl: "https://console.mistral.ai/api-keys",
   },
   {
     id: "custom",
@@ -409,6 +433,8 @@ export const LLM_PROVIDERS: readonly LLMProvider[] = [
     defaultModel: "",
     keyPlaceholder: "(optional for local models)",
     models: [],
+    costTier: "self-hosted",
+    costNote: "Run your own model locally — no API cost",
   },
 ] as const;
 

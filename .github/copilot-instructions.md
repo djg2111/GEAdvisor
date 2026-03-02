@@ -45,7 +45,9 @@ npx serve dist --listen 8080   # local dev server
 - **Completed flips table**: `renderCompletedFlips()` renders a `<table class="completed-flips-table">` with clickable sort headers. Module-scoped `completedFlipsSortCol`/`completedFlipsSortAsc` track state.
 - **CSV export**: `#export-csv-btn` in the portfolio history toolbar triggers `exportCompletedFlipsCsv()` — generates a data-URL CSV download of all `CompletedFlip` entries.
 - **Three CSS themes**: Classic Dark (`:root`), OSRS Brown (`body[data-theme="osrs"]`), RS3 Modern Blue (`body[data-theme="rs3-modern"]`) — all via CSS custom properties. New UI elements must use `var(--*)` tokens, never hard-coded colours.
-- **Provider presets** in `LLM_PROVIDERS` array (`types.ts`) — each has `endpoint`, `defaultModel`, `keyPlaceholder`, and curated `models[]` with `recommended` flags
+- **Provider presets** in `LLM_PROVIDERS` array (`types.ts`) — each has `endpoint`, `defaultModel`, `keyPlaceholder`, curated `models[]` with `recommended` flags, `costTier` (free/free-tier/low-cost/paid/self-hosted), `costNote`, and optional `signupUrl`
+- **Provider cost badges**: `populateProviderDropdown()` appends a cost-tier emoji badge to each `<option>` label (e.g. "Groq  \u2705 FREE \u2B50 Recommended"). `applyProviderUI()` shows a colour-coded `#provider-cost-hint` span and toggles the `#setup-guide-btn` visibility.
+- **Setup guide modal**: `showSetupGuide()` opens a lazily-created singleton (`ensureSetupGuideModal()`) with provider-specific step-by-step instructions (from `SETUP_GUIDES` map), a cost-tier banner, a direct link to the provider\'s API-key page, and a comparison table of all providers. Closes on backdrop click or Escape.
 - **Barrel imports**: Always import services/types from `./services` (the barrel), not from individual files like `./services/types`
 - **`HistoricalPriceRecord`** is re-exported from the barrel (`services/index.ts`) — use it in uiService for typed cache reads
 - **Deep-history scan checkbox**: `#deep-history-checkbox` next to the scan button; persisted in `ge-analyzer:deep-history`. When checked, `runFullMarketScan(..., deepHistory=true)` fetches 90-day history instead of 30-day per batch (~3–5× slower). One-time warning toast on enable.
@@ -57,7 +59,7 @@ npx serve dist --listen 8080   # local dev server
 
 | File | Responsibility |
 |------|---------------|
-| `uiService.ts` | **All** DOM manipulation, event binding, localStorage, rendering (~4 200 lines) |
+| `uiService.ts` | **All** DOM manipulation, event binding, localStorage, rendering (~4 400 lines) |
 | `services/types.ts` | Every shared interface + `LLM_PROVIDERS` constant |
 | `services/coreKnowledge.ts` | Static RS3 economic rules (GE tax, buy limits, margin checking, high alch) |
 | `services/llmService.ts` | OpenAI-compatible chat-completion client; builds system + user prompt |
@@ -65,8 +67,8 @@ npx serve dist --listen 8080   # local dev server
 | `services/initDataPipeline.ts` | Startup orchestrator + `SEED_ITEMS` list (~100 RS3 items). Runs two health checks on every startup: re-enriches missing `highAlch`/`buyLimit` (>50% threshold) and re-seeds sparse history (<30% coverage). `runFullMarketScan` uses adaptive inter-batch backoff (1.5 s baseline, 30 s ceiling) |
 | `services/portfolioService.ts` | Active flip tracker + completed flip history with P&L stats (localStorage) |
 | `services/weirdGloopService.ts` | Weird Gloop RS3 GE API client — batched sequential fetching with `fetchWithRetry()` exponential backoff (429 / network errors) |
-| `services/wikiService.ts` | RS Wiki MediaWiki API client + Cargo buy-limit API (two-step search → extract) |
-| `style.css` | Three themes, cards/tiles/grids, unified analytics modal (details + graph), velocity badges, slider theming, toast notifications, alert inputs, inline alert popovers, data-mgmt buttons, predictive badges, compact-tiles toggle, completed-flips table, CSV export button, responsive `@media (min-width: 800px)` breakpoint (~3 060 lines) |
+| `services/wikiService.ts` | RS Wiki MediaWiki API client + Cargo buy-limit API (two-step search → extract). High Alch values derived from `Module:Exchange/<Item>` Lua sources: prefers explicit `alchvalue`, falls back to `floor(value × 0.6)`, skips `alchable = false` |
+| `style.css` | Three themes, cards/tiles/grids, unified analytics modal (details + graph), velocity badges, slider theming, toast notifications, alert inputs, inline alert popovers, data-mgmt buttons, predictive badges, compact-tiles toggle, completed-flips table, CSV export button, provider cost hints, setup guide modal, provider comparison table, responsive `@media (min-width: 800px)` breakpoint (~3 300 lines) |
 
 ## UI Layout (index.html, top → bottom)
 

@@ -237,6 +237,12 @@ export class WikiService {
   /** Regex that extracts the `alchvalue = <number>` value from a Lua module source. */
   private static readonly ALCH_RE = /alchvalue\s*=\s*(\d+)/;
 
+  /** Regex that extracts the `value = <number>` (base item value) from a Lua module source. */
+  private static readonly VALUE_RE = /\bvalue\s*=\s*(\d+)/;
+
+  /** Regex that detects `alchable = false` — items that cannot be alched. */
+  private static readonly ALCHABLE_FALSE_RE = /alchable\s*=\s*false/i;
+
   /**
    * Fetch GE buy limits in bulk by reading `Module:Exchange/<Item>` pages
    * from the RS3 Wiki.  Each module contains a Lua table with a `limit`
@@ -350,7 +356,9 @@ export class WikiService {
 
   /**
    * Fetch High Alchemy values in bulk by reading `Module:Exchange/<Item>` pages.
-   * Each Lua module contains an `alchvalue` field with the item's alch price.
+   * Each Lua module may contain an explicit `alchvalue` field; if absent, the
+   * value is computed from the base `value` field as `floor(value × 0.6)`.
+   * Items with `alchable = false` are skipped.
    *
    * @param itemNames - Canonical RS3 item names.
    * @returns A `Map<string, number>` keyed by item name → high alch value.
@@ -433,10 +441,23 @@ export class WikiService {
       if (!page.title || page.missing !== undefined) continue;
       const itemName = page.title.replace(/^Module:Exchange\//, "");
       const luaSrc = page.revisions?.[0]?.slots?.main?.["*"] ?? "";
-      const match = WikiService.ALCH_RE.exec(luaSrc);
-      if (match) {
-        const val = Number(match[1]);
+
+      // Skip items explicitly marked as non-alchable
+      if (WikiService.ALCHABLE_FALSE_RE.test(luaSrc)) continue;
+
+      // Prefer explicit alchvalue if present
+      const alchMatch = WikiService.ALCH_RE.exec(luaSrc);
+      if (alchMatch) {
+        const val = Number(alchMatch[1]);
         if (val > 0) map.set(itemName, val);
+        continue;
+      }
+
+      // Fallback: compute High Alch from base value (High Alch = floor(value × 0.6))
+      const valueMatch = WikiService.VALUE_RE.exec(luaSrc);
+      if (valueMatch) {
+        const highAlch = Math.floor(Number(valueMatch[1]) * 0.6);
+        if (highAlch > 0) map.set(itemName, highAlch);
       }
     }
 

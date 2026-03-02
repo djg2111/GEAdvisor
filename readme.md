@@ -53,6 +53,8 @@ Uses a **RAG (Retrieval-Augmented Generation) pipeline** to combine live GE mark
 ### AI Advisor
 - **Multi-turn RAG chat** — ask questions about items, flipping strategies, or money-making methods
 - **6 LLM providers** — Groq (default/free), OpenAI, OpenRouter, Together AI, Mistral AI, or any custom OpenAI-compatible endpoint (Ollama, LM Studio, etc.)
+- **Cost tier indicators** — every provider in the dropdown shows a badge (✅ FREE, 🆓 Free Tier, 💲 Low Cost, 💳 Paid) so you can pick at a glance; Groq is starred as the recommended free option
+- **Interactive setup guide** — "How to get an API key" button opens a step-by-step walkthrough for the selected provider, plus a full provider comparison table
 - **Anti-hallucination guardrails** — the LLM can only reference data explicitly provided in context
 - **RS3 economic rules** — GE tax, buy limits, margin checking, and high alch rules are injected into every prompt
 
@@ -130,14 +132,16 @@ See [HANDOFF.md](HANDOFF.md) for exhaustive architecture documentation.
 
 ## LLM Providers
 
-| Provider | Free Tier | Default Model |
-|----------|-----------|---------------|
-| **Groq** | ✅ Yes | `llama3-8b-8192` |
-| **OpenAI** | ❌ | `gpt-4o-mini` |
-| **OpenRouter** | Varies | `meta-llama/llama-3-8b-instruct` |
-| **Together AI** | Trial credits | `meta-llama/Llama-3-8b-chat-hf` |
-| **Mistral AI** | Trial credits | `mistral-small-latest` |
-| **Custom** | N/A | User-supplied |
+| Provider | Cost | Default Model | Notes |
+|----------|------|---------------|-------|
+| **Groq** ⭐ | ✅ FREE | `llama3-8b-8192` | Generous free tier, no credit card required — **recommended** |
+| **OpenRouter** | 🆓 Free Tier | `meta-llama/llama-3-8b-instruct` | Free tier for select models |
+| **Together AI** | 🆓 Free Tier | `meta-llama/Llama-3-8b-chat-hf` | $5 free credit on signup |
+| **Mistral AI** | 💲 Low Cost | `mistral-small-latest` | Competitive per-token pricing |
+| **OpenAI** | 💳 Paid | `gpt-4o-mini` | Pay-as-you-go, requires billing |
+| **Custom** | N/A | User-supplied | Self-hosted (Ollama, LM Studio, etc.) |
+
+> **Getting started?** Select a provider in Settings and click the **"How to get an API key"** button for a step-by-step guide.
 
 API keys are stored locally in your browser's localStorage — never sent anywhere except to the provider you select.
 

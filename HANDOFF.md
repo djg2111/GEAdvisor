@@ -215,16 +215,27 @@ These rules have a **supremacy clause** in the system prompt — they override a
 
 The settings panel supports **6 LLM providers** via the `LLM_PROVIDERS` constant array:
 
-| Provider | Endpoint | Default Model | Key Hint |
-|----------|----------|---------------|----------|
-| **Groq** (default) | `api.groq.com/openai/v1/chat/completions` | `llama3-8b-8192` | `gsk_…` |
-| **OpenAI** | `api.openai.com/v1/chat/completions` | `gpt-4o-mini` | `sk-…` |
-| **OpenRouter** | `openrouter.ai/api/v1/chat/completions` | `meta-llama/llama-3-8b-instruct` | `sk-or-…` |
-| **Together AI** | `api.together.xyz/v1/chat/completions` | `meta-llama/Llama-3-8b-chat-hf` | `tok_…` |
-| **Mistral AI** | `api.mistral.ai/v1/chat/completions` | `mistral-small-latest` | `mis_…` |
-| **Custom / Self-hosted** | (user-supplied) | (user-supplied) | (optional) |
+| Provider | Endpoint | Default Model | Key Hint | Cost Tier |
+|----------|----------|---------------|----------|-----------|
+| **Groq** (default) | `api.groq.com/openai/v1/chat/completions` | `llama3-8b-8192` | `gsk_…` | ✅ FREE |
+| **OpenAI** | `api.openai.com/v1/chat/completions` | `gpt-4o-mini` | `sk-…` | 💳 Paid |
+| **OpenRouter** | `openrouter.ai/api/v1/chat/completions` | `meta-llama/llama-3-8b-instruct` | `sk-or-…` | 🆓 Free Tier |
+| **Together AI** | `api.together.xyz/v1/chat/completions` | `meta-llama/Llama-3-8b-chat-hf` | `tok_…` | 🆓 Free Tier |
+| **Mistral AI** | `api.mistral.ai/v1/chat/completions` | `mistral-small-latest` | `mis_…` | 💲 Low Cost |
+| **Custom / Self-hosted** | (user-supplied) | (user-supplied) | (optional) | 🖥️ Self-hosted |
 
-Each provider includes a curated `models` array of `ModelOption` objects with `id`, `label`, and optional `recommended` flag. The UI renders these as a searchable datalist. Users can also type any arbitrary model name.
+Each provider includes:
+- A curated `models` array of `ModelOption` objects with `id`, `label`, and optional `recommended` flag. The UI renders these as a searchable datalist. Users can also type any arbitrary model name.
+- `costTier` (`ProviderCostTier` union: `"free"` | `"free-tier"` | `"low-cost"` | `"paid"` | `"self-hosted"`) — rendered as an emoji badge next to the provider name in the dropdown and as a colour-coded `#provider-cost-hint` span below it.
+- `costNote` — short human-readable description of pricing (e.g. "Generous free tier — no credit card required").
+- `signupUrl` (optional) — direct URL to the provider’s API-key page. When present, the `#setup-guide-btn` is visible.
+
+**Setup guide modal** (`showSetupGuide()`): Opens a lazily-created singleton backdrop (`.setup-guide-backdrop`) with:
+- Provider-specific step-by-step instructions from the `SETUP_GUIDES` map in `uiService.ts`.
+- A coloured cost-tier banner.
+- A direct “Open API Keys page” link.
+- A comparison table of all non-custom providers with cost badges.
+- Closes on backdrop click or Escape key.
 
 ### 4.9 Portfolio Service (`portfolioService.ts`)
 
@@ -503,7 +514,8 @@ All defined in `src/services/types.ts`:
 | `WikiPage` | `pageid`, `ns`, `title`, `extract?`, `missing?` |
 | `WikiGuideResult` | `title`, `found`, `text` |
 | `ModelOption` | `id`, `label`, `recommended?` — single model entry in a provider |
-| `LLMProvider` | `id`, `label`, `endpoint`, `defaultModel`, `keyPlaceholder`, `models` |
+| `ProviderCostTier` | `"free"` \| `"free-tier"` \| `"low-cost"` \| `"paid"` \| `"self-hosted"` — pricing tier badge |
+| `LLMProvider` | `id`, `label`, `endpoint`, `defaultModel`, `keyPlaceholder`, `models`, `costTier`, `costNote`, `signupUrl?` |
 | `LLMConfig` | `apiKey`, `endpoint`, `model`, `temperature`, `maxTokens` |
 | `ChatMessage` | `role: "system"\|"user"\|"assistant"`, `content` |
 | `ChatCompletionRequest` | OpenAI-compatible request body |
@@ -635,6 +647,7 @@ Everything below is **complete and verified** (builds with 0 errors):
 | Full market scan history fetches hitting 429 rate limits after first batch | `fetchHistoricalPrices` used individual per-item HTTP requests (100 requests per 100-item batch in concurrent groups of 10), exhausting the API rate limit | Rewrote to use **pipe-delimited batched requests** of 50 items each, dispatched sequentially with 1 000 ms pauses — reduces 100 requests to 2 per scan batch (March 2026) |
 | Post-scan `refreshMarketPanel` triggering 30 K+ 429 errors | `marketAnalyzerService.fetchAPIHistory` had its own per-item fetch loop (no retry, no delay, CONCURRENCY=10); after a 7 059-item scan the sparse-data fallback tried to fetch history for all ~1 849 cached items individually | Replaced bespoke `fetchAPIHistory` with delegation to `WeirdGloopService.fetchHistoricalPrices` (batched pipe-delimited, sequential, 1 s pauses). Also capped sparse fallback at 500 items and persisted results to IndexedDB (March 2026) |
 | CORS failures on Firefox but not Chrome | `fetchWithRetry()` in `weirdGloopService.ts` and `fetchBuyLimitBatch`/`fetchAlchValueBatch` in `wikiService.ts` set a custom `User-Agent` header. Firefox sends it (non-safelisted → triggers CORS preflight), but the APIs only allow `accept` in `Access-Control-Allow-Headers`. Chrome silently strips `User-Agent` so no preflight occurs | Removed the custom `User-Agent` header from all browser `fetch()` calls in both services — browser sends its own `User-Agent` automatically. Never set non-safelisted headers in browser `fetch()` (March 2026) |
+| High Alch values showing "Unknown" for all items | `getBulkHighAlchValues` regex matched only `alchvalue = <number>`, but most `Module:Exchange/<Item>` Lua sources only have a `value` field (base item value); `alchvalue` is rarely present | Added fallback: if no explicit `alchvalue`, compute High Alch as `floor(value × 0.6)` from the base `value` field. Also skip items with `alchable = false`. Added `VALUE_RE` and `ALCHABLE_FALSE_RE` regexes (March 2026) |
 | Two separate modals (item detail + graph) with duplicated data and disjointed UX | `showItemModal` and `showGraphModal` were independent singletons — users had to open two modals to see all item info, and features like alerts/actions were only in one | Consolidated into `showAnalyticsModal(item)` — a single scrollable overlay combining badges, action buttons, detail rows, alert inputs, interactive price chart with range selector, and stats grid. Old functions deprecated but retained. Single ↗ button per card (March 2026) |
 
 ---
