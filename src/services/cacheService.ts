@@ -16,6 +16,7 @@ import type {
   CacheServiceConfig,
   HistoricalPriceRecord,
   StoredPriceRecord,
+  WeirdGloopHistoryEntry,
   WeirdGloopPriceRecord,
 } from "./types";
 
@@ -160,6 +161,55 @@ export class CacheService {
 
       tx.onerror = () => {
         console.error("[CacheService] Bulk-insert transaction failed:", tx.error);
+        reject(tx.error);
+      };
+    });
+  }
+
+  /**
+   * Bulk-insert 30+ days of historical snapshots into the `price-history`
+   * store.  Uses a single read-write transaction for atomicity and performance.
+   *
+   * Each entry is keyed by the compound `[name, day]` pair, so duplicate
+   * days are silently overwritten (idempotent).
+   *
+   * @param historyMap - Map of item name → array of daily history entries as
+   *                     returned by {@link WeirdGloopService.fetchHistoricalPrices}.
+   * @returns The number of history rows written.
+   */
+  async bulkInsertHistory(
+    historyMap: Map<string, WeirdGloopHistoryEntry[]>,
+  ): Promise<number> {
+    const db = this.ensureOpen();
+
+    return new Promise<number>((resolve, reject) => {
+      const tx = db.transaction(HISTORY_STORE, "readwrite");
+      const store = tx.objectStore(HISTORY_STORE);
+      let count = 0;
+
+      for (const [name, entries] of historyMap) {
+        for (const entry of entries) {
+          const day = new Date(entry.timestamp).toISOString().slice(0, 10);
+          const record: HistoricalPriceRecord = {
+            id: 0,
+            name,
+            day,
+            price: entry.price,
+            volume: entry.volume ?? 0,
+            timestamp: new Date(entry.timestamp).toISOString(),
+            fetchedAt: Date.now(),
+          };
+          const req = store.put(record);
+          req.onsuccess = () => { count++; };
+        }
+      }
+
+      tx.oncomplete = () => {
+        console.log(`[CacheService] Bulk-inserted ${count} historical rows.`);
+        resolve(count);
+      };
+      tx.onerror = () => {
+        console.error("[CacheService] Bulk history insert failed:", tx.error);
         reject(tx.error);
       };
     });

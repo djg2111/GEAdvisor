@@ -195,6 +195,7 @@
 				<div id="market-header">
 					<h2>Top 20 Markets</h2>
 					<div class="market-header-actions">
+						<button id="full-market-scan-btn" class="scan-btn" type="button" title="Scan all ~7,000 GE items in the background">🔍 Scan Full Market</button>
 						<select id="top20-sort-select" class="section-sort-select" title="Sort Top 20">
 							<option value="default">Sort: Default</option>
 							<option value="alpha">Sort: A–Z</option>
@@ -207,6 +208,14 @@
 				<div id="market-loading" class="loader">Loading market data…</div>
 				<div id="market-items"></div>
 				</div><!-- /.top20-section -->
+
+				<!-- ── Background sync progress bar ───────────────────── -->
+				<div id="background-sync-progress" class="sync-progress hidden">
+					<div class="sync-progress-track">
+						<div id="sync-progress-fill" class="sync-progress-fill"></div>
+					</div>
+					<span id="sync-progress-text" class="sync-progress-text">Scanning…</span>
+				</div>
 			</section>
 
 			<!-- ── Advisor / chat view ────────────────────────────────── -->

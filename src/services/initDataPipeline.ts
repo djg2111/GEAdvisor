@@ -16,7 +16,7 @@
 import { CacheService } from "./cacheService";
 import { WeirdGloopService } from "./weirdGloopService";
 import { WikiService } from "./wikiService";
-import type { StoredPriceRecord, GECatalogueEntry } from "./types";
+import type { StoredPriceRecord, GECatalogueEntry, WeirdGloopPriceRecord } from "./types";
 
 /** URL for the RS Wiki’s full GE item-ID catalogue (JSON). */
 const GE_CATALOGUE_URL =
@@ -41,21 +41,51 @@ const SEED_ITEMS: string[] = [
   "Green h'ween mask",
   "Red h'ween mask",
   "Blue h'ween mask",
+  "Easter egg",
+  "Pumpkin",
+  "Disk of returning",
+  "Black Santa hat",
+  "Fish mask",
+  "Golden cracker",
 
   // ── High-volume Skilling Supplies ─────────────────────────────────────
   "Raw shark",
   "Shark",
   "Raw rocktail",
   "Rocktail",
+  "Raw sailfish",
+  "Sailfish",
+  "Raw lobster",
+  "Lobster",
+  "Raw swordfish",
+  "Swordfish",
   "Grimy dwarf weed",
   "Dwarf weed",
   "Grimy lantadyme",
   "Lantadyme",
   "Grimy torstol",
   "Torstol",
+  "Grimy snapdragon",
+  "Snapdragon",
+  "Grimy ranarr",
+  "Ranarr",
+  "Grimy kwuarm",
+  "Kwuarm",
+  "Grimy cadantine",
+  "Cadantine",
+  "Grimy avantoe",
+  "Avantoe",
+  "Grimy toadflax",
+  "Toadflax",
+  "Grimy irit",
+  "Irit",
+  "Grimy spirit weed",
+  "Spirit weed",
   "Magic logs",
   "Elder logs",
   "Yew logs",
+  "Maple logs",
+  "Willow logs",
   "Coal",
   "Mithril ore",
   "Adamantite ore",
@@ -63,6 +93,32 @@ const SEED_ITEMS: string[] = [
   "Runite ore",
   "Gold ore",
   "Iron ore",
+  "Silver ore",
+  "Copper ore",
+  "Tin ore",
+  "Banite ore",
+  "Orichalcite ore",
+  "Drakolith",
+  "Phasmatite",
+  "Necrite ore",
+  "Light animica",
+  "Dark animica",
+  "Pure essence",
+  "Rune essence",
+  "Flax",
+  "Bow string",
+  "Uncut diamond",
+  "Uncut ruby",
+  "Uncut emerald",
+  "Uncut sapphire",
+  "Diamond",
+  "Ruby",
+  "Emerald",
+  "Sapphire",
+  "Crystal flask",
+  "Potion flask",
+  "Vial of water",
+  "Feather",
 
   // ── Potions & Consumables ─────────────────────────────────────────────
   "Overload (4)",
@@ -71,6 +127,25 @@ const SEED_ITEMS: string[] = [
   "Saradomin brew (4)",
   "Weapon poison+++ (4)",
   "Aggression potion (4)",
+  "Super antifire (4)",
+  "Prayer renewal (4)",
+  "Extreme attack (4)",
+  "Extreme strength (4)",
+  "Extreme defence (4)",
+  "Extreme magic (4)",
+  "Extreme ranging (4)",
+  "Super prayer (4)",
+  "Summoning potion (4)",
+  "Antifire (4)",
+  "Super attack (4)",
+  "Super strength (4)",
+  "Super defence (4)",
+  "Super magic potion (4)",
+  "Super ranging potion (4)",
+  "Adrenaline potion (4)",
+  "Rocktail soup",
+  "Sailfish soup",
+  "Summer pie",
 
   // ── Runes ─────────────────────────────────────────────────────────────
   "Blood rune",
@@ -83,6 +158,17 @@ const SEED_ITEMS: string[] = [
   "Water rune",
   "Air rune",
   "Earth rune",
+  "Body rune",
+  "Mind rune",
+  "Chaos rune",
+  "Cosmic rune",
+  "Mud rune",
+  "Dust rune",
+  "Lava rune",
+  "Steam rune",
+  "Smoke rune",
+  "Mist rune",
+  "Armadyl rune",
 
   // ── PvM Drops & Salvage ───────────────────────────────────────────────
   "Dragonfire shield",
@@ -105,6 +191,37 @@ const SEED_ITEMS: string[] = [
   "Malevolent helm",
   "Malevolent cuirass",
   "Malevolent greaves",
+  "Seren godbow",
+  "Staff of Sliske",
+  "Zaros godsword",
+  "Praesul codex",
+  "Inquisitor staff",
+  "Masterwork platebody",
+  "Masterwork platelegs",
+  "Masterwork helm",
+  "Masterwork boots",
+  "Masterwork gloves",
+  "Trimmed masterwork platebody",
+  "Trimmed masterwork platelegs",
+  "Trimmed masterwork helm",
+  "Trimmed masterwork boots",
+  "Trimmed masterwork gloves",
+  "Eldritch crossbow",
+  "Blightbound crossbow",
+  "Fractured Staff of Armadyl",
+  "Scripture of Jas",
+  "Scripture of Wen",
+  "Scripture of Ful",
+  "Cinderbane gloves",
+  "Laceration boots",
+  "Fleeting boots",
+  "Blast diffusion boots",
+  "Essence of Finality amulet",
+  "Amulet of souls",
+  "Reaper necklace",
+  "Deathtouch bracelet",
+  "Ring of death",
+  "Luck of the Dwarves",
 
   // ── Summoning & Misc ──────────────────────────────────────────────────
   "Spirit shard",
@@ -113,6 +230,10 @@ const SEED_ITEMS: string[] = [
   "Blue charm",
   "Pack yak pouch",
   "Water talisman",
+  "Fire talisman",
+  "Yak-hide",
+  "Unicorn horn",
+  "Swamp tar",
 
   // ── Alchable / Margin Items ───────────────────────────────────────────
   "Battlestaff",
@@ -121,10 +242,44 @@ const SEED_ITEMS: string[] = [
   "Onyx bolts (e)",
   "Rune bar",
   "Adamant bar",
+  "Mithril bar",
+  "Steel bar",
+  "Iron bar",
+  "Bronze bar",
+  "Gold bar",
+  "Banite bar",
+  "Elder rune bar",
+  "Orichalcite bar",
+  "Drakolith bar",
+  "Phasmatite bar",
+  "Necronium bar",
+  "Light animica bar",
+  "Dark animica bar",
   "Hydrix",
   "Uncut dragonstone",
   "Dragonstone",
   "Bond",
+  "Cannonball",
+  "Broad arrowheads",
+  "Dragon bones",
+  "Frost dragon bones",
+  "Dinosaur bones",
+  "Reinforced dinosaur bones",
+  "Dagannoth bones",
+  "Infernal ashes",
+  "Dragon arrowheads",
+  "Rune arrowheads",
+  "Adamant arrowheads",
+  "Black dragonhide",
+  "Royal dragonhide",
+  "Green dragonhide",
+  "Blue dragonhide",
+  "Red dragonhide",
+  "Rune platebody",
+  "Rune platelegs",
+  "Dragon platelegs",
+  "Dragon plateskirt",
+  "Dragon helm",
 ];
 
 /**
@@ -176,15 +331,20 @@ export async function initDataPipeline(): Promise<StoredPriceRecord[]> {
         "[initDataPipeline] API returned zero records. Cache will remain empty."
       );
     } else {
-      // Step 3b — Enrich records with GE buy limits from the wiki.
+      // Step 3b — Enrich records with GE buy limits and high alch values from the wiki.
       const wiki = new WikiService();
       const itemNames = Array.from(prices.keys());
       let buyLimits: Map<string, number>;
+      let alchValues: Map<string, number>;
       try {
-        buyLimits = await wiki.getBulkBuyLimits(itemNames);
+        [buyLimits, alchValues] = await Promise.all([
+          wiki.getBulkBuyLimits(itemNames),
+          wiki.getBulkHighAlchValues(itemNames),
+        ]);
       } catch (wikiErr) {
-        console.warn("[initDataPipeline] Wiki buy-limit fetch failed — continuing without limits.", wikiErr);
+        console.warn("[initDataPipeline] Wiki enrichment fetch failed — continuing without limits/alch.", wikiErr);
         buyLimits = new Map();
+        alchValues = new Map();
       }
 
       for (const [name, record] of prices) {
@@ -192,14 +352,35 @@ export async function initDataPipeline(): Promise<StoredPriceRecord[]> {
         if (limit !== undefined) {
           record.buyLimit = limit;
         }
+        const alch = alchValues.get(name);
+        if (alch !== undefined) {
+          record.highAlch = alch;
+        }
       }
       console.log(
-        `[initDataPipeline] Enriched ${buyLimits.size} / ${prices.size} records with buy limits.`
+        `[initDataPipeline] Enriched ${buyLimits.size} buy limits, ${alchValues.size} alch values for ${prices.size} records.`
       );
 
       // Step 3c — Persist enriched records into IndexedDB.
       const written = await cache.bulkInsert(prices);
       console.log(`[initDataPipeline] Wrote ${written} records to cache.`);
+
+      // Step 3d — Seed 30 days of historical prices for EMA / regression.
+      try {
+        const itemNames = Array.from(prices.keys());
+        const historyMap = await api.fetchHistoricalPrices(itemNames, 30);
+        if (historyMap.size > 0) {
+          const histWritten = await cache.bulkInsertHistory(historyMap);
+          console.log(
+            `[initDataPipeline] Seeded ${histWritten} historical rows for ${historyMap.size} items.`
+          );
+        }
+      } catch (histErr) {
+        console.warn(
+          "[initDataPipeline] Historical price fetch failed — sparklines may be sparse.",
+          histErr
+        );
+      }
     }
   } else {
     console.log("[initDataPipeline] Cache is fresh — skipping API fetch.");
@@ -252,4 +433,111 @@ export async function fetchGECatalogue(): Promise<GECatalogueEntry[]> {
     console.error("[GECatalogue] Failed to fetch catalogue:", err);
     return [];
   }
+}
+
+/**
+ * Callback signature for reporting background scan progress.
+ * @param done  - Number of items processed so far.
+ * @param total - Total number of items to process.
+ */
+export type ScanProgressCallback = (done: number, total: number) => void;
+
+/**
+ * Run a **non-blocking** full-market background scan.
+ *
+ * Fetches latest prices + 30-day history for **every** item in the GE
+ * catalogue (~7 000 items) in batches of 100, with a 500 ms delay between
+ * batches to avoid rate-limiting.  Each batch is bulk-inserted into IndexedDB
+ * immediately so progress persists even if the user closes the app mid-scan.
+ *
+ * The UI remains fully interactive during the scan because the function
+ * yields control back to the browser between batches via `setTimeout`.
+ *
+ * @param catalogue       - Pre-fetched GE catalogue entries.
+ * @param onProgress      - Called after every batch with `(done, total)`.
+ * @param signal          - Optional `AbortSignal` to cancel the scan early.
+ * @returns The total number of items successfully fetched and persisted.
+ */
+export async function runFullMarketScan(
+  catalogue: GECatalogueEntry[],
+  onProgress?: ScanProgressCallback,
+  signal?: AbortSignal,
+): Promise<number> {
+  if (catalogue.length === 0) {
+    console.warn("[FullMarketScan] Empty catalogue — nothing to scan.");
+    return 0;
+  }
+
+  const cache = new CacheService();
+  const api = new WeirdGloopService();
+  const wiki = new WikiService();
+
+  await cache.open();
+
+  const BATCH_SIZE = 100;
+  const DELAY_MS = 500;
+  const allNames = catalogue.map((e) => e.name);
+  const total = allNames.length;
+  let done = 0;
+
+  console.log(`[FullMarketScan] Starting scan of ${total} items in batches of ${BATCH_SIZE}…`);
+
+  for (let i = 0; i < allNames.length; i += BATCH_SIZE) {
+    if (signal?.aborted) {
+      console.log("[FullMarketScan] Aborted by user.");
+      break;
+    }
+
+    const batchNames = allNames.slice(i, i + BATCH_SIZE);
+
+    try {
+      // Fetch latest prices for this batch.
+      const prices: Map<string, WeirdGloopPriceRecord> = await api.fetchLatestPrices(batchNames);
+
+      if (prices.size > 0) {
+        // Enrich with buy limits + alch values (best-effort).
+        const names = Array.from(prices.keys());
+        try {
+          const [limits, alchs] = await Promise.all([
+            wiki.getBulkBuyLimits(names),
+            wiki.getBulkHighAlchValues(names),
+          ]);
+          for (const [name, record] of prices) {
+            const limit = limits.get(name);
+            if (limit !== undefined) record.buyLimit = limit;
+            const alch = alchs.get(name);
+            if (alch !== undefined) record.highAlch = alch;
+          }
+        } catch {
+          // Non-critical — continue without enrichment.
+        }
+
+        // Persist to IndexedDB immediately.
+        await cache.bulkInsert(prices);
+
+        // Fetch 30-day history for this batch (best-effort).
+        try {
+          const historyMap = await api.fetchHistoricalPrices(names, 30);
+          if (historyMap.size > 0) {
+            await cache.bulkInsertHistory(historyMap);
+          }
+        } catch {
+          // Non-critical — skip history for this batch.
+        }
+      }
+    } catch (err) {
+      console.warn(`[FullMarketScan] Batch ${i / BATCH_SIZE + 1} failed:`, err);
+    }
+
+    done = Math.min(i + BATCH_SIZE, total);
+    onProgress?.(done, total);
+
+    // Yield to the browser event loop + rate-limit delay.
+    if (i + BATCH_SIZE < allNames.length) {
+      await new Promise((r) => setTimeout(r, DELAY_MS));
+    }
+  }
+
+  console.log(`[FullMarketScan] Complete. ${done} / ${total} items processed.`);
+  return done;
 }

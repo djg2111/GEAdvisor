@@ -234,6 +234,9 @@ export class WikiService {
   /** Regex that extracts the `limit = <number>` value from a Lua module source. */
   private static readonly LIMIT_RE = /limit\s*=\s*(\d+)/;
 
+  /** Regex that extracts the `alchvalue = <number>` value from a Lua module source. */
+  private static readonly ALCH_RE = /alchvalue\s*=\s*(\d+)/;
+
   /**
    * Fetch GE buy limits in bulk by reading `Module:Exchange/<Item>` pages
    * from the RS3 Wiki.  Each module contains a Lua table with a `limit`
@@ -339,6 +342,101 @@ export class WikiService {
         if (limit > 0) {
           map.set(itemName, limit);
         }
+      }
+    }
+
+    return map;
+  }
+
+  /**
+   * Fetch High Alchemy values in bulk by reading `Module:Exchange/<Item>` pages.
+   * Each Lua module contains an `alchvalue` field with the item's alch price.
+   *
+   * @param itemNames - Canonical RS3 item names.
+   * @returns A `Map<string, number>` keyed by item name → high alch value.
+   */
+  async getBulkHighAlchValues(itemNames: string[]): Promise<Map<string, number>> {
+    if (itemNames.length === 0) return new Map();
+
+    const batches = this.chunkArray(itemNames, WikiService.EXCHANGE_BATCH_SIZE);
+    console.log(
+      `[WikiService] Fetching alch values for ${itemNames.length} items in ${batches.length} batch(es)…`
+    );
+
+    const settled = await Promise.allSettled(
+      batches.map((batch, idx) => this.fetchAlchValueBatch(batch, idx))
+    );
+
+    const combined = new Map<string, number>();
+    for (const result of settled) {
+      if (result.status === "fulfilled") {
+        for (const [name, val] of result.value) {
+          combined.set(name, val);
+        }
+      } else {
+        console.warn("[WikiService] Alch-value batch failed:", result.reason);
+      }
+    }
+
+    console.log(
+      `[WikiService] Resolved alch values for ${combined.size} / ${itemNames.length} items.`
+    );
+    return combined;
+  }
+
+  /**
+   * Fetch a single batch of high alchemy values from `Module:Exchange/<Item>` Lua sources.
+   *
+   * @param batch - Subset of item names.
+   * @param idx   - Batch index for logging.
+   * @returns Map of canonical item name → high alchemy value.
+   */
+  private async fetchAlchValueBatch(
+    batch: string[],
+    idx: number,
+  ): Promise<Map<string, number>> {
+    const titles = batch
+      .map((n) => `Module:Exchange/${n.replace(/ /g, "_")}`)
+      .join("|");
+
+    const url =
+      `https://runescape.wiki/api.php?action=query&prop=revisions` +
+      `&rvprop=content&rvslots=main&format=json&origin=*` +
+      `&titles=${encodeURIComponent(titles)}`;
+
+    const response = await fetch(url, {
+      method: "GET",
+      headers: { Accept: "application/json", "User-Agent": "GE-Market-Analyzer/1.0" },
+    });
+
+    if (!response.ok) {
+      throw new Error(
+        `[WikiService] Exchange-module HTTP ${response.status} (alch batch ${idx + 1}).`
+      );
+    }
+
+    const json = await response.json() as {
+      query?: {
+        pages?: Record<string, {
+          title?: string;
+          missing?: string;
+          revisions?: Array<{ slots?: { main?: { "*"?: string } } }>;
+        }>;
+      };
+    };
+
+    const map = new Map<string, number>();
+    const pages = json?.query?.pages;
+    if (!pages) return map;
+
+    for (const page of Object.values(pages)) {
+      if (!page.title || page.missing !== undefined) continue;
+      const itemName = page.title.replace(/^Module:Exchange\//, "");
+      const luaSrc = page.revisions?.[0]?.slots?.main?.["*"] ?? "";
+      const match = WikiService.ALCH_RE.exec(luaSrc);
+      if (match) {
+        const val = Number(match[1]);
+        if (val > 0) map.set(itemName, val);
       }
     }
 

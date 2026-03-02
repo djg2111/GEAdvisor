@@ -103,9 +103,12 @@ export class PortfolioService {
     if (idx === -1) return undefined;
 
     const active = this.flips[idx];
+    // Official RS3 wiki tax formula: floor(price * 2%), exempt at ≤ 50 gp.
+    let taxPerItem = Math.floor(actualSellPrice * 0.02);
+    if (actualSellPrice <= 50) taxPerItem = 0;
+    const netSellPerItem = actualSellPrice - taxPerItem;
     const realizedProfit =
-      Math.round(actualSellPrice * 0.98 * active.quantity) -
-      active.buyPrice * active.quantity;
+      (netSellPerItem * active.quantity) - (active.buyPrice * active.quantity);
 
     const completed: CompletedFlip = {
       ...active,

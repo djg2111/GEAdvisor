@@ -218,6 +218,8 @@ export class LLMService {
       "6. Keep responses concise and actionable. Use bullet points or numbered lists.",
       "7. Format gold values with standard RS3 abbreviations (K, M, B).",
       "8. If no wiki guide exists for an item, only discuss it from the market-data perspective.",
+      "9. Analyze the '30d Trend Slope' and 'Volatility' metrics provided for each item. A positive slope indicates an upward price trend; a negative slope signals decline. Volatility above 10% signals high risk.",
+      "10. When recommending or discussing an item, explicitly mention whether its linear slope is positive or negative and whether its volatility is high (>10%) or low. Use these to justify your buy/sell/hold advice.",
       "",
       "The following RS3 economic laws are ABSOLUTE. They supersede any conflicting outside knowledge you may have. Apply them to every calculation.",
       "",

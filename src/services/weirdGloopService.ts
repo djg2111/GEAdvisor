@@ -14,6 +14,8 @@
 
 import type {
   WeirdGloopLatestResponse,
+  WeirdGloopHistoryEntry,
+  WeirdGloopHistoryResponse,
   WeirdGloopPriceRecord,
   WeirdGloopServiceConfig,
 } from "./types";
@@ -93,6 +95,72 @@ export class WeirdGloopService {
       `[WeirdGloopService] Successfully fetched ${consolidated.size} / ${itemNames.length} price records.`
     );
     return consolidated;
+  }
+
+  /**
+   * Fetch up to 90 days of historical daily prices for every item in
+   * {@link itemNames}.  The Weird Gloop `/last90d` endpoint only supports a
+   * single item per request, so items are fetched in concurrent batches of
+   * {@link HISTORY_CONCURRENCY} to avoid overwhelming the API.
+   *
+   * Individual item failures are logged but do **not** reject the returned
+   * promise — successfully fetched histories are always returned.
+   *
+   * @param itemNames - Canonical RS3 item names.
+   * @param days      - Number of recent days to extract from the 90-day
+   *                    window (default 30).  Pass 90 to keep the full range.
+   * @returns A `Map<itemName, WeirdGloopHistoryEntry[]>` of chronological
+   *          daily snapshots, filtered to the requested window.
+   */
+  async fetchHistoricalPrices(
+    itemNames: string[],
+    days: number = 30,
+  ): Promise<Map<string, WeirdGloopHistoryEntry[]>> {
+    if (itemNames.length === 0) return new Map();
+
+    const HISTORY_CONCURRENCY = 10;
+    const cutoff = Date.now() - days * 24 * 60 * 60 * 1000;
+    const result = new Map<string, WeirdGloopHistoryEntry[]>();
+
+    console.log(
+      `[WeirdGloopService] Fetching last90d history for ${itemNames.length} items (keeping last ${days} days)…`
+    );
+
+    const fetchOne = async (name: string): Promise<void> => {
+      try {
+        const url = `https://api.weirdgloop.org/exchange/history/rs/last90d?name=${encodeURIComponent(name)}`;
+        const resp = await fetch(url, {
+          method: "GET",
+          headers: {
+            "User-Agent":
+              "RS3-GE-Analyzer-Alt1Plugin/1.0 (contact: github.com/skillbert/alt1minimal)",
+            Accept: "application/json",
+          },
+        });
+        if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+        const json: WeirdGloopHistoryResponse = await resp.json();
+        const entries = json[name];
+        if (!Array.isArray(entries)) return;
+
+        const filtered = entries
+          .filter((e) => e.timestamp >= cutoff)
+          .sort((a, b) => a.timestamp - b.timestamp);
+
+        if (filtered.length > 0) result.set(name, filtered);
+      } catch {
+        // Individual item failure — silently skip.
+      }
+    };
+
+    for (let i = 0; i < itemNames.length; i += HISTORY_CONCURRENCY) {
+      const batch = itemNames.slice(i, i + HISTORY_CONCURRENCY);
+      await Promise.allSettled(batch.map(fetchOne));
+    }
+
+    console.log(
+      `[WeirdGloopService] Historical data fetched for ${result.size} / ${itemNames.length} items.`
+    );
+    return result;
   }
 
   // ─── Private Helpers ──────────────────────────────────────────────────

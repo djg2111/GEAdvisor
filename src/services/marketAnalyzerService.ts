@@ -27,6 +27,86 @@ import type {
   StoredPriceRecord,
 } from "./types";
 
+// ─── Pure Time-Series Math ──────────────────────────────────────────────────
+
+/**
+ * Calculate the Exponential Moving Average of a price series.
+ *
+ * The EMA gives progressively more weight to recent observations.
+ * With the default `alpha = 0.2`, the half-life is roughly 3 observations.
+ *
+ * @param prices - Chronological price array (oldest-first).  Must have ≥ 1 element.
+ * @param alpha  - Smoothing factor in (0, 1].  Higher = more reactive.
+ * @returns The final EMA value, or `0` if the array is empty.
+ */
+function calculateEMA(prices: number[], alpha: number = 0.2): number {
+  if (prices.length === 0) return 0;
+  let ema = prices[0];
+  for (let i = 1; i < prices.length; i++) {
+    ema = alpha * prices[i] + (1 - alpha) * ema;
+  }
+  return ema;
+}
+
+/**
+ * Calculate the volatility of a price series as the standard deviation of
+ * daily percentage returns.
+ *
+ * A return of `0.05` means the typical daily swing is ±5 %.
+ *
+ * @param prices - Chronological price array (oldest-first).  Needs ≥ 2 elements.
+ * @returns Population standard deviation of daily % changes, or `0` if too few data points.
+ */
+function calculateVolatility(prices: number[]): number {
+  if (prices.length < 2) return 0;
+  const returns: number[] = [];
+  for (let i = 1; i < prices.length; i++) {
+    if (prices[i - 1] === 0) continue;
+    returns.push((prices[i] - prices[i - 1]) / prices[i - 1]);
+  }
+  if (returns.length === 0) return 0;
+  const mean = returns.reduce((s, r) => s + r, 0) / returns.length;
+  const variance = returns.reduce((s, r) => s + (r - mean) ** 2, 0) / returns.length;
+  return Math.sqrt(variance);
+}
+
+/**
+ * Fit an ordinary least-squares (OLS) linear regression to a price series and
+ * return the slope plus a one-step-ahead prediction.
+ *
+ * The independent variable is a zero-based day index (0, 1, 2, …).
+ *
+ * @param prices - Chronological price array (oldest-first).  Needs ≥ 2 elements.
+ * @returns `{ slope, predictedNext }` where `predictedNext` is the extrapolated
+ *          price for day `N` (one beyond the last observation).
+ *          Both are `0` when there is insufficient data.
+ */
+function calculateLinearTrend(prices: number[]): { slope: number; predictedNext: number } {
+  const n = prices.length;
+  if (n < 2) return { slope: 0, predictedNext: 0 };
+
+  // Σx, Σy, Σxy, Σx²  where x = 0 … n-1
+  let sumX = 0;
+  let sumY = 0;
+  let sumXY = 0;
+  let sumX2 = 0;
+  for (let i = 0; i < n; i++) {
+    sumX += i;
+    sumY += prices[i];
+    sumXY += i * prices[i];
+    sumX2 += i * i;
+  }
+
+  const denom = n * sumX2 - sumX * sumX;
+  if (denom === 0) return { slope: 0, predictedNext: prices[n - 1] };
+
+  const slope = (n * sumXY - sumX * sumY) / denom;
+  const intercept = (sumY - slope * sumX) / n;
+  const predictedNext = intercept + slope * n; // day = n (one step ahead)
+
+  return { slope, predictedNext };
+}
+
 /** Default analyser settings. */
 const DEFAULTS: MarketAnalyzerConfig = {
   topN: 20,
@@ -84,11 +164,11 @@ export class MarketAnalyzerService {
       return [];
     }
 
-    // Build a volume-SMA map from the last 7 days of history.
-    const avgVolumeMap = await this.buildAvgVolumeMap(7);
+    // Build a volume-SMA map from the last 30 days of history.
+    const avgVolumeMap = await this.buildAvgVolumeMap(30);
 
-    // Build a price-history map for sparklines.
-    const priceHistoryMap = await this.buildPriceHistoryMap(7);
+    // Build a price-history map for sparklines / EMA / regression.
+    const priceHistoryMap = await this.buildPriceHistoryMap(30);
 
     const effectiveMinVol = overrides?.minVolume ?? this.minVolume;
     const effectiveMaxVol = overrides?.maxVolume ?? this.maxVolume;
@@ -131,8 +211,8 @@ export class MarketAnalyzerService {
 
     if (matched.length === 0) return [];
 
-    const avgVolumeMap = await this.buildAvgVolumeMap(7);
-    const priceHistoryMap = await this.buildPriceHistoryMap(7);
+    const avgVolumeMap = await this.buildAvgVolumeMap(30);
+    const priceHistoryMap = await this.buildPriceHistoryMap(30);
 
     // Score with no volume/price filters so *every* match is included.
     const scored = this.scoreAndFilter(matched, 0, 0, 0, avgVolumeMap, priceHistoryMap);
@@ -154,8 +234,8 @@ export class MarketAnalyzerService {
     const matched = allRecords.filter((r) => names.has(r.name));
     if (matched.length === 0) return [];
 
-    const avgVolumeMap = await this.buildAvgVolumeMap(7);
-    const priceHistoryMap = await this.buildPriceHistoryMap(7);
+    const avgVolumeMap = await this.buildAvgVolumeMap(30);
+    const priceHistoryMap = await this.buildPriceHistoryMap(30);
 
     const scored = this.scoreAndFilter(matched, 0, 0, 0, avgVolumeMap, priceHistoryMap);
     return this.sortDescending(scored);
@@ -208,7 +288,10 @@ export class MarketAnalyzerService {
       const hype = item.volumeSpikeMultiplier > 0
         ? ` | 🔥 ${item.volumeSpikeMultiplier}x Vol Spike`
         : "";
-      return `${rank}. ${item.name} | GE Price: ${price} gp | Buy ≤ ${recBuy} | Sell ≥ ${recSell} | Profit: ${flipPft} gp/ea | Limit: ${limit} | Eff. Vol: ${effVol} | Max 4H Capital: ${cap4h} | Tax Gap: ${this.formatGp(item.taxGap)} gp${risk}${hype}`;
+      const slope = item.linearSlope >= 0 ? `+${item.linearSlope.toFixed(1)}` : item.linearSlope.toFixed(1);
+      const vol = (item.volatility * 100).toFixed(1);
+      const predicted = this.formatGp(Math.round(item.predictedNextPrice));
+      return `${rank}. ${item.name} | GE Price: ${price} gp | Buy ≤ ${recBuy} | Sell ≥ ${recSell} | Profit: ${flipPft} gp/ea | Limit: ${limit} | Eff. Vol: ${effVol} | Max 4H Capital: ${cap4h} | Tax Gap: ${this.formatGp(item.taxGap)} gp | 30d Trend Slope: ${slope} | Volatility: ${vol}% | Predicted 24h Price: ${predicted} gp${risk}${hype}`;
     });
 
     return [header, ...lines, divider].join("\n");
@@ -262,8 +345,10 @@ export class MarketAnalyzerService {
       const maxCapitalPer4H = limit != null ? record.price * limit : 0;
 
       // Tax gap: minimum spread (in gp) needed to break even after 2% GE tax.
+      // Use floor-based tax to match the official RS3 engine rounding.
       const breakEvenSell = Math.ceil(record.price / 0.98);
-      const taxGap = breakEvenSell - record.price;
+      const breakEvenTax = record.price <= 50 ? 0 : Math.floor(breakEvenSell * 0.02);
+      const taxGap = breakEvenTax + (breakEvenSell - record.price - breakEvenTax);
 
       // Recommended buy price: ~1% below current GE mid-price.
       const recBuyPrice = Math.max(
@@ -273,13 +358,17 @@ export class MarketAnalyzerService {
       // Recommended sell price: high enough above the buy price to cover
       // the 2% GE tax and still yield a meaningful margin.
       // Target: sell at ~3% above mid-price → ~2% spread after tax.
-      const recSellPrice = Math.max(
+      let recSellPrice = Math.max(
         recBuyPrice + 1,
         Math.ceil(record.price * 1.03)
       );
+      // High Alchemy floor: never recommend selling below the alch value.
+      recSellPrice = Math.max(recSellPrice, record.highAlch || 0);
       // Estimated per-item flip profit: sell − buy − 2% GE tax on the sale.
-      const geTax = Math.floor(recSellPrice * 0.02);
-      const estFlipProfit = recSellPrice - recBuyPrice - geTax;
+      // Official RS3 wiki formula: floor(price * 2%), exempt at ≤ 50 gp.
+      let expectedTax = Math.floor(recSellPrice * 0.02);
+      if (recSellPrice <= 50) expectedTax = 0;
+      const estFlipProfit = recSellPrice - recBuyPrice - expectedTax;
 
       // Risk flag: only cheap items (< 500 gp) where the absolute tax
       // gap is large relative to realistic spreads.
@@ -295,6 +384,12 @@ export class MarketAnalyzerService {
       // Price history sparkline data: historical prices + today.
       const histPrices = priceHistoryMap.get(record.name) ?? [];
       const priceHistory = [...histPrices, record.price];
+
+      // ── Time-series indicators (30-day window) ────────────────────────
+      const ema30d = calculateEMA(priceHistory);
+      const volatility = calculateVolatility(priceHistory);
+      const { slope: linearSlope, predictedNext: predictedNextPrice } =
+        calculateLinearTrend(priceHistory);
 
       // 7-day price momentum: classify trend based on overall % change.
       let priceTrend: "Uptrend" | "Downtrend" | "Stable" = "Stable";
@@ -318,13 +413,20 @@ export class MarketAnalyzerService {
         tradeVelocity = "Very Slow";
       }
 
+      // ── Scoring adjustments based on predictive indicators ──────────
+      let tradedValue = record.price * effectivePlayerVolume;
+      // Reward upward-trending items (positive linear slope).
+      if (linearSlope > 0) tradedValue *= 1.05;
+      // Penalise highly volatile items (daily σ > 10 %).
+      if (volatility > 0.10) tradedValue *= 0.90;
+
       result.push({
         name: record.name,
         itemId: record.id,
         price: record.price,
         recBuyPrice,
         volume: globalVol,
-        tradedValue: record.price * effectivePlayerVolume,
+        tradedValue,
         buyLimit: record.buyLimit,
         effectivePlayerVolume,
         maxCapitalPer4H,
@@ -336,6 +438,10 @@ export class MarketAnalyzerService {
         tradeVelocity,
         priceHistory,
         priceTrend,
+        ema30d,
+        volatility,
+        linearSlope,
+        predictedNextPrice,
       });
     }
 

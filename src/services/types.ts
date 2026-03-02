@@ -20,6 +20,8 @@ export interface WeirdGloopPriceRecord {
   volume: number;
   /** GE buy limit per 4-hour window (fetched from the RS Wiki Cargo API). */
   buyLimit?: number;
+  /** High Alchemy value in gp (fetched from the RS Wiki Exchange module). */
+  highAlch?: number;
 }
 
 /**
@@ -28,6 +30,27 @@ export interface WeirdGloopPriceRecord {
  */
 export interface WeirdGloopLatestResponse {
   [itemName: string]: WeirdGloopPriceRecord;
+}
+
+/**
+ * A single data point in the Weird Gloop `/exchange/history/rs/last90d` response.
+ * Each entry represents one daily price snapshot.
+ */
+export interface WeirdGloopHistoryEntry {
+  /** Unix-millisecond timestamp of the snapshot. */
+  timestamp: number;
+  /** Closing price for that day. */
+  price: number;
+  /** 24-hour trade volume (may be 0). */
+  volume?: number;
+}
+
+/**
+ * Top-level response shape for a `/exchange/history/rs/last90d` call.
+ * Keys are canonical item names; values are arrays of daily snapshots.
+ */
+export interface WeirdGloopHistoryResponse {
+  [itemName: string]: WeirdGloopHistoryEntry[];
 }
 
 // ─── IndexedDB Stored Record ────────────────────────────────────────────────
@@ -149,6 +172,29 @@ export interface RankedItem {
    * - `"Stable"` — within ±5 %.
    */
   priceTrend: "Uptrend" | "Downtrend" | "Stable";
+  /**
+   * 30-day Exponential Moving Average of historical prices.
+   * Gives more weight to recent prices (α = 0.2 by default).
+   * `0` when insufficient history.
+   */
+  ema30d: number;
+  /**
+   * Standard deviation of daily percentage changes over the price history.
+   * A value of `0.05` means 5 % typical daily swing.
+   * `0` when fewer than 2 data points.
+   */
+  volatility: number;
+  /**
+   * OLS linear-regression slope of the price series (gp per day).
+   * Positive = upward drift, negative = declining.
+   * `0` when insufficient history.
+   */
+  linearSlope: number;
+  /**
+   * Price predicted by the linear regression model for the next day
+   * (i.e. day N+1).  `0` when insufficient history.
+   */
+  predictedNextPrice: number;
 }
 
 /** Tuneable knobs for the {@link MarketAnalyzerService}. */

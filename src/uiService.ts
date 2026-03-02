@@ -20,6 +20,7 @@ import {
   LLM_PROVIDERS,
   MarketAnalyzerService,
   PortfolioService,
+  runFullMarketScan,
   WeirdGloopService,
   WikiService,
 } from "./services";
@@ -257,6 +258,10 @@ let els: {
   favoritesCollapseBtn: HTMLButtonElement;
   favoritesSortSelect: HTMLSelectElement;
   refreshMarketBtn: HTMLButtonElement;
+  fullMarketScanBtn: HTMLButtonElement;
+  syncProgress: HTMLElement;
+  syncProgressFill: HTMLElement;
+  syncProgressText: HTMLElement;
   marketLoading: HTMLElement;
   marketItems: HTMLElement;
   errorBanner: HTMLElement;
@@ -366,6 +371,7 @@ export async function initUI(): Promise<void> {
   bindPortfolio();
   bindErrorRetry();
   bindDataManagement();
+  bindFullMarketScan();
   requestNotificationPermission();
 
   // Initialise shared service singletons.
@@ -595,6 +601,80 @@ function bindForceReload(): void {
       showError(msg);
     } finally {
       els.forceReloadBtn.disabled = false;
+    }
+  });
+}
+
+// ─── Full Market Background Scan ────────────────────────────────────────────
+
+/** Abort controller for an in-progress background scan. */
+let scanAbortController: AbortController | null = null;
+
+/**
+ * Bind the "Scan Full Market" button.  When clicked, runs a non-blocking
+ * background scan of all ~7 000 GE items, updating a progress bar in the UI.
+ * The user can continue using the app normally while the scan runs.
+ */
+function bindFullMarketScan(): void {
+  els.fullMarketScanBtn.addEventListener("click", async () => {
+    // If a scan is already running, abort it.
+    if (scanAbortController) {
+      scanAbortController.abort();
+      scanAbortController = null;
+      els.fullMarketScanBtn.textContent = "\uD83D\uDD0D Scan Full Market";
+      els.syncProgress.classList.add("hidden");
+      return;
+    }
+
+    if (geCatalogue.length === 0) {
+      try {
+        geCatalogue = await fetchGECatalogue();
+      } catch {
+        showError("Could not load item catalogue. Try again later.");
+        return;
+      }
+    }
+
+    if (geCatalogue.length === 0) {
+      showError("Item catalogue is empty — cannot scan.");
+      return;
+    }
+
+    // Show progress bar and disable button label.
+    scanAbortController = new AbortController();
+    els.fullMarketScanBtn.textContent = "\u23F9 Cancel Scan";
+    els.syncProgress.classList.remove("hidden");
+    els.syncProgressFill.style.width = "0%";
+    els.syncProgressText.textContent = "Scanning 0 / " + geCatalogue.length.toLocaleString("en-US") + "\u2026";
+
+    try {
+      await runFullMarketScan(
+        geCatalogue,
+        (done, total) => {
+          const pct = Math.round((done / total) * 100);
+          els.syncProgressFill.style.width = pct + "%";
+          els.syncProgressText.textContent =
+            `Scanning ${done.toLocaleString("en-US")} / ${total.toLocaleString("en-US")}\u2026 (${pct}%)`;
+        },
+        scanAbortController.signal,
+      );
+
+      // Scan complete — refresh the market panel with the full dataset.
+      cache = new CacheService();
+      await cache.open();
+      analyzer = new MarketAnalyzerService(cache);
+      await refreshMarketPanel();
+
+      els.syncProgressFill.style.width = "100%";
+      els.syncProgressText.textContent = "Full market scan complete \u2714";
+      setTimeout(() => els.syncProgress.classList.add("hidden"), 4000);
+    } catch (err) {
+      console.error("[UIService] Full market scan error:", err);
+      els.syncProgressText.textContent = "Scan failed \u2014 see console.";
+      setTimeout(() => els.syncProgress.classList.add("hidden"), 5000);
+    } finally {
+      scanAbortController = null;
+      els.fullMarketScanBtn.textContent = "\uD83D\uDD0D Scan Full Market";
     }
   });
 }
@@ -3135,6 +3215,10 @@ function resolveElements(): void {
     favoritesCollapseBtn: q<HTMLButtonElement>("favorites-collapse-btn"),
     favoritesSortSelect: q<HTMLSelectElement>("favorites-sort-select"),
     refreshMarketBtn: q<HTMLButtonElement>("refresh-market-btn"),
+    fullMarketScanBtn: q<HTMLButtonElement>("full-market-scan-btn"),
+    syncProgress: q("background-sync-progress"),
+    syncProgressFill: q("sync-progress-fill"),
+    syncProgressText: q("sync-progress-text"),
     marketLoading: q("market-loading"),
     marketItems: q("market-items"),
     errorBanner: q("error-banner"),

@@ -9,11 +9,14 @@ export { WikiService } from "./wikiService";
 export { LLMService, LLMRequestError } from "./llmService";
 export { PortfolioService } from "./portfolioService";
 export { RS3_ECONOMIC_RULES } from "./coreKnowledge";
-export { initDataPipeline, fetchGECatalogue } from "./initDataPipeline";
+export { initDataPipeline, fetchGECatalogue, runFullMarketScan } from "./initDataPipeline";
+export type { ScanProgressCallback } from "./initDataPipeline";
 export { LLM_PROVIDERS } from "./types";
 export type {
   WeirdGloopPriceRecord,
   WeirdGloopLatestResponse,
+  WeirdGloopHistoryEntry,
+  WeirdGloopHistoryResponse,
   StoredPriceRecord,
   RankedItem,
   WikiGuideResult,
