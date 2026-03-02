@@ -401,6 +401,262 @@ body {
   margin-bottom: 6px;
 }
 
+/* ── Provider cost hints & setup guide ────────────────────────────────────── */
+
+.provider-cost-hint {
+  display: block;
+  margin: 2px 0 4px;
+  font-size: 11px;
+  line-height: 1.3;
+  color: var(--text-muted);
+}
+.provider-cost-hint.tier-free {
+  color: var(--accent-green);
+}
+.provider-cost-hint.tier-free-tier {
+  color: #4ecdc4;
+}
+.provider-cost-hint.tier-low-cost {
+  color: var(--accent-blue-text);
+}
+.provider-cost-hint.tier-paid {
+  color: var(--text-muted);
+}
+.provider-cost-hint.tier-self-hosted {
+  color: var(--text-muted);
+}
+
+.setup-guide-btn {
+  display: inline-block;
+  margin-bottom: 6px;
+  padding: 4px 10px;
+  font-size: 11px;
+  background: transparent;
+  border: 1px dashed var(--accent-blue-text);
+  border-radius: 3px;
+  color: var(--accent-blue-text);
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+.setup-guide-btn:hover {
+  background: var(--accent-blue-text);
+  color: var(--bg-main);
+}
+.setup-guide-btn.hidden {
+  display: none;
+}
+
+/* ── Setup guide modal ────────────────────────────────────────────────────── */
+
+.setup-guide-backdrop {
+  position: fixed;
+  inset: 0;
+  background: var(--modal-backdrop);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10001;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.15s ease;
+}
+.setup-guide-backdrop.visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.setup-guide-modal {
+  position: relative;
+  background: var(--bg-main);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  width: 88vw;
+  max-width: 560px;
+  max-height: 80vh;
+  overflow-y: auto;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+  padding: 1.25rem;
+  box-sizing: border-box;
+  animation: setup-guide-in 0.18s ease-out;
+}
+@keyframes setup-guide-in {
+  from { opacity: 0; transform: scale(0.96) translateY(10px); }
+  to   { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+.setup-guide-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.75rem;
+}
+.setup-guide-header h3 {
+  margin: 0;
+  font-size: 16px;
+  color: var(--text-bright);
+}
+.setup-guide-close {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-size: 22px;
+  cursor: pointer;
+  padding: 0 4px;
+  line-height: 1;
+}
+.setup-guide-close:hover {
+  color: var(--text-bright);
+}
+
+.setup-guide-tier {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border-radius: 6px;
+  margin-bottom: 0.75rem;
+  font-size: 12px;
+  font-weight: 500;
+}
+.setup-guide-tier.tier-free {
+  background: rgba(76, 175, 80, 0.12);
+  border: 1px solid rgba(76, 175, 80, 0.3);
+  color: var(--accent-green);
+}
+.setup-guide-tier.tier-free-tier {
+  background: rgba(78, 205, 196, 0.12);
+  border: 1px solid rgba(78, 205, 196, 0.3);
+  color: #4ecdc4;
+}
+.setup-guide-tier.tier-low-cost {
+  background: rgba(100, 149, 237, 0.12);
+  border: 1px solid rgba(100, 149, 237, 0.3);
+  color: var(--accent-blue-text);
+}
+.setup-guide-tier.tier-paid {
+  background: rgba(180, 180, 180, 0.08);
+  border: 1px solid rgba(180, 180, 180, 0.2);
+  color: var(--text-muted);
+}
+.setup-guide-tier.tier-self-hosted {
+  background: rgba(180, 180, 180, 0.08);
+  border: 1px solid rgba(180, 180, 180, 0.2);
+  color: var(--text-muted);
+}
+
+.tier-badge {
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.setup-guide-steps {
+  margin: 0 0 0.75rem 0;
+  padding-left: 1.4rem;
+  font-size: 12px;
+  line-height: 1.7;
+  color: var(--text-primary);
+}
+.setup-guide-steps li {
+  margin-bottom: 6px;
+}
+.setup-guide-steps a {
+  color: var(--accent-blue-text);
+  text-decoration: underline;
+}
+.setup-guide-steps a:hover {
+  color: var(--text-bright);
+}
+
+.setup-guide-note {
+  padding: 8px 12px;
+  border-radius: 6px;
+  background: rgba(255, 215, 0, 0.08);
+  border: 1px solid rgba(255, 215, 0, 0.2);
+  font-size: 11px;
+  color: #f0d060;
+  margin-bottom: 0.75rem;
+  line-height: 1.5;
+}
+
+.setup-guide-link {
+  display: inline-block;
+  margin-bottom: 1rem;
+  font-size: 12px;
+  color: var(--accent-blue-text);
+  text-decoration: none;
+  font-weight: 500;
+}
+.setup-guide-link:hover {
+  text-decoration: underline;
+  color: var(--text-bright);
+}
+
+/* ── Provider comparison table ────────────────────────────────────────────── */
+
+.setup-guide-comparison {
+  border-top: 1px solid var(--border);
+  padding-top: 0.75rem;
+}
+.setup-guide-comparison h4 {
+  margin: 0 0 8px;
+  font-size: 13px;
+  color: var(--text-bright);
+}
+
+.provider-comparison-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 11px;
+}
+.provider-comparison-table th {
+  text-align: left;
+  padding: 5px 8px;
+  border-bottom: 1px solid var(--border);
+  color: var(--text-muted);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-size: 10px;
+}
+.provider-comparison-table td {
+  padding: 6px 8px;
+  border-bottom: 1px solid var(--border-input);
+  color: var(--text-primary);
+}
+.provider-comparison-table tr.active-row td {
+  background: rgba(100, 149, 237, 0.08);
+  color: var(--text-bright);
+  font-weight: 500;
+}
+.provider-comparison-table tr:hover td {
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.tier-badge-sm {
+  display: inline-block;
+  padding: 1px 6px;
+  border-radius: 3px;
+  font-size: 10px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.tier-badge-sm.tier-free {
+  background: rgba(76, 175, 80, 0.15);
+  color: var(--accent-green);
+}
+.tier-badge-sm.tier-free-tier {
+  background: rgba(78, 205, 196, 0.15);
+  color: #4ecdc4;
+}
+.tier-badge-sm.tier-low-cost {
+  background: rgba(100, 149, 237, 0.15);
+  color: var(--accent-blue-text);
+}
+.tier-badge-sm.tier-paid {
+  background: rgba(180, 180, 180, 0.1);
+  color: var(--text-muted);
+}
+
 select {
   background: var(--bg-input);
   border: 1px solid var(--border-input);
@@ -5727,6 +5983,9 @@ const LLM_PROVIDERS = [
             { id: "gemma2-9b-it", label: "Gemma 2 9B" },
             { id: "mixtral-8x7b-32768", label: "Mixtral 8×7B" },
         ],
+        costTier: "free",
+        costNote: "Generous free tier — no credit card required",
+        signupUrl: "https://console.groq.com/keys",
     },
     {
         id: "openai",
@@ -5741,6 +6000,9 @@ const LLM_PROVIDERS = [
             { id: "gpt-3.5-turbo", label: "GPT-3.5 Turbo" },
             { id: "o3-mini", label: "o3-mini" },
         ],
+        costTier: "paid",
+        costNote: "Pay-as-you-go — requires billing setup",
+        signupUrl: "https://platform.openai.com/api-keys",
     },
     {
         id: "openrouter",
@@ -5756,6 +6018,9 @@ const LLM_PROVIDERS = [
             { id: "google/gemma-2-9b-it", label: "Gemma 2 9B" },
             { id: "openai/gpt-4o-mini", label: "GPT-4o Mini (OpenAI)" },
         ],
+        costTier: "free-tier",
+        costNote: "Free tier for select models — credit for paid models",
+        signupUrl: "https://openrouter.ai/keys",
     },
     {
         id: "together",
@@ -5769,6 +6034,9 @@ const LLM_PROVIDERS = [
             { id: "mistralai/Mixtral-8x7B-Instruct-v0.1", label: "Mixtral 8×7B" },
             { id: "togethercomputer/RedPajama-INCITE-7B-Chat", label: "RedPajama 7B" },
         ],
+        costTier: "free-tier",
+        costNote: "Free tier with $5 credit on signup",
+        signupUrl: "https://api.together.xyz/settings/api-keys",
     },
     {
         id: "mistral",
@@ -5783,6 +6051,9 @@ const LLM_PROVIDERS = [
             { id: "open-mistral-7b", label: "Mistral 7B (Open)" },
             { id: "open-mixtral-8x7b", label: "Mixtral 8×7B (Open)" },
         ],
+        costTier: "low-cost",
+        costNote: "Pay-as-you-go — competitively priced",
+        signupUrl: "https://console.mistral.ai/api-keys",
     },
     {
         id: "custom",
@@ -5791,6 +6062,8 @@ const LLM_PROVIDERS = [
         defaultModel: "",
         keyPlaceholder: "(optional for local models)",
         models: [],
+        costTier: "self-hosted",
+        costNote: "Run your own model locally — no API cost",
     },
 ];
 
@@ -6289,7 +6562,9 @@ class WikiService {
     }
     /**
      * Fetch High Alchemy values in bulk by reading `Module:Exchange/<Item>` pages.
-     * Each Lua module contains an `alchvalue` field with the item's alch price.
+     * Each Lua module may contain an explicit `alchvalue` field; if absent, the
+     * value is computed from the base `value` field as `floor(value × 0.6)`.
+     * Items with `alchable = false` are skipped.
      *
      * @param itemNames - Canonical RS3 item names.
      * @returns A `Map<string, number>` keyed by item name → high alch value.
@@ -6345,11 +6620,23 @@ class WikiService {
                 continue;
             const itemName = page.title.replace(/^Module:Exchange\//, "");
             const luaSrc = page.revisions?.[0]?.slots?.main?.["*"] ?? "";
-            const match = WikiService.ALCH_RE.exec(luaSrc);
-            if (match) {
-                const val = Number(match[1]);
+            // Skip items explicitly marked as non-alchable
+            if (WikiService.ALCHABLE_FALSE_RE.test(luaSrc))
+                continue;
+            // Prefer explicit alchvalue if present
+            const alchMatch = WikiService.ALCH_RE.exec(luaSrc);
+            if (alchMatch) {
+                const val = Number(alchMatch[1]);
                 if (val > 0)
                     map.set(itemName, val);
+                continue;
+            }
+            // Fallback: compute High Alch from base value (High Alch = floor(value × 0.6))
+            const valueMatch = WikiService.VALUE_RE.exec(luaSrc);
+            if (valueMatch) {
+                const highAlch = Math.floor(Number(valueMatch[1]) * 0.6);
+                if (highAlch > 0)
+                    map.set(itemName, highAlch);
             }
         }
         return map;
@@ -6442,6 +6729,10 @@ WikiService.EXCHANGE_BATCH_SIZE = 50;
 WikiService.LIMIT_RE = /limit\s*=\s*(\d+)/;
 /** Regex that extracts the `alchvalue = <number>` value from a Lua module source. */
 WikiService.ALCH_RE = /alchvalue\s*=\s*(\d+)/;
+/** Regex that extracts the `value = <number>` (base item value) from a Lua module source. */
+WikiService.VALUE_RE = /\bvalue\s*=\s*(\d+)/;
+/** Regex that detects `alchable = false` — items that cannot be alched. */
+WikiService.ALCHABLE_FALSE_RE = /alchable\s*=\s*false/i;
 
 
 /***/ },
@@ -6758,15 +7049,31 @@ async function initUI(onStatus) {
 }
 // ─── Settings (API Key) ─────────────────────────────────────────────────────
 /**
+ * Map a {@link ProviderCostTier} to a short human-readable badge label.
+ */
+function costTierBadge(tier) {
+    switch (tier) {
+        case "free": return "\u2705 FREE";
+        case "free-tier": return "\u{1F193} Free Tier";
+        case "low-cost": return "\uD83D\uDCB2 Low Cost";
+        case "paid": return "\uD83D\uDCB3 Paid";
+        case "self-hosted": return "\uD83D\uDDA5\uFE0F Self-hosted";
+        default: return "";
+    }
+}
+/**
  * Populate the provider `<select>` element from the {@link LLM_PROVIDERS}
- * preset array.
+ * preset array, annotating each option with its cost tier badge.
  */
 function populateProviderDropdown() {
     els.providerSelect.innerHTML = "";
     for (const p of _services__WEBPACK_IMPORTED_MODULE_0__.LLM_PROVIDERS) {
         const opt = document.createElement("option");
         opt.value = p.id;
-        opt.textContent = p.label;
+        const badge = costTierBadge(p.costTier);
+        opt.textContent = badge ? `${p.label}  ${badge}` : p.label;
+        if (p.id === "groq")
+            opt.textContent += " \u2B50 Recommended";
         els.providerSelect.appendChild(opt);
     }
 }
@@ -6796,7 +7103,8 @@ function restoreSettings() {
 }
 /**
  * Update UI elements that depend on the active provider selection:
- * placeholder text, custom endpoint visibility, model datalist, model placeholder.
+ * placeholder text, custom endpoint visibility, model datalist, model placeholder,
+ * cost tier hint, and setup guide button visibility.
  */
 function applyProviderUI(provider) {
     // Toggle custom endpoint field visibility.
@@ -6804,6 +7112,12 @@ function applyProviderUI(provider) {
     // Update placeholders.
     els.apiKeyInput.placeholder = provider.keyPlaceholder;
     els.modelInput.placeholder = provider.defaultModel || "(enter model name)";
+    // Cost tier hint.
+    const badge = costTierBadge(provider.costTier);
+    els.providerCostHint.textContent = badge ? `${badge} \u2014 ${provider.costNote}` : provider.costNote;
+    els.providerCostHint.className = `provider-cost-hint tier-${provider.costTier}`;
+    // Show/hide setup guide button (only useful for cloud providers with a signup URL).
+    els.setupGuideBtn.classList.toggle("hidden", !provider.signupUrl);
     // Rebuild datalist options for this provider's model catalogue.
     populateModelDatalist(provider);
 }
@@ -6819,6 +7133,145 @@ function populateModelDatalist(provider) {
         opt.label = m.recommended ? `★ ${m.label} (recommended)` : m.label;
         els.modelOptions.appendChild(opt);
     }
+}
+// ─── API Key Setup Guide Modal ──────────────────────────────────────────────
+/** Lazily-created singleton setup guide modal. */
+let setupGuideModal = null;
+/**
+ * Provider-specific setup instructions.  Keyed by provider ID.
+ * Each entry has numbered steps and an optional note.
+ */
+const SETUP_GUIDES = {
+    groq: {
+        steps: [
+            'Go to <a href="https://console.groq.com" target="_blank" rel="noopener">console.groq.com</a> and click <strong>Sign Up</strong> (Google / GitHub / email).',
+            "No credit card is required \u2014 the free tier is generous enough for this plugin.",
+            'Once logged in, navigate to <strong>API Keys</strong> in the left sidebar (or visit <a href="https://console.groq.com/keys" target="_blank" rel="noopener">console.groq.com/keys</a>).',
+            'Click <strong>Create API Key</strong>, give it a name (e.g. "GE Analyzer"), and copy the key.',
+            "Paste the key into the <em>API Key</em> field above and click <strong>Save</strong>.",
+            "Select a model (the default <strong>Llama 3 8B</strong> works great) and you\u2019re ready to go!",
+        ],
+        note: "Groq\u2019s free tier allows thousands of requests per day with fast inference \u2014 perfect for this plugin. Rate limits reset daily.",
+    },
+    openai: {
+        steps: [
+            'Go to <a href="https://platform.openai.com/signup" target="_blank" rel="noopener">platform.openai.com</a> and create an account.',
+            "Add a payment method under <strong>Settings \u2192 Billing</strong>.",
+            'Navigate to <a href="https://platform.openai.com/api-keys" target="_blank" rel="noopener">API Keys</a> and click <strong>Create new secret key</strong>.',
+            "Copy the key, paste it above, and click <strong>Save</strong>.",
+        ],
+        note: "OpenAI charges per token. GPT-4o Mini is very affordable for this use case.",
+    },
+    openrouter: {
+        steps: [
+            'Go to <a href="https://openrouter.ai" target="_blank" rel="noopener">openrouter.ai</a> and sign up.',
+            "Some models (e.g. Llama 3 8B) are free to use \u2014 no payment needed.",
+            'Navigate to <a href="https://openrouter.ai/keys" target="_blank" rel="noopener">Keys</a> and create a new API key.',
+            "Paste the key above and click <strong>Save</strong>.",
+        ],
+        note: "OpenRouter aggregates many providers. Look for the \u26A1 icon on their site to find free models.",
+    },
+    together: {
+        steps: [
+            'Go to <a href="https://api.together.xyz" target="_blank" rel="noopener">api.together.xyz</a> and create an account.',
+            "New accounts receive <strong>$5 in free credit</strong> \u2014 no card required.",
+            'Navigate to <a href="https://api.together.xyz/settings/api-keys" target="_blank" rel="noopener">Settings \u2192 API Keys</a> and create a key.',
+            "Paste the key above and click <strong>Save</strong>.",
+        ],
+    },
+    mistral: {
+        steps: [
+            'Go to <a href="https://console.mistral.ai" target="_blank" rel="noopener">console.mistral.ai</a> and create an account.',
+            'Navigate to <a href="https://console.mistral.ai/api-keys" target="_blank" rel="noopener">API Keys</a> and generate a key.',
+            "Paste the key above and click <strong>Save</strong>.",
+        ],
+        note: "Mistral offers competitive per-token pricing, especially for their smaller models.",
+    },
+};
+/** Create (once) and return the setup guide modal backdrop + shell. */
+function ensureSetupGuideModal() {
+    if (setupGuideModal)
+        return setupGuideModal;
+    const backdrop = document.createElement("div");
+    backdrop.className = "setup-guide-backdrop";
+    backdrop.addEventListener("click", (e) => {
+        if (e.target === backdrop)
+            backdrop.classList.remove("visible");
+    });
+    const modal = document.createElement("div");
+    modal.className = "setup-guide-modal";
+    modal.setAttribute("role", "dialog");
+    modal.setAttribute("aria-modal", "true");
+    backdrop.appendChild(modal);
+    document.body.appendChild(backdrop);
+    document.addEventListener("keydown", (e) => {
+        if (e.key === "Escape" && backdrop.classList.contains("visible")) {
+            backdrop.classList.remove("visible");
+        }
+    });
+    setupGuideModal = backdrop;
+    return backdrop;
+}
+/**
+ * Show the API-key setup guide modal for the currently selected provider.
+ * Falls back to a generic message if no guide is available.
+ */
+function showSetupGuide() {
+    const provider = getProviderById(els.providerSelect.value);
+    const backdrop = ensureSetupGuideModal();
+    const modal = backdrop.querySelector(".setup-guide-modal");
+    const guide = SETUP_GUIDES[provider.id];
+    const badge = costTierBadge(provider.costTier);
+    let html = '<div class="setup-guide-header">';
+    html += `<h3>Setup Guide: ${provider.label}</h3>`;
+    html += '<button class="setup-guide-close" aria-label="Close">\u00D7</button>';
+    html += "</div>";
+    // Cost tier banner
+    html += `<div class="setup-guide-tier tier-${provider.costTier}">`;
+    html += `<span class="tier-badge">${badge}</span>`;
+    html += `<span>${provider.costNote}</span>`;
+    html += "</div>";
+    if (guide) {
+        html += '<ol class="setup-guide-steps">';
+        for (const step of guide.steps) {
+            html += `<li>${step}</li>`;
+        }
+        html += "</ol>";
+        if (guide.note) {
+            html += `<div class="setup-guide-note">\uD83D\uDCA1 ${guide.note}</div>`;
+        }
+    }
+    else {
+        html += "<p>Visit your provider\u2019s dashboard to create an API key, then paste it into the API Key field and click Save.</p>";
+    }
+    // Quick link
+    if (provider.signupUrl) {
+        html += `<a class="setup-guide-link" href="${provider.signupUrl}" target="_blank" rel="noopener">\u2192 Open ${provider.label} API Keys page</a>`;
+    }
+    // Provider comparison table (always shown)
+    html += '<div class="setup-guide-comparison">';
+    html += "<h4>Provider Comparison</h4>";
+    html += '<table class="provider-comparison-table"><thead><tr>';
+    html += "<th>Provider</th><th>Cost</th><th>Notes</th>";
+    html += "</tr></thead><tbody>";
+    for (const p of _services__WEBPACK_IMPORTED_MODULE_0__.LLM_PROVIDERS) {
+        if (p.id === "custom")
+            continue;
+        const isActive = p.id === provider.id;
+        const rowBadge = costTierBadge(p.costTier);
+        html += `<tr class="${isActive ? "active-row" : ""}">`;
+        html += `<td>${p.label}${p.id === "groq" ? " \u2B50" : ""}</td>`;
+        html += `<td><span class="tier-badge-sm tier-${p.costTier}">${rowBadge}</span></td>`;
+        html += `<td>${p.costNote}</td>`;
+        html += "</tr>";
+    }
+    html += "</tbody></table>";
+    html += "</div>";
+    modal.innerHTML = html;
+    // Bind close button.
+    const closeBtn = modal.querySelector(".setup-guide-close");
+    closeBtn?.addEventListener("click", () => backdrop.classList.remove("visible"));
+    backdrop.classList.add("visible");
 }
 /**
  * Persist all settings inputs to `localStorage`.
@@ -6884,6 +7337,8 @@ function bindSettingsEvents() {
         // clicks into it.  The placeholder already shows the default model.
         els.modelInput.value = "";
     });
+    // Setup guide button.
+    els.setupGuideBtn.addEventListener("click", showSetupGuide);
 }
 /**
  * Bind the force-reload button.  Clears the IndexedDB cache, re-runs the
@@ -10096,6 +10551,8 @@ function resolveElements() {
     els = {
         alt1Status: q("alt1-status"),
         providerSelect: q("provider-select"),
+        providerCostHint: q("provider-cost-hint"),
+        setupGuideBtn: q("setup-guide-btn"),
         customEndpointGroup: q("custom-endpoint-group"),
         customEndpointInput: q("custom-endpoint-input"),
         modelInput: q("model-input"),
