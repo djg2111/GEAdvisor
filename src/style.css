@@ -1,0 +1,1878 @@
+/* ─────────────────────────────────────────────────────────────────────────────
+ * GE Market Analyzer — Alt1 Overlay Stylesheet
+ *
+ * Dark palette optimised for readability on top of the RS3 game client.
+ * All measurements use px/rem so the overlay renders consistently regardless
+ * of the host page's base font-size.
+ * ───────────────────────────────────────────────────────────────────────────── */
+
+/* ═══════════════════════════════════════════════════════════════════════════
+ *  THEME VARIABLES — CSS Custom Properties
+ *  Default: "Classic Dark".  Switch via body[data-theme="osrs"|"rs3-modern"].
+ * ═══════════════════════════════════════════════════════════════════════════ */
+
+:root {
+  /* ── Backgrounds ─────────────────────── */
+  --bg-main: #1e1e1e;
+  --bg-panel: #252526;
+  --bg-elevated: #2d2d30;
+  --bg-hover: #2a2d2e;
+  --bg-input: #3c3c3c;
+  --bg-muted: #333;
+  --bg-filter: #1e1e24;
+  --bg-number-input: #2a2a2e;
+
+  /* ── Text ────────────────────────────── */
+  --text-main: #d4d4d4;
+  --text-bright: #fff;
+  --text-accent: #9cdcfe;
+  --text-heading: #dcdcaa;
+  --text-price: #b5cea8;
+  --text-muted: #888;
+  --text-soft: #aaa;
+  --text-dimmed: #666;
+
+  /* ── Borders ─────────────────────────── */
+  --border-main: #333;
+  --border-section: #3a3d40;
+  --border-input: #555;
+  --border-subtle: #444;
+  --border-hype: #6b5a1e;
+  --border-hype-hover: #a08830;
+
+  /* ── Primary action ──────────────────── */
+  --accent-primary: #0e639c;
+  --accent-primary-hover: #1177bb;
+  --accent-primary-active: #094771;
+  --accent-focus: #007acc;
+
+  /* ── Semantic accents ────────────────── */
+  --accent-blue-text: #569cd6;
+  --accent-green: #6a9955;
+  --accent-green-bright: #27ae60;
+  --accent-teal: #4ec9b0;
+  --accent-gold: #f0c040;
+  --accent-gold-hype: #f5c542;
+  --accent-red: #f44747;
+  --accent-red-dark: #c0392b;
+  --accent-red-bg: #3a1d1d;
+  --accent-red-border: #6b3030;
+  --accent-red-border-hover: #a04040;
+
+  /* ── Chat ─────────────────────────────── */
+  --chat-user-bg: #264f78;
+  --chat-error-bg: #3b1a1a;
+
+  /* ── Badges ──────────────────────────── */
+  --badge-buy-bg: #1e2d3a;
+  --badge-sell-bg: #1e3a1e;
+  --badge-hype-bg: #3a2e10;
+
+  /* ── Modal ───────────────────────────── */
+  --modal-backdrop: rgba(0, 0, 0, 0.6);
+  --modal-shadow: rgba(0, 0, 0, 0.8);
+
+  /* ── Scrollbar ───────────────────────── */
+  --scrollbar-thumb: #555;
+  --scrollbar-thumb-hover: #777;
+
+  /* ── Misc ─────────────────────────────── */
+  --link-color: #6cb4ee;
+  --add-flip-bg: #1b6b2a;
+  --limit-ready-bg: #1a2e1a;
+}
+
+/* ── OSRS Brown Theme ─────────────────────────────────────────────────────── */
+
+body[data-theme="osrs"] {
+  --bg-main: #382b1f;
+  --bg-panel: #4a3a2a;
+  --bg-elevated: #56452f;
+  --bg-hover: #5c4b35;
+  --bg-input: #3e2e1e;
+  --bg-muted: #4a3a2a;
+  --bg-filter: #322418;
+  --bg-number-input: #3a2c1e;
+
+  --text-main: #ffdf8f;
+  --text-bright: #fff5d0;
+  --text-accent: #ffd666;
+  --text-heading: #ff9900;
+  --text-price: #d4a843;
+  --text-muted: #b89860;
+  --text-soft: #c8a060;
+  --text-dimmed: #8a6d40;
+
+  --border-main: #1f160e;
+  --border-section: #2a1e12;
+  --border-input: #6b5030;
+  --border-subtle: #5a4020;
+  --border-hype: #806020;
+  --border-hype-hover: #a08030;
+
+  --accent-primary: #8b4513;
+  --accent-primary-hover: #a0522d;
+  --accent-primary-active: #6b3410;
+  --accent-focus: #cd853f;
+  --accent-blue-text: #cd853f;
+  --accent-green: #6b8e23;
+  --accent-green-bright: #228b22;
+  --accent-teal: #8fbc8f;
+  --accent-gold: #ffd700;
+  --accent-gold-hype: #ffa500;
+  --accent-red: #dc143c;
+  --accent-red-dark: #8b0000;
+  --accent-red-bg: #3a1a0a;
+  --accent-red-border: #8b3030;
+  --accent-red-border-hover: #a04040;
+
+  --chat-user-bg: #5a3a18;
+  --chat-error-bg: #3a1a0a;
+  --badge-buy-bg: #3a2810;
+  --badge-sell-bg: #283a10;
+  --badge-hype-bg: #3a3010;
+
+  --modal-backdrop: rgba(0, 0, 0, 0.7);
+  --modal-shadow: rgba(0, 0, 0, 0.9);
+  --scrollbar-thumb: #6b5030;
+  --scrollbar-thumb-hover: #8a6d40;
+  --link-color: #cd853f;
+  --add-flip-bg: #4a6b1a;
+  --limit-ready-bg: #2a3a1a;
+}
+
+/* ── RS3 Modern Theme ─────────────────────────────────────────────────────── */
+
+body[data-theme="rs3-modern"] {
+  --bg-main: #0f1722;
+  --bg-panel: #1c2836;
+  --bg-elevated: #1e2d3e;
+  --bg-hover: #243548;
+  --bg-input: #1a2a3a;
+  --bg-muted: #1c2836;
+  --bg-filter: #141f2d;
+  --bg-number-input: #162030;
+
+  --text-main: #e6f0fa;
+  --text-bright: #ffffff;
+  --text-accent: #7dd3fc;
+  --text-heading: #38bdf8;
+  --text-price: #86efac;
+  --text-muted: #7494b0;
+  --text-soft: #90adc4;
+  --text-dimmed: #4a6580;
+
+  --border-main: #2a3f54;
+  --border-section: #1e3450;
+  --border-input: #3a5570;
+  --border-subtle: #2a4060;
+  --border-hype: #5a5a1e;
+  --border-hype-hover: #808030;
+
+  --accent-primary: #00a8ff;
+  --accent-primary-hover: #33bbff;
+  --accent-primary-active: #0080cc;
+  --accent-focus: #00a8ff;
+  --accent-blue-text: #7dd3fc;
+  --accent-green: #4ade80;
+  --accent-green-bright: #22c55e;
+  --accent-teal: #2dd4bf;
+  --accent-gold: #fbbf24;
+  --accent-gold-hype: #f59e0b;
+  --accent-red: #f87171;
+  --accent-red-dark: #ef4444;
+  --accent-red-bg: #2a1515;
+  --accent-red-border: #7f1d1d;
+  --accent-red-border-hover: #991b1b;
+
+  --chat-user-bg: #0c3a6e;
+  --chat-error-bg: #2a1515;
+  --badge-buy-bg: #0c2d4a;
+  --badge-sell-bg: #0c3a1e;
+  --badge-hype-bg: #3a3010;
+
+  --modal-backdrop: rgba(0, 0, 0, 0.75);
+  --modal-shadow: rgba(0, 0, 0, 0.9);
+  --scrollbar-thumb: #3a5570;
+  --scrollbar-thumb-hover: #4a7090;
+  --link-color: #7dd3fc;
+  --add-flip-bg: #0d5a2a;
+  --limit-ready-bg: #0d2a1a;
+}
+
+/* ── Reset & base ─────────────────────────────────────────────────────────── */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  width: 100%;
+  height: 100%;
+}
+
+body {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;          /* prevent body-level scrollbar; app shell handles its own scrolling */
+  font-family: "Segoe UI", Consolas, "Liberation Mono", monospace;
+  font-size: 13px;
+  line-height: 1.45;
+  color: var(--text-main);
+  background: var(--bg-main);
+}
+
+/* ── Alt1 status banner ───────────────────────────────────────────────────── */
+
+#alt1-status {
+  padding: 4px 10px;
+  font-size: 11px;
+  text-align: center;
+}
+
+#alt1-status:empty {
+  display: none;
+}
+
+#alt1-status a {
+  color: var(--link-color);
+}
+
+/* ── App shell ────────────────────────────────────────────────────────────── */
+
+#app {
+  display: flex;
+  flex-direction: column;
+  height: 95%;              /* fill parent, not viewport — respects zoom */
+  min-height: 0;             /* allow flex children to shrink properly */
+  overflow: hidden;
+}
+
+/* ── Settings panel ───────────────────────────────────────────────────────── */
+
+#settings-panel {
+  background: var(--bg-panel);
+  border-bottom: 1px solid var(--border-main);
+  padding: 6px 10px;
+  font-size: 12px;
+  flex-shrink: 0;
+}
+
+#settings-panel summary {
+  cursor: pointer;
+  user-select: none;
+  color: var(--text-accent);
+  font-weight: 600;
+  outline: none;
+}
+
+.settings-body {
+  margin-top: 6px;
+}
+
+.settings-body label {
+  display: block;
+  margin-bottom: 3px;
+  color: var(--text-muted);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.settings-row {
+  display: flex;
+  gap: 6px;
+}
+
+.settings-row input {
+  flex: 1;
+}
+
+.status-hint {
+  display: block;
+  margin-top: 4px;
+  font-size: 11px;
+  color: var(--accent-green);
+}
+
+.status-hint.error {
+  color: var(--accent-red);
+}
+
+/* ── Danger button ────────────────────────────────────────────────────────── */
+
+.danger-btn {
+  width: 100%;
+  font-size: 11px;
+  padding: 5px 10px;
+  background: var(--accent-red-bg);
+  border: 1px solid var(--accent-red-border);
+  color: var(--text-main);
+  border-radius: 3px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.danger-btn:hover {
+  background: var(--accent-red-border);
+  color: var(--text-bright);
+}
+
+.danger-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* ── Settings field helpers ───────────────────────────────────────────────── */
+
+.settings-field {
+  margin-top: 6px;
+}
+
+.settings-field.hidden {
+  display: none;
+}
+
+.settings-body select,
+.settings-body input[type="text"] {
+  width: 100%;
+  margin-bottom: 6px;
+}
+
+select {
+  background: var(--bg-input);
+  border: 1px solid var(--border-input);
+  border-radius: 3px;
+  padding: 5px 8px;
+  color: var(--text-main);
+  font-family: inherit;
+  font-size: 12px;
+  outline: none;
+  transition: border-color 0.15s;
+  appearance: auto;
+}
+
+select:focus {
+  border-color: var(--accent-focus);
+}
+
+/* ── Shared input / button styles ─────────────────────────────────────────── */
+
+input[type="text"],
+input[type="password"] {
+  background: var(--bg-input);
+  border: 1px solid var(--border-input);
+  border-radius: 3px;
+  padding: 5px 8px;
+  color: var(--text-main);
+  font-family: inherit;
+  font-size: 12px;
+  outline: none;
+  transition: border-color 0.15s;
+}
+
+input[type="text"]:focus,
+input[type="password"]:focus {
+  border-color: var(--accent-focus);
+}
+
+button {
+  background: var(--accent-primary);
+  border: none;
+  border-radius: 3px;
+  padding: 5px 14px;
+  color: var(--text-bright);
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.15s;
+}
+
+button:hover {
+  background: var(--accent-primary-hover);
+}
+
+button:active {
+  background: var(--accent-primary-active);
+}
+
+button:disabled {
+  background: var(--bg-input);
+  color: var(--text-dimmed);
+  cursor: not-allowed;
+}
+
+/* ── Layout toggle buttons ─────────────────────────────────────────────────── */
+
+.layout-toggle {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 6px;
+}
+
+.layout-btn {
+  flex: 1;
+  font-size: 11px;
+  padding: 4px 8px;
+  background: var(--bg-muted);
+  border: 1px solid var(--border-input);
+  color: var(--text-muted);
+  border-radius: 3px;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+
+.layout-btn:hover {
+  background: var(--bg-input);
+  color: var(--text-main);
+}
+
+.layout-btn.active {
+  background: var(--accent-primary);
+  color: var(--text-bright);
+  border-color: var(--accent-primary);
+}
+
+/* ── Tab navigation ───────────────────────────────────────────────────────── */
+
+#view-tabs {
+  display: flex;
+  gap: 0;
+  flex-shrink: 0;
+  background: var(--bg-panel);
+  border-bottom: 1px solid var(--border-main);
+}
+
+.tab-btn {
+  flex: 1;
+  padding: 6px 10px;
+  font-size: 12px;
+  font-weight: 600;
+  background: var(--bg-panel);
+  border: none;
+  border-bottom: 2px solid transparent;
+  color: var(--text-muted);
+  border-radius: 0;
+  cursor: pointer;
+  transition: color 0.15s, border-color 0.15s, background 0.15s;
+}
+
+.tab-btn:hover {
+  color: var(--text-main);
+  background: var(--bg-hover);
+}
+
+.tab-btn.active {
+  color: var(--text-accent);
+  border-bottom-color: var(--accent-primary);
+  background: var(--bg-main);
+}
+
+/* ── Main content wrapper ─────────────────────────────────────────────────── */
+
+#app-content {
+  flex: 1 1 0;
+  min-height: 0;
+  overflow: hidden;
+}
+
+/* ── Market data panel ────────────────────────────────────────────────────── */
+
+#market-view {
+  overflow-y: auto;
+  padding: 8px 10px;
+}
+
+#market-view h2 {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-heading);
+  margin: 0;
+}
+
+/* ── Top 20 section container ──────────────────────────────────────────────────── */
+
+.top20-section {
+  margin-bottom: 8px;
+  border: 1px solid var(--border-section);
+  border-radius: 6px;
+  background: var(--bg-main);
+  overflow: hidden;
+}
+
+.top20-section #market-header {
+  padding: 4px 10px;
+  background: var(--bg-panel);
+  border-bottom: 1px solid var(--border-section);
+  margin-bottom: 0;
+}
+
+#market-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 6px;
+}
+
+#market-header h2 {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-heading);
+  margin: 0;
+}
+
+/* ── View toggle buttons ──────────────────────────────────────────────────── */
+
+.view-toggle {
+  display: flex;
+  gap: 2px;
+}
+
+.view-btn {
+  background: var(--bg-muted);
+  border: 1px solid var(--border-input);
+  border-radius: 3px;
+  padding: 2px 7px;
+  color: var(--text-muted);
+  font-size: 13px;
+  cursor: pointer;
+  line-height: 1;
+  min-width: 24px;
+  text-align: center;
+  transition: background 0.15s, color 0.15s;
+}
+
+.view-btn:hover {
+  background: var(--bg-input);
+  color: var(--text-main);
+}
+
+.view-btn.active {
+  background: var(--accent-primary);
+  color: var(--text-bright);
+  border-color: var(--accent-primary);
+}
+
+/* ── Filter bar ───────────────────────────────────────────────────────────── */
+
+.filter-bar {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 6px;
+  flex-wrap: wrap;
+}
+
+.filter-bar select {
+  flex: 1 1 0;
+  min-width: 0;
+  font-size: 11px;
+  padding: 3px 5px;
+}
+
+.refresh-btn {
+  flex-shrink: 0;
+  font-size: 11px;
+  padding: 3px 10px;
+  background: var(--bg-muted);
+  border: 1px solid var(--border-input);
+  color: var(--text-main);
+  border-radius: 3px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.refresh-btn:hover {
+  background: var(--accent-primary);
+  color: var(--text-bright);
+}
+
+/* ── Custom filter precision controls ─────────────────────────────────────── */
+
+.custom-filter-group {
+  margin-bottom: 6px;
+  padding: 4px 6px;
+  background: var(--bg-filter);
+  border: 1px solid var(--border-main);
+  border-radius: 3px;
+}
+
+.custom-filter-label {
+  display: block;
+  font-size: 10px;
+  color: var(--text-soft);
+  margin-bottom: 2px;
+  margin-top: 4px;
+}
+
+.custom-filter-label:first-child {
+  margin-top: 0;
+}
+
+.custom-filter-label .hint {
+  color: var(--text-dimmed);
+}
+
+.slider-row {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
+.slider-row input[type="range"] {
+  flex: 1 1 0;
+  min-width: 0;
+  height: 16px;
+  cursor: pointer;
+  accent-color: var(--accent-primary);
+}
+
+.slider-row input[type="number"] {
+  width: 80px;
+  flex-shrink: 0;
+  font-size: 11px;
+  padding: 2px 4px;
+  background: var(--bg-number-input);
+  border: 1px solid var(--border-input);
+  color: var(--text-main);
+  border-radius: 3px;
+  text-align: right;
+}
+
+.slider-row input[type="number"]:focus {
+  outline: 1px solid var(--accent-primary);
+  border-color: var(--accent-primary);
+}
+
+.loader {
+  color: var(--text-muted);
+  font-style: italic;
+  font-size: 12px;
+  padding: 4px 0;
+}
+
+.market-empty {
+  color: var(--text-muted);
+  font-size: 12px;
+  padding: 8px 4px;
+}
+
+/* ── Market card (shared across all views) ────────────────────────────────── */
+
+.market-card {
+  background: var(--bg-panel);
+  border: 1px solid var(--border-main);
+  border-radius: 4px;
+  overflow: hidden;
+  transition: border-color 0.15s;
+}
+
+.market-card:hover {
+  border-color: var(--border-input);
+}
+
+.market-card.risky {
+  border-color: var(--accent-red-border);
+}
+
+.market-card.risky:hover {
+  border-color: var(--accent-red-border-hover);
+}
+
+.market-card.hype {
+  border-color: var(--border-hype);
+}
+
+.market-card.hype:hover {
+  border-color: var(--border-hype-hover);
+}
+
+/* Flip recommendation badges in the card header */
+
+.flip-badges {
+  margin-left: auto;
+  display: flex;
+  gap: 3px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  align-items: center;
+  min-width: 0;
+  flex-shrink: 1;
+}
+
+.buy-badge,
+.sell-badge,
+.profit-badge {
+  font-size: 10px;
+  padding: 1px 6px;
+  border-radius: 3px;
+  white-space: nowrap;
+}
+
+.buy-badge {
+  background: var(--badge-buy-bg);
+  color: var(--accent-blue-text);
+}
+
+.sell-badge {
+  background: var(--badge-sell-bg);
+  color: var(--accent-green);
+}
+
+.sell-badge.risky {
+  background: var(--accent-red-bg);
+  color: var(--accent-red);
+  font-weight: 600;
+}
+
+.profit-badge {
+  background: var(--badge-sell-bg);
+  color: var(--accent-teal);
+  font-weight: 600;
+}
+
+.profit-badge.negative {
+  background: var(--accent-red-bg);
+  color: var(--accent-red);
+}
+
+.hype-badge {
+  background: var(--badge-hype-bg);
+  color: var(--accent-gold-hype);
+  font-weight: 600;
+  animation: hype-pulse 2s ease-in-out infinite;
+}
+
+@keyframes hype-pulse {
+  0%, 100% { opacity: 1; }
+  50%      { opacity: 0.6; }
+}
+
+.hype-text {
+  color: var(--accent-gold-hype) !important;
+}
+
+.buy-highlight {
+  color: var(--accent-blue-text) !important;
+}
+
+.sell-highlight {
+  color: var(--accent-teal) !important;
+}
+
+.profit-highlight {
+  color: var(--accent-teal) !important;
+}
+
+.risky-text {
+  color: var(--accent-red) !important;
+}
+
+/* ── Market search bar ────────────────────────────────────────────────────── */
+
+#market-search-input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 7px 10px;
+  margin-bottom: 6px;
+  background: var(--bg-panel);
+  color: var(--text-main);
+  border: 1px solid var(--bg-input);
+  border-radius: 4px;
+  font-size: 13px;
+  outline: none;
+  transition: border-color 0.15s;
+}
+
+#market-search-input::placeholder {
+  color: var(--text-dimmed);
+}
+
+#market-search-input:focus {
+  border-color: var(--accent-blue-text);
+}
+
+/* ── Search section ────────────────────────────────────────────────────── */
+
+#search-section {
+  margin-bottom: 6px;
+}
+
+#search-results {
+  margin-top: 6px;
+}
+
+#search-results:empty {
+  display: none;
+}
+
+#search-loading {
+  font-size: 12px;
+  color: var(--text-muted);
+  padding: 4px 0;
+}
+
+.market-card-header {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 4px 8px;
+  padding: 5px 8px;
+  cursor: pointer;
+  user-select: none;
+  min-height: 36px;
+}
+
+.market-card-header:hover {
+  background: var(--bg-hover);
+}
+
+/* \u2500\u2500 Sparkline canvas \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */
+
+.sparkline {
+  display: block;
+  width: 100%;
+  height: 30px;
+  padding: 0 8px;
+  box-sizing: border-box;
+  opacity: 0.85;
+}
+
+.item-sprite {
+  flex-shrink: 0;
+  image-rendering: pixelated;
+  width: 36px;
+  height: 32px;
+  object-fit: contain;
+}
+
+.market-card .item-name {
+  color: var(--text-accent);
+  flex: 1 1 0;
+  min-width: 60px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 12px;
+}
+
+.item-price {
+  color: var(--text-price);
+  white-space: nowrap;
+  flex-shrink: 0;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+/* ── Expandable detail panel ──────────────────────────────────────────────── */
+
+.market-card-detail {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.2s ease, padding 0.2s ease;
+  padding: 0 8px;
+  background: var(--bg-main);
+  border-top: 0px solid var(--border-main);
+}
+
+.market-card.expanded .market-card-detail {
+  max-height: 400px;
+  padding: 6px 8px;
+  border-top-width: 1px;
+  overflow-y: auto;
+}
+
+/* \u2500\u2500 Popout button \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */
+
+.popout-btn {
+  all: unset;
+  cursor: pointer;
+  font-size: 14px;
+  line-height: 1;
+  color: var(--text-muted);
+  padding: 2px 4px;
+  border-radius: 3px;
+  flex-shrink: 0;
+  transition: color 0.15s, background 0.15s;
+}
+
+.popout-btn:hover {
+  color: var(--accent-blue-text);
+  background: rgba(86, 156, 214, 0.12);
+}
+
+/* ── Card action button group ──────────────────────────────────────────────── */
+
+.card-actions {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  flex-shrink: 0;
+}
+
+/* ── Favourite button ──────────────────────────────────────────────────────── */
+
+.fav-btn {
+  all: unset;
+  cursor: pointer;
+  font-size: 15px;
+  line-height: 1;
+  color: var(--text-muted);
+  padding: 2px 4px;
+  border-radius: 3px;
+  flex-shrink: 0;
+  transition: color 0.15s, transform 0.15s;
+}
+
+.fav-btn:hover {
+  color: var(--accent-gold);
+  transform: scale(1.15);
+}
+
+/* Filled star when item is favourited. */
+.market-card.favorited .fav-btn,
+.modal-fav-btn:has(+ .item-modal-close) {
+  /* fallback — override via JS textContent ★ vs ☆ */
+}
+
+.market-card.favorited {
+  border-left: 2px solid var(--accent-gold);
+}
+
+/* Quick-add to portfolio button */
+
+.quick-add-btn {
+  all: unset;
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 1;
+  color: var(--text-muted);
+  padding: 1px 5px;
+  border-radius: 3px;
+  flex-shrink: 0;
+  transition: color 0.15s, background 0.15s;
+}
+
+.quick-add-btn:hover {
+  color: var(--accent-teal);
+  background: rgba(78, 201, 176, 0.12);
+}
+
+/* ── Favourites section ────────────────────────────────────────────────────────────── */
+
+.favorites-section {
+  margin-bottom: 8px;
+  border: 1px solid var(--border-section);
+  border-radius: 6px;
+  background: var(--bg-main);
+  overflow: hidden;
+}
+
+.favorites-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 4px 10px;
+  background: var(--bg-panel);
+  border-bottom: 1px solid var(--border-section);
+}
+
+.favorites-header h3 {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--accent-gold);
+}
+
+.favorites-header .view-btn {
+  font-size: 14px;
+  padding: 0 4px;
+}
+
+/* ── Floating Item Detail Modal ────────────────────────────────────────────── */
+
+.item-modal-backdrop {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 500;
+  background: var(--modal-backdrop);
+  justify-content: center;
+  align-items: center;
+}
+
+.item-modal-backdrop.visible {
+  display: flex;
+}
+
+.item-modal {
+  background: var(--bg-main);
+  border: 1px solid var(--accent-blue-text);
+  border-radius: 6px;
+  width: 380px;
+  max-width: 92vw;
+  max-height: 85vh;
+  overflow-y: auto;
+  box-shadow: 0 8px 32px var(--modal-shadow);
+  animation: modal-in 0.15s ease-out;
+}
+
+@keyframes modal-in {
+  from { opacity: 0; transform: scale(0.95) translateY(8px); }
+  to   { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+.item-modal-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--border-main);
+}
+
+.item-modal-name {
+  flex: 1;
+  color: var(--text-accent);
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.item-modal-close {
+  all: unset;
+  cursor: pointer;
+  color: var(--text-muted);
+  font-size: 18px;
+  line-height: 1;
+  padding: 2px 6px;
+  border-radius: 3px;
+  flex-shrink: 0;
+  transition: color 0.15s, background 0.15s;
+}
+
+.item-modal-close:hover {
+  color: var(--accent-red);
+  background: rgba(244, 71, 71, 0.12);
+}
+
+.item-modal-body {
+  padding: 10px 12px;
+}
+
+.item-modal-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin-bottom: 8px;
+}
+
+.modal-sparkline {
+  display: block;
+  width: 100%;
+  height: 60px;
+  margin-bottom: 8px;
+}
+
+.item-modal-details {
+  display: flex;
+  flex-direction: column;
+}
+
+.item-modal-details .detail-row {
+  padding: 3px 0;
+  font-size: 12px;
+}
+
+.item-modal-details .detail-label {
+  color: var(--text-muted);
+}
+
+.item-modal-details .detail-value {
+  color: var(--text-main);
+  font-weight: 600;
+}
+
+.detail-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 2px 0;
+  font-size: 11px;
+}
+
+.detail-label {
+  color: var(--text-muted);
+}
+
+.detail-value {
+  color: var(--text-main);
+  font-weight: 600;
+}
+
+/* ── List view ────────────────────────────────────────────────────────────── */
+
+.market-items.list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.market-items.list .market-card {
+  border-radius: 2px;
+}
+
+.market-items.list .item-sprite {
+  width: 24px;
+  height: 22px;
+}
+
+/* ── Tile view ────────────────────────────────────────────────────────────── */
+
+.market-items.tile {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+  gap: 4px;
+}
+
+.market-items.tile .market-card-header {
+  flex-direction: column;
+  text-align: center;
+  padding: 8px 6px;
+  gap: 4px;
+}
+
+.market-items.tile .item-sprite {
+  width: 36px;
+  height: 32px;
+}
+
+.market-items.tile .item-name {
+  font-size: 11px;
+  text-align: center;
+  white-space: normal;
+  overflow: visible;
+}
+
+.market-items.tile .item-price {
+  font-size: 11px;
+}
+
+.market-items.tile .flip-badges {
+  margin-left: 0;
+  justify-content: center;
+  width: 100%;
+}
+
+.market-items.tile .buy-badge,
+.market-items.tile .sell-badge,
+.market-items.tile .profit-badge {
+  font-size: 9px;
+  padding: 1px 4px;
+}
+
+.market-items.tile .sparkline {
+  height: 20px;
+  padding: 0 4px;
+}
+
+/* ─ Expanded card tweaks (tile view) ─ */
+
+.market-items.tile .market-card.expanded .sparkline {
+  height: 40px;
+  padding: 0 10px;
+}
+
+/* ── Hybrid view (compact grid, list-style rows) ──────────────────────────── */
+
+.market-items.hybrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 3px;
+}
+
+.market-items.hybrid .market-card-header {
+  padding: 4px 6px;
+  gap: 6px;
+}
+
+.market-items.hybrid .item-sprite {
+  width: 28px;
+  height: 24px;
+}
+
+.market-items.hybrid .sparkline {
+  height: 22px;
+  padding: 0 6px;
+}
+
+.market-items.hybrid .flip-badges {
+  gap: 2px;
+}
+
+.market-items.hybrid .buy-badge,
+.market-items.hybrid .sell-badge,
+.market-items.hybrid .profit-badge {
+  font-size: 9px;
+  padding: 1px 4px;
+}
+
+/* ── Chat / Advisor panel ──────────────────────────────────────────────────── */
+
+#advisor-view {
+  display: flex;
+  flex-direction: column;
+  min-height: 120px;         /* never collapse so small that input disappears */
+  overflow: hidden;          /* contain children; chat-history scrolls internally */
+  padding: 8px 10px 10px;
+}
+
+#advisor-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-shrink: 0;
+  margin-bottom: 6px;
+}
+
+#advisor-view h2 {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-heading);
+  margin: 0;
+  flex-shrink: 0;
+}
+
+#clear-chat-btn {
+  font-size: 11px;
+  padding: 2px 8px;
+  border: 1px solid var(--border-input);
+  border-radius: 4px;
+  background: transparent;
+  color: var(--text-main);
+  cursor: pointer;
+  transition: background .15s, color .15s;
+}
+#clear-chat-btn:hover { background: var(--accent-red-dark); color: var(--text-bright); border-color: var(--accent-red-dark); }
+
+#chat-history {
+  flex: 1;
+  overflow-y: auto;
+  border: 1px solid var(--border-main);
+  border-radius: 4px;
+  background: var(--bg-panel);
+  padding: 8px;
+  margin-bottom: 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* ── Chat bubbles ─────────────────────────────────────────────────────────── */
+
+.chat-msg {
+  max-width: 92%;
+  padding: 6px 10px;
+  border-radius: 6px;
+  font-size: 12px;
+  line-height: 1.5;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
+
+.chat-msg.user {
+  align-self: flex-end;
+  background: var(--chat-user-bg);
+  color: var(--text-main);
+  border-bottom-right-radius: 2px;
+}
+
+.chat-msg.assistant {
+  align-self: flex-start;
+  background: var(--bg-muted);
+  color: var(--text-main);
+  border-bottom-left-radius: 2px;
+}
+
+.chat-msg.system {
+  align-self: center;
+  background: transparent;
+  color: var(--text-muted);
+  font-style: italic;
+  font-size: 11px;
+  text-align: center;
+}
+
+.chat-msg.error {
+  align-self: center;
+  background: var(--chat-error-bg);
+  color: var(--accent-red);
+  font-size: 11px;
+  text-align: center;
+}
+
+/* Thinking indicator */
+.chat-msg.thinking {
+  align-self: flex-start;
+  background: transparent;
+  color: var(--text-muted);
+  font-style: italic;
+  font-size: 12px;
+}
+
+.chat-msg.thinking::after {
+  content: "";
+  animation: dots 1.4s steps(4, end) infinite;
+}
+
+@keyframes dots {
+  0%   { content: ""; }
+  25%  { content: "."; }
+  50%  { content: ".."; }
+  75%  { content: "..."; }
+  100% { content: ""; }
+}
+
+/* ── Chat input row ───────────────────────────────────────────────────────── */
+
+#chat-input-row {
+  display: flex;
+  gap: 6px;
+  flex-shrink: 0;            /* never collapse — always visible */
+  padding-top: 2px;
+}
+
+#chat-input {
+  flex: 1;
+}
+
+/* ── Portfolio view ─────────────────────────────────────────────────────────────────── */
+
+#portfolio-view {
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  padding: 8px 10px 10px;
+}
+
+#portfolio-view h2 {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-heading);
+  margin: 0 0 6px;
+  flex-shrink: 0;
+}
+
+/* Add-flip form */
+
+.portfolio-form {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-bottom: 8px;
+  padding: 6px;
+  background: var(--bg-panel);
+  border: 1px solid var(--border-main);
+  border-radius: 4px;
+}
+
+.portfolio-form input[type="text"],
+.portfolio-form input[type="number"] {
+  width: 100%;
+  font-size: 11px;
+  padding: 4px 6px;
+  background: var(--bg-input);
+  border: 1px solid var(--border-input);
+  border-radius: 3px;
+  color: var(--text-main);
+}
+
+.portfolio-form input[type="text"]:focus,
+.portfolio-form input[type="number"]:focus {
+  border-color: var(--accent-focus);
+  outline: none;
+}
+
+/* Autocomplete dropdown */
+
+.autocomplete-wrap {
+  position: relative;
+}
+
+.autocomplete-list {
+  display: none;
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  z-index: 50;
+  max-height: 180px;
+  overflow-y: auto;
+  background: var(--bg-elevated);
+  border: 1px solid var(--accent-focus);
+  border-top: none;
+  border-radius: 0 0 4px 4px;
+}
+
+.autocomplete-list.open {
+  display: block;
+}
+
+.autocomplete-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 4px 8px;
+  font-size: 11px;
+  color: var(--text-main);
+  cursor: pointer;
+  transition: background .1s;
+}
+
+.autocomplete-item:hover,
+.autocomplete-item.highlighted {
+  background: var(--accent-primary-active);
+}
+
+.autocomplete-item-price {
+  color: var(--accent-green);
+  font-size: 10px;
+  margin-left: 8px;
+  flex-shrink: 0;
+}
+
+.autocomplete-empty {
+  padding: 6px 8px;
+  font-size: 11px;
+  color: var(--text-dimmed);
+  font-style: italic;
+}
+
+.autocomplete-section {
+  padding: 3px 8px;
+  font-size: 9px;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  background: var(--bg-main);
+  border-top: 1px solid var(--border-main);
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+
+.autocomplete-section:first-child {
+  border-top: none;
+}
+
+.portfolio-form-row {
+  display: flex;
+  gap: 4px;
+}
+
+.portfolio-form-row input {
+  flex: 1;
+  min-width: 0;
+}
+
+#add-flip-btn {
+  font-size: 11px;
+  padding: 4px 10px;
+  background: var(--add-flip-bg);
+  border: none;
+  border-radius: 3px;
+  color: var(--text-bright);
+  cursor: pointer;
+  font-weight: 600;
+  transition: background .15s;
+}
+
+#add-flip-btn:hover {
+  background: var(--accent-green-bright);
+}
+
+/* Active flips list */
+
+#active-flips-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.flip-card {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 6px 8px;
+  background: var(--bg-panel);
+  border: 1px solid var(--border-main);
+  border-radius: 4px;
+  font-size: 11px;
+  transition: border-color .3s;
+}
+
+.flip-card.limit-ready {
+  border-color: var(--accent-green-bright);
+  background: var(--limit-ready-bg);
+}
+
+.flip-card-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.flip-item-name {
+  font-weight: 600;
+  color: var(--text-accent);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.flip-remove-btn {
+  background: transparent;
+  border: 1px solid var(--border-input);
+  border-radius: 3px;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: 10px;
+  padding: 1px 6px;
+  transition: background .15s, color .15s;
+}
+
+.flip-remove-btn:hover {
+  background: var(--accent-red-dark);
+  color: var(--text-bright);
+  border-color: var(--accent-red-dark);
+}
+
+.flip-details {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 12px;
+  color: var(--text-soft);
+}
+
+.flip-details span {
+  white-space: nowrap;
+}
+
+.flip-timer {
+  font-weight: 600;
+  color: var(--text-heading);
+}
+
+.flip-timer.ready {
+  color: var(--accent-green-bright);
+}
+
+.flip-profit {
+  color: var(--accent-green);
+  font-weight: 600;
+}
+
+.flip-profit.loss {
+  color: var(--accent-red);
+}
+
+.portfolio-empty {
+  color: var(--text-dimmed);
+  font-size: 11px;
+  font-style: italic;
+  padding: 8px 0;
+}
+
+/* ── Portfolio sub-navigation ───────────────────────────────────────────────── */
+
+.portfolio-sub-nav {
+  display: flex;
+  gap: 2px;
+  margin-bottom: 8px;
+  border-bottom: 1px solid var(--border-main);
+  padding-bottom: 4px;
+}
+
+.portfolio-sub-btn {
+  flex: 1;
+  padding: 5px 8px;
+  background: transparent;
+  border: 1px solid var(--border-subtle);
+  border-radius: 4px 4px 0 0;
+  color: var(--text-muted);
+  font-size: 11px;
+  cursor: pointer;
+  transition: background .15s, color .15s, border-color .15s;
+}
+
+.portfolio-sub-btn:hover {
+  color: var(--text-main);
+  border-color: var(--text-dimmed);
+}
+
+.portfolio-sub-btn.active {
+  background: var(--bg-elevated);
+  color: var(--text-main);
+  border-color: var(--accent-primary);
+  border-bottom: 2px solid var(--accent-primary);
+}
+
+/* ── Portfolio stats dashboard ──────────────────────────────────────────────── */
+
+.portfolio-stats {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.stat-card {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 8px 6px;
+  background: var(--bg-panel);
+  border: 1px solid var(--border-main);
+  border-radius: 4px;
+}
+
+.stat-label {
+  font-size: 10px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.stat-value {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-main);
+}
+
+.stat-value.profit {
+  color: var(--accent-green);
+}
+
+.stat-value.loss {
+  color: var(--accent-red);
+}
+
+/* ── Completed flip cards ───────────────────────────────────────────────────── */
+
+.completed-flip-card {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 6px 8px;
+  background: var(--bg-panel);
+  border: 1px solid var(--border-main);
+  border-left: 3px solid var(--border-main);
+  border-radius: 4px;
+  font-size: 11px;
+  margin-bottom: 4px;
+}
+
+.completed-flip-card.win {
+  border-left-color: var(--accent-green-bright);
+  background: linear-gradient(90deg, rgba(39,174,96,0.06) 0%, transparent 40%);
+}
+
+.completed-flip-card.loss {
+  border-left-color: var(--accent-red-dark);
+  background: linear-gradient(90deg, rgba(192,57,43,0.06) 0%, transparent 40%);
+}
+
+.completed-flip-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.completed-flip-top .flip-item-name {
+  font-weight: 600;
+  color: var(--text-accent);
+}
+
+.completed-flip-date {
+  font-size: 10px;
+  color: var(--text-dimmed);
+}
+
+.completed-flip-details {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 12px;
+  color: var(--text-soft);
+}
+
+.completed-flip-details span {
+  white-space: nowrap;
+}
+
+.completed-flip-profit {
+  font-weight: 600;
+}
+
+.completed-flip-profit.win {
+  color: var(--accent-green);
+}
+
+.completed-flip-profit.loss {
+  color: var(--accent-red);
+}
+
+/* ── Complete flip button ───────────────────────────────────────────────────── */
+
+.flip-card-actions {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.flip-complete-btn {
+  background: transparent;
+  border: 1px solid var(--border-input);
+  border-radius: 3px;
+  color: var(--accent-green);
+  cursor: pointer;
+  font-size: 11px;
+  padding: 1px 6px;
+  transition: background .15s, color .15s;
+}
+
+.flip-complete-btn:hover {
+  background: var(--accent-green-bright);
+  color: var(--text-bright);
+  border-color: var(--accent-green-bright);
+}
+
+/* ── Webkit scrollbar styling ─────────────────────────────────────────────── */
+
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-main);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--scrollbar-thumb);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--scrollbar-thumb-hover);
+}
+
+/* ═════════════════════════════════════════════════════════════════════════════
+ *  LAYOUT MODES — driven by body[data-layout]
+ * ═════════════════════════════════════════════════════════════════════════════ */
+
+/* ── Tabbed layout (default — compact, in-game overlay) ───────────────────── */
+
+body[data-layout="tabbed"] #view-tabs {
+  display: flex;
+}
+
+body[data-layout="tabbed"] #app-content {
+  display: flex;
+  flex-direction: column;
+}
+
+body[data-layout="tabbed"] #market-view {
+  flex: 1 1 0;
+  display: none;                 /* hidden by default; .active-tab shows it */
+}
+
+body[data-layout="tabbed"] #advisor-view {
+  flex: 1 1 0;
+  display: none;
+}
+
+body[data-layout="tabbed"] #portfolio-view {
+  flex: 1 1 0;
+  display: none;
+}
+
+body[data-layout="tabbed"] #market-view.active-tab,
+body[data-layout="tabbed"] #advisor-view.active-tab,
+body[data-layout="tabbed"] #portfolio-view.active-tab {
+  display: flex;
+  flex-direction: column;
+}
+
+/* Market view in tabbed layout renders as a column */
+body[data-layout="tabbed"] #market-view.active-tab {
+  display: block;
+  overflow-y: auto;
+}
+
+/* Smooth tab transitions */
+body[data-layout="tabbed"] #market-view,
+body[data-layout="tabbed"] #advisor-view,
+body[data-layout="tabbed"] #portfolio-view {
+  opacity: 0;
+  transition: opacity 0.15s ease;
+}
+
+body[data-layout="tabbed"] #market-view.active-tab,
+body[data-layout="tabbed"] #advisor-view.active-tab,
+body[data-layout="tabbed"] #portfolio-view.active-tab {
+  opacity: 1;
+}
+
+/* ── Sidebar layout (side-by-side, second monitor) ────────────────────────── */
+
+body[data-layout="sidebar"] #view-tabs {
+  display: none;                 /* tabs not needed in sidebar mode */
+}
+
+body[data-layout="sidebar"] #app-content {
+  display: flex;
+  flex-direction: row;
+  gap: 1px;
+}
+
+body[data-layout="sidebar"] #market-view {
+  width: 360px;
+  flex-shrink: 0;
+  overflow-y: auto;
+  border-right: 1px solid var(--border-main);
+  display: block;
+}
+
+/* Force list-style column layout for market items in sidebar */
+body[data-layout="sidebar"] #market-items.tile,
+body[data-layout="sidebar"] #market-items.hybrid {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+body[data-layout="sidebar"] #market-items.tile .market-card-header,
+body[data-layout="sidebar"] #market-items.hybrid .market-card-header {
+  flex-direction: row;
+  text-align: left;
+}
+
+body[data-layout="sidebar"] #advisor-view {
+  flex: 1 1 0;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+body[data-layout="sidebar"] #portfolio-view {
+  flex: 1 1 0;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  border-left: 1px solid var(--border-main);
+}

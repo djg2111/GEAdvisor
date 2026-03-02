@@ -1,0 +1,534 @@
+# GE Market Analyzer — Agent Handoff Document
+
+> **Purpose**: Bring a new AI agent chat session fully up to speed on the architecture, codebase, constraints, and current status of this Alt1 Toolkit plugin.
+
+---
+
+## 1. Project Overview
+
+This is a **RuneScape 3 Alt1 Toolkit plugin** called the **GE Market Analyzer**. It is an intelligent Grand Exchange market analyzer and money-making instructor that uses a **RAG (Retrieval-Augmented Generation)** pipeline:
+
+```
+Data Ingestion → Local Caching → Deterministic Filtering → LLM Synthesis
+```
+
+The plugin runs as an overlay inside the RS3 game client via the Alt1 framework, and also works standalone in a browser for development.
+
+**Tech stack**: TypeScript, Webpack 5, IndexedDB, native `fetch` API, multi-provider LLM support (OpenAI-compatible).
+
+---
+
+## 2. Standing Rules & Constraints
+
+These rules were established across all prior prompts and **must be followed in all future work**:
+
+1. **Act as an expert TypeScript developer specializing in RuneScape 3 Alt1 Toolkit plugins.**
+2. **Prioritize clean architecture, strict modularity, and separation of concerns.**
+3. **Do not provide basic explanations of the tech stack. Write production-ready code.**
+4. **Do NOT use any external NPM packages for LLM/HTTP** (like `openai`); rely exclusively on the native browser `fetch` API to keep the Webpack bundle small.
+5. **Do not modify the existing cache or API service files unless absolutely necessary.**
+6. **Include descriptive JSDoc comments** on all public methods and interfaces.
+7. **Ensure all methods are strongly typed using TypeScript interfaces.**
+8. The LLM system prompt must **explicitly forbid hallucinating prices, volumes, or game mechanics** and **must only use the provided Wiki text and GE data**.
+9. Wiki guide fetching uses a **two-step search → extract** strategy (no longer naive string concatenation). See §4.5.
+10. The LLM system prompt must include the **RS3 economic rules** from `coreKnowledge.ts` with a supremacy clause — these rules override any outside knowledge the model may have.
+11. **Barrel imports**: Always import services/types from `./services` (the barrel), not from individual files like `./services/types`.
+12. **All DOM manipulation lives in `uiService.ts`** — no other file should touch the DOM. Services remain UI-agnostic.
+
+---
+
+## 3. File Structure
+
+```
+alt1minimal/
+├── package.json               # deps: alt1. devDeps: ts-loader, webpack, html-webpack-plugin, style-loader, css-loader
+├── tsconfig.json              # target ES2020, lib [ES2020, DOM, DOM.Iterable], moduleResolution "bundler"
+├── webpack.config.js          # context src/, entry main→./index.ts, output dist/, HtmlWebpackPlugin
+├── HANDOFF.md                 # This document
+└── src/
+    ├── appconfig.json         # Alt1 app manifest (asset/resource in webpack)
+    ├── icon.png               # App icon (asset/resource)
+    ├── index.html             # Full UI: settings, tabbed layout (market / advisor / portfolio), search, favourites, filters
+    ├── index.ts               # Lean entry point: alt1 detection → initDataPipeline() → initUI()
+    ├── style.css              # Dark theme, flexbox, cards/tiles, filters, chat, modals, sparklines, portfolio history (~1700 lines)
+    ├── uiService.ts           # All DOM logic: settings, market render, search, favourites, portfolio, chat RAG (~2200 lines)
+    └── services/
+        ├── index.ts               # Barrel re-export of all services + types + constants
+        ├── types.ts               # All shared TypeScript interfaces + LLM_PROVIDERS preset array
+        ├── coreKnowledge.ts       # Static RS3 economic rules knowledge base (injected into LLM prompt)
+        ├── weirdGloopService.ts   # Weird Gloop RS3 GE API client
+        ├── cacheService.ts        # IndexedDB wrapper (v2: prices + price-history stores)
+        ├── marketAnalyzerService.ts # Deterministic filtering: score → filter → rank → format (with runtime overrides)
+        ├── wikiService.ts         # RS3 Wiki MediaWiki API client + Cargo buy-limit API
+        ├── llmService.ts          # OpenAI-compatible chat-completion client + anti-hallucination + economic rules prompt
+        ├── portfolioService.ts    # Active flip tracker with localStorage persistence
+        └── initDataPipeline.ts    # Orchestrator: open cache → check stale → fetch → insert → return. Also fetchGECatalogue()
+```
+
+---
+
+## 4. Architecture Deep-Dive
+
+### 4.1 Data Pipeline (`initDataPipeline.ts`)
+
+Called once at startup from `index.ts`:
+1. Opens IndexedDB (`ge-analyzer-cache` database, version 2).
+2. Checks staleness via cursor on `fetchedAt` index descending — if newest record > 24h old, cache is stale.
+3. If stale: fetches ~100 curated seed items from the Weird Gloop API → enriches with buy limits from the RS Wiki Cargo API → bulk-inserts into IndexedDB (both `prices` and `price-history` stores).
+4. Returns all cached `StoredPriceRecord[]`.
+
+**Seed items** (~100): Curated list of heavily-traded RS3 items including rares, skilling supplies, potions, runes, PvM drops, summoning materials, and alchables. Defined as `SEED_ITEMS` array in `initDataPipeline.ts`.
+
+**`fetchGECatalogue()`**: Fetches the full RS Wiki `Module:GEIDs/data.json` (~7,000 GE-tradeable items, ~215KB). Returns a sorted `GECatalogueEntry[]` used for the market search bar.
+
+### 4.2 Weird Gloop API Service (`weirdGloopService.ts`)
+
+- Endpoint: `https://api.weirdgloop.org/exchange/history/rs/latest?name=ITEM1|ITEM2`
+- Items are pipe-delimited, batched in groups of 100.
+- All batches fire concurrently via `Promise.allSettled` — one failure doesn't abort others.
+- Returns `Map<string, WeirdGloopPriceRecord>`.
+
+### 4.3 Cache Service (`cacheService.ts`)
+
+- IndexedDB wrapper. Database: `ge-analyzer-cache`, version 2.
+- **Two object stores**:
+  - `prices` — keyPath: `name`, index on `fetchedAt`. Current snapshot of each item.
+  - `price-history` — compound keyPath: `[name, day]`. One row per item per calendar day for SMA / hype tracking.
+- Key methods: `open()`, `bulkInsert(prices)`, `getAll()`, `getRecentHistory(days)`, `getHistoricalRecords()`, `isStale()`, `clear()`.
+- `bulkInsert` writes to both stores in a single read-write transaction. History store uses daily dedup via the `[name, day]` compound key.
+- `isStale()` opens a descending cursor on the `fetchedAt` index, checks if newest record > 24h TTL.
+
+### 4.4 Market Analyzer Service (`marketAnalyzerService.ts`)
+
+Pure math on local data — no network calls:
+1. Reads all cached records from `CacheService.getAll()`.
+2. Builds 7-day average volume map and price history map from the `price-history` store.
+3. Scores each item via `scoreAndFilter()`:
+   - `tradedValue = price × volume`
+   - `recBuyPrice = floor(price × 0.99)` — 1% below market (realistic instant-buy entry)
+   - `recSellPrice = ceil(price × 1.03)` — 3% above market (target exit)
+   - `estFlipProfit = recSellPrice - recBuyPrice - floor(recSellPrice × 0.02)` — ~2% net margin after 2% GE tax
+   - `effectivePlayerVolume = min(volume, buyLimit × 6)` — caps at what one player can trade per day
+   - `taxGap = ceil(price / 0.98) - price` — minimum spread to break even after tax
+   - `volumeSpikeMultiplier` — ratio of today's volume to 7-day SMA (hype detection at >1.5×)
+   - `isRisky = price < 500` — low-price items where tax eats most spreads
+4. Filters items by `minVolume`, `maxVolume`, `maxPrice`.
+5. Sorts descending by `tradedValue`.
+6. Slices to top-N (default 20).
+
+**Key methods**:
+- `getTopItems(overrides?)` — full pipeline with optional `Partial<MarketAnalyzerConfig>` runtime filter overrides.
+- `searchItems(query)` — filters cache by name substring, scores with no vol/price filters, returns top 50.
+- `getItemsByNames(names: Set<string>)` — looks up specific items by exact name set, used by the favourites panel.
+- `formatForLLM(items)` — produces a numbered multi-line string with K/M/B/T abbreviations for LLM context injection.
+
+### 4.5 Wiki Service (`wikiService.ts`)
+
+**Two-step guide fetching** (search → extract → fallback):
+1. **Step 1 — Search**: Queries the MediaWiki search API: `action=query&list=search&srsearch=Money making guide {itemName}`. Validates the top result's title contains a guide-related keyword ("money making guide", "smithing", "crafting", "mining", etc.) to filter out unrelated pages.
+2. **Step 2 — Extract**: Fetches `action=query&prop=extracts&explaintext=1` using the exact resolved title from step 1.
+3. **Fallback**: If no guide is found (search returns nothing or the top result is irrelevant), fetches the base `{itemName}` article itself so the LLM at least gets item mechanics / creation info.
+4. **Error handling**: The method never throws. On total failure it returns `{ found: false, text: "" }` so the LLM pipeline continues safely.
+
+- Private helpers: `searchForGuideTitle(itemName)` → `string | null`, `fetchExtract(title)` → `WikiGuideResult`.
+- Static `GUIDE_KEYWORDS` array for search result validation.
+- **Buy limit fetching**: `getBulkBuyLimits(names)` reads `Module:Exchange/<Item>` Lua source via the revisions API, extracts `limit = <n>`. Batched ≤ 50 titles per request, concurrent via `Promise.allSettled`.
+- `getGuidesForItems(names)` fetches in parallel via `Promise.allSettled`.
+
+### 4.6 Core Knowledge Base (`coreKnowledge.ts`)
+
+Static RS3 economic rules injected into every LLM system prompt. Exported as `RS3_ECONOMIC_RULES` string constant.
+
+**Rules covered**:
+1. **GE Tax**: 2% tax on all sales (exempt at ≤50 gp). Must deduct before calculating profit/ROI.
+2. **Buy Limits**: 4-hour buy limits per item. Volume recommendations must respect these.
+3. **Margin Checking**: Insta-buy (+20%) / insta-sell (−20%) method. True margin = gap minus 2% tax.
+4. **High Alchemy**: High Alch value acts as an item's price floor.
+
+These rules have a **supremacy clause** in the system prompt — they override any outside knowledge the model may have.
+
+### 4.7 LLM Service (`llmService.ts`)
+
+- Default endpoint: `https://api.groq.com/openai/v1/chat/completions`
+- Default model: `llama3-8b-8192`, temperature 0.4, max_tokens 1024.
+- Constructor: `Partial<LLMConfig>` — all fields optional (defaults to Groq free tier). API key may be omitted for self-hosted models.
+- Authorization header is **conditionally included** only when `apiKey` is non-empty (supports keyless self-hosted models like Ollama / LM Studio).
+- **Multi-turn chat**: Maintains conversation history across sends. History is persisted to localStorage (`ge-analyzer:chat-history`, max 50 messages). Clear button resets history.
+- `generateAdvice(query, marketData, wikiText)` builds:
+  - **System prompt**: RS3 GE specialist persona + strict anti-hallucination rules (8 numbered rules) + RS3 economic rules from `coreKnowledge.ts` with supremacy clause. Must only use provided data. Must cite exact numbers.
+  - **User message**: Three delimited sections: `=== GRAND EXCHANGE DATA ===`, `=== WIKI GUIDE TEXT ===`, `=== PLAYER QUESTION ===`.
+- Error handling: `LLMRequestError` class with `status` and `responseBody`. Descriptive messages for 401/403/429/5xx.
+
+### 4.8 LLM Provider System (`types.ts`)
+
+The settings panel supports **6 LLM providers** via the `LLM_PROVIDERS` constant array:
+
+| Provider | Endpoint | Default Model | Key Hint |
+|----------|----------|---------------|----------|
+| **Groq** (default) | `api.groq.com/openai/v1/chat/completions` | `llama3-8b-8192` | `gsk_…` |
+| **OpenAI** | `api.openai.com/v1/chat/completions` | `gpt-4o-mini` | `sk-…` |
+| **OpenRouter** | `openrouter.ai/api/v1/chat/completions` | `meta-llama/llama-3-8b-instruct` | `sk-or-…` |
+| **Together AI** | `api.together.xyz/v1/chat/completions` | `meta-llama/Llama-3-8b-chat-hf` | `tok_…` |
+| **Mistral AI** | `api.mistral.ai/v1/chat/completions` | `mistral-small-latest` | `mis_…` |
+| **Custom / Self-hosted** | (user-supplied) | (user-supplied) | (optional) |
+
+Each provider includes a curated `models` array of `ModelOption` objects with `id`, `label`, and optional `recommended` flag. The UI renders these as a searchable datalist. Users can also type any arbitrary model name.
+
+### 4.9 Portfolio Service (`portfolioService.ts`)
+
+Manages active flips **and** completed flip history:
+
+**Active flips** — localStorage key `ge-analyzer:portfolio`:
+- `addFlip(itemName, buyPrice, quantity, targetSellPrice)` — creates a new flip with a unique UUID and timestamp.
+- `getFlips()` — returns all active flips sorted by timestamp.
+- `removeFlip(id)` — deletes a flip by ID.
+- Each flip tracks: `id`, `itemName`, `buyPrice`, `quantity`, `targetSellPrice`, `timestamp`.
+- UI renders each flip as a card with buy/sell prices, quantity, projected profit (post-tax), a live buy-limit countdown timer (refreshed every 30s), and a `.flip-card-actions` group containing ✓ "Mark as sold" and ✕ "Remove" buttons side-by-side.
+
+**Completed flips** — localStorage key `ge-analyzer:portfolio-history`:
+- `completeFlip(id, actualSellPrice)` — moves an active flip to the completed array. Calculates `realizedProfit = Math.round(actualSellPrice × 0.98 × quantity) − (buyPrice × quantity)` (2% GE tax deducted from sell side). Saves both arrays.
+- `getCompletedFlips()` — returns a shallow copy of completed flips, newest first.
+- `getPortfolioStats()` — aggregates across all completed flips: `{ totalProfit, totalFlips, avgProfit, avgRoi }`. Avg ROI = total profit ÷ total capital invested.
+
+**Portfolio sub-navigation** (HTML + CSS):
+- Two toggle buttons: "Active Flips" / "History & Stats". Switching to history calls `renderCompletedFlips()` + `renderPortfolioStats()`.
+- **Stats dashboard**: 4 `.stat-card` elements — Total Profit, Completed Flips, Avg Profit, Avg ROI. Values colour-coded green (profit) / red (loss).
+- **Completed flip cards**: `.completed-flip-card` with `.win` (green left border + subtle green gradient) or `.loss` (red left border + red gradient) variants. Shows item name, completion date, buy/sold/qty/P&L details.
+
+### 4.10 UI Service (`uiService.ts`)
+
+All DOM manipulation isolated here — services remain UI-agnostic. ~2050 lines.
+
+`initUI()` flow:
+1. Resolves all DOM elements by ID (~50 refs, throws if missing).
+2. Populates provider dropdown from `LLM_PROVIDERS`.
+3. Restores all settings from `localStorage` (provider, model, endpoint, API key, view mode, layout).
+4. Binds all events: settings, chat, view toggle, market filters, force reload, layout toggle, tab navigation, clear chat, portfolio, favourites collapse, Top 20 collapse.
+5. Creates `CacheService` + `MarketAnalyzerService` + `WikiService` + `PortfolioService` singletons.
+6. Runs `refreshMarketPanel()` → renders market items in the current view mode.
+7. Renders the favourites panel (if any favourites exist).
+8. Builds the full item catalogue for portfolio autocomplete.
+9. Fetches the full GE catalogue (~7,000 items) for market search.
+10. Pre-fetches wiki text for top 5 items so first chat is fast.
+11. Restores any persisted LLM chat conversation.
+12. Renders any persisted portfolio flips and starts the countdown timer.
+
+**Layout modes**: Tabbed (default) or Sidebar — toggled via buttons, persisted in localStorage (`ge-analyzer:layout`).
+- **Tabbed**: Three tabs — Market Data, Ask Advisor, Portfolio. One visible at a time.
+- **Sidebar**: All three sections visible side-by-side.
+
+**Market panel rendering**:
+- Three **view modes**: List (☰), Tile (▦), Hybrid (⊞) — toggled via buttons, persisted in localStorage (`ge-analyzer:view-mode`).
+- `setViewMode(mode)` — updates active button styling and CSS class on market-items, search-results, and favourites-items containers.
+- `buildItemCard(item)` — creates a market card element with:
+  - Jagex sprite, item name, price
+  - Flip recommendation badges: Buy ≤, Sell ≥, profit/ea
+  - Hype badge (🔥 Nx Vol) when volume spike > 1.5×
+  - Canvas sparkline (7-day price history)
+  - Expandable detail panel (12 rows: GE price, rec buy/sell, flip profit, volumes, buy limit, capital, tax gap, margin)
+  - **Action button group** (`.card-actions`): Popout (↗), Favourite (☆/★), Quick-add to portfolio (+)
+- Multiple cards can be expanded simultaneously.
+- Sprites loaded from `https://secure.runescape.com/m=itemdb_rs/obj_sprite.gif?id={itemId}`.
+
+**Floating item detail modal**:
+- `showItemModal(item)` — creates a centred modal overlay with backdrop.
+- Contains: sprite, name, price, favourite button (★), quick-add button (+), close button (✕), badges, enlarged sparkline (340×60), full detail rows.
+- Backdrop click or ✕ button closes.
+- Lazy singleton — created once, reused for all items.
+
+**Favourites system**:
+- Persisted as a JSON array of item names in localStorage (`ge-analyzer:favorites`).
+- `getFavorites()` / `toggleFavorite(name)` — read/write helpers.
+- Star button (☆/★) on every card header and in the modal header.
+- Favourited cards get a `.favorited` class with a gold left border.
+- **Favourites panel** (`#favorites-section`): appears between the search bar and Top 20, auto-hides when empty. Collapsible via ▾/▸ button in the header.
+- `renderFavorites()` — calls `analyzer.getItemsByNames(favNames)`, renders cards into `#favorites-items` container. Re-renders on every favourite toggle.
+- Respects the current view mode (list/tile/hybrid).
+
+**Quick-add to portfolio**:
+- `+` button on every card header and in the modal header.
+- Switches to the portfolio tab, pre-fills the flip form (item name, recommended buy price, recommended sell price), focuses the quantity input.
+- Uses `suppressAutocomplete` flag to prevent the portfolio search dropdown from opening during programmatic form fill. Resets via `requestAnimationFrame`.
+
+**Full GE catalogue search** (`#search-section`):
+- Search input at the top of the market view. Debounced 300ms.
+- Searches the full ~7,000 item GE catalogue (`Module:GEIDs/data.json`) client-side.
+- Items not in cache: fetches prices from Weird Gloop API, buy limits from wiki Cargo API, enriches and inserts into IndexedDB — then scores and renders.
+- Results render into `#search-results` (separate container above Top 20, never replaces it).
+- Empty search clears results (`:empty` CSS hides the container).
+
+**Portfolio autocomplete**:
+- Item name input has full autocomplete dropdown.
+- Focus/empty shows recommended items from `latestTopItems` first, then all cached items.
+- Typing filters by case-insensitive substring with recommended matches pinned to top.
+- Arrow keys navigate, Enter selects, Escape closes.
+- `selectSuggestion(name, price)` fills item name + buy price, focuses quantity.
+
+**Collapsible sections**:
+- **Favourites**: ▾/▸ toggle in the section header hides/shows `#favorites-items`.
+- **Top 20**: ▾/▸ toggle in the view-toggle bar hides/shows filters, custom groups, loading indicator, and `#market-items`. Restores custom filter group visibility based on dropdown state when expanding.
+
+**Dynamic market filters**:
+- `readFilterConfig()` — translates dropdown values into `{ minVolume, maxVolume, maxPrice }` overrides.
+- Volume filter options: Any Volume, High Volume (>50K), Low Volume (<1K), Custom (slider controls).
+- Price filter options: Unlimited, Under 10M, Under 100M, Under 500M, Custom (slider control).
+- Custom volume: Min/max sliders with synced text inputs.
+- Custom budget: Max price slider with synced text input.
+
+**Chat flow** (`handleSend`):
+1. Validates input text + API key presence.
+2. Appends user message bubble → clears input → locks input.
+3. Shows "Thinking" animated indicator.
+4. Creates `LLMService` via `resolvedLLMConfig()` which reads current provider/model/endpoint/key from localStorage.
+5. Calls `generateAdvice(query, latestMarketSummary, latestWikiText)`.
+6. Removes thinking indicator → appends assistant response bubble.
+7. Catches `LLMRequestError` with user-friendly messages per status code.
+8. Unlocks input, scrolls chat to bottom.
+
+**Force reload**: Button in settings that clears IndexedDB cache, re-runs the full data pipeline, and refreshes the market panel. Shows status indicator.
+
+**Module-scoped state**: `latestMarketSummary`, `latestWikiText`, `latestTopItems`, `allCachedItems`, `geCatalogue`, `currentView`, `llm`, `portfolio`, `favoritesCollapsed`, `top20Collapsed`, `suppressAutocomplete`.
+
+### 4.11 Entry Point (`index.ts`)
+
+Lean orchestrator (~50 lines):
+1. Imports `alt1`, static assets (`appconfig.json`, `icon.png`), `style.css`.
+2. Detects `window.alt1` — if present, calls `alt1.identifyAppUrl()`; if absent, shows "add app" link.
+3. Calls `await initDataPipeline()`.
+4. Calls `await initUI()`.
+
+### 4.12 HTML Structure (`index.html`)
+
+- `#alt1-status` — Alt1 detection banner (hidden when empty via CSS).
+- `#app` — flex column shell:
+  - `<details id="settings-panel">` — collapsible settings:
+    - Layout toggle: Tabbed / Sidebar.
+    - Provider `<select id="provider-select">`.
+    - Custom endpoint `<div id="custom-endpoint-group">` (hidden unless provider is `custom`).
+    - Model `<input id="model-input">` with `<datalist id="model-options">`.
+    - API key `<input type="password">` + Save button + status hint.
+    - Force Reload Data button + status hint.
+  - `<nav id="view-tabs">` — tab buttons: Market Data, Ask Advisor, Portfolio.
+  - `<main id="app-content">`:
+    - `<section id="market-view">`:
+      - `#search-section` — search input + loading indicator + `#search-results`.
+      - `#favorites-section` (`.favorites-section`) — header with ★ Favourites title + collapse button, `#favorites-items` container.
+      - `.top20-section` wrapper:
+        - `#market-header` — "Top 20 Markets" h2 + view toggle buttons (☰/▦/⊞/▾).
+        - `#market-filters` — volume/price dropdowns + refresh button.
+        - `#volume-custom-group` and `#budget-custom-group` — slider controls (hidden by default).
+        - `#market-loading` + `#market-items`.
+    - `<section id="advisor-view">` — h2 "Ask the Advisor" + clear button + `#chat-history` + `#chat-input-row`.
+    - `<section id="portfolio-view">` — h2 "Active Portfolio" + `#portfolio-sub-nav` (Active Flips / History & Stats toggle):
+      - `#portfolio-active-container` — add-flip form (autocomplete name input, buy/qty/sell fields, add button) + `#active-flips-list`.
+      - `#portfolio-history-container` (hidden by default) — `#portfolio-stats` dashboard (4 `.stat-card`: Total Profit, Completed Flips, Avg Profit, Avg ROI) + `#completed-flips-list`.
+- `HtmlWebpackPlugin` injects the script tag automatically — no manual `<script>` tag in HTML.
+
+### 4.13 Stylesheet (`style.css`)
+
+- Dark theme: `#1e1e1e` background, `#d4d4d4` text, Segoe UI / Consolas font stack.
+- `html` and `body` both `width: 100%; height: 100%`.
+- **`#app` uses `height: 95%`** (manually set to fix Alt1 zoom-level scaling issues — do NOT change).
+- **Market panel**: `flex: 0 1 auto`, `max-height: 30%` in non-tabbed layout.
+- **Chat panel**: `flex: 1 1 0`, `min-height: 120px`.
+- **Market cards**: `.market-card` base with `.market-card-header` (flex, wrap, gap), expandable `.market-card-detail` (max-height transition), `.sparkline` canvas.
+  - **List view**: Full-width stacked cards.
+  - **Tile view**: CSS grid `repeat(auto-fill, minmax(130px, 1fr))`. Column flex-direction on header. Compact badge/sprite sizes.
+  - **Hybrid view**: CSS grid `repeat(auto-fill, minmax(200px, 1fr))`.
+- **Card action buttons** (`.card-actions`): Horizontal flex row containing popout (`.popout-btn`), favourite (`.fav-btn`), quick-add (`.quick-add-btn`). Always stays horizontal even in tile view's column layout.
+- **Favourite styling**: `.fav-btn` gold on hover (`#f0c040`), `.market-card.favorited` gets gold left border. `.fav-btn` uses scale(1.15) on hover.
+- **Quick-add button**: `.quick-add-btn` teal on hover (`#4ec9b0`).
+- **Favourites section**: `.favorites-section` with border, rounded corners, dark header (`#252526`), gold ★ title.
+- **Top 20 section**: `.top20-section` with matching border/rounded styling. `#market-header` gets dark header background when inside the section.
+- **Canvas sparklines**: 100×30 on cards, 340×60 in modal. Gradient line chart drawn via native Canvas API.
+- **Floating modal**: `.item-modal-backdrop` with centred `.item-modal` (max 400px, slide-in animation `modal-in`).
+- **Flip badges**: `.flip-badges` with flex-wrap. `.buy-badge`, `.sell-badge`, `.profit-badge`, `.hype-badge`. Responsive wrapping with `min-width: 60px` on `.item-name`.
+- **Portfolio**: `.portfolio-form`, `.autocomplete-wrap`, `.flip-card` with countdown timer styling, `.flip-card-actions` horizontal button group (✓ + ✕).
+- **Portfolio sub-nav**: `.portfolio-sub-nav` / `.portfolio-sub-btn` tab-style toggle with blue active border.
+- **Portfolio stats dashboard**: `.portfolio-stats` flex row of `.stat-card` elements. `.stat-value.profit` (green) / `.stat-value.loss` (red).
+- **Completed flip cards**: `.completed-flip-card` with `.win` (green left border + gradient) and `.loss` (red left border + gradient) variants.
+- **Hype indicators**: `.market-card.hype` border glow, `.hype-badge` pulse animation.
+- **Layout modes**: `body[data-layout="tabbed"]` hides non-active tabs, `body[data-layout="sidebar"]` shows all sections side-by-side.
+- Chat bubbles: user (blue `#264f78`), assistant (dark `#333`), system (italic gray), error (red `#3b1a1a`), thinking (animated dots via CSS `@keyframes`).
+- Thin dark webkit scrollbar styling.
+
+---
+
+## 5. localStorage Keys
+
+| Key | Purpose |
+|-----|---------|
+| `ge-analyzer:llm-api-key` | Bearer token for the selected LLM provider |
+| `ge-analyzer:llm-provider` | Selected provider ID (e.g. `groq`, `openai`, `custom`) |
+| `ge-analyzer:llm-model` | Model identifier (e.g. `llama3-8b-8192`) |
+| `ge-analyzer:llm-endpoint` | Custom endpoint URL (only used when provider is `custom`) |
+| `ge-analyzer:view-mode` | Market panel view mode (`list`, `tile`, or `hybrid`) |
+| `ge-analyzer:layout` | Interface layout mode (`tabbed` or `sidebar`) |
+| `ge-analyzer:chat-history` | Serialised LLM chat conversation (max 50 messages) |
+| `ge-analyzer:favorites` | JSON array of favourited item names |
+| `ge-analyzer:portfolio` | Serialised `ActiveFlip[]` portfolio data |
+| `ge-analyzer:portfolio-history` | Serialised `CompletedFlip[]` completed flip history |
+
+---
+
+## 6. Key Types Reference
+
+All defined in `src/services/types.ts`:
+
+| Type | Purpose |
+|------|---------|
+| `WeirdGloopPriceRecord` | API response shape: `id`, `timestamp`, `price`, `volume`, `buyLimit?` |
+| `WeirdGloopLatestResponse` | `{ [itemName: string]: WeirdGloopPriceRecord }` |
+| `StoredPriceRecord` | Extends API record with `name` (keyPath) + `fetchedAt` (TTL) |
+| `HistoricalPriceRecord` | Extends `StoredPriceRecord` with `day` (ISO date, compound key with `name`) |
+| `RankedItem` | 17 fields: `name`, `itemId`, `price`, `recBuyPrice`, `volume`, `tradedValue`, `buyLimit?`, `effectivePlayerVolume`, `maxCapitalPer4H`, `taxGap`, `recSellPrice`, `estFlipProfit`, `isRisky`, `volumeSpikeMultiplier`, `priceHistory` |
+| `MarketAnalyzerConfig` | `topN` (20), `minVolume` (0), `maxVolume?`, `maxPrice?` |
+| `CacheServiceConfig` | `dbName`, `storeName`, `ttlMs` (default 24h) |
+| `WeirdGloopServiceConfig` | `batchSize` (default 100) |
+| `GECatalogueEntry` | `name`, `id` — one entry per GE-tradeable item (~7,000 total) |
+| `ActiveFlip` | `id`, `itemName`, `buyPrice`, `quantity`, `targetSellPrice`, `timestamp` |
+| `CompletedFlip` | Extends `ActiveFlip` + `actualSellPrice`, `completedAt`, `realizedProfit` |
+| `PortfolioStats` | `totalProfit`, `totalFlips`, `avgProfit`, `avgRoi` |
+| `WikiSearchResponse` | MediaWiki `action=query&list=search` response: `query.search[].{title, pageid}` |
+| `WikiQueryResponse` | MediaWiki `action=query` response subset |
+| `WikiPage` | `pageid`, `ns`, `title`, `extract?`, `missing?` |
+| `WikiGuideResult` | `title`, `found`, `text` |
+| `ModelOption` | `id`, `label`, `recommended?` — single model entry in a provider |
+| `LLMProvider` | `id`, `label`, `endpoint`, `defaultModel`, `keyPlaceholder`, `models` |
+| `LLMConfig` | `apiKey`, `endpoint`, `model`, `temperature`, `maxTokens` |
+| `ChatMessage` | `role: "system"\|"user"\|"assistant"`, `content` |
+| `ChatCompletionRequest` | OpenAI-compatible request body |
+| `ChatCompletionResponse` | `id`, `choices`, `usage?` |
+| `ChatCompletionChoice` | `index`, `message`, `finish_reason` |
+
+**Exported constants** (from `types.ts` and `coreKnowledge.ts`):
+| Constant | Purpose |
+|----------|---------|
+| `LLM_PROVIDERS` | `readonly LLMProvider[]` — 6 built-in provider presets |
+| `RS3_ECONOMIC_RULES` | String constant — RS3 economic laws injected into LLM system prompt |
+
+---
+
+## 7. Build & Serve
+
+### Build
+```bash
+npm run build        # runs webpack → outputs to dist/  (0 errors expected)
+npm run watch        # webpack --watch
+```
+
+### Serve locally
+```bash
+npx serve dist --listen 8080       # serves at http://localhost:8080
+```
+
+### TypeScript type-check
+```bash
+npx tsc --noEmit
+```
+
+**Known pre-existing `tsc` warnings**: `tsc --noEmit` may show ~11 errors in `index.ts` related to the `alt1` module and `window.alt1`. These are expected because `tsc` runs without webpack's module resolution — the `alt1` package types are resolved by webpack at build time. These errors do **NOT** affect the Webpack build. **Only `npm run build` is the true validation.**
+
+### Webpack config notes
+- `HtmlWebpackPlugin` handles `index.html` emission — do NOT add HTML to `asset/resource` rules.
+- `style-loader` + `css-loader` handle `.css` imports (injected into `<head>` at runtime).
+- `ts-loader` compiles TypeScript.
+- `asset/resource` rule for images and JSON (excluding `.data.png` and `.fontmeta.json` which use alt1 loaders).
+- Library output: UMD as `window.TestApp`.
+- Externals: `sharp`, `canvas`, `electron/common` (node-only alt1 deps).
+
+---
+
+## 8. Current Status
+
+Everything below is **complete and verified** (builds with 0 errors):
+
+- [x] Weird Gloop API service (batched, concurrent fetching)
+- [x] IndexedDB cache service v2 (TTL-based staleness, bulk insert, prices + price-history stores)
+- [x] Data pipeline orchestrator (seed list of ~100 items, buy-limit enrichment from wiki)
+- [x] Full GE catalogue fetch (~7,000 items from `Module:GEIDs/data.json`)
+- [x] Market analyzer service (scoring, filtering, ranking, LLM formatting, runtime overrides)
+- [x] Player-centric scoring (effective player volume, max capital per 4h, buy-limit constraints)
+- [x] Flip profit formula: buy at 0.99×, sell at 1.03×, ~2% net margin after 2% GE tax
+- [x] Volume spike / hype detection (7-day SMA comparison, >1.5× threshold)
+- [x] Canvas sparklines (7-day price history, gradient line chart)
+- [x] Wiki service (two-step search → extract guide fetching + fallback to base item page + Cargo buy-limit API)
+- [x] LLM service (multi-provider, multi-turn chat, strict anti-hallucination + economic rules prompt)
+- [x] Core knowledge base (RS3 economic rules: GE tax, buy limits, margin checking, high alch)
+- [x] LLM provider selection UI (6 providers: Groq, OpenAI, OpenRouter, Together AI, Mistral AI, Custom)
+- [x] Searchable model dropdown with per-provider curated model lists (★ recommended labels)
+- [x] Custom endpoint support for self-hosted models (Ollama, LM Studio, etc.)
+- [x] Conditional Authorization header (omitted for keyless self-hosted models)
+- [x] Tabbed + Sidebar layout modes (persisted in localStorage)
+- [x] Three market view modes: List, Tile, Hybrid (persisted in localStorage)
+- [x] Market item cards with Jagex sprites, flip badges, sparklines, expandable detail panels
+- [x] Floating item detail modal (centred overlay, enlarged sparkline, full data)
+- [x] Dynamic market filters: Trading Volume (Any/High/Low/Custom), Max Price (Unlimited/10M/100M/500M/Custom)
+- [x] Custom volume/budget slider controls with synced text inputs
+- [x] Market refresh button (re-runs filtering pipeline with current filter config)
+- [x] Force Reload Data button (clears cache, re-fetches, re-enriches)
+- [x] Full GE catalogue search bar (searches ~7,000 items, on-demand price/buy-limit fetch)
+- [x] Separate search results section (above Top 20, never replaces it)
+- [x] Favourites system (star toggle on cards + modal, localStorage persistence, dedicated panel with collapse)
+- [x] Quick-add to portfolio (+ button on cards + modal, pre-fills flip form, switches to portfolio tab)
+- [x] Collapsible sections (Favourites ▾/▸ and Top 20 ▾/▸ toggles)
+- [x] Active flip portfolio with localStorage persistence
+- [x] Portfolio autocomplete (recommended items pinned, full cached catalogue search)
+- [x] Flip cards with buy/sell prices, profit projection, buy-limit countdown timer, ✓/✕ action buttons
+- [x] Completed flips history system (mark as sold, actual sell price, P&L tracking)
+- [x] Portfolio sub-navigation (Active Flips / History & Stats toggle)
+- [x] Portfolio stats dashboard (Total Profit, Completed Flips, Avg Profit, Avg ROI)
+- [x] Completed flip cards (green/red win/loss styling, realised profit display)
+- [x] Chat history persistence (localStorage, max 50 messages, clear button)
+- [x] Multi-turn LLM conversation with RAG context
+- [x] Full HTML UI (settings panel, tabbed/sidebar layout, market/advisor/portfolio sections)
+- [x] Dark-themed CSS (~1700 lines — cards, tiles, grids, modals, sparklines, filters, chat, portfolio, completed flips, stats, badges)
+- [x] Webpack build passes (`npm run build` — 0 errors, 0 warnings)
+- [x] CSS scaling fix (`#app` height 95% for Alt1 zoom compatibility)
+
+---
+
+## 9. Past Issues & Resolutions
+
+| Issue | Root Cause | Fix |
+|-------|-----------|-----|
+| ES5 lib errors (Promise, Map, Object.entries) | tsconfig defaulted to ES5 | Set `target: "ES2020"`, `lib: ["ES2020", "DOM", "DOM.Iterable"]` |
+| `index.html` not emitted to `dist/` | Webpack `asset/resource` rule for HTML | Installed `html-webpack-plugin`, removed HTML from asset rule |
+| Chat input cut off at different zoom levels | `100vh` on `#app` didn't adapt | Used `height: 95%`, flex layout with `max-height: 30%` market / `min-height: 120px` chat |
+| `tsc --noEmit` shows alt1 errors | `tsc` lacks webpack's module resolution | Expected/benign — does NOT affect webpack build |
+| Model datalist pre-filtered on provider switch | Auto-filling model text filtered `<datalist>` | Clear input on provider change; placeholder shows default model |
+| DOM refs dropped during refactor | Refactoring replaced DOM ref block omitting some refs | Manually restored all refs in `resolveElements()` |
+| Expanded cards pushing tile grid | Inline expand with z-index/grid-column broke layout | Replaced with floating modal overlay for detail view |
+| Item names invisible in tile/hybrid views | Overflow hidden + no min-width | Added `min-width: 60px`, `flex-wrap: wrap`, `flex-shrink: 1` |
+| Flip profit always 1-2 gp | Old formula used bare break-even for sell price | New formula: buy at 0.99×, sell at 1.03×, ~2% net after tax |
+| Search replacing Top 20 items | Both rendered into same `#market-items` container | Added separate `#search-results` container above Top 20 |
+| On-demand searched items missing buy limits | Buy limit fetch skipped for non-cached items | Added wiki `getBulkBuyLimits()` call in search flow before cache insert |
+| Favourites/action buttons vertical in tile view | Tile `flex-direction: column` stacked all header children | Wrapped action buttons in `.card-actions` horizontal flex container |
+| Portfolio dropdown opens on "Add Flip" click | `handleAddFlip()` called `flipItemName.focus()` after clearing form | Changed to `flipItemName.blur()` to prevent autocomplete trigger |
+| Portfolio dropdown opens on quick-add from card | Tab switch + form fill triggered focus event on name input | Added `suppressAutocomplete` flag, guard in `updateSuggestions()`, reset via `requestAnimationFrame` |
+
+---
+
+## 10. Potential Next Steps (Not Started)
+
+These were discussed or implied but never started:
+
+- ~~**Improved wiki title mapping**~~: ✅ Implemented — two-step MediaWiki search → extract strategy with fallback (see §4.5).
+- **Alt1 overlay integration**: Capture game state, integrate with Alt1's screen-reading capabilities.
+- **Error recovery UI**: Surface cache/network errors more visibly in the market panel.
+- **Item detail links**: Link expanded market cards to the RS3 Wiki or GE database pages.
+- **Responsive mobile layout**: Current CSS is optimized for the Alt1 overlay viewport; could add media queries for wider screens.
+- **Favourites sorting**: Sort favourited items by custom criteria (drag-to-reorder, alphabetical, profit).
+- ~~**Portfolio profit tracking**~~: ✅ Implemented — completed flips with actual sell price, realised profit, stats dashboard (see §4.9).
+- **Price alerts**: Notify when a favourited item hits a target price.
+- **Export/import**: Export favourites + portfolio data as JSON for backup/sharing.
+
+---
+
+## 11. Package Dependencies
+
+**Runtime**: `alt1` (v0.0.1) — RS3 overlay framework.
+
+**Dev**: `@types/node`, `ts-loader`, `typescript`, `webpack`, `webpack-cli`, `style-loader`, `css-loader`, `html-webpack-plugin`, `sharp` (alt1 peer dep).
+
+**Explicitly NOT used**: No `openai`, `axios`, or other HTTP/LLM packages. All HTTP is native `fetch`.

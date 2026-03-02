@@ -1,83 +1,52 @@
-// alt1 base libs, provides all the commonly used methods for image matching and capture
-// also gives your editor info about the window.alt1 api
-import * as a1lib from "alt1";
+/**
+ * @module index
+ * Application entry point.
+ *
+ * Responsibilities (in order):
+ *  1. Import static assets so Webpack emits them.
+ *  2. Import the stylesheet (processed by style-loader → injected at runtime).
+ *  3. Detect the Alt1 environment and show the appropriate status banner.
+ *  4. Run the data-ingest pipeline (fetch + cache).
+ *  5. Bootstrap the UI (market panel, settings, chat).
+ */
 
-// tell webpack that this file relies index.html, appconfig.json and icon.png, this makes webpack
-// add these files to the output directory
-// this works because in /webpack.config.js we told webpack to treat all html, json and imageimports
-// as assets
-import "./index.html";
+import * as a1lib from "alt1";
+import { initDataPipeline } from "./services";
+import { initUI } from "./uiService";
+
+// ── Static asset imports (Webpack asset/resource) ───────────────────────────
 import "./appconfig.json";
 import "./icon.png";
 
+// ── Stylesheet (Webpack style-loader injects into <head>) ───────────────────
+import "./style.css";
 
-var output = document.getElementById("output");
+// ── Alt1 environment detection ──────────────────────────────────────────────
+const alt1Status = document.getElementById("alt1-status");
 
-// loads all images as raw pixel data async, images have to be saved as *.data.png
-// this also takes care of metadata headers in the image that make browser load the image
-// with slightly wrong colors
-// this function is async, so you cant acccess the images instantly but generally takes <20ms
-// use `await imgs.promise` if you want to use the images as soon as they are loaded
-var imgs = a1lib.webpackImages({
-	homeport: require("./homebutton.data.png")
-});
-
-// listen for pasted (ctrl-v) images, usually used in the browser version of an app
-a1lib.PasteInput.listen(img => {
-	findHomeport(img);
-}, (err, errid) => {
-	output.insertAdjacentHTML("beforeend", `<div><b>${errid}</b>  ${err}</div>`);
-});
-
-// You can reach exports on window.TestApp because of
-// library:{type:"umd",name:"TestApp"} in webpack.config.ts
-export function capture() {
-	if (!window.alt1) {
-		output.insertAdjacentHTML("beforeend", `<div>You need to run this page in alt1 to capture the screen</div>`);
-		return;
-	}
-	if (!alt1.permissionPixel) {
-		output.insertAdjacentHTML("beforeend", `<div>Page is not installed as app or capture permission is not enabled</div>`);
-		return;
-	}
-	var img = a1lib.captureHoldFullRs();
-	findHomeport(img);
-}
-
-function findHomeport(img: a1lib.ImgRef) {
-	var loc = img.findSubimage(imgs.homeport);
-	for (let match of loc) {
-		output.insertAdjacentHTML("beforeend", `<div>match at: ${match.x}, ${match.y}</div>`);
-
-		//get the pixel data around the matched area and show them in the output
-		let pixels = img.toData(match.x - 20, match.y - 20, imgs.homeport.width + 40, imgs.homeport.height + 40);
-		output.insertAdjacentElement("beforeend", pixels.toImage());
-
-		//overlay a rectangle around it on screen if we're running in alt1
-		if (window.alt1) {
-			alt1.overLayRect(a1lib.mixColor(255, 255, 255), match.x, match.y, imgs.homeport.width, imgs.homeport.height, 2000, 3);
-		}
-	}
-	if (loc.length == 0 && window.alt1) {
-		alt1.overLayTextEx("Couldn't find homeport button", a1lib.mixColor(255, 255, 255), 20, Math.round(alt1.rsWidth / 2), 200, 2000, "", true, true);
-	}
-}
-
-//check if we are running inside alt1 by checking if the alt1 global exists
 if (window.alt1) {
-	//tell alt1 about the app
-	//this makes alt1 show the add app button when running inside the embedded browser
-	//also updates app settings if they are changed
-	alt1.identifyAppUrl("./appconfig.json");
-} else {
-	let addappurl = `alt1://addapp/${new URL("./appconfig.json", document.location.href).href}`;
-	output.insertAdjacentHTML("beforeend", `
-		Alt1 not detected, click <a href='${addappurl}'>here</a> to add this app to Alt1
-	`);
+  alt1.identifyAppUrl("./appconfig.json");
+} else if (alt1Status) {
+  const addAppUrl = `alt1://addapp/${new URL("./appconfig.json", document.location.href).href}`;
+  alt1Status.innerHTML =
+    `Alt1 not detected — <a href="${addAppUrl}">click here</a> to add this app.`;
 }
 
-//also the worst possible example of how to use global exposed exports as described in webpack.config.js
-output.insertAdjacentHTML("beforeend", `
-	<div>paste an image of rs with homeport button (or not)</div>
-	<div onclick='TestApp.capture()'>Click to capture if on alt1</div>`
-);
+// ── Boot sequence ───────────────────────────────────────────────────────────
+(async () => {
+  try {
+    // Step 1 — Populate the IndexedDB cache with fresh GE data.
+    await initDataPipeline();
+
+    // Step 2 — Wire services → DOM and render the interface.
+    await initUI();
+
+    console.log("[GE Analyzer] Startup complete.");
+  } catch (err) {
+    console.error("[GE Analyzer] Startup failed:", err);
+    alt1Status?.insertAdjacentHTML(
+      "beforeend",
+      `<div style="color:#f44747;margin-top:4px">Startup error — see console.</div>`
+    );
+  }
+})();
