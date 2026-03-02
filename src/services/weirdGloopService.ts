@@ -44,8 +44,8 @@ export class WeirdGloopService {
   private static readonly MAX_RETRIES = 4;
   /** Base delay (ms) for exponential backoff — doubled on each retry. */
   private static readonly BACKOFF_BASE_MS = 2_000;
-  /** Small pause (ms) between sequential history-concurrency groups. */
-  private static readonly HISTORY_GROUP_DELAY_MS = 300;
+  /** Small pause (ms) between sequential history batches. */
+  private static readonly HISTORY_GROUP_DELAY_MS = 1_000;
 
   /**
    * Create a new service instance.
@@ -108,11 +108,11 @@ export class WeirdGloopService {
 
   /**
    * Fetch up to 90 days of historical daily prices for every item in
-   * {@link itemNames}.  The Weird Gloop `/last90d` endpoint only supports a
-   * single item per request, so items are fetched in concurrent batches of
-   * {@link HISTORY_CONCURRENCY} to avoid overwhelming the API.
+   * {@link itemNames}.  Items are batched into pipe-delimited requests of
+   * {@link HISTORY_BATCH_SIZE} (default 50) and dispatched **sequentially**
+   * to avoid rate-limiting.
    *
-   * Individual item failures are logged but do **not** reject the returned
+   * Individual batch failures are logged but do **not** reject the returned
    * promise — successfully fetched histories are always returned.
    *
    * @param itemNames - Canonical RS3 item names.
@@ -127,34 +127,46 @@ export class WeirdGloopService {
   ): Promise<Map<string, WeirdGloopHistoryEntry[]>> {
     if (itemNames.length === 0) return new Map();
 
-    const HISTORY_CONCURRENCY = 10;
+    // Batch history requests using pipe-delimited names — March 2026
+    const HISTORY_BATCH_SIZE = 50;
     const cutoff = Date.now() - days * 24 * 60 * 60 * 1000;
     const result = new Map<string, WeirdGloopHistoryEntry[]>();
+    const batches = this.chunkArray(itemNames, HISTORY_BATCH_SIZE);
 
     console.log(
-      `[WeirdGloopService] Fetching last90d history for ${itemNames.length} items (keeping last ${days} days)…`
+      `[WeirdGloopService] Fetching last90d history for ${itemNames.length} items in ` +
+      `${batches.length} batch(es) of up to ${HISTORY_BATCH_SIZE} (keeping last ${days} days)…`
     );
 
-    const fetchOne = async (name: string): Promise<void> => {
-      const url = `https://api.weirdgloop.org/exchange/history/rs/last90d?name=${encodeURIComponent(name)}`;
-      const resp = await WeirdGloopService.fetchWithRetry(url);
-      if (!resp) return;                                    // all retries exhausted
-      const json: WeirdGloopHistoryResponse = await resp.json();
-      const entries = json[name];
-      if (!Array.isArray(entries)) return;
+    for (let idx = 0; idx < batches.length; idx++) {
+      const batch = batches[idx];
+      const nameParam = batch.map((n) => encodeURIComponent(n)).join("|");
+      const url = `https://api.weirdgloop.org/exchange/history/rs/last90d?name=${nameParam}`;
 
-      const filtered = entries
-        .filter((e) => e.timestamp >= cutoff)
-        .sort((a, b) => a.timestamp - b.timestamp);
+      try {
+        const resp = await WeirdGloopService.fetchWithRetry(url);
+        if (!resp) {
+          console.warn(`[WeirdGloopService] History batch ${idx + 1} — all retries exhausted.`);
+          continue;
+        }
+        const json: WeirdGloopHistoryResponse = await resp.json();
 
-      if (filtered.length > 0) result.set(name, filtered);
-    };
+        for (const name of batch) {
+          const entries = json[name];
+          if (!Array.isArray(entries)) continue;
 
-    for (let i = 0; i < itemNames.length; i += HISTORY_CONCURRENCY) {
-      const batch = itemNames.slice(i, i + HISTORY_CONCURRENCY);
-      await Promise.allSettled(batch.map(fetchOne));
-      // Small pause between concurrent groups to stay under rate limit.
-      if (i + HISTORY_CONCURRENCY < itemNames.length) {
+          const filtered = entries
+            .filter((e) => e.timestamp >= cutoff)
+            .sort((a, b) => a.timestamp - b.timestamp);
+
+          if (filtered.length > 0) result.set(name, filtered);
+        }
+      } catch (err) {
+        console.error(`[WeirdGloopService] History batch ${idx + 1} failed:`, err);
+      }
+
+      // Pause between sequential batches to stay under rate limit.
+      if (idx < batches.length - 1) {
         await WeirdGloopService.sleep(WeirdGloopService.HISTORY_GROUP_DELAY_MS);
       }
     }

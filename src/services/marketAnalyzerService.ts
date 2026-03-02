@@ -21,6 +21,7 @@
  */
 
 import { CacheService } from "./cacheService";
+import { WeirdGloopService } from "./weirdGloopService";
 import type {
   MarketAnalyzerConfig,
   RankedItem,
@@ -135,6 +136,13 @@ export class MarketAnalyzerService {
   private readonly maxVolume: number;
   private readonly maxPrice: number;
 
+  // Cached intermediate maps with TTL – March 2026
+  /** TTL for cached volume/price maps (10 minutes). */
+  private static readonly MAP_CACHE_TTL_MS = 10 * 60 * 1000;
+  private cachedAvgVolumeMap: Map<string, number> | null = null;
+  private cachedPriceHistoryMap: Map<string, number[]> | null = null;
+  private mapCacheTimestamp = 0;
+
   /**
    * @param cache  - An **already-opened** {@link CacheService} instance.
    * @param config - Optional overrides for ranking behaviour.
@@ -145,6 +153,47 @@ export class MarketAnalyzerService {
     this.minVolume = config?.minVolume ?? DEFAULTS.minVolume;
     this.maxVolume = config?.maxVolume ?? 0;
     this.maxPrice = config?.maxPrice ?? 0;
+  }
+
+  /** Invalidate the cached volume/price maps so the next call rebuilds them. */
+  invalidateMapCache(): void {
+    this.cachedAvgVolumeMap = null;
+    this.cachedPriceHistoryMap = null;
+    this.mapCacheTimestamp = 0;
+  }
+
+  /** Check whether the cached maps are still within their TTL. */
+  private isMapsStale(): boolean {
+    return !this.cachedAvgVolumeMap
+      || !this.cachedPriceHistoryMap
+      || (Date.now() - this.mapCacheTimestamp > MarketAnalyzerService.MAP_CACHE_TTL_MS);
+  }
+
+  /**
+   * Return (possibly cached) avgVolumeMap and priceHistoryMap.
+   * Rebuilds both if the cache is stale or empty.
+   */
+  private async getOrBuildMaps(days: number = 30): Promise<{
+    avgVolumeMap: Map<string, number>;
+    priceHistoryMap: Map<string, number[]>;
+  }> {
+    if (!this.isMapsStale()) {
+      console.log("[MarketAnalyzer] Using cached scoring maps (age: " +
+        `${((Date.now() - this.mapCacheTimestamp) / 1000).toFixed(0)}s).`);
+      return {
+        avgVolumeMap: this.cachedAvgVolumeMap!,
+        priceHistoryMap: this.cachedPriceHistoryMap!,
+      };
+    }
+
+    const avgVolumeMap = await this.buildAvgVolumeMap(days);
+    const priceHistoryMap = await this.buildPriceHistoryMap(days);
+
+    this.cachedAvgVolumeMap = avgVolumeMap;
+    this.cachedPriceHistoryMap = priceHistoryMap;
+    this.mapCacheTimestamp = Date.now();
+
+    return { avgVolumeMap, priceHistoryMap };
   }
 
   // ─── Public API ───────────────────────────────────────────────────────
@@ -165,10 +214,9 @@ export class MarketAnalyzerService {
     }
 
     // Build a volume-SMA map from the last 30 days of history.
-    const avgVolumeMap = await this.buildAvgVolumeMap(30);
-
     // Build a price-history map for sparklines / EMA / regression.
-    const priceHistoryMap = await this.buildPriceHistoryMap(30);
+    // Uses TTL-cached maps to skip redundant IndexedDB reads + API calls.
+    const { avgVolumeMap, priceHistoryMap } = await this.getOrBuildMaps(30);
 
     const effectiveMinVol = overrides?.minVolume ?? this.minVolume;
     const effectiveMaxVol = overrides?.maxVolume ?? this.maxVolume;
@@ -211,8 +259,7 @@ export class MarketAnalyzerService {
 
     if (matched.length === 0) return [];
 
-    const avgVolumeMap = await this.buildAvgVolumeMap(30);
-    const priceHistoryMap = await this.buildPriceHistoryMap(30);
+    const { avgVolumeMap, priceHistoryMap } = await this.getOrBuildMaps(30);
 
     // Score with no volume/price filters so *every* match is included.
     const scored = this.scoreAndFilter(matched, 0, 0, 0, avgVolumeMap, priceHistoryMap);
@@ -234,8 +281,7 @@ export class MarketAnalyzerService {
     const matched = allRecords.filter((r) => names.has(r.name));
     if (matched.length === 0) return [];
 
-    const avgVolumeMap = await this.buildAvgVolumeMap(30);
-    const priceHistoryMap = await this.buildPriceHistoryMap(30);
+    const { avgVolumeMap, priceHistoryMap } = await this.getOrBuildMaps(30);
 
     const scored = this.scoreAndFilter(matched, 0, 0, 0, avgVolumeMap, priceHistoryMap);
     return this.sortDescending(scored);
@@ -534,14 +580,22 @@ export class MarketAnalyzerService {
       // ── Sparse-data fallback: fetch from Weird Gloop API ──────────────
       // If most items have ≤ 1 day of local history, pull from the API so
       // sparklines can render immediately after install / cache clear.
+      // Capped at 500 items to avoid rate-limit avalanche after full scans.
+      // Uses batched pipe-delimited WeirdGloopService – March 2026
       const allItems = await this.cache.getAll();
       const itemNames = allItems.map((r) => r.name);
       const sparse = itemNames.length > 0 &&
         itemNames.filter((n) => (map.get(n)?.length ?? 0) >= 2).length < itemNames.length * 0.3;
 
       if (sparse && itemNames.length > 0) {
-        console.log("[MarketAnalyzer] Local price history is sparse — fetching from Weird Gloop API…");
-        const apiMap = await this.fetchAPIHistory(itemNames, days);
+        const SPARSE_CAP = 500;
+        const namesToFetch = itemNames.length > SPARSE_CAP
+          ? itemNames.slice(0, SPARSE_CAP)
+          : itemNames;
+        console.log(
+          `[MarketAnalyzer] Local price history is sparse — fetching ${namesToFetch.length} items from Weird Gloop API…`
+        );
+        const apiMap = await this.fetchAPIHistory(namesToFetch, days);
         // Merge: API data fills in gaps; local data takes precedence when present.
         for (const [name, prices] of apiMap) {
           if (!map.has(name) || (map.get(name)!.length < prices.length)) {
@@ -556,47 +610,39 @@ export class MarketAnalyzerService {
   }
 
   /**
-   * Fetch historical prices from the Weird Gloop `/exchange/history/rs/last90d`
-   * endpoint and extract daily closing prices for the last {@link days} days.
+   * Fetch historical prices from the Weird Gloop API and extract daily
+   * closing prices for the last {@link days} days.
    *
-   * Each item is fetched individually (the `/last90d` endpoint does not
-   * support pipe-separated batch names).  Requests are run in parallel
-   * batches of {@link CONCURRENCY} to avoid overwhelming the API.
-   * Individual failures are logged but do not reject the returned promise.
+   * Delegates to {@link WeirdGloopService.fetchHistoricalPrices} which uses
+   * pipe-delimited batched requests (50 items per HTTP call) dispatched
+   * sequentially with rate-limit-safe pauses.  Results are also persisted
+   * to IndexedDB so subsequent calls hit the cache instead.
    *
    * @param itemNames - Canonical RS3 item names.
    * @param days      - Number of recent days to extract from the 90-day window.
    * @returns A `Map<itemName, number[]>` of chronological daily prices.
    */
+  // Batched pipe-delimited history via WeirdGloopService – March 2026
   private async fetchAPIHistory(
     itemNames: string[],
     days: number,
   ): Promise<Map<string, number[]>> {
     const result = new Map<string, number[]>();
-    const CONCURRENCY = 10;
-    const cutoff = new Date();
-    cutoff.setDate(cutoff.getDate() - days);
-    const cutoffMs = cutoff.getTime();
     const todayStr = new Date().toISOString().slice(0, 10);
 
-    /** Fetch a single item's history and add to result map. */
-    const fetchOne = async (name: string): Promise<void> => {
-      try {
-        const url = `https://api.weirdgloop.org/exchange/history/rs/last90d?name=${encodeURIComponent(name)}`;
-        const resp = await fetch(url, {
-          headers: {
-            "User-Agent": "RS3-GE-Analyzer-Alt1Plugin/1.0",
-            Accept: "application/json",
-          },
-        });
-        if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
-        const json = await resp.json() as Record<string, Array<{ timestamp: number; price: number }>>;
-        const entries = json[name];
-        if (!Array.isArray(entries)) return;
+    try {
+      const api = new WeirdGloopService();
+      const historyMap = await api.fetchHistoricalPrices(itemNames, days);
 
+      // Persist fetched data to IndexedDB for future use.
+      if (historyMap.size > 0) {
+        try { await this.cache.bulkInsertHistory(historyMap); } catch { /* non-critical */ }
+      }
+
+      // Transform WeirdGloopHistoryEntry[] → number[] (daily prices).
+      for (const [name, entries] of historyMap) {
         const dayMap = new Map<string, number>();
         for (const e of entries) {
-          if (e.timestamp < cutoffMs) continue;
           const day = new Date(e.timestamp).toISOString().slice(0, 10);
           if (day === todayStr) continue;
           dayMap.set(day, e.price);
@@ -605,15 +651,9 @@ export class MarketAnalyzerService {
         if (sorted.length > 0) {
           result.set(name, sorted.map((d) => d[1]));
         }
-      } catch {
-        // Individual item failure — silently skip.
       }
-    };
-
-    // Process items in concurrent batches.
-    for (let i = 0; i < itemNames.length; i += CONCURRENCY) {
-      const batch = itemNames.slice(i, i + CONCURRENCY);
-      await Promise.allSettled(batch.map(fetchOne));
+    } catch (err) {
+      console.warn("[MarketAnalyzer] fetchAPIHistory failed:", err);
     }
 
     console.log(`[MarketAnalyzer] API history fetched for ${result.size} items.`);

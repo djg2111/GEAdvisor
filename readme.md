@@ -38,6 +38,7 @@ Uses a **RAG (Retrieval-Augmented Generation) pipeline** to combine live GE mark
 - **Trade velocity** — Insta-Flip / Active / Slow / Very Slow badges with explanatory tooltips
 - **Hype detection** — volume spike badges when today's volume exceeds the 7-day average by 1.5×
 - **Dedicated graph modal** — 📊 button on every card opens a full chart modal with gradient area chart, trend analysis, price change stats, high/low, and volatility — with a **history-range selector** (7 / 30 / 90 days) inside the modal and in the market filter bar. Uses **on-demand cache-first history loading**: checks IndexedDB first, fetches from the Weird Gloop API only when data is sparse, and persists results for future use
+- **Manual history refresh** — graph modal shows a "Refresh" button when price history is insufficient (< 7 days), letting users manually fetch missing data\n- **Startup loading overlay** — spinner with status text keeps users informed during data pipeline and market analysis bootstrap
 - **Predictive analytics badges** — EMA trend (↑/↓ vs 30-day EMA), predicted 24h price change (linear regression), and daily volatility % shown directly on every market card
 - **Price momentum badges** — "⚠️ Crashing" / "📈 Rising" warnings when 7-day trend exceeds ±5 %
 - **Three view modes** — List, Tile, and Hybrid layouts

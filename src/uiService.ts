@@ -366,7 +366,7 @@ let geCatalogue: GECatalogueEntry[] = [];
  * ready.  Returns only after the initial data pipeline has completed and the
  * market panel is rendered.
  */
-export async function initUI(): Promise<void> {
+export async function initUI(onStatus?: (msg: string, step: string) => void): Promise<void> {
   resolveElements();
   populateProviderDropdown();
   restoreSettings();
@@ -393,6 +393,7 @@ export async function initUI(): Promise<void> {
   portfolio = new PortfolioService();
 
   // Run the initial market analysis and render.
+  onStatus?.("Ranking top items\u2026", "Step 2 of 5");
   try {
     await refreshMarketPanel();
   } catch (err) {
@@ -402,6 +403,7 @@ export async function initUI(): Promise<void> {
   }
 
   // Render the favourites section (if any favourites exist).
+  onStatus?.("Loading favourites\u2026", "Step 3 of 5");
   restoreFavSort();
   bindFavSort();
   await renderFavorites();
@@ -412,6 +414,7 @@ export async function initUI(): Promise<void> {
   await loadItemCatalogue();
 
   // Fetch the full GE catalogue (~7 000 items) for market search.
+  onStatus?.("Fetching item catalogue\u2026", "Step 4 of 5");
   try {
     geCatalogue = await fetchGECatalogue();
   } catch (err) {
@@ -421,6 +424,7 @@ export async function initUI(): Promise<void> {
 
   // Pre-fetch wiki text for the first batch of items so that the first
   // chat message doesn't have to wait for wiki I/O.
+  onStatus?.("Pre-fetching wiki data\u2026", "Step 5 of 5");
   await prefetchWikiText();
 
   // Restore any persisted LLM chat conversation.
@@ -2410,8 +2414,19 @@ async function refreshItemGraph(item: RankedItem, range: number): Promise<void> 
       `</div>`;
   }
 
+  // Manual history refresh fallback – March 2026
+  // Update history-status visibility after range refresh.
+  const statusEl = mBody.querySelector<HTMLElement>(".graph-history-status");
+  if (hist.length < 7) {
+    statusEl?.classList.add("visible");
+    if (canvas) canvas.style.display = "none";
+  } else {
+    statusEl?.classList.remove("visible");
+    if (canvas) canvas.style.display = "";
+  }
+
   requestAnimationFrame(() => {
-    if (canvas) drawGraphChart(canvas, hist);
+    if (canvas && hist.length >= 2) drawGraphChart(canvas, hist);
   });
 }
 
@@ -2503,12 +2518,19 @@ async function showGraphModal(item: RankedItem): Promise<void> {
     `<option value="${d}"${d === range ? " selected" : ""}>History: ${d} days</option>`
   ).join("");
 
+  // Manual history refresh fallback – March 2026
+  const insufficientData = hist.length < 7;
+
   mBody.innerHTML =
     `<div class="graph-modal-range-row">` +
       `<label>Range:</label>` +
       `<select class="graph-range-inline">${rangeOptions}</select>` +
     `</div>` +
-    `<canvas class="graph-modal-canvas" width="480" height="180"></canvas>` +
+    `<canvas class="graph-modal-canvas" width="480" height="180"${insufficientData ? ' style="display:none"' : ''}></canvas>` +
+    `<div class="graph-history-status${insufficientData ? ' visible' : ''}">` +
+      `Insufficient history \u2022 ` +
+      `<button class="refresh-history-btn">Refresh</button>` +
+    `</div>` +
     `<div class="graph-stats">` +
       `<div class="graph-stat-row">` +
         `<span class="graph-stat-label">${range}-Day Trend</span>` +
@@ -2551,10 +2573,58 @@ async function showGraphModal(item: RankedItem): Promise<void> {
     });
   }
 
+  // Manual history refresh fallback – March 2026
+  bindRefreshHistoryBtn(mBody, item);
+
   // Draw the chart after the modal is in the DOM.
   requestAnimationFrame(() => {
     const canvas = mBody.querySelector<HTMLCanvasElement>(".graph-modal-canvas");
-    if (canvas) drawGraphChart(canvas, hist);
+    if (canvas && !insufficientData) drawGraphChart(canvas, hist);
+  });
+}
+
+// Manual history refresh fallback – March 2026
+/**
+ * Bind the “Refresh” button inside `.graph-history-status` so users can
+ * manually fetch missing history for low-volume / post-scan items.
+ */
+function bindRefreshHistoryBtn(container: HTMLElement, item: RankedItem): void {
+  const btn = container.querySelector<HTMLButtonElement>(".refresh-history-btn");
+  if (!btn) return;
+
+  btn.addEventListener("click", async () => {
+    btn.disabled = true;
+    btn.textContent = "Fetching\u2026";
+
+    try {
+      const prices = await ensureItemHistory(item.name, 90);
+      const range = parseInt(
+        (container.querySelector<HTMLSelectElement>(".graph-range-inline")?.value) || "7", 10
+      );
+      const sliced = (range < 90 && prices.length > range) ? prices.slice(-range) : prices;
+      const hist = sliced.length > 0 ? [...sliced, item.price] : [item.price];
+
+      // Update canvas visibility & status strip.
+      const canvas = container.querySelector<HTMLCanvasElement>(".graph-modal-canvas");
+      const statusEl = container.querySelector<HTMLElement>(".graph-history-status");
+
+      if (hist.length >= 7) {
+        if (canvas) { canvas.style.display = ""; drawGraphChart(canvas, hist); }
+        statusEl?.classList.remove("visible");
+      } else {
+        // Still insufficient — draw what we have but keep the status.
+        if (canvas) { canvas.style.display = ""; drawGraphChart(canvas, hist); }
+        btn.textContent = "Refresh";
+        btn.disabled = false;
+      }
+
+      // Refresh stats as well.
+      refreshItemGraph(item, range);
+    } catch {
+      showToast("Failed to load history", "info");
+      btn.textContent = "Refresh";
+      btn.disabled = false;
+    }
   });
 }
 

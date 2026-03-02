@@ -38,6 +38,7 @@ npx serve dist --listen 8080   # local dev server
 - **Per-section sort controls**: Top 20, Search Results, and Favourites each have their own sort `<select>` and localStorage key (`ge-analyzer:top20-sort`, `ge-analyzer:search-sort`, `ge-analyzer:fav-sort`). Shared `applySortOrder()` helper sorts in place — do not add a global sort.
 - **History-range selector**: `<select id="history-range-select">` in `#market-filters` (7/30/90 days). Also rendered inline inside the graph modal — changing either syncs the other. `fetchItemHistory(name, range)` delegates to `ensureItemHistory` (cache-first, API fallback) then slices to the requested range.
 - **On-demand graph history**: `ensureItemHistory(itemName, 90)` checks IndexedDB first; if < 7 data points are cached it fetches via `WeirdGloopService.fetchHistoricalPrices`, persists via `cache.bulkInsertHistory`, then returns prices. The graph modal shows dynamic loading text ("Checking cached history…" → "Fetching price history…") and a toast on failure.
+- **Manual history refresh fallback**: When the graph modal has < 7 data points, a `.graph-history-status` strip appears ("Insufficient history • Refresh") below the canvas. Clicking the button calls `ensureItemHistory(itemName, 90)`, re-renders on success, shows toast on failure. Button only visible when data is insufficient.
 - **Predictive badges**: `buildItemCard` appends `.predictive-badges` (EMA, predicted 24h, volatility) after the momentum badges. Values come from `RankedItem.ema30d`, `.predictedNextPrice`, `.volatility`.
 - **Completed flips table**: `renderCompletedFlips()` renders a `<table class="completed-flips-table">` with clickable sort headers. Module-scoped `completedFlipsSortCol`/`completedFlipsSortAsc` track state.
 - **CSV export**: `#export-csv-btn` in the portfolio history toolbar triggers `exportCompletedFlipsCsv()` — generates a data-URL CSV download of all `CompletedFlip` entries.
@@ -46,17 +47,17 @@ npx serve dist --listen 8080   # local dev server
 - **Barrel imports**: Always import services/types from `./services` (the barrel), not from individual files like `./services/types`
 - **`HistoricalPriceRecord`** is re-exported from the barrel (`services/index.ts`) — use it in uiService for typed cache reads
 - **Deep-history scan checkbox**: `#deep-history-checkbox` next to the scan button; persisted in `ge-analyzer:deep-history`. When checked, `runFullMarketScan(..., deepHistory=true)` fetches 90-day history instead of 30-day per batch (~3–5× slower). One-time warning toast on enable.
-- **Rate-limit retry & adaptive backoff**: `WeirdGloopService.fetchWithRetry()` retries 429s and network errors with exponential backoff (MAX_RETRIES=4, BACKOFF_BASE_MS=2 000 ms). `fetchLatestPrices` dispatches batches **sequentially** (not concurrently) with 300 ms inter-batch pauses. History fetches use concurrency groups of 10 with HISTORY_GROUP_DELAY_MS=300 ms between groups. `runFullMarketScan` uses 1 500 ms inter-batch delay with adaptive backoff: consecutive empty batches double the delay up to a 30 s ceiling; delay resets to baseline on a successful batch.
+- **Rate-limit retry & adaptive backoff**: `WeirdGloopService.fetchWithRetry()` retries 429s and network errors with exponential backoff (MAX_RETRIES=4, BACKOFF_BASE_MS=2 000 ms). `fetchLatestPrices` dispatches batches **sequentially** (not concurrently) with 300 ms inter-batch pauses. History fetches use **pipe-delimited batched requests** of 50 items each, dispatched sequentially with HISTORY_GROUP_DELAY_MS=1 000 ms between batches (previously individual per-item requests). `runFullMarketScan` uses 1 500 ms inter-batch delay with adaptive backoff: consecutive empty batches double the delay up to a 30 s ceiling; delay resets to baseline on a successful batch.
 
 ## File Roles
 
 | File | Responsibility |
 |------|---------------|
-| `uiService.ts` | **All** DOM manipulation, event binding, localStorage, rendering (~3 580 lines) |
+| `uiService.ts` | **All** DOM manipulation, event binding, localStorage, rendering (~3 720 lines) |
 | `services/types.ts` | Every shared interface + `LLM_PROVIDERS` constant |
 | `services/coreKnowledge.ts` | Static RS3 economic rules (GE tax, buy limits, margin checking, high alch) |
 | `services/llmService.ts` | OpenAI-compatible chat-completion client; builds system + user prompt |
-| `services/marketAnalyzerService.ts` | Score → filter → rank → format. Includes trade velocity scoring, 7-day price momentum classification, and sparse-history fallback to Weird Gloop `last90d` API for chart data. |
+| `services/marketAnalyzerService.ts` | Score → filter → rank → format. Includes trade velocity scoring, 7-day price momentum classification, and sparse-history fallback to Weird Gloop `last90d` API for chart data. Sparse fallback delegates to `WeirdGloopService.fetchHistoricalPrices` (batched, pipe-delimited) and is capped at 500 items to avoid rate-limit avalanche after full scans. |
 | `services/initDataPipeline.ts` | Startup orchestrator + `SEED_ITEMS` list (~100 RS3 items). `runFullMarketScan` uses adaptive inter-batch backoff (1.5 s baseline, 30 s ceiling) |
 | `services/portfolioService.ts` | Active flip tracker + completed flip history with P&L stats (localStorage) |
 | `services/weirdGloopService.ts` | Weird Gloop RS3 GE API client — batched sequential fetching with `fetchWithRetry()` exponential backoff (429 / network errors) |
@@ -65,6 +66,7 @@ npx serve dist --listen 8080   # local dev server
 
 ## UI Layout (index.html, top → bottom)
 
+0. `#startup-overlay` — full-area spinner + status text (auto-removed after boot completes)
 1. `#background-sync-progress` — scan progress bar (hidden by default, shown during full market scan)
 2. `#error-banner` — dismissible error bar with retry (hidden by default)
 3. `#market-filters` — volume / price dropdowns + refresh button

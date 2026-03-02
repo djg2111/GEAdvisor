@@ -245,6 +245,7 @@ body {
 /* ── App shell ────────────────────────────────────────────────────────────── */
 
 #app {
+  position: relative;        /* contain startup overlay */
   display: flex;
   flex-direction: column;
   height: 95%;              /* fill parent, not viewport — respects zoom */
@@ -825,6 +826,45 @@ button:disabled {
 .slider-row input[type="number"]:focus {
   outline: 1px solid var(--accent-primary);
   border-color: var(--accent-primary);
+}
+
+/* ── Startup loading overlay ──────────────────────────────────────────────── */
+
+.startup-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 900;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  background: var(--bg, #1e1e1e);
+  transition: opacity 0.4s ease;
+}
+.startup-overlay.fade-out {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.startup-spinner {
+  width: 36px;
+  height: 36px;
+  border: 3px solid var(--border, #333);
+  border-top-color: var(--accent-blue, #569cd6);
+  border-radius: 50%;
+  animation: startup-spin 0.8s linear infinite;
+}
+@keyframes startup-spin {
+  to { transform: rotate(360deg); }
+}
+
+.startup-status {
+  color: var(--text-muted, #888);
+  font-size: 12px;
+  text-align: center;
+  max-width: 260px;
+  line-height: 1.4;
 }
 
 .loader {
@@ -1544,6 +1584,30 @@ button:disabled {
   margin-bottom: 12px;
   border-radius: 4px;
   background: var(--bg-elevated);
+}
+
+.graph-history-status {
+  display: none;
+  text-align: center;
+  padding: 8px 4px;
+  font-size: 11px;
+  color: var(--text-muted, #888);
+}
+.graph-history-status.visible {
+  display: block;
+}
+.graph-history-status button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--accent-blue, #569cd6);
+  text-decoration: underline;
+  font-size: 11px;
+  padding: 0 2px;
+}
+.graph-history-status button:disabled {
+  opacity: 0.5;
+  cursor: default;
 }
 
 .graph-stats {

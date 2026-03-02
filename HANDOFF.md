@@ -81,7 +81,7 @@ alt1minimal/
     ├── appconfig.json         # Alt1 app manifest (asset/resource in webpack)
     ├── icon.png               # App icon (asset/resource)
     ├── index.html             # Full UI: settings, tabbed layout (market / advisor / portfolio), search, favourites, filters
-    ├── index.ts               # Lean entry point: alt1 detection → initDataPipeline() → initUI()
+    ├── index.ts               # Lean entry point: alt1 detection → initDataPipeline() → initUI(), startup loading overlay
     ├── style.css              # Three themes (Classic Dark, OSRS Brown, RS3 Modern Blue), flexbox, cards, modals, graph modal, toasts, inline alert popovers, data-mgmt, responsive desktop breakpoint (~2440 lines)
     ├── uiService.ts           # All DOM logic: settings, market render, search, favourites, portfolio, chat RAG, error recovery, price alerts, data export/import, CSV export, sortable flips table (~3100 lines)
     └── services/
@@ -127,8 +127,8 @@ Called once at startup from `index.ts`:
 
 - **`fetchWithRetry(url, maxRetries?)`** — private static helper. On HTTP 429 or network `TypeError`, retries up to `MAX_RETRIES` (4) times with exponential backoff: delay = `BACKOFF_BASE_MS` (2 000 ms) × 2^attempt. Non-retryable HTTP errors return `null`.
 - **`fetchLatestPrices(itemNames)`** — sequential batch dispatch (one request at a time, 300 ms pause between batches). Each batch uses `fetchWithRetry`. Returns `Map<string, WeirdGloopPriceRecord>`.
-- **`fetchHistoricalPrices(itemNames, days)`** — individual item fetches within concurrency groups of `HISTORY_CONCURRENCY` (10) via `Promise.allSettled`. Each call uses `fetchWithRetry`. Groups are separated by `HISTORY_GROUP_DELAY_MS` (300 ms).
-- **Static constants**: `MAX_RETRIES = 4`, `BACKOFF_BASE_MS = 2_000`, `HISTORY_GROUP_DELAY_MS = 300`.
+- **`fetchHistoricalPrices(itemNames, days)`** — pipe-delimited batched requests of up to 50 items each, dispatched **sequentially** with `HISTORY_GROUP_DELAY_MS` (1 000 ms) pauses between batches. Each batch uses `fetchWithRetry`. Previously used individual per-item requests in concurrent groups of 10, which caused 429 rate-limiting during full scans.
+- **Static constants**: `MAX_RETRIES = 4`, `BACKOFF_BASE_MS = 2_000`, `HISTORY_GROUP_DELAY_MS = 1_000`.
 
 ### 4.3 Cache Service (`cacheService.ts`)
 
@@ -142,7 +142,7 @@ Called once at startup from `index.ts`:
 
 ### 4.4 Market Analyzer Service (`marketAnalyzerService.ts`)
 
-Pure math on local data with one network fallback — when the local IndexedDB price-history store is sparse (< 30% of items have ≥ 2 days), `buildPriceHistoryMap()` fetches from the Weird Gloop `/exchange/history/rs/last90d` endpoint (batched, 50 items/request) to populate sparklines immediately after install or cache clear:
+Pure math on local data with one network fallback — when the local IndexedDB price-history store is sparse (< 30% of items have ≥ 2 days), `buildPriceHistoryMap()` delegates to `WeirdGloopService.fetchHistoricalPrices` (pipe-delimited batched requests of 50, with 1 000 ms pauses) and persists results to IndexedDB. Capped at 500 items to avoid rate-limit avalanche after full scans:
 1. Reads all cached records from `CacheService.getAll()`.
 2. Builds 7-day average volume map and price history map from the `price-history` store.
 3. Scores each item via `scoreAndFilter()`:
@@ -419,7 +419,7 @@ Lean orchestrator (~50 lines):
 - **Quick-add button**: `.quick-add-btn` teal on hover (`#4ec9b0`).
 - **Favourites section**: `.favorites-section` with border, rounded corners, dark header (`#252526`), gold ★ title.
 - **Top 20 section**: `.top20-section` with matching border/rounded styling. `#market-header` gets dark header background when inside the section.
-- **Graph modal**: `.graph-modal-backdrop` with centred `.graph-modal` (max 520px). Header with sprite + title + close button. Body contains a `.graph-loading-msg` placeholder (dynamic text: "Checking cached history…" → "Fetching price history…"), a large `<canvas class="graph-modal-canvas">` (480×140) drawn via `drawGraphChart()`, followed by `.graph-stats` — a column of `.graph-stat-row` elements showing N-Day Trend (with colour + icon), Change (absolute + percentage), Current Price, N-Day High, N-Day Low, Volatility %, and Data Points count. Lazy singleton pattern (`ensureGraphModal()`). History is loaded via `ensureItemHistory()` (cache-first, API fallback).
+- **Graph modal**: `.graph-modal-backdrop` with centred `.graph-modal` (max 520px). Header with sprite + title + close button. Body contains a `.graph-loading-msg` placeholder (dynamic text: "Checking cached history…" → "Fetching price history…"), a large `<canvas class="graph-modal-canvas">` (480×140) drawn via `drawGraphChart()`, a `.graph-history-status` strip (hidden by default, shown via `.visible` class when < 7 data points — contains "Insufficient history" text and a `.refresh-history-btn` button that calls `ensureItemHistory()` to manually fetch missing data), followed by `.graph-stats` — a column of `.graph-stat-row` elements showing N-Day Trend (with colour + icon), Change (absolute + percentage), Current Price, N-Day High, N-Day Low, Volatility %, and Data Points count. Lazy singleton pattern (`ensureGraphModal()`). History is loaded via `ensureItemHistory()` (cache-first, API fallback).
 - **Floating modal**: `.item-modal-backdrop` with centred `.item-modal` (max 400px, slide-in animation `modal-in`).
 - **Flip badges**: `.flip-badges` with flex-wrap. `.buy-badge`, `.sell-badge`, `.profit-badge`, `.hype-badge`. Responsive wrapping with `min-width: 60px` on `.item-name`.
 - **Portfolio**: `.portfolio-form`, `.autocomplete-wrap`, `.flip-card` with countdown timer styling, `.flip-card-actions` horizontal button group (✓ + ✕).
@@ -548,7 +548,7 @@ Everything below is **complete and verified** (builds with 0 errors):
 - [x] Trade velocity scoring (Insta-Flip / Active / Slow / Very Slow badges with tooltips)
 - [x] Price momentum / trend classification (Uptrend / Downtrend / Stable based on 7-day % change, with falling-knife warning badges)
 - [x] Dedicated graph modal (📊 button on cards → full chart + momentum stats: trend, % change, high/low, volatility, data points) — with **on-demand cache-first history** (`ensureItemHistory`)
-- [x] Wiki service (two-step search → extract guide fetching + fallback to base item page + Cargo buy-limit API)
+- [x] Manual history refresh fallback — graph modal shows "Insufficient history • Refresh" button when < 7 data points (March 2026)- [x] Startup loading overlay — spinner + status text (“Loading market data…” / “Analysing markets…”) covers `#app` until boot completes, fades out on success (March 2026)- [x] Wiki service (two-step search → extract guide fetching + fallback to base item page + Cargo buy-limit API)
 - [x] LLM service (multi-provider, multi-turn chat, strict anti-hallucination + economic rules prompt)
 - [x] Core knowledge base (RS3 economic rules: GE tax, buy limits, margin checking, high alch)
 - [x] LLM provider selection UI (6 providers: Groq, OpenAI, OpenRouter, Together AI, Mistral AI, Custom)
@@ -611,6 +611,9 @@ Everything below is **complete and verified** (builds with 0 errors):
 | Search results rendering inline after view toggle move | Moving `#view-toggle` into `#search-section` (flex container) caused `#search-results` and `#search-loading` to flow beside the input | Added `width: 100%` to both elements to force them onto their own row in the flex-wrap container |
 | Graph modal showing no data / stuck on "Loading price history…" | Full market scan fetches current prices but not deep history; `fetchItemHistory` always hit the API directly (no cache) | Implemented `ensureItemHistory()` cache-first flow: checks IndexedDB for ≥ 7 data points, fetches via `WeirdGloopService.fetchHistoricalPrices` on demand, persists via `bulkInsertHistory`, dynamic loading text + error toast (March 2026) |
 | API 429 rate-limiting during full market scan | Concurrent `Promise.allSettled` dispatch in `fetchLatestPrices` overwhelmed the Weird Gloop API after ~2 batches | Switched to sequential batch dispatch with 300 ms pauses; added `fetchWithRetry()` with exponential backoff (MAX_RETRIES=4, base 2 s); increased `runFullMarketScan` inter-batch delay from 500 ms to 1 500 ms with adaptive doubling (ceiling 30 s) on consecutive empty batches (March 2026) |
+| Graph modal showing no data for low-volume items with no fallback action | Users had no way to manually trigger history fetch when automatic cache had insufficient data | Added `.graph-history-status` strip with Refresh button: calls `ensureItemHistory()`, re-renders graph on success, toast on failure. Only visible when < 7 data points (March 2026) |
+| Full market scan history fetches hitting 429 rate limits after first batch | `fetchHistoricalPrices` used individual per-item HTTP requests (100 requests per 100-item batch in concurrent groups of 10), exhausting the API rate limit | Rewrote to use **pipe-delimited batched requests** of 50 items each, dispatched sequentially with 1 000 ms pauses — reduces 100 requests to 2 per scan batch (March 2026) |
+| Post-scan `refreshMarketPanel` triggering 30 K+ 429 errors | `marketAnalyzerService.fetchAPIHistory` had its own per-item fetch loop (no retry, no delay, CONCURRENCY=10); after a 7 059-item scan the sparse-data fallback tried to fetch history for all ~1 849 cached items individually | Replaced bespoke `fetchAPIHistory` with delegation to `WeirdGloopService.fetchHistoricalPrices` (batched pipe-delimited, sequential, 1 s pauses). Also capped sparse fallback at 500 items and persisted results to IndexedDB (March 2026) |
 
 ---
 
