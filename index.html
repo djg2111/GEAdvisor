@@ -108,6 +108,14 @@
 
 			<!-- ── Market data view ───────────────────────────────────── -->
 			<section id="market-view" class="active-tab">
+				<!-- ── Background sync progress bar (relocated to top) ── -->
+				<div id="background-sync-progress" class="sync-progress hidden">
+					<div class="sync-progress-track">
+						<div id="sync-progress-fill" class="sync-progress-fill"></div>
+					</div>
+					<span id="sync-progress-text" class="sync-progress-text">Scanning…</span>
+				</div>
+
 				<!-- ── Error recovery banner ──────────────────────────── -->
 				<div id="error-banner" class="error-banner hidden">
 					<span id="error-banner-msg">Something went wrong.</span>
@@ -128,6 +136,11 @@
 						<option value="100000000">Budget: &lt;100M</option>
 						<option value="500000000">Budget: &lt;500M</option>
 						<option value="custom">Budget: Custom</option>
+					</select>
+					<select id="history-range-select" title="Chart history range">
+						<option value="7" selected>History: 7 days</option>
+						<option value="30">History: 30 days</option>
+						<option value="90">History: 90 days</option>
 					</select>
 					<button id="refresh-market-btn" class="refresh-btn" type="button">⟳ Refresh</button>
 				</div>
@@ -196,6 +209,10 @@
 					<h2>Top 20 Markets</h2>
 					<div class="market-header-actions">
 						<button id="full-market-scan-btn" class="scan-btn" type="button" title="Scan all ~7,000 GE items in the background">🔍 Scan Full Market</button>
+						<label class="deep-history-label" title="Fetch 90-day history for every item (slower, ~3–5× longer)">
+							<input type="checkbox" id="deep-history-checkbox" />
+							<span>90d history</span>
+						</label>
 						<select id="top20-sort-select" class="section-sort-select" title="Sort Top 20">
 							<option value="default">Sort: Default</option>
 							<option value="alpha">Sort: A–Z</option>
@@ -209,13 +226,6 @@
 				<div id="market-items"></div>
 				</div><!-- /.top20-section -->
 
-				<!-- ── Background sync progress bar ───────────────────── -->
-				<div id="background-sync-progress" class="sync-progress hidden">
-					<div class="sync-progress-track">
-						<div id="sync-progress-fill" class="sync-progress-fill"></div>
-					</div>
-					<span id="sync-progress-text" class="sync-progress-text">Scanning…</span>
-				</div>
 			</section>
 
 			<!-- ── Advisor / chat view ────────────────────────────────── -->
@@ -269,6 +279,10 @@
 
 				<!-- History & Stats pane (hidden by default) -->
 				<div id="portfolio-history-container" style="display:none">
+					<div class="portfolio-history-toolbar">
+						<input id="completed-flips-filter" type="text" placeholder="Filter by item or profit…" autocomplete="off" spellcheck="false" />
+						<button id="export-csv-btn" type="button">📊 Export CSV</button>
+					</div>
 					<div id="portfolio-stats" class="portfolio-stats">
 						<div class="stat-card">
 							<span class="stat-label">Total Profit</span>

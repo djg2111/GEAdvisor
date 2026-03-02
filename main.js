@@ -692,6 +692,23 @@ button:disabled {
   filter: none;
 }
 
+/* ── Deep-history checkbox label ──────────────────────────────────────────── */
+
+.deep-history-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 10px;
+  color: var(--text-muted);
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.deep-history-label input[type="checkbox"] {
+  margin: 0;
+  accent-color: var(--accent-primary);
+}
+
 /* ── Background sync progress bar ─────────────────────────────────────────── */
 
 .sync-progress {
@@ -2237,6 +2254,185 @@ button:disabled {
 
 .completed-flip-profit.loss {
   color: var(--accent-red);
+}
+
+/* ── Predictive analytics badges on market cards ────────────────────────────── */
+
+.predictive-badges {
+  display: flex;
+  gap: 3px;
+  flex-wrap: wrap;
+  align-items: center;
+  margin-top: 2px;
+}
+
+.ema-badge,
+.predicted-badge,
+.vol-badge {
+  font-size: 10px;
+  padding: 1px 6px;
+  border-radius: 3px;
+  white-space: nowrap;
+  cursor: help;
+}
+
+.ema-badge {
+  background: rgba(86, 156, 214, 0.18);
+  color: var(--accent-blue-text);
+}
+
+.ema-badge.up {
+  color: var(--accent-green-bright);
+  background: rgba(39, 174, 96, 0.15);
+}
+
+.ema-badge.down {
+  color: var(--accent-red);
+  background: rgba(244, 71, 71, 0.15);
+}
+
+.predicted-badge {
+  font-weight: 600;
+}
+
+.predicted-badge.up {
+  color: var(--accent-green-bright);
+  background: rgba(39, 174, 96, 0.15);
+}
+
+.predicted-badge.down {
+  color: var(--accent-red);
+  background: rgba(244, 71, 71, 0.15);
+}
+
+.predicted-badge.neutral {
+  color: var(--text-muted);
+  background: rgba(136, 136, 136, 0.15);
+}
+
+.vol-badge {
+  background: rgba(240, 192, 64, 0.15);
+  color: var(--accent-gold);
+}
+
+/* ── Completed flips table ─────────────────────────────────────────────────── */
+
+.portfolio-history-toolbar {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 8px;
+  align-items: center;
+}
+
+.portfolio-history-toolbar input[type="text"] {
+  flex: 1;
+  padding: 4px 8px;
+  font-size: 11px;
+  border: 1px solid var(--border-input);
+  border-radius: 3px;
+  background: var(--bg-input);
+  color: var(--text-main);
+}
+
+.portfolio-history-toolbar input[type="text"]::placeholder {
+  color: var(--text-muted);
+  opacity: 0.6;
+}
+
+#export-csv-btn {
+  padding: 4px 10px;
+  font-size: 11px;
+  white-space: nowrap;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-input);
+  border-radius: 3px;
+  color: var(--text-main);
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+#export-csv-btn:hover {
+  background: var(--accent-primary);
+  color: var(--text-bright);
+}
+
+.completed-flips-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 11px;
+}
+
+.completed-flips-table th {
+  text-align: left;
+  padding: 4px 8px;
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--text-heading);
+  border-bottom: 2px solid var(--border-main);
+  cursor: pointer;
+  user-select: none;
+  white-space: nowrap;
+  background: var(--bg-elevated);
+}
+
+.completed-flips-table th:hover {
+  color: var(--text-bright);
+}
+
+.completed-flips-table th .sort-arrow {
+  margin-left: 2px;
+  font-size: 9px;
+  color: var(--text-muted);
+}
+
+.completed-flips-table td {
+  padding: 4px 8px;
+  border-bottom: 1px solid var(--border-main);
+  color: var(--text-main);
+  white-space: nowrap;
+}
+
+.completed-flips-table tr.win td:first-child {
+  border-left: 3px solid var(--accent-green-bright);
+}
+
+.completed-flips-table tr.loss td:first-child {
+  border-left: 3px solid var(--accent-red-dark);
+}
+
+.completed-flips-table .profit-cell {
+  font-weight: 600;
+}
+
+.completed-flips-table .profit-cell.win {
+  color: var(--accent-green);
+}
+
+.completed-flips-table .profit-cell.loss {
+  color: var(--accent-red);
+}
+
+/* ── Graph modal history-range dropdown ──────────────────────────────────── */
+
+.graph-modal-range-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
+.graph-modal-range-row label {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.graph-modal-range-row select {
+  padding: 2px 6px;
+  font-size: 11px;
+  background: var(--bg-input);
+  color: var(--text-main);
+  border: 1px solid var(--border-input);
+  border-radius: 3px;
 }
 
 /* ── Complete flip button ───────────────────────────────────────────────────── */
@@ -3822,10 +4018,10 @@ async function fetchGECatalogue() {
 /**
  * Run a **non-blocking** full-market background scan.
  *
- * Fetches latest prices + 30-day history for **every** item in the GE
- * catalogue (~7 000 items) in batches of 100, with a 500 ms delay between
- * batches to avoid rate-limiting.  Each batch is bulk-inserted into IndexedDB
- * immediately so progress persists even if the user closes the app mid-scan.
+ * Fetches latest prices + history for **every** item in the GE catalogue
+ * (~7 000 items) in batches of 100, with a 500 ms delay between batches to
+ * avoid rate-limiting.  Each batch is bulk-inserted into IndexedDB immediately
+ * so progress persists even if the user closes the app mid-scan.
  *
  * The UI remains fully interactive during the scan because the function
  * yields control back to the browser between batches via `setTimeout`.
@@ -3833,9 +4029,12 @@ async function fetchGECatalogue() {
  * @param catalogue       - Pre-fetched GE catalogue entries.
  * @param onProgress      - Called after every batch with `(done, total)`.
  * @param signal          - Optional `AbortSignal` to cancel the scan early.
+ * @param deepHistory     - When `true`, fetches 90-day history instead of
+ *                          the default 30-day window (~3–5× slower).
  * @returns The total number of items successfully fetched and persisted.
  */
-async function runFullMarketScan(catalogue, onProgress, signal) {
+// Optional deep history during full scan – March 2026
+async function runFullMarketScan(catalogue, onProgress, signal, deepHistory = false) {
     if (catalogue.length === 0) {
         console.warn("[FullMarketScan] Empty catalogue — nothing to scan.");
         return 0;
@@ -3845,10 +4044,13 @@ async function runFullMarketScan(catalogue, onProgress, signal) {
     const wiki = new _wikiService__WEBPACK_IMPORTED_MODULE_2__.WikiService();
     await cache.open();
     const BATCH_SIZE = 100;
-    const DELAY_MS = 500;
+    const BASE_DELAY_MS = 1500; // default pause between batches
+    const MAX_DELAY_MS = 30000; // ceiling for adaptive backoff
     const allNames = catalogue.map((e) => e.name);
     const total = allNames.length;
     let done = 0;
+    let currentDelay = BASE_DELAY_MS; // adapts when batches return empty
+    let consecutiveEmpty = 0; // tracks back-to-back 0-result batches
     console.log(`[FullMarketScan] Starting scan of ${total} items in batches of ${BATCH_SIZE}…`);
     for (let i = 0; i < allNames.length; i += BATCH_SIZE) {
         if (signal?.aborted) {
@@ -3860,6 +4062,9 @@ async function runFullMarketScan(catalogue, onProgress, signal) {
             // Fetch latest prices for this batch.
             const prices = await api.fetchLatestPrices(batchNames);
             if (prices.size > 0) {
+                // Successful fetch — reset adaptive delay.
+                consecutiveEmpty = 0;
+                currentDelay = BASE_DELAY_MS;
                 // Enrich with buy limits + alch values (best-effort).
                 const names = Array.from(prices.keys());
                 try {
@@ -3881,9 +4086,11 @@ async function runFullMarketScan(catalogue, onProgress, signal) {
                 }
                 // Persist to IndexedDB immediately.
                 await cache.bulkInsert(prices);
-                // Fetch 30-day history for this batch (best-effort).
+                // Fetch history for this batch (best-effort).
+                // Optional deep history during full scan – March 2026
+                const historyDays = deepHistory ? 90 : 30;
                 try {
-                    const historyMap = await api.fetchHistoricalPrices(names, 30);
+                    const historyMap = await api.fetchHistoricalPrices(names, historyDays);
                     if (historyMap.size > 0) {
                         await cache.bulkInsertHistory(historyMap);
                     }
@@ -3892,15 +4099,24 @@ async function runFullMarketScan(catalogue, onProgress, signal) {
                     // Non-critical — skip history for this batch.
                 }
             }
+            else {
+                // Batch returned 0 results — likely rate-limited.  Back off.
+                consecutiveEmpty++;
+                currentDelay = Math.min(BASE_DELAY_MS * Math.pow(2, consecutiveEmpty), MAX_DELAY_MS);
+                console.warn(`[FullMarketScan] Batch ${i / BATCH_SIZE + 1} returned 0 results ` +
+                    `(${consecutiveEmpty} consecutive). Next delay: ${(currentDelay / 1000).toFixed(1)}s`);
+            }
         }
         catch (err) {
-            console.warn(`[FullMarketScan] Batch ${i / BATCH_SIZE + 1} failed:`, err);
+            consecutiveEmpty++;
+            currentDelay = Math.min(BASE_DELAY_MS * Math.pow(2, consecutiveEmpty), MAX_DELAY_MS);
+            console.warn(`[FullMarketScan] Batch ${i / BATCH_SIZE + 1} failed (delay → ${(currentDelay / 1000).toFixed(1)}s):`, err);
         }
         done = Math.min(i + BATCH_SIZE, total);
         onProgress?.(done, total);
-        // Yield to the browser event loop + rate-limit delay.
+        // Yield to the browser event loop + adaptive rate-limit delay.
         if (i + BATCH_SIZE < allNames.length) {
-            await new Promise((r) => setTimeout(r, DELAY_MS));
+            await new Promise((r) => setTimeout(r, currentDelay));
         }
     }
     console.log(`[FullMarketScan] Complete. ${done} / ${total} items processed.`);
@@ -4889,6 +5105,8 @@ class PortfolioService {
      * Mark an active flip as completed, calculate realised profit, and move it
      * to the history ledger.
      *
+     * Tax is rounded DOWN per item per official wiki mechanics (exempt ≤50 gp).
+     *
      * @param id              - Unique ID of the active flip to complete.
      * @param actualSellPrice - The per-item price the flip was actually sold at.
      * @returns The completed flip record, or `undefined` if the ID was not found.
@@ -4898,12 +5116,11 @@ class PortfolioService {
         if (idx === -1)
             return undefined;
         const active = this.flips[idx];
-        // Official RS3 wiki tax formula: floor(price * 2%), exempt at ≤ 50 gp.
-        let taxPerItem = Math.floor(actualSellPrice * 0.02);
-        if (actualSellPrice <= 50)
-            taxPerItem = 0;
+        const taxPerItem = (actualSellPrice <= 50) ? 0 : Math.floor(actualSellPrice * 0.02);
         const netSellPerItem = actualSellPrice - taxPerItem;
         const realizedProfit = (netSellPerItem * active.quantity) - (active.buyPrice * active.quantity);
+        // Temporary debug log for tax verification — remove after testing.
+        console.log(`[PortfolioService] completeFlip: taxPerItem=${taxPerItem}, netSellPerItem=${netSellPerItem}`);
         const completed = {
             ...active,
             actualSellPrice,
@@ -5180,16 +5397,21 @@ class WeirdGloopService {
         }
         const batches = this.chunkArray(itemNames, this.batchSize);
         console.log(`[WeirdGloopService] Fetching ${itemNames.length} items in ${batches.length} batch(es) of up to ${this.batchSize}…`);
-        const settled = await Promise.allSettled(batches.map((batch, idx) => this.fetchBatch(batch, idx)));
+        // Execute batches sequentially to stay within API rate limits.
         const consolidated = new Map();
-        for (const result of settled) {
-            if (result.status === "fulfilled") {
-                for (const [name, record] of Object.entries(result.value)) {
+        for (let idx = 0; idx < batches.length; idx++) {
+            try {
+                const json = await this.fetchBatch(batches[idx], idx);
+                for (const [name, record] of Object.entries(json)) {
                     consolidated.set(name, record);
                 }
             }
-            else {
-                console.error("[WeirdGloopService] Batch failed:", result.reason);
+            catch (err) {
+                console.error("[WeirdGloopService] Batch failed:", err);
+            }
+            // Brief pause between batches to avoid rate-limiting.
+            if (idx < batches.length - 1) {
+                await WeirdGloopService.sleep(300);
             }
         }
         console.log(`[WeirdGloopService] Successfully fetched ${consolidated.size} / ${itemNames.length} price records.`);
@@ -5218,34 +5440,27 @@ class WeirdGloopService {
         const result = new Map();
         console.log(`[WeirdGloopService] Fetching last90d history for ${itemNames.length} items (keeping last ${days} days)…`);
         const fetchOne = async (name) => {
-            try {
-                const url = `https://api.weirdgloop.org/exchange/history/rs/last90d?name=${encodeURIComponent(name)}`;
-                const resp = await fetch(url, {
-                    method: "GET",
-                    headers: {
-                        "User-Agent": "RS3-GE-Analyzer-Alt1Plugin/1.0 (contact: github.com/skillbert/alt1minimal)",
-                        Accept: "application/json",
-                    },
-                });
-                if (!resp.ok)
-                    throw new Error(`HTTP ${resp.status}`);
-                const json = await resp.json();
-                const entries = json[name];
-                if (!Array.isArray(entries))
-                    return;
-                const filtered = entries
-                    .filter((e) => e.timestamp >= cutoff)
-                    .sort((a, b) => a.timestamp - b.timestamp);
-                if (filtered.length > 0)
-                    result.set(name, filtered);
-            }
-            catch {
-                // Individual item failure — silently skip.
-            }
+            const url = `https://api.weirdgloop.org/exchange/history/rs/last90d?name=${encodeURIComponent(name)}`;
+            const resp = await WeirdGloopService.fetchWithRetry(url);
+            if (!resp)
+                return; // all retries exhausted
+            const json = await resp.json();
+            const entries = json[name];
+            if (!Array.isArray(entries))
+                return;
+            const filtered = entries
+                .filter((e) => e.timestamp >= cutoff)
+                .sort((a, b) => a.timestamp - b.timestamp);
+            if (filtered.length > 0)
+                result.set(name, filtered);
         };
         for (let i = 0; i < itemNames.length; i += HISTORY_CONCURRENCY) {
             const batch = itemNames.slice(i, i + HISTORY_CONCURRENCY);
             await Promise.allSettled(batch.map(fetchOne));
+            // Small pause between concurrent groups to stay under rate limit.
+            if (i + HISTORY_CONCURRENCY < itemNames.length) {
+                await WeirdGloopService.sleep(WeirdGloopService.HISTORY_GROUP_DELAY_MS);
+            }
         }
         console.log(`[WeirdGloopService] Historical data fetched for ${result.size} / ${itemNames.length} items.`);
         return result;
@@ -5264,20 +5479,63 @@ class WeirdGloopService {
         const nameParam = batch.map((n) => encodeURIComponent(n)).join("|");
         const url = `${BASE_URL}?name=${nameParam}`;
         console.debug(`[WeirdGloopService] Batch ${batchIdx}: requesting ${batch.length} items…`);
-        const response = await fetch(url, {
-            method: "GET",
-            headers: {
-                // Weird Gloop asks consumers to set a descriptive User-Agent.
-                "User-Agent": "RS3-GE-Analyzer-Alt1Plugin/1.0 (contact: github.com/skillbert/alt1minimal)",
-                Accept: "application/json",
-            },
-        });
-        if (!response.ok) {
-            throw new Error(`[WeirdGloopService] Batch ${batchIdx} HTTP ${response.status}: ${response.statusText}`);
+        const response = await WeirdGloopService.fetchWithRetry(url);
+        if (!response) {
+            throw new Error(`[WeirdGloopService] Batch ${batchIdx}: all retries exhausted`);
         }
         const json = await response.json();
         console.debug(`[WeirdGloopService] Batch ${batchIdx}: received ${Object.keys(json).length} records.`);
         return json;
+    }
+    // ─── Rate-Limit Helpers ───────────────────────────────────────────────
+    /**
+     * Fetch a URL with automatic retry + exponential backoff on 429 and
+     * transient network errors.  Returns `null` when all retries are
+     * exhausted so callers can degrade gracefully.
+     *
+     * @param url        - Fully-qualified URL to request.
+     * @param maxRetries - Override for {@link MAX_RETRIES}.
+     * @returns The successful `Response`, or `null` after all attempts fail.
+     */
+    static async fetchWithRetry(url, maxRetries = WeirdGloopService.MAX_RETRIES) {
+        for (let attempt = 0; attempt <= maxRetries; attempt++) {
+            try {
+                const resp = await fetch(url, {
+                    method: "GET",
+                    headers: {
+                        "User-Agent": "RS3-GE-Analyzer-Alt1Plugin/1.0 (contact: github.com/skillbert/alt1minimal)",
+                        Accept: "application/json",
+                    },
+                });
+                if (resp.ok)
+                    return resp;
+                // Rate-limited — back off and retry.
+                if (resp.status === 429) {
+                    const delay = WeirdGloopService.BACKOFF_BASE_MS * Math.pow(2, attempt);
+                    console.warn(`[WeirdGloopService] 429 rate-limited (attempt ${attempt + 1}/${maxRetries + 1}). ` +
+                        `Waiting ${(delay / 1000).toFixed(1)}s before retry…`);
+                    await WeirdGloopService.sleep(delay);
+                    continue;
+                }
+                // Non-retryable HTTP error.
+                console.error(`[WeirdGloopService] HTTP ${resp.status} for ${url.slice(0, 120)}`);
+                return null;
+            }
+            catch (err) {
+                // Network / CORS error — often accompanies a 429 that the browser
+                // blocks before we even see the status.  Treat it as retryable.
+                const delay = WeirdGloopService.BACKOFF_BASE_MS * Math.pow(2, attempt);
+                console.warn(`[WeirdGloopService] Network error (attempt ${attempt + 1}/${maxRetries + 1}). ` +
+                    `Waiting ${(delay / 1000).toFixed(1)}s… [${err.message}]`);
+                await WeirdGloopService.sleep(delay);
+            }
+        }
+        console.error(`[WeirdGloopService] All ${maxRetries + 1} attempts failed for ${url.slice(0, 120)}`);
+        return null;
+    }
+    /** Promise-based sleep helper. */
+    static sleep(ms) {
+        return new Promise((r) => setTimeout(r, ms));
     }
     /**
      * Split an array into sub-arrays of at most {@link size} elements.
@@ -5294,6 +5552,12 @@ class WeirdGloopService {
         return chunks;
     }
 }
+/** Maximum retry attempts on 429 / transient errors. */
+WeirdGloopService.MAX_RETRIES = 4;
+/** Base delay (ms) for exponential backoff — doubled on each retry. */
+WeirdGloopService.BACKOFF_BASE_MS = 2000;
+/** Small pause (ms) between sequential history-concurrency groups. */
+WeirdGloopService.HISTORY_GROUP_DELAY_MS = 300;
 
 
 /***/ },
@@ -5754,6 +6018,8 @@ const LS_THEME = "ge-analyzer:theme";
 const LS_CHAT_HISTORY = "ge-analyzer:chat-history";
 /** `localStorage` key for the user's favourited item names (JSON array). */
 const LS_FAVORITES = "ge-analyzer:favorites";
+/** `localStorage` key for “deep history” checkbox preference (boolean string). */
+const LS_DEEP_HISTORY = "ge-analyzer:deep-history";
 /** Maximum number of messages (user + assistant) persisted to localStorage. */
 const MAX_SAVED_MESSAGES = 50;
 /** GE buy-limit window duration in milliseconds (4 hours). */
@@ -5894,6 +6160,9 @@ function quickAddToPortfolio(item) {
 // ─── Cached DOM references ──────────────────────────────────────────────────
 /** Lazily resolved element cache — populated in {@link initUI}. */
 let els;
+// ─── Completed-flips sort state ─────────────────────────────────────────────
+let completedFlipsSortCol = "date";
+let completedFlipsSortAsc = false; // default descending (newest first)
 // ─── Shared service instances (initialised once) ────────────────────────────
 let cache;
 let analyzer;
@@ -5990,6 +6259,8 @@ async function initUI() {
     renderCompletedFlips();
     startPortfolioTimer();
     bindPortfolioSubNav();
+    bindCompletedFlipsFilter();
+    bindCsvExport();
 }
 // ─── Settings (API Key) ─────────────────────────────────────────────────────
 /**
@@ -6156,12 +6427,31 @@ function bindForceReload() {
 // ─── Full Market Background Scan ────────────────────────────────────────────
 /** Abort controller for an in-progress background scan. */
 let scanAbortController = null;
+/** Whether the deep-history warning toast has been shown this session. */
+let deepHistoryWarned = false;
 /**
- * Bind the "Scan Full Market" button.  When clicked, runs a non-blocking
- * background scan of all ~7 000 GE items, updating a progress bar in the UI.
- * The user can continue using the app normally while the scan runs.
+ * Bind the "Scan Full Market" button and the deep-history checkbox.
+ * When clicked, runs a non-blocking background scan of all ~7 000 GE items,
+ * updating a progress bar in the UI.  The user can continue using the app
+ * normally while the scan runs.
+ *
+ * The deep-history checkbox (persisted in localStorage) controls whether
+ * 90-day history is fetched for every item (~3–5× slower).
  */
+// Optional deep history during full scan – March 2026
 function bindFullMarketScan() {
+    // ── Restore persisted deep-history preference ──
+    const savedDeep = localStorage.getItem(LS_DEEP_HISTORY) === "true";
+    els.deepHistoryCheckbox.checked = savedDeep;
+    // ── Persist + warn on checkbox toggle ──
+    els.deepHistoryCheckbox.addEventListener("change", () => {
+        const checked = els.deepHistoryCheckbox.checked;
+        localStorage.setItem(LS_DEEP_HISTORY, String(checked));
+        if (checked && !deepHistoryWarned) {
+            deepHistoryWarned = true;
+            showToast("Deep history enabled \u2014 full scans may take 3\u201310 minutes depending on connection.", "info", 8000);
+        }
+    });
     els.fullMarketScanBtn.addEventListener("click", async () => {
         // If a scan is already running, abort it.
         if (scanAbortController) {
@@ -6181,22 +6471,25 @@ function bindFullMarketScan() {
             }
         }
         if (geCatalogue.length === 0) {
-            showError("Item catalogue is empty — cannot scan.");
+            showError("Item catalogue is empty \u2014 cannot scan.");
             return;
         }
-        // Show progress bar and disable button label.
+        const deepHistory = els.deepHistoryCheckbox.checked;
+        const deepLabel = deepHistory ? " (deep history: ON)" : "";
+        // Show progress bar and update button label.
         scanAbortController = new AbortController();
         els.fullMarketScanBtn.textContent = "\u23F9 Cancel Scan";
         els.syncProgress.classList.remove("hidden");
         els.syncProgressFill.style.width = "0%";
-        els.syncProgressText.textContent = "Scanning 0 / " + geCatalogue.length.toLocaleString("en-US") + "\u2026";
+        els.syncProgressText.textContent =
+            "Scanning 0 / " + geCatalogue.length.toLocaleString("en-US") + "\u2026" + deepLabel;
         try {
             await (0,_services__WEBPACK_IMPORTED_MODULE_0__.runFullMarketScan)(geCatalogue, (done, total) => {
                 const pct = Math.round((done / total) * 100);
                 els.syncProgressFill.style.width = pct + "%";
                 els.syncProgressText.textContent =
-                    `Scanning ${done.toLocaleString("en-US")} / ${total.toLocaleString("en-US")}\u2026 (${pct}%)`;
-            }, scanAbortController.signal);
+                    `Scanning ${done.toLocaleString("en-US")} / ${total.toLocaleString("en-US")}\u2026 (${pct}%)${deepLabel}`;
+            }, scanAbortController.signal, deepHistory);
             // Scan complete — refresh the market panel with the full dataset.
             cache = new _services__WEBPACK_IMPORTED_MODULE_0__.CacheService();
             await cache.open();
@@ -6756,8 +7049,9 @@ function setViewMode(mode) {
     if (latestTopItems.length > 0) {
         renderMarketItems(latestTopItems);
     }
-    // Re-render favourites in new view mode.
-    renderFavorites();
+    // Re-render favourites in new view mode (guard: analyzer may not exist yet).
+    if (analyzer)
+        renderFavorites();
 }
 // ─── Market Item Rendering ──────────────────────────────────────────────────
 /**
@@ -6947,7 +7241,7 @@ function drawGraphChart(canvas, data) {
     // Trend colour.
     const first = data[0];
     const last = data[data.length - 1];
-    const lineColour = last > first ? "#4ec9b0" : last < first ? "#f44747" : "#888";
+    const lineColour = last > first ? "#4ec9b0" : last < first ? "#f44747" : "#888888";
     // ── Gradient fill under curve ──
     ctx.beginPath();
     ctx.moveTo(toXY(0).x, toXY(0).y);
@@ -7189,6 +7483,40 @@ function buildItemCard(item) {
         trendBadge.textContent = "\uD83D\uDCC8 Rising";
         trendBadge.title = "Price has risen more than 5% over the last 7 days \u2014 positive momentum.";
         flipWrap.appendChild(trendBadge);
+    }
+    // Usability enhancement – March 2026: predictive analytics badges.
+    const predictiveWrap = document.createElement("span");
+    predictiveWrap.className = "predictive-badges";
+    // EMA Trend badge.
+    if (item.ema30d > 0 && item.price > 0) {
+        const emaPct = ((item.price - item.ema30d) / item.ema30d) * 100;
+        const emaDir = emaPct > 0 ? "up" : emaPct < 0 ? "down" : "";
+        const emaBadge = document.createElement("span");
+        emaBadge.className = `ema-badge ${emaDir}`;
+        emaBadge.textContent = `EMA ${emaPct >= 0 ? "\u2191" : "\u2193"}${Math.abs(emaPct).toFixed(1)}%`;
+        emaBadge.title = `30-day Exponential Moving Average: ${formatGpShort(Math.round(item.ema30d))} gp. Current price is ${Math.abs(emaPct).toFixed(1)}% ${emaPct >= 0 ? "above" : "below"} the EMA — ${emaPct > 2 ? "bullish signal" : emaPct < -2 ? "bearish signal" : "near average"}.`;
+        predictiveWrap.appendChild(emaBadge);
+    }
+    // Predicted 24h badge.
+    if (item.predictedNextPrice > 0 && item.price > 0) {
+        const predPct = ((item.predictedNextPrice - item.price) / item.price) * 100;
+        const predDir = predPct > 0.1 ? "up" : predPct < -0.1 ? "down" : "neutral";
+        const predBadge = document.createElement("span");
+        predBadge.className = `predicted-badge ${predDir}`;
+        predBadge.textContent = `24h ${predPct >= 0 ? "+" : ""}${predPct.toFixed(1)}%`;
+        predBadge.title = `Linear-regression predicted next-day price: ${formatGpShort(Math.round(item.predictedNextPrice))} gp. Based on the slope of recent price history (${item.linearSlope >= 0 ? "+" : ""}${formatGpShort(Math.round(item.linearSlope))} gp/day).`;
+        predictiveWrap.appendChild(predBadge);
+    }
+    // Volatility badge.
+    if (item.volatility > 0) {
+        const volBadge = document.createElement("span");
+        volBadge.className = "vol-badge";
+        volBadge.textContent = `Vol ${(item.volatility * 100).toFixed(1)}%`;
+        volBadge.title = `Daily price volatility: ${(item.volatility * 100).toFixed(1)}% std deviation of daily % changes. Higher values mean wider price swings — more risk but potentially faster flips.`;
+        predictiveWrap.appendChild(volBadge);
+    }
+    if (predictiveWrap.childElementCount > 0) {
+        flipWrap.appendChild(predictiveWrap);
     }
     header.appendChild(flipWrap);
     // Popout button — opens the floating detail modal.
@@ -7571,56 +7899,155 @@ function ensureGraphModal() {
     graphModal = backdrop;
     return backdrop;
 }
+// Usability fix: on-demand history for graphs – March 2026
 /**
- * Fetch 7-day price history for a single item from the Weird Gloop API.
- * Returns chronological daily prices (excluding today) or an empty array on failure.
+ * Ensure the IndexedDB cache has sufficient history for an item, fetching
+ * from the Weird Gloop API on demand if needed.
+ *
+ * @param itemName - Canonical RS3 item name.
+ * @param days     - Desired history depth (default 90 — always fetch the
+ *                   maximum so shorter ranges are covered too).
+ * @returns Chronological daily prices (oldest-first, excluding today) within
+ *          the requested window, or an empty array on failure.
  */
-async function fetchItemHistory(name) {
+async function ensureItemHistory(itemName, days = 90) {
+    // 1. Check the cache first.
+    const cached = await cache.getHistoricalRecords(itemName, days);
+    if (cached.length >= 7) {
+        // Sufficient data already cached — return prices oldest-first.
+        return cached.map((r) => r.price);
+    }
+    // 2. Cache is sparse or empty — fetch from API and persist.
     try {
-        const url = `https://api.weirdgloop.org/exchange/history/rs/last90d?name=${encodeURIComponent(name)}`;
-        const resp = await fetch(url, {
-            headers: {
-                "User-Agent": "RS3-GE-Analyzer-Alt1Plugin/1.0",
-                Accept: "application/json",
-            },
-        });
-        if (!resp.ok)
-            return [];
-        const json = await resp.json();
-        const entries = json[name];
-        if (!Array.isArray(entries))
-            return [];
-        const cutoff = new Date();
-        cutoff.setDate(cutoff.getDate() - 7);
-        const cutoffMs = cutoff.getTime();
-        const todayStr = new Date().toISOString().slice(0, 10);
-        const dayMap = new Map();
-        for (const e of entries) {
-            if (e.timestamp < cutoffMs)
-                continue;
-            const day = new Date(e.timestamp).toISOString().slice(0, 10);
-            if (day === todayStr)
-                continue;
-            dayMap.set(day, e.price);
+        const api = new _services__WEBPACK_IMPORTED_MODULE_0__.WeirdGloopService();
+        const historyMap = await api.fetchHistoricalPrices([itemName], days);
+        if (historyMap.size > 0) {
+            await cache.bulkInsertHistory(historyMap);
         }
-        const sorted = [...dayMap.entries()].sort((a, b) => (a[0] < b[0] ? -1 : 1));
-        return sorted.map((d) => d[1]);
+        // 3. Re-read from cache (now populated) to get normalised records.
+        const fresh = await cache.getHistoricalRecords(itemName, days);
+        return fresh.map((r) => r.price);
+    }
+    catch (err) {
+        console.warn(`[ensureItemHistory] Failed for "${itemName}":`, err);
+        // Return whatever partial cache data we had.
+        return cached.map((r) => r.price);
+    }
+}
+/**
+ * Fetch price history for a single item, preferring the IndexedDB cache and
+ * falling back to a direct API call.  The returned array is filtered to the
+ * requested range (7 / 30 / 90 days).
+ *
+ * @param name  - Canonical RS3 item name.
+ * @param range - Number of days: 7, 30, or 90.  Defaults to 7.
+ * @returns Chronological daily prices (excluding today) or an empty array on failure.
+ */
+async function fetchItemHistory(name, range = 7) {
+    // ensureItemHistory always fetches 90 days; we slice to the requested range afterward.
+    const allPrices = await ensureItemHistory(name, 90);
+    if (allPrices.length === 0)
+        return [];
+    // Client-side trim to requested range.
+    if (range >= 90 || allPrices.length <= range)
+        return allPrices;
+    return allPrices.slice(-range);
+}
+/**
+ * Refresh the graph modal chart with a new history range.
+ * Called when the in-modal range dropdown changes.
+ */
+// Usability fix: on-demand history for graphs – March 2026
+async function refreshItemGraph(item, range) {
+    const backdrop = ensureGraphModal();
+    const mBody = backdrop.querySelector("#graph-modal-body");
+    // Show loading while fetching / checking cache.
+    const canvas = mBody.querySelector(".graph-modal-canvas");
+    if (canvas) {
+        const ctx = canvas.getContext("2d");
+        if (ctx) {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.font = "12px 'Segoe UI', sans-serif";
+            ctx.fillStyle = "#888";
+            ctx.textAlign = "center";
+            ctx.textBaseline = "middle";
+            ctx.fillText("Fetching history\u2026", canvas.width / 2, canvas.height / 2);
+        }
+    }
+    let fetched;
+    try {
+        fetched = await fetchItemHistory(item.name, range);
     }
     catch {
-        return [];
+        showToast("History unavailable \u2014 could not fetch price data.", "info");
+        fetched = [];
     }
+    const hist = fetched.length > 0 ? [...fetched, item.price] : [item.price];
+    const hasData = hist.length >= 2;
+    const currentPrice = item.price;
+    const oldestPrice = hasData ? hist[0] : currentPrice;
+    const highPrice = hasData ? Math.max(...hist) : currentPrice;
+    const lowPrice = hasData ? Math.min(...hist) : currentPrice;
+    const pctChange = oldestPrice > 0 ? ((currentPrice - oldestPrice) / oldestPrice) * 100 : 0;
+    const absChange = currentPrice - oldestPrice;
+    const volatility = hasData ? ((highPrice - lowPrice) / lowPrice) * 100 : 0;
+    const trendLabel = pctChange < -5 ? "Downtrend" : pctChange > 5 ? "Uptrend" : "Stable";
+    const trendColour = trendLabel === "Uptrend" ? "var(--accent-green-bright, #4ec9b0)"
+        : trendLabel === "Downtrend" ? "var(--accent-red, #f44747)" : "var(--text-muted, #888)";
+    const trendIcon = trendLabel === "Uptrend" ? "\uD83D\uDCC8" : trendLabel === "Downtrend" ? "\u26A0\uFE0F" : "\u27A1\uFE0F";
+    // Preserve range dropdown and update stats.
+    const statsEl = mBody.querySelector(".graph-stats");
+    if (statsEl) {
+        statsEl.innerHTML =
+            `<div class="graph-stat-row">` +
+                `<span class="graph-stat-label">${range}-Day Trend</span>` +
+                `<span class="graph-stat-value" style="color:${trendColour}">${trendIcon} ${trendLabel}</span>` +
+                `</div>` +
+                `<div class="graph-stat-row">` +
+                `<span class="graph-stat-label">Change</span>` +
+                `<span class="graph-stat-value" style="color:${trendColour}">${absChange >= 0 ? "+" : ""}${formatGpShort(absChange)} gp (${pctChange >= 0 ? "+" : ""}${pctChange.toFixed(1)}%)</span>` +
+                `</div>` +
+                `<div class="graph-stat-row">` +
+                `<span class="graph-stat-label">Current Price</span>` +
+                `<span class="graph-stat-value">${currentPrice.toLocaleString("en-US")} gp</span>` +
+                `</div>` +
+                `<div class="graph-stat-row">` +
+                `<span class="graph-stat-label">${range}-Day High</span>` +
+                `<span class="graph-stat-value">${highPrice.toLocaleString("en-US")} gp</span>` +
+                `</div>` +
+                `<div class="graph-stat-row">` +
+                `<span class="graph-stat-label">${range}-Day Low</span>` +
+                `<span class="graph-stat-value">${lowPrice.toLocaleString("en-US")} gp</span>` +
+                `</div>` +
+                `<div class="graph-stat-row">` +
+                `<span class="graph-stat-label">Volatility</span>` +
+                `<span class="graph-stat-value">${volatility.toFixed(1)}%</span>` +
+                `</div>` +
+                `<div class="graph-stat-row">` +
+                `<span class="graph-stat-label">Data Points</span>` +
+                `<span class="graph-stat-value">${hist.length} day${hist.length !== 1 ? "s" : ""}</span>` +
+                `</div>`;
+    }
+    requestAnimationFrame(() => {
+        if (canvas)
+            drawGraphChart(canvas, hist);
+    });
 }
 /**
  * Populate the graph modal with a specific item\u2019s price chart and
  * momentum analytics, then show it.
  *
- * If the item has fewer than 2 data points, an on-demand API fetch is
- * attempted before rendering to backfill the chart.
+ * Uses the cache-first {@link ensureItemHistory} flow: checks IndexedDB for
+ * existing history, fetches from the Weird Gloop API on demand if fewer than
+ * 7 data points are cached, then persists the result for future use.
  */
+// Usability fix: on-demand history for graphs – March 2026
 async function showGraphModal(item) {
     const backdrop = ensureGraphModal();
     const mHeader = backdrop.querySelector("#graph-modal-header");
     const mBody = backdrop.querySelector("#graph-modal-body");
+    // Read the current range from the market-filters dropdown.
+    const range = parseInt(els.historyRangeSelect.value, 10) || 7;
     // \u2500\u2500 Header \u2500\u2500
     const closeBtn = mHeader.querySelector(".item-modal-close");
     mHeader.innerHTML = "";
@@ -7637,24 +8064,35 @@ async function showGraphModal(item) {
     mHeader.appendChild(img);
     mHeader.appendChild(title);
     mHeader.appendChild(closeBtn);
-    // ── On-demand history fetch if data is sparse ──
-    if (item.priceHistory.length < 2) {
-        // Show a loading state immediately.
-        mBody.innerHTML = `<div style="text-align:center;padding:24px;color:#888;">Loading price history\u2026</div>`;
-        backdrop.classList.add("visible");
-        const fetched = await fetchItemHistory(item.name);
-        if (fetched.length > 0) {
-            // Rebuild priceHistory: historical days + today's price.
-            item.priceHistory = [...fetched, item.price];
-            // Re-classify trend.
-            if (item.priceHistory.length >= 2 && item.priceHistory[0] > 0) {
-                const pct = (item.price - item.priceHistory[0]) / item.priceHistory[0];
-                item.priceTrend = pct < -0.05 ? "Downtrend" : pct > 0.05 ? "Uptrend" : "Stable";
-            }
+    // ── On-demand history fetch (cache-first, API fallback) ──
+    // Usability fix: on-demand history for graphs – March 2026
+    mBody.innerHTML = `<div class="graph-loading-msg" style="text-align:center;padding:24px;color:#888;">Checking cached history\u2026</div>`;
+    backdrop.classList.add("visible");
+    // Quick cache probe to decide loading message.
+    const cachedCount = (await cache.getHistoricalRecords(item.name, 90)).length;
+    if (cachedCount < 7) {
+        const loadingEl = mBody.querySelector(".graph-loading-msg");
+        if (loadingEl)
+            loadingEl.textContent = "Fetching price history\u2026";
+    }
+    let fetched;
+    try {
+        fetched = await fetchItemHistory(item.name, range);
+    }
+    catch {
+        showToast("History unavailable \u2014 could not fetch price data.", "info");
+        fetched = [];
+    }
+    const hist = fetched.length > 0 ? [...fetched, item.price] : (item.priceHistory.length >= 2 ? item.priceHistory : [item.price]);
+    const hasData = hist.length >= 2;
+    // Update item priceHistory if we got fresh data and range is 7d.
+    if (fetched.length > 0 && range <= 7) {
+        item.priceHistory = [...fetched, item.price];
+        if (item.priceHistory.length >= 2 && item.priceHistory[0] > 0) {
+            const pct = (item.price - item.priceHistory[0]) / item.priceHistory[0];
+            item.priceTrend = pct < -0.05 ? "Downtrend" : pct > 0.05 ? "Uptrend" : "Stable";
         }
     }
-    const hist = item.priceHistory;
-    const hasData = hist.length >= 2;
     // Compute momentum stats.
     const currentPrice = item.price;
     const oldestPrice = hasData ? hist[0] : currentPrice;
@@ -7664,15 +8102,21 @@ async function showGraphModal(item) {
     const absChange = currentPrice - oldestPrice;
     const volatility = hasData ? ((highPrice - lowPrice) / lowPrice) * 100 : 0;
     // Trend direction and colour.
-    const trendLabel = item.priceTrend;
+    const trendLabel = pctChange < -5 ? "Downtrend" : pctChange > 5 ? "Uptrend" : "Stable";
     const trendColour = trendLabel === "Uptrend" ? "var(--accent-green-bright, #4ec9b0)"
         : trendLabel === "Downtrend" ? "var(--accent-red, #f44747)" : "var(--text-muted, #888)";
     const trendIcon = trendLabel === "Uptrend" ? "\uD83D\uDCC8" : trendLabel === "Downtrend" ? "\u26A0\uFE0F" : "\u27A1\uFE0F";
+    // Build range selector row inside the modal.
+    const rangeOptions = [7, 30, 90].map((d) => `<option value="${d}"${d === range ? " selected" : ""}>History: ${d} days</option>`).join("");
     mBody.innerHTML =
-        `<canvas class="graph-modal-canvas" width="480" height="180"></canvas>` +
+        `<div class="graph-modal-range-row">` +
+            `<label>Range:</label>` +
+            `<select class="graph-range-inline">${rangeOptions}</select>` +
+            `</div>` +
+            `<canvas class="graph-modal-canvas" width="480" height="180"></canvas>` +
             `<div class="graph-stats">` +
             `<div class="graph-stat-row">` +
-            `<span class="graph-stat-label">7-Day Trend</span>` +
+            `<span class="graph-stat-label">${range}-Day Trend</span>` +
             `<span class="graph-stat-value" style="color:${trendColour}">${trendIcon} ${trendLabel}</span>` +
             `</div>` +
             `<div class="graph-stat-row">` +
@@ -7684,11 +8128,11 @@ async function showGraphModal(item) {
             `<span class="graph-stat-value">${currentPrice.toLocaleString("en-US")} gp</span>` +
             `</div>` +
             `<div class="graph-stat-row">` +
-            `<span class="graph-stat-label">7-Day High</span>` +
+            `<span class="graph-stat-label">${range}-Day High</span>` +
             `<span class="graph-stat-value">${highPrice.toLocaleString("en-US")} gp</span>` +
             `</div>` +
             `<div class="graph-stat-row">` +
-            `<span class="graph-stat-label">7-Day Low</span>` +
+            `<span class="graph-stat-label">${range}-Day Low</span>` +
             `<span class="graph-stat-value">${lowPrice.toLocaleString("en-US")} gp</span>` +
             `</div>` +
             `<div class="graph-stat-row">` +
@@ -7700,8 +8144,17 @@ async function showGraphModal(item) {
             `<span class="graph-stat-value">${hist.length} day${hist.length !== 1 ? "s" : ""}</span>` +
             `</div>` +
             `</div>`;
+    // Bind inline range dropdown.
+    const inlineRange = mBody.querySelector(".graph-range-inline");
+    if (inlineRange) {
+        inlineRange.addEventListener("change", () => {
+            const newRange = parseInt(inlineRange.value, 10) || 7;
+            // Sync the global dropdown.
+            els.historyRangeSelect.value = String(newRange);
+            refreshItemGraph(item, newRange);
+        });
+    }
     // Draw the chart after the modal is in the DOM.
-    backdrop.classList.add("visible");
     requestAnimationFrame(() => {
         const canvas = mBody.querySelector(".graph-modal-canvas");
         if (canvas)
@@ -8190,23 +8643,106 @@ function buildFlipCard(flip) {
 }
 // ─── Completed Flips (History & Stats) ──────────────────────────────────────
 /**
- * Render the completed-flips list and the stats dashboard header.
+ * Render the completed-flips list as a sortable <table> and the stats dashboard header.
+ * Supports column sort (click headers) and text filtering.
  */
+// Usability enhancement – March 2026
 function renderCompletedFlips() {
     renderPortfolioStats();
     const container = els.completedFlipsList;
     container.innerHTML = "";
-    const flips = portfolio.getCompletedFlips();
+    let flips = portfolio.getCompletedFlips();
+    // Apply text filter.
+    const filterText = els.completedFlipsFilter.value.trim().toLowerCase();
+    if (filterText) {
+        flips = flips.filter((f) => {
+            const profitStr = String(f.realizedProfit);
+            return f.itemName.toLowerCase().includes(filterText) || profitStr.includes(filterText);
+        });
+    }
     if (flips.length === 0) {
         const empty = document.createElement("div");
         empty.className = "portfolio-empty";
-        empty.textContent = "No completed flips yet. Use the ✓ button on an active flip to log a sale.";
+        empty.textContent = filterText
+            ? "No flips match the current filter."
+            : "No completed flips yet. Use the \u2713 button on an active flip to log a sale.";
         container.appendChild(empty);
         return;
     }
-    for (const flip of flips) {
-        container.appendChild(buildCompletedFlipCard(flip));
+    // Sort flips.
+    const dir = completedFlipsSortAsc ? 1 : -1;
+    flips.sort((a, b) => {
+        switch (completedFlipsSortCol) {
+            case "date": return dir * (a.completedAt - b.completedAt);
+            case "item": return dir * a.itemName.localeCompare(b.itemName);
+            case "profit": return dir * (a.realizedProfit - b.realizedProfit);
+            case "roi": {
+                const roiA = a.buyPrice * a.quantity > 0 ? a.realizedProfit / (a.buyPrice * a.quantity) : 0;
+                const roiB = b.buyPrice * b.quantity > 0 ? b.realizedProfit / (b.buyPrice * b.quantity) : 0;
+                return dir * (roiA - roiB);
+            }
+            default: return 0;
+        }
+    });
+    const table = document.createElement("table");
+    table.className = "completed-flips-table";
+    // Header row.
+    const thead = document.createElement("thead");
+    const headerRow = document.createElement("tr");
+    const columns = [
+        { key: "date", label: "Date" },
+        { key: "item", label: "Item" },
+        { key: "profit", label: "Profit" },
+        { key: "roi", label: "ROI" },
+    ];
+    for (const col of columns) {
+        const th = document.createElement("th");
+        const arrow = completedFlipsSortCol === col.key
+            ? (completedFlipsSortAsc ? " \u25B2" : " \u25BC")
+            : "";
+        th.innerHTML = `${col.label}<span class="sort-arrow">${arrow}</span>`;
+        th.addEventListener("click", () => {
+            if (completedFlipsSortCol === col.key) {
+                completedFlipsSortAsc = !completedFlipsSortAsc;
+            }
+            else {
+                completedFlipsSortCol = col.key;
+                completedFlipsSortAsc = col.key === "item"; // alphabetical default asc
+            }
+            renderCompletedFlips();
+        });
+        headerRow.appendChild(th);
     }
+    thead.appendChild(headerRow);
+    table.appendChild(thead);
+    // Body rows.
+    const tbody = document.createElement("tbody");
+    for (const flip of flips) {
+        const row = document.createElement("tr");
+        row.className = flip.realizedProfit > 0 ? "win" : "loss";
+        const dateCell = document.createElement("td");
+        dateCell.textContent = new Date(flip.completedAt).toLocaleDateString("en-GB", {
+            day: "numeric", month: "short", year: "2-digit",
+        });
+        const itemCell = document.createElement("td");
+        itemCell.textContent = flip.itemName;
+        const profitCell = document.createElement("td");
+        profitCell.className = `profit-cell ${flip.realizedProfit > 0 ? "win" : "loss"}`;
+        profitCell.textContent = `${formatGpShort(flip.realizedProfit)} gp`;
+        const roi = flip.buyPrice * flip.quantity > 0
+            ? (flip.realizedProfit / (flip.buyPrice * flip.quantity)) * 100
+            : 0;
+        const roiCell = document.createElement("td");
+        roiCell.className = `profit-cell ${roi >= 0 ? "win" : "loss"}`;
+        roiCell.textContent = `${roi >= 0 ? "+" : ""}${roi.toFixed(1)}%`;
+        row.appendChild(dateCell);
+        row.appendChild(itemCell);
+        row.appendChild(profitCell);
+        row.appendChild(roiCell);
+        tbody.appendChild(row);
+    }
+    table.appendChild(tbody);
+    container.appendChild(table);
 }
 /**
  * Populate the stats dashboard header from portfolio stats.
@@ -8224,9 +8760,53 @@ function renderPortfolioStats() {
     els.statAvgRoi.className = `stat-value ${stats.avgRoi >= 0 ? "profit" : "loss"}`;
 }
 /**
- * Build a single completed-flip card DOM element.
+ * Bind the completed-flips filter input to re-render on typing.
  */
-function buildCompletedFlipCard(flip) {
+// Usability enhancement – March 2026
+function bindCompletedFlipsFilter() {
+    els.completedFlipsFilter.addEventListener("input", () => {
+        renderCompletedFlips();
+    });
+}
+/**
+ * Generate a CSV string from all completed flips and trigger a download.
+ */
+// Usability enhancement – March 2026
+function exportCompletedFlipsCsv() {
+    const flips = portfolio.getCompletedFlips();
+    if (flips.length === 0) {
+        alert("No completed flips to export.");
+        return;
+    }
+    const header = "Item,Buy Price,Qty,Sell Price,Realised Profit,Date";
+    const rows = flips.map((f) => {
+        const dateStr = new Date(f.completedAt).toISOString().slice(0, 10);
+        // Escape item names that might contain commas.
+        const safeName = f.itemName.includes(",") ? `"${f.itemName}"` : f.itemName;
+        return `${safeName},${f.buyPrice},${f.quantity},${f.actualSellPrice},${f.realizedProfit},${dateStr}`;
+    });
+    const csv = [header, ...rows].join("\n");
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "ge-advisor-flips.csv";
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+}
+/**
+ * Bind the CSV export button click handler.
+ */
+function bindCsvExport() {
+    els.exportCsvBtn.addEventListener("click", exportCompletedFlipsCsv);
+}
+/**
+ * Build a single completed-flip card DOM element.
+ * @deprecated Replaced by table-based rendering in {@link renderCompletedFlips}.
+ */
+function _buildCompletedFlipCard(flip) {
     const card = document.createElement("div");
     card.className = `completed-flip-card ${flip.realizedProfit > 0 ? "win" : "loss"}`;
     const top = document.createElement("div");
@@ -8491,6 +9071,7 @@ function resolveElements() {
         favoritesSortSelect: q("favorites-sort-select"),
         refreshMarketBtn: q("refresh-market-btn"),
         fullMarketScanBtn: q("full-market-scan-btn"),
+        deepHistoryCheckbox: q("deep-history-checkbox"),
         syncProgress: q("background-sync-progress"),
         syncProgressFill: q("sync-progress-fill"),
         syncProgressText: q("sync-progress-text"),
@@ -8538,6 +9119,9 @@ function resolveElements() {
         exportDataBtn: q("export-data-btn"),
         importDataBtn: q("import-data-btn"),
         importFileInput: q("import-file-input"),
+        historyRangeSelect: q("history-range-select"),
+        completedFlipsFilter: q("completed-flips-filter"),
+        exportCsvBtn: q("export-csv-btn"),
     };
 }
 // ─── Formatting utilities ───────────────────────────────────────────────────
