@@ -327,6 +327,30 @@ body {
   cursor: not-allowed;
 }
 
+/* ── Data management buttons ──────────────────────────────────────────────── */
+
+.data-mgmt .settings-row {
+  margin-top: 4px;
+}
+
+.data-mgmt button {
+  flex: 1;
+  font-size: 11px;
+  padding: 5px 8px;
+  background: var(--bg-input);
+  border: 1px solid var(--border-input);
+  color: var(--text-primary);
+  border-radius: 3px;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.data-mgmt button:hover {
+  background: var(--bg-muted);
+  border-color: var(--accent-blue-text);
+  color: var(--accent-blue-text);
+}
+
 /* ── Settings field helpers ───────────────────────────────────────────────── */
 
 .settings-field {
@@ -897,6 +921,26 @@ button:disabled {
   color: var(--text-muted);
 }
 
+/* \u2500\u2500 Price trend (momentum) badges \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */
+
+.trend-badge {
+  font-size: 10px;
+  padding: 1px 6px;
+  border-radius: 3px;
+  white-space: nowrap;
+  font-weight: 600;
+}
+
+.trend-downtrend {
+  background: rgba(244, 71, 71, 0.18);
+  color: var(--accent-red);
+}
+
+.trend-uptrend {
+  background: rgba(39, 174, 96, 0.18);
+  color: var(--accent-green-bright);
+}
+
 @keyframes hype-pulse {
   0%, 100% { opacity: 1; }
   50%      { opacity: 0.6; }
@@ -998,13 +1042,20 @@ button:disabled {
 
 /* \u2500\u2500 Sparkline canvas \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */
 
-.sparkline {
-  display: block;
-  width: 100%;
-  height: 30px;
-  padding: 0 8px;
-  box-sizing: border-box;
-  opacity: 0.85;
+.graph-btn {
+  all: unset;
+  cursor: pointer;
+  font-size: 11px;
+  line-height: 1;
+  color: var(--text-muted);
+  padding: 2px 3px;
+  border-radius: 3px;
+  flex-shrink: 0;
+  letter-spacing: -1px;
+  transition: color 0.15s;
+}
+.graph-btn:hover {
+  color: var(--accent-green-bright, #4ec9b0);
 }
 
 .item-sprite {
@@ -1077,6 +1128,8 @@ button:disabled {
   align-items: center;
   gap: 2px;
   flex-shrink: 0;
+  flex-wrap: wrap;
+  justify-content: center;
 }
 
 /* ── Favourite button ──────────────────────────────────────────────────────── */
@@ -1126,6 +1179,78 @@ button:disabled {
 .quick-add-btn:hover {
   color: var(--accent-teal);
   background: rgba(78, 201, 176, 0.12);
+}
+
+/* ── Alert bell button (inline on card) ────────────────────────────────────── */
+
+.alert-btn {
+  all: unset;
+  cursor: pointer;
+  font-size: 13px;
+  line-height: 1;
+  color: var(--text-muted);
+  padding: 2px 4px;
+  border-radius: 3px;
+  flex-shrink: 0;
+  opacity: 0.55;
+  transition: color 0.15s, opacity 0.15s, transform 0.15s;
+}
+
+.alert-btn:hover {
+  opacity: 1;
+  transform: scale(1.15);
+}
+
+.alert-btn.alert-active {
+  opacity: 1;
+  color: var(--accent-gold);
+  filter: drop-shadow(0 0 2px rgba(240, 192, 64, 0.5));
+}
+
+/* ── Inline card alert popover ─────────────────────────────────────────────── */
+
+.card-alert-popover {
+  display: none;
+  padding: 6px 10px;
+  background: var(--bg-muted);
+  border: 1px solid var(--border-section);
+  border-top: none;
+  border-radius: 0 0 4px 4px;
+  gap: 4px;
+}
+
+.card-alert-popover.open {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.card-alert-row {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.card-alert-row label {
+  font-size: 10px;
+  color: var(--text-muted);
+  white-space: nowrap;
+  min-width: 34px;
+}
+
+.card-alert-row input[type="number"] {
+  width: 80px;
+  padding: 2px 5px;
+  font-size: 10px;
+  background: var(--bg-input);
+  border: 1px solid var(--border-input);
+  color: var(--text-primary);
+  border-radius: 3px;
+}
+
+.card-alert-row input[type="number"]::placeholder {
+  color: var(--text-muted);
+  opacity: 0.6;
 }
 
 /* ── External link buttons (Wiki / GE) ─────────────────────────────────────── */
@@ -1277,11 +1402,91 @@ button:disabled {
   margin-bottom: 8px;
 }
 
-.modal-sparkline {
+/* (modal-sparkline removed — chart now in dedicated graph modal) */
+
+/* ── Graph Modal ──────────────────────────────────────────────────────────── */
+
+.graph-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.15s ease;
+}
+.graph-modal-backdrop.visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.graph-modal {
+  background: var(--bg-main);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  width: 92%;
+  max-width: 520px;
+  max-height: 85vh;
+  overflow-y: auto;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.5);
+}
+
+.graph-modal-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--border);
+}
+.graph-modal-title {
+  flex: 1;
+  font-weight: 600;
+  font-size: 14px;
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.graph-modal-body {
+  padding: 12px;
+}
+
+.graph-modal-canvas {
   display: block;
   width: 100%;
-  height: 60px;
-  margin-bottom: 8px;
+  height: 180px;
+  margin-bottom: 12px;
+  border-radius: 4px;
+  background: var(--bg-elevated);
+}
+
+.graph-stats {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.graph-stat-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 4px 0;
+  border-bottom: 1px solid var(--border);
+  font-size: 12px;
+}
+.graph-stat-row:last-child {
+  border-bottom: none;
+}
+.graph-stat-label {
+  color: var(--text-muted);
+}
+.graph-stat-value {
+  font-weight: 600;
+  color: var(--text);
 }
 
 .item-modal-details {
@@ -1359,6 +1564,13 @@ button:disabled {
   text-align: center;
   padding: 8px 6px;
   gap: 4px;
+  overflow: visible;
+}
+
+.market-items.tile .card-actions {
+  gap: 3px;
+  justify-content: center;
+  flex-wrap: wrap;
 }
 
 .market-items.tile .item-sprite {
@@ -1390,17 +1602,7 @@ button:disabled {
   padding: 1px 4px;
 }
 
-.market-items.tile .sparkline {
-  height: 20px;
-  padding: 0 4px;
-}
-
-/* ─ Expanded card tweaks (tile view) ─ */
-
-.market-items.tile .market-card.expanded .sparkline {
-  height: 40px;
-  padding: 0 10px;
-}
+/* (tile sparkline rules removed — chart now in dedicated graph modal) */
 
 /* ── Hybrid view (compact grid, list-style rows) ──────────────────────────── */
 
@@ -1420,10 +1622,7 @@ button:disabled {
   height: 24px;
 }
 
-.market-items.hybrid .sparkline {
-  height: 22px;
-  padding: 0 6px;
-}
+/* (hybrid sparkline rule removed) */
 
 .market-items.hybrid .flip-badges {
   gap: 2px;
@@ -2094,6 +2293,102 @@ body[data-layout="sidebar"] #portfolio-view {
 }
 
 /* ══════════════════════════════════════════════════════════════════════════════
+   Toast Notifications
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+#toast-container {
+  position: fixed;
+  top: 8px;
+  right: 8px;
+  z-index: 900;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  pointer-events: none;
+  max-width: 320px;
+}
+
+.toast {
+  padding: 8px 12px;
+  border-radius: 4px;
+  font-size: 11px;
+  line-height: 1.4;
+  color: var(--text-primary);
+  background: var(--bg-panel);
+  border-left: 3px solid var(--accent-primary);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+  opacity: 0;
+  transform: translateX(30px);
+  transition: opacity 0.3s ease, transform 0.3s ease;
+  pointer-events: auto;
+}
+
+.toast.show {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.toast-buy {
+  border-left-color: #4ec9b0;
+}
+
+.toast-sell {
+  border-left-color: #f0c040;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   Modal — Price Alert Inputs
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+.alert-inputs {
+  margin-top: 8px;
+  padding: 8px 10px;
+  background: var(--bg-muted);
+  border-radius: 4px;
+  border: 1px solid var(--border-section);
+}
+
+.alert-inputs-title {
+  margin: 0 0 6px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-heading);
+}
+
+.alert-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+
+.alert-row:last-child {
+  margin-bottom: 0;
+}
+
+.alert-row label {
+  font-size: 10px;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+.alert-row input[type="number"] {
+  width: 120px;
+  padding: 2px 6px;
+  font-size: 10px;
+  background: var(--bg-input);
+  border: 1px solid var(--border-input);
+  color: var(--text-primary);
+  border-radius: 3px;
+}
+
+.alert-row input[type="number"]::placeholder {
+  color: var(--text-muted);
+  opacity: 0.6;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
    Desktop / wide-viewport overrides
    ══════════════════════════════════════════════════════════════════════════════ */
 
@@ -2145,10 +2440,7 @@ body[data-layout="sidebar"] #portfolio-view {
     gap: 5px;
   }
 
-  /* Slightly larger sparklines on cards. */
-  .sparkline {
-    height: 36px;
-  }
+  /* (responsive sparkline rule removed — chart now in dedicated graph modal) */
 
   /* Advisor chat gets more comfortable padding. */
   #advisor-view {

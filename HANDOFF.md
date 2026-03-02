@@ -50,8 +50,8 @@ alt1minimal/
     ├── icon.png               # App icon (asset/resource)
     ├── index.html             # Full UI: settings, tabbed layout (market / advisor / portfolio), search, favourites, filters
     ├── index.ts               # Lean entry point: alt1 detection → initDataPipeline() → initUI()
-    ├── style.css              # Three themes (Classic Dark, OSRS Brown, RS3 Modern Blue), flexbox, cards, modals, sparklines, responsive desktop breakpoint (~2150 lines)
-    ├── uiService.ts           # All DOM logic: settings, market render, search, favourites, portfolio, chat RAG, error recovery (~2480 lines)
+    ├── style.css              # Three themes (Classic Dark, OSRS Brown, RS3 Modern Blue), flexbox, cards, modals, graph modal, toasts, inline alert popovers, data-mgmt, responsive desktop breakpoint (~2440 lines)
+    ├── uiService.ts           # All DOM logic: settings, market render, search, favourites, portfolio, chat RAG, error recovery, price alerts, data export/import (~2840 lines)
     └── services/
         ├── index.ts               # Barrel re-export of all services + types + constants
         ├── types.ts               # All shared TypeScript interfaces + LLM_PROVIDERS preset array
@@ -100,7 +100,7 @@ Called once at startup from `index.ts`:
 
 ### 4.4 Market Analyzer Service (`marketAnalyzerService.ts`)
 
-Pure math on local data — no network calls:
+Pure math on local data with one network fallback — when the local IndexedDB price-history store is sparse (< 30% of items have ≥ 2 days), `buildPriceHistoryMap()` fetches from the Weird Gloop `/exchange/history/rs/last90d` endpoint (batched, 50 items/request) to populate sparklines immediately after install or cache clear:
 1. Reads all cached records from `CacheService.getAll()`.
 2. Builds 7-day average volume map and price history map from the `price-history` store.
 3. Scores each item via `scoreAndFilter()`:
@@ -112,6 +112,7 @@ Pure math on local data — no network calls:
    - `taxGap = ceil(price / 0.98) - price` — minimum spread to break even after tax
    - `volumeSpikeMultiplier` — ratio of today's volume to 7-day SMA (hype detection at >1.5×)
    - `tradeVelocity` — categorical speed label based on volume × buy-limit throughput: `"Insta-Flip"` (>50 K), `"Active"` (>5 K), `"Slow"` (>500), `"Very Slow"` (≤500)
+   - `priceTrend` — 7-day price momentum: `"Downtrend"` (dropped >5 %), `"Uptrend"` (risen >5 %), `"Stable"` (within ±5 %). Empty/short history defaults to Stable.
    - `isRisky = price < 500` — low-price items where tax eats most spreads
 4. Filters items by `minVolume`, `maxVolume`, `maxPrice`.
 5. Sorts descending by `tradedValue`.
@@ -226,22 +227,32 @@ All DOM manipulation isolated here — services remain UI-agnostic. ~2480 lines.
   - Flip recommendation badges: Buy ≤, Sell ≥, profit/ea
   - Trade velocity badge (Insta-Flip / Active / Slow / Very Slow) with explanatory tooltip
   - Hype badge (🔥 Nx Vol) when volume spike > 1.5×
-  - Canvas sparkline (7-day price history)
+  - **Graph button** (📊) — opens the dedicated graph modal with enlarged 7-day area chart and momentum stats
   - External links: Wiki and GE Database
   - Expandable detail panel (12 rows with tooltips: GE price, rec buy/sell, flip profit, volumes, buy limit, capital, tax gap, margin)
-  - **Action button group** (`.card-actions`): Popout (↗), Favourite (☆/★), Quick-add to portfolio (+)
+  - **Action button group** (`.card-actions`): Popout (↗), Favourite (☆/★), Alert (🔔), Graph (📊), Quick-add to portfolio (+)
 - Multiple cards can be expanded simultaneously.
 - Sprites loaded from `https://secure.runescape.com/m=itemdb_rs/obj_sprite.gif?id={itemId}`.
 
 **Floating item detail modal**:
 - `showItemModal(item)` — creates a centred modal overlay with backdrop.
-- Contains: sprite, name, price, favourite button (★), quick-add button (+), close button (✕), badges, enlarged sparkline (340×60), full detail rows.
+- Contains: sprite, name, price, favourite button (★), quick-add button (+), close button (✕), badges, full detail rows, **price alert inputs** (buy/sell thresholds).
 - Backdrop click or ✕ button closes.
 - Lazy singleton — created once, reused for all items.
 
+**Price alert system**:
+- **Inline card popover**: Each card has a 🔔 bell button in `.card-actions` that toggles a `.card-alert-popover` with compact Buy ≤ / Sell ≥ number inputs. Only one popover is open at a time per item list. Bell glows gold (`.alert-active`) when thresholds are set.
+- **Modal inputs**: Two number inputs in the item detail modal ("Alert if drops below" / "Alert if rises above") — same data, just a larger editing surface.
+- Values are saved to the `FavoriteItem.targetBuy` / `targetSell` fields (setting an alert auto-favourites the item).
+- `checkPriceAlerts(items)` runs on every `refreshMarketPanel()` against all cached items.
+- Alerts fire both a DOM toast (`#toast-container`, fixed top-right, auto-dismiss after 6 s) and a native browser `Notification` (if permission granted).
+- **Dedup**: `firedAlerts` Set (module-scoped, session-lifetime) prevents the same item+direction from alerting more than once per session.
+- Notification permission is requested once during `initUI()`.
+
 **Favourites system**:
-- Persisted as a JSON array of item names in localStorage (`ge-analyzer:favorites`).
-- `getFavorites()` / `toggleFavorite(name)` — read/write helpers.
+- Persisted as a JSON array of `FavoriteItem` objects in localStorage (`ge-analyzer:favorites`). Each entry has `name` and optional `targetBuy` / `targetSell` alert thresholds.
+- **Legacy migration**: Old `string[]` format auto-converts to `FavoriteItem[]` on first load via `loadFavorites()`.
+- `getFavorites()` returns a `Set<string>` of names for quick membership checks. `toggleFavorite(name)` / `setFavoriteAlerts(name, targetBuy?, targetSell?)` modify the underlying array.
 - Star button (☆/★) on every card header and in the modal header.
 - Favourited cards get a `.favorited` class with a gold left border.
 - **Favourites panel** (`#favorites-section`): appears between the search bar and Top 20, auto-hides when empty. Collapsible via ▾/▸ button in the header. Has its own sort dropdown (`#favorites-sort-select`) persisted to `ge-analyzer:fav-sort`.
@@ -300,7 +311,7 @@ All DOM manipulation isolated here — services remain UI-agnostic. ~2480 lines.
 
 **Force reload**: Button in settings that clears IndexedDB cache, re-runs the full data pipeline, and refreshes the market panel. Shows status indicator.
 
-**Module-scoped state**: `latestMarketSummary`, `latestWikiText`, `latestTopItems`, `latestSearchResults`, `allCachedItems`, `geCatalogue`, `currentView`, `llm`, `portfolio`, `favoritesCollapsed`, `top20Collapsed`, `isSearchActive`, `suppressAutocomplete`.
+**Module-scoped state**: `latestMarketSummary`, `latestWikiText`, `latestTopItems`, `latestSearchResults`, `allCachedItems`, `geCatalogue`, `currentView`, `llm`, `portfolio`, `favoritesCollapsed`, `top20Collapsed`, `isSearchActive`, `suppressAutocomplete`, `firedAlerts`, `toastContainer`.
 
 ### 4.11 Entry Point (`index.ts`)
 
@@ -321,6 +332,7 @@ Lean orchestrator (~50 lines):
     - Model `<input id="model-input">` with `<datalist id="model-options">`.
     - API key `<input type="password">` + Save button + status hint.
     - Force Reload Data button + status hint.
+    - **Data Management** section: Export Data / Import Data buttons + hidden `<input type="file" id="import-file-input" accept=".json">`.
   - `<nav id="view-tabs">` — tab buttons: Market Data, Ask Advisor, Portfolio.
   - `<main id="app-content">`:
     - `<section id="market-view">`:
@@ -349,16 +361,16 @@ Lean orchestrator (~50 lines):
 - **`#app` uses `height: 95%`** (manually set to fix Alt1 zoom-level scaling issues — do NOT change).
 - **Market panel**: `flex: 0 1 auto`, `max-height: 30%` in non-tabbed layout.
 - **Chat panel**: `flex: 1 1 0`, `min-height: 120px`.
-- **Market cards**: `.market-card` base with `.market-card-header` (flex, wrap, gap), expandable `.market-card-detail` (max-height transition), `.sparkline` canvas.
+- **Market cards**: `.market-card` base with `.market-card-header` (flex, wrap, gap), expandable `.market-card-detail` (max-height transition).
   - **List view**: Full-width stacked cards.
   - **Tile view**: CSS grid `repeat(auto-fill, minmax(130px, 1fr))`. Column flex-direction on header. Compact badge/sprite sizes.
   - **Hybrid view**: CSS grid `repeat(auto-fill, minmax(200px, 1fr))`.
-- **Card action buttons** (`.card-actions`): Horizontal flex row containing popout (`.popout-btn`), favourite (`.fav-btn`), quick-add (`.quick-add-btn`). Always stays horizontal even in tile view's column layout.
+- **Card action buttons** (`.card-actions`): Horizontal flex row containing popout (`.popout-btn`), favourite (`.fav-btn`), alert (`.alert-btn`), graph (`.graph-btn`), quick-add (`.quick-add-btn`). Always stays horizontal even in tile view's column layout.
 - **Favourite styling**: `.fav-btn` gold on hover (`#f0c040`), `.market-card.favorited` gets gold left border. `.fav-btn` uses scale(1.15) on hover.
 - **Quick-add button**: `.quick-add-btn` teal on hover (`#4ec9b0`).
 - **Favourites section**: `.favorites-section` with border, rounded corners, dark header (`#252526`), gold ★ title.
 - **Top 20 section**: `.top20-section` with matching border/rounded styling. `#market-header` gets dark header background when inside the section.
-- **Canvas sparklines**: 100×30 on cards, 340×60 in modal. Gradient line chart drawn via native Canvas API.
+- **Graph modal**: `.graph-modal-backdrop` with centred `.graph-modal` (max 520px). Header with sprite + title + close button. Body contains a large `<canvas class="graph-modal-canvas">` (480×140) drawn via `drawSparkline()`, followed by `.graph-stats` — a column of `.graph-stat-row` elements showing 7-Day Trend (with colour + icon), Change (absolute + percentage), Current Price, 7-Day High, 7-Day Low, Volatility %, and Data Points count. Lazy singleton pattern (`ensureGraphModal()`).
 - **Floating modal**: `.item-modal-backdrop` with centred `.item-modal` (max 400px, slide-in animation `modal-in`).
 - **Flip badges**: `.flip-badges` with flex-wrap. `.buy-badge`, `.sell-badge`, `.profit-badge`, `.hype-badge`. Responsive wrapping with `min-width: 60px` on `.item-name`.
 - **Portfolio**: `.portfolio-form`, `.autocomplete-wrap`, `.flip-card` with countdown timer styling, `.flip-card-actions` horizontal button group (✓ + ✕).
@@ -367,11 +379,14 @@ Lean orchestrator (~50 lines):
 - **Completed flip cards**: `.completed-flip-card` with `.win` (green left border + gradient) and `.loss` (red left border + gradient) variants.
 - **Hype indicators**: `.market-card.hype` border glow, `.hype-badge` pulse animation.
 - **Trade velocity badges**: `.velocity-badge` with colour variants (`.velocity-insta`, `.velocity-active`, `.velocity-slow`, `.velocity-veryslow`) and explanatory `title` tooltips.
+- **Price trend badges**: `.trend-badge` with `.trend-downtrend` (red, "⚠️ Crashing") and `.trend-uptrend` (green, "📈 Rising"). Only shown for non-Stable trends. Renders on both card and modal badges.
 - **External links**: `.ext-link` / `.wiki-link` / `.ge-link` on cards and in the detail modal — open RS Wiki and GE Database pages.
 - **Per-section sort selects**: `.section-sort-select` compact dropdown (10 px) in search section, Top 20 header (`.market-header-actions`), and favourites header (`.favorites-header-actions`).
 - **Slider theming**: WebKit (`::-webkit-slider-runnable-track`, `::-webkit-slider-thumb`) and Firefox (`::-moz-range-track`, `::-moz-range-thumb`) pseudo-elements styled via `--border-input` / `--accent-primary` custom properties. Hover and focus states included.
 - **Error banner**: `#error-banner` — fixed top bar with dismiss and retry buttons (hidden by default, shown via JS).
-- **Responsive desktop breakpoint**: `@media (min-width: 800px)` — wider modal (480 px), larger sparklines, wider grid columns for tile/hybrid, increased padding on main sections.
+- **Toast notifications**: `#toast-container` (fixed top-right, z-index 900). `.toast` with `.toast-buy` (teal border) and `.toast-sell` (gold border) variants. Slide-in/fade-out transitions.
+- **Alert inputs**: `.alert-inputs` panel in the item modal — two number inputs for buy/sell thresholds, themed via CSS variables.
+- **Responsive desktop breakpoint**: `@media (min-width: 800px)` — wider modal (480 px), wider grid columns for tile/hybrid, increased padding on main sections.
 - **Layout modes**: `body[data-layout="tabbed"]` hides non-active tabs, `body[data-layout="sidebar"]` shows all sections side-by-side.
 - Chat bubbles: user (blue `#264f78`), assistant (dark `#333`), system (italic gray), error (red `#3b1a1a`), thinking (animated dots via CSS `@keyframes`).
 - Thin dark webkit scrollbar styling.
@@ -393,7 +408,7 @@ Lean orchestrator (~50 lines):
 | `ge-analyzer:search-sort` | Search results sort key |
 | `ge-analyzer:fav-sort` | Favourites section sort key |
 | `ge-analyzer:chat-history` | Serialised LLM chat conversation (max 50 messages) |
-| `ge-analyzer:favorites` | JSON array of favourited item names |
+| `ge-analyzer:favorites` | JSON array of `FavoriteItem` objects (`{ name, targetBuy?, targetSell? }`) — auto-migrates from legacy `string[]` |
 | `ge-analyzer:portfolio` | Serialised `ActiveFlip[]` portfolio data |
 | `ge-analyzer:portfolio-history` | Serialised `CompletedFlip[]` completed flip history |
 
@@ -409,11 +424,12 @@ All defined in `src/services/types.ts`:
 | `WeirdGloopLatestResponse` | `{ [itemName: string]: WeirdGloopPriceRecord }` |
 | `StoredPriceRecord` | Extends API record with `name` (keyPath) + `fetchedAt` (TTL) |
 | `HistoricalPriceRecord` | Extends `StoredPriceRecord` with `day` (ISO date, compound key with `name`) |
-| `RankedItem` | 18 fields: `name`, `itemId`, `price`, `recBuyPrice`, `volume`, `tradedValue`, `buyLimit?`, `effectivePlayerVolume`, `maxCapitalPer4H`, `taxGap`, `recSellPrice`, `estFlipProfit`, `isRisky`, `volumeSpikeMultiplier`, `tradeVelocity`, `priceHistory` |
+| `RankedItem` | 19 fields: `name`, `itemId`, `price`, `recBuyPrice`, `volume`, `tradedValue`, `buyLimit?`, `effectivePlayerVolume`, `maxCapitalPer4H`, `taxGap`, `recSellPrice`, `estFlipProfit`, `isRisky`, `volumeSpikeMultiplier`, `tradeVelocity`, `priceHistory`, `priceTrend` |
 | `MarketAnalyzerConfig` | `topN` (20), `minVolume` (0), `maxVolume?`, `maxPrice?` |
 | `CacheServiceConfig` | `dbName`, `storeName`, `ttlMs` (default 24h) |
 | `WeirdGloopServiceConfig` | `batchSize` (default 100) |
 | `GECatalogueEntry` | `name`, `id` — one entry per GE-tradeable item (~7,000 total) |
+| `FavoriteItem` | `name`, `targetBuy?`, `targetSell?` — favourited item with optional price-alert thresholds |
 | `ActiveFlip` | `id`, `itemName`, `buyPrice`, `quantity`, `targetSellPrice`, `timestamp` |
 | `CompletedFlip` | Extends `ActiveFlip` + `actualSellPrice`, `completedAt`, `realizedProfit` |
 | `PortfolioStats` | `totalProfit`, `totalFlips`, `avgProfit`, `avgRoi` |
@@ -480,7 +496,8 @@ Everything below is **complete and verified** (builds with 0 errors):
 - [x] Flip profit formula: buy at 0.99×, sell at 1.03×, ~2% net margin after 2% GE tax
 - [x] Volume spike / hype detection (7-day SMA comparison, >1.5× threshold)
 - [x] Trade velocity scoring (Insta-Flip / Active / Slow / Very Slow badges with tooltips)
-- [x] Canvas sparklines (7-day price history, gradient line chart)
+- [x] Price momentum / trend classification (Uptrend / Downtrend / Stable based on 7-day % change, with falling-knife warning badges)
+- [x] Dedicated graph modal (📊 button on cards → full chart + momentum stats: trend, % change, high/low, volatility, data points)
 - [x] Wiki service (two-step search → extract guide fetching + fallback to base item page + Cargo buy-limit API)
 - [x] LLM service (multi-provider, multi-turn chat, strict anti-hallucination + economic rules prompt)
 - [x] Core knowledge base (RS3 economic rules: GE tax, buy limits, margin checking, high alch)
@@ -490,8 +507,8 @@ Everything below is **complete and verified** (builds with 0 errors):
 - [x] Conditional Authorization header (omitted for keyless self-hosted models)
 - [x] Tabbed + Sidebar layout modes (persisted in localStorage)
 - [x] Three market view modes: List, Tile, Hybrid (persisted in localStorage)
-- [x] Market item cards with Jagex sprites, flip badges, sparklines, expandable detail panels
-- [x] Floating item detail modal (centred overlay, enlarged sparkline, full data)
+- [x] Market item cards with Jagex sprites, flip badges, expandable detail panels
+- [x] Floating item detail modal (centred overlay, full data)
 - [x] Dynamic market filters: Trading Volume (Any/High/Low/Custom), Max Price (Unlimited/10M/100M/500M/Custom)
 - [x] Custom volume/budget slider controls with synced text inputs (themed per CSS theme)
 - [x] Market refresh button (re-runs filtering pipeline with current filter config)
@@ -501,6 +518,7 @@ Everything below is **complete and verified** (builds with 0 errors):
 - [x] Separate search results section (above Top 20, never replaces it)
 - [x] External links on market cards and detail modal (RS Wiki + GE Database)
 - [x] Favourites system (star toggle on cards + modal, localStorage persistence, dedicated panel with collapse + per-section sort)
+- [x] Price alert system (per-item buy/sell thresholds on favourites, native Notification API + DOM toast notifications, session dedup, auto-favourite on alert set)
 - [x] Quick-add to portfolio (+ button on cards + modal, pre-fills flip form, switches to portfolio tab)
 - [x] Collapsible sections (Favourites ▾/▸ and Top 20 ▾/▸ toggles)
 - [x] Active flip portfolio with localStorage persistence
@@ -513,7 +531,7 @@ Everything below is **complete and verified** (builds with 0 errors):
 - [x] Chat history persistence (localStorage, max 50 messages, clear button)
 - [x] Multi-turn LLM conversation with RAG context
 - [x] Full HTML UI (settings panel, tabbed/sidebar layout, market/advisor/portfolio sections)
-- [x] Dark-themed CSS (~2150 lines — three themes, cards, tiles, grids, modals, sparklines, filters, chat, portfolio, velocity badges, external links, responsive desktop breakpoint)
+- [x] Dark-themed CSS (~2440 lines — three themes, cards, tiles, grids, modals, graph modal, filters, chat, portfolio, velocity badges, external links, toast notifications, alert inputs, inline alert popovers, responsive desktop breakpoint)
 - [x] Error recovery UI (dismissible error banner with retry button, try/catch wrappers across pipeline and UI)
 - [x] Webpack build passes (`npm run build` — 0 errors, 0 warnings)
 - [x] CSS scaling fix (`#app` height 95% for Alt1 zoom compatibility)
@@ -549,12 +567,12 @@ These were discussed or implied but never started:
 - ~~**Improved wiki title mapping**~~: ✅ Implemented — two-step MediaWiki search → extract strategy with fallback (see §4.5).
 - ~~**Error recovery UI**~~: ✅ Implemented — dismissible error banner with retry button, try/catch wrappers across pipeline and UI.
 - ~~**Item detail links**~~: ✅ Implemented — Wiki and GE Database links on every card and in the detail modal.
-- ~~**Responsive mobile layout**~~: ✅ Implemented — `@media (min-width: 800px)` desktop breakpoint with wider modals, larger sparklines, expanded grids.
+- ~~**Responsive mobile layout**~~: ✅ Implemented — `@media (min-width: 800px)` desktop breakpoint with wider modals, expanded grids.
 - ~~**Favourites sorting**~~: ✅ Implemented — per-section sort dropdowns on Favourites, Top 20, and Search Results.
 - ~~**Portfolio profit tracking**~~: ✅ Implemented — completed flips with actual sell price, realised profit, stats dashboard (see §4.9).
 - **Alt1 overlay integration**: Capture game state, integrate with Alt1's screen-reading capabilities.
-- **Price alerts**: Notify when a favourited item hits a target price.
-- **Export/import**: Export favourites + portfolio data as JSON for backup/sharing.
+- ~~**Price alerts**~~: ✅ Implemented — per-item buy/sell alert thresholds in the detail modal, native browser notifications + DOM toast, session dedup via `firedAlerts` Set (see §4.10).
+- ~~**Export/import**~~: ✅ Implemented — JSON backup of favourites, portfolio, portfolio-history, and theme via Data Management buttons in settings (see §4.12).
 
 ---
 

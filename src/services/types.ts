@@ -140,7 +140,16 @@ export interface RankedItem {
    * Chronological daily prices over the last 7 days (oldest-first).
    * Empty when there is no historical data yet.
    */
-  priceHistory: number[];}
+  priceHistory: number[];
+  /**
+   * 7-day price momentum classification based on the overall percentage
+   * change between the oldest historical price and the current price.
+   * - `"Downtrend"` — dropped more than 5 % (falling knife warning).
+   * - `"Uptrend"` — risen more than 5 %.
+   * - `"Stable"` — within ±5 %.
+   */
+  priceTrend: "Uptrend" | "Downtrend" | "Stable";
+}
 
 /** Tuneable knobs for the {@link MarketAnalyzerService}. */
 export interface MarketAnalyzerConfig {
@@ -468,6 +477,19 @@ export interface PortfolioStats {
 }
 
 // ─── Full GE Catalogue ────────────────────────────────────────────────────────────
+
+/**
+ * A favourited item with optional price-alert thresholds.
+ * Persisted to `localStorage` as a JSON array.
+ */
+export interface FavoriteItem {
+  /** Canonical RS3 item name. */
+  name: string;
+  /** Alert when the item's GE price drops to or below this value (gp). */
+  targetBuy?: number;
+  /** Alert when the item's GE price rises to or at above this value (gp). */
+  targetSell?: number;
+}
 
 /**
  * Lightweight entry from the RS Wiki’s `Module:GEIDs/data.json` catalogue.

@@ -32,6 +32,9 @@ npx serve dist --listen 8080   # local dev server
 - **LLMService accepts `Partial<LLMConfig>`** — all fields optional (defaults to Groq). API key omitted = no Authorization header (for self-hosted models)
 - **Runtime filter overrides**: `analyzer.getTopItems(overrides?)` merges `Partial<MarketAnalyzerConfig>` at call time — don't reconstruct the service for filter changes
 - **localStorage keys** are prefixed `ge-analyzer:` (e.g. `ge-analyzer:llm-provider`, `ge-analyzer:view-mode`, `ge-analyzer:top20-sort`, `ge-analyzer:theme`)
+- **Favourites use `FavoriteItem[]`** (not plain strings) — stored in `ge-analyzer:favorites` as `{ name, targetBuy?, targetSell? }`. Legacy `string[]` format auto-migrates on first load via `loadFavorites()`.
+- **Price alert dedup**: `firedAlerts` Set (session-scoped) prevents the same alert from firing repeatedly. Alerts trigger both a DOM toast (`#toast-container`) and a native `Notification` (if permission granted).
+- **Inline alert popover**: Each item card has a 🔔 button in `.card-actions` that toggles a `.card-alert-popover` with compact buy/sell inputs — only one popover open at a time per list. The full modal also retains its own alert inputs.
 - **Per-section sort controls**: Top 20, Search Results, and Favourites each have their own sort `<select>` and localStorage key (`ge-analyzer:top20-sort`, `ge-analyzer:search-sort`, `ge-analyzer:fav-sort`). Shared `applySortOrder()` helper sorts in place — do not add a global sort.
 - **Three CSS themes**: Classic Dark (`:root`), OSRS Brown (`body[data-theme="osrs"]`), RS3 Modern Blue (`body[data-theme="rs3-modern"]`) — all via CSS custom properties. New UI elements must use `var(--*)` tokens, never hard-coded colours.
 - **Provider presets** in `LLM_PROVIDERS` array (`types.ts`) — each has `endpoint`, `defaultModel`, `keyPlaceholder`, and curated `models[]` with `recommended` flags
@@ -41,15 +44,15 @@ npx serve dist --listen 8080   # local dev server
 
 | File | Responsibility |
 |------|---------------|
-| `uiService.ts` | **All** DOM manipulation, event binding, localStorage, rendering (~2 480 lines) |
+| `uiService.ts` | **All** DOM manipulation, event binding, localStorage, rendering (~2 870 lines) |
 | `services/types.ts` | Every shared interface + `LLM_PROVIDERS` constant |
 | `services/coreKnowledge.ts` | Static RS3 economic rules (GE tax, buy limits, margin checking, high alch) |
 | `services/llmService.ts` | OpenAI-compatible chat-completion client; builds system + user prompt |
-| `services/marketAnalyzerService.ts` | Pure math: score → filter → rank → format (no network). Includes trade velocity scoring. |
+| `services/marketAnalyzerService.ts` | Score → filter → rank → format. Includes trade velocity scoring, 7-day price momentum classification, and sparse-history fallback to Weird Gloop `last90d` API for chart data. |
 | `services/initDataPipeline.ts` | Startup orchestrator + `SEED_ITEMS` list (~100 RS3 items) |
 | `services/portfolioService.ts` | Active flip tracker + completed flip history with P&L stats (localStorage) |
 | `services/wikiService.ts` | RS Wiki MediaWiki API client + Cargo buy-limit API (two-step search → extract) |
-| `style.css` | Three themes, cards/tiles/grids, modals, sparklines, velocity badges, slider theming, responsive `@media (min-width: 800px)` breakpoint (~2 150 lines) |
+| `style.css` | Three themes, cards/tiles/grids, modals, dedicated graph modal, velocity badges, slider theming, toast notifications, alert inputs, inline alert popovers, data-mgmt buttons, responsive `@media (min-width: 800px)` breakpoint (~2 440 lines) |
 
 ## UI Layout (index.html, top → bottom)
 

@@ -15,7 +15,9 @@
  *  5. **Slice**    — keep only the top-N items.
  *  6. **Format**   — serialise the result into a compact string for LLM context.
  *
- * All calculations are pure math on local data — no network calls.
+ * All calculations are pure math on local data — the only network call is a
+ * fallback fetch to the Weird Gloop historical API when the local IndexedDB
+ * price-history store has insufficient data for sparkline rendering.
  */
 
 import { CacheService } from "./cacheService";
@@ -294,6 +296,14 @@ export class MarketAnalyzerService {
       const histPrices = priceHistoryMap.get(record.name) ?? [];
       const priceHistory = [...histPrices, record.price];
 
+      // 7-day price momentum: classify trend based on overall % change.
+      let priceTrend: "Uptrend" | "Downtrend" | "Stable" = "Stable";
+      if (priceHistory.length >= 2 && priceHistory[0] > 0) {
+        const percentChange = (record.price - priceHistory[0]) / priceHistory[0];
+        if (percentChange < -0.05) priceTrend = "Downtrend";
+        else if (percentChange > 0.05) priceTrend = "Uptrend";
+      }
+
       // Trade velocity: qualitative speed tier based on hourly volume vs buy limit.
       const hourlyVolume = Math.floor(globalVol / 24);
       const safeBuyLimit = (limit != null && limit > 0) ? limit : 0;
@@ -325,6 +335,7 @@ export class MarketAnalyzerService {
         volumeSpikeMultiplier,
         tradeVelocity,
         priceHistory,
+        priceTrend,
       });
     }
 
@@ -381,7 +392,11 @@ export class MarketAnalyzerService {
   /**
    * Build a `Map<itemName, number[]>` of chronological daily prices
    * for sparkline rendering.  Each array contains one price per past day
-   * (does **not** include today \u2014 the caller appends the current price).
+   * (does **not** include today — the caller appends the current price).
+   *
+   * When the local IndexedDB history is sparse (most items have ≤ 1 day),
+   * the method falls back to the Weird Gloop `last90d` API to fetch
+   * real historical prices, extracting data for the last {@link days} days.
    *
    * @param days - Number of calendar days to look back.
    */
@@ -409,10 +424,94 @@ export class MarketAnalyzerService {
         entries.sort((a, b) => (a.day < b.day ? -1 : a.day > b.day ? 1 : 0));
         map.set(name, entries.map((e) => e.price));
       }
+
+      // ── Sparse-data fallback: fetch from Weird Gloop API ──────────────
+      // If most items have ≤ 1 day of local history, pull from the API so
+      // sparklines can render immediately after install / cache clear.
+      const allItems = await this.cache.getAll();
+      const itemNames = allItems.map((r) => r.name);
+      const sparse = itemNames.length > 0 &&
+        itemNames.filter((n) => (map.get(n)?.length ?? 0) >= 2).length < itemNames.length * 0.3;
+
+      if (sparse && itemNames.length > 0) {
+        console.log("[MarketAnalyzer] Local price history is sparse — fetching from Weird Gloop API…");
+        const apiMap = await this.fetchAPIHistory(itemNames, days);
+        // Merge: API data fills in gaps; local data takes precedence when present.
+        for (const [name, prices] of apiMap) {
+          if (!map.has(name) || (map.get(name)!.length < prices.length)) {
+            map.set(name, prices);
+          }
+        }
+      }
     } catch (err) {
       console.warn("[MarketAnalyzer] Could not build price history map.", err);
     }
     return map;
+  }
+
+  /**
+   * Fetch historical prices from the Weird Gloop `/exchange/history/rs/last90d`
+   * endpoint and extract daily closing prices for the last {@link days} days.
+   *
+   * Each item is fetched individually (the `/last90d` endpoint does not
+   * support pipe-separated batch names).  Requests are run in parallel
+   * batches of {@link CONCURRENCY} to avoid overwhelming the API.
+   * Individual failures are logged but do not reject the returned promise.
+   *
+   * @param itemNames - Canonical RS3 item names.
+   * @param days      - Number of recent days to extract from the 90-day window.
+   * @returns A `Map<itemName, number[]>` of chronological daily prices.
+   */
+  private async fetchAPIHistory(
+    itemNames: string[],
+    days: number,
+  ): Promise<Map<string, number[]>> {
+    const result = new Map<string, number[]>();
+    const CONCURRENCY = 10;
+    const cutoff = new Date();
+    cutoff.setDate(cutoff.getDate() - days);
+    const cutoffMs = cutoff.getTime();
+    const todayStr = new Date().toISOString().slice(0, 10);
+
+    /** Fetch a single item's history and add to result map. */
+    const fetchOne = async (name: string): Promise<void> => {
+      try {
+        const url = `https://api.weirdgloop.org/exchange/history/rs/last90d?name=${encodeURIComponent(name)}`;
+        const resp = await fetch(url, {
+          headers: {
+            "User-Agent": "RS3-GE-Analyzer-Alt1Plugin/1.0",
+            Accept: "application/json",
+          },
+        });
+        if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+        const json = await resp.json() as Record<string, Array<{ timestamp: number; price: number }>>;
+        const entries = json[name];
+        if (!Array.isArray(entries)) return;
+
+        const dayMap = new Map<string, number>();
+        for (const e of entries) {
+          if (e.timestamp < cutoffMs) continue;
+          const day = new Date(e.timestamp).toISOString().slice(0, 10);
+          if (day === todayStr) continue;
+          dayMap.set(day, e.price);
+        }
+        const sorted = [...dayMap.entries()].sort((a, b) => (a[0] < b[0] ? -1 : 1));
+        if (sorted.length > 0) {
+          result.set(name, sorted.map((d) => d[1]));
+        }
+      } catch {
+        // Individual item failure — silently skip.
+      }
+    };
+
+    // Process items in concurrent batches.
+    for (let i = 0; i < itemNames.length; i += CONCURRENCY) {
+      const batch = itemNames.slice(i, i + CONCURRENCY);
+      await Promise.allSettled(batch.map(fetchOne));
+    }
+
+    console.log(`[MarketAnalyzer] API history fetched for ${result.size} items.`);
+    return result;
   }
 
   /**

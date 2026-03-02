@@ -17,7 +17,8 @@ Uses a **RAG (Retrieval-Augmented Generation) pipeline** to combine live GE mark
 - **Flip recommendations** — buy/sell prices with profit-per-item after 2% GE tax
 - **Trade velocity** — Insta-Flip / Active / Slow / Very Slow badges with explanatory tooltips
 - **Hype detection** — volume spike badges when today's volume exceeds the 7-day average by 1.5×
-- **Canvas sparklines** — 7-day price history on every card
+- **Dedicated graph modal** — 📊 button on every card opens a full chart modal with 7-day gradient area chart, trend analysis, price change stats, high/low, and volatility (auto-fetches history from Weird Gloop API when local data is sparse)
+- **Price momentum badges** — "⚠️ Crashing" / "📈 Rising" warnings when 7-day trend exceeds ±5 %
 - **Three view modes** — List, Tile, and Hybrid layouts
 - **Per-section sorting** — independent sort controls (Default, A–Z, Price ↓, Profit ↓) on Top 20, Search Results, and Favourites
 - **Dynamic filters** — volume and price filters with themed custom slider controls
@@ -37,9 +38,11 @@ Uses a **RAG (Retrieval-Augmented Generation) pipeline** to combine live GE mark
 
 ### Extras
 - **Favourites** — star any item for quick access in a dedicated collapsible panel with its own sort control
+- **Price alerts** — set buy/sell thresholds via the inline 🔔 bell on any card or in the detail modal; triggers native browser notifications and in-app toasts when prices cross your targets
+- **Export / Import** — back up favourites, portfolio, flip history, and theme to a JSON file; restore from any previous backup
 - **Quick-add** — one-click add from any market card to the portfolio form
 - **Three CSS themes** — Classic Dark, OSRS Brown, and RS3 Modern Blue (all themed via CSS variables)
-- **Responsive desktop layout** — wider modals, larger sparklines, and expanded grids at ≥ 800 px
+- **Responsive desktop layout** — wider modals and expanded grids at ≥ 800 px
 - **Error recovery UI** — dismissible error banner with retry button for network/cache failures
 - **Persistent state** — all settings, chat history, favourites, sort preferences, and portfolio data saved to localStorage
 - **Tabbed & sidebar layouts** — switch between compact tabbed view or full sidebar mode

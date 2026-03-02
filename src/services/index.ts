@@ -28,4 +28,5 @@ export type {
   CompletedFlip,
   PortfolioStats,
   GECatalogueEntry,
+  FavoriteItem,
 } from "./types";

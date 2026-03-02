@@ -23,7 +23,7 @@ import {
   WeirdGloopService,
   WikiService,
 } from "./services";
-import type { ActiveFlip, CompletedFlip, GECatalogueEntry, LLMProvider, MarketAnalyzerConfig, RankedItem, StoredPriceRecord } from "./services";
+import type { ActiveFlip, CompletedFlip, FavoriteItem, GECatalogueEntry, LLMProvider, MarketAnalyzerConfig, RankedItem, StoredPriceRecord } from "./services";
 
 // ─── Constants ──────────────────────────────────────────────────────────────
 
@@ -121,25 +121,78 @@ const DETAIL_TIPS: Record<string, string> = {
 
 // ─── Favorites helpers ──────────────────────────────────────────────────────
 
-/** Return the Set of favourited item names from localStorage. */
-function getFavorites(): Set<string> {
+/**
+ * Load the persisted favourites list, auto-migrating from the legacy
+ * `string[]` format to `FavoriteItem[]` on first access.
+ */
+function loadFavorites(): FavoriteItem[] {
   try {
     const raw = localStorage.getItem(LS_FAVORITES);
-    return raw ? new Set(JSON.parse(raw) as string[]) : new Set();
+    if (!raw) return [];
+    const parsed: unknown = JSON.parse(raw);
+    if (!Array.isArray(parsed)) return [];
+
+    // Legacy format: plain string array → migrate to FavoriteItem[].
+    if (parsed.length > 0 && typeof parsed[0] === "string") {
+      const migrated: FavoriteItem[] = (parsed as string[]).map((name) => ({ name }));
+      localStorage.setItem(LS_FAVORITES, JSON.stringify(migrated));
+      return migrated;
+    }
+
+    return parsed as FavoriteItem[];
   } catch {
-    return new Set();
+    return [];
   }
+}
+
+/** Persist the favourites list. */
+function saveFavorites(favs: FavoriteItem[]): void {
+  localStorage.setItem(LS_FAVORITES, JSON.stringify(favs));
+}
+
+/** Return the Set of favourited item names from localStorage. */
+function getFavorites(): Set<string> {
+  return new Set(loadFavorites().map((f) => f.name));
 }
 
 /** Toggle an item's favourite status and persist the result. Returns the new state. */
 function toggleFavorite(name: string): boolean {
-  const favs = getFavorites();
-  const isFav = favs.has(name);
-  if (isFav) favs.delete(name); else favs.add(name);
-  localStorage.setItem(LS_FAVORITES, JSON.stringify([...favs]));
-  // Re-render the favourites panel asynchronously.
+  const favs = loadFavorites();
+  const idx = favs.findIndex((f) => f.name === name);
+  if (idx >= 0) {
+    favs.splice(idx, 1);
+    saveFavorites(favs);
+    renderFavorites();
+    return false;
+  }
+  favs.push({ name });
+  saveFavorites(favs);
   renderFavorites();
-  return !isFav;
+  return true;
+}
+
+/**
+ * Read the alert thresholds for a specific favourited item.
+ * Returns `undefined` if the item is not favourited.
+ */
+function getFavoriteAlerts(name: string): FavoriteItem | undefined {
+  return loadFavorites().find((f) => f.name === name);
+}
+
+/**
+ * Update the price-alert thresholds for a favourited item.
+ * Creates the favourite entry if it doesn't already exist.
+ */
+function setFavoriteAlerts(name: string, targetBuy?: number, targetSell?: number): void {
+  const favs = loadFavorites();
+  let entry = favs.find((f) => f.name === name);
+  if (!entry) {
+    entry = { name };
+    favs.push(entry);
+  }
+  entry.targetBuy = targetBuy;
+  entry.targetSell = targetSell;
+  saveFavorites(favs);
 }
 
 /** When true, the next autocomplete open is suppressed. */
@@ -245,6 +298,9 @@ let els: {
   statAvgProfit: HTMLElement;
   statAvgRoi: HTMLElement;
   completedFlipsList: HTMLElement;
+  exportDataBtn: HTMLButtonElement;
+  importDataBtn: HTMLButtonElement;
+  importFileInput: HTMLInputElement;
 };
 
 // ─── Shared service instances (initialised once) ────────────────────────────
@@ -309,6 +365,8 @@ export async function initUI(): Promise<void> {
   bindClearChat();
   bindPortfolio();
   bindErrorRetry();
+  bindDataManagement();
+  requestNotificationPermission();
 
   // Initialise shared service singletons.
   cache = new CacheService();
@@ -655,6 +713,107 @@ function hideError(): void {
   els.errorBannerMsg.textContent = "";
 }
 
+// ─── Toast Notifications ────────────────────────────────────────────────────
+
+/** Lazily-created toast container (fixed to top-right of viewport). */
+let toastContainer: HTMLElement | null = null;
+
+/** Ensure the toast container exists in the DOM. */
+function ensureToastContainer(): HTMLElement {
+  if (toastContainer) return toastContainer;
+  toastContainer = document.createElement("div");
+  toastContainer.id = "toast-container";
+  document.body.appendChild(toastContainer);
+  return toastContainer;
+}
+
+/**
+ * Show a toast notification. Automatically removes itself after `durationMs`.
+ * @param message - The text to display.
+ * @param type - Visual variant (`"info"`, `"buy"`, or `"sell"`).
+ * @param durationMs - How long the toast stays visible (default 6 000 ms).
+ */
+function showToast(message: string, type: "info" | "buy" | "sell" = "info", durationMs = 6000): void {
+  const container = ensureToastContainer();
+  const toast = document.createElement("div");
+  toast.className = `toast toast-${type}`;
+  toast.textContent = message;
+  container.appendChild(toast);
+
+  // Trigger the entrance animation on the next frame.
+  requestAnimationFrame(() => toast.classList.add("show"));
+
+  setTimeout(() => {
+    toast.classList.remove("show");
+    toast.addEventListener("transitionend", () => toast.remove());
+    // Safety fallback in case transitionend doesn't fire.
+    setTimeout(() => toast.remove(), 500);
+  }, durationMs);
+}
+
+// ─── Price Alert Engine ─────────────────────────────────────────────────────
+
+/** Set of "name|direction" keys that have already fired in this session to avoid spam. */
+const firedAlerts = new Set<string>();
+
+/**
+ * Request browser notification permission once (no-ops after the first call).
+ * Safe to call on every refresh — the browser only shows the prompt once.
+ */
+function requestNotificationPermission(): void {
+  if (typeof Notification !== "undefined" && Notification.permission === "default") {
+    Notification.requestPermission().catch(() => { /* swallow if blocked */ });
+  }
+}
+
+/**
+ * Check every favourited item's price against its alert thresholds.
+ * Fires a native browser `Notification` (if granted) **and** a DOM toast for
+ * each threshold breach.  Each alert fires at most once per session per
+ * direction (`buy` / `sell`) to prevent spam.
+ *
+ * @param items - The latest scored items to check (typically all cached items).
+ */
+function checkPriceAlerts(items: RankedItem[]): void {
+  const favs = loadFavorites();
+  if (favs.length === 0) return;
+
+  // Build a quick lookup by name.
+  const priceMap = new Map<string, number>();
+  for (const it of items) priceMap.set(it.name, it.price);
+
+  for (const fav of favs) {
+    const currentPrice = priceMap.get(fav.name);
+    if (currentPrice == null) continue;
+
+    // ── Buy alert: price dropped to or below target ────────────────────
+    if (fav.targetBuy && currentPrice <= fav.targetBuy) {
+      const key = `${fav.name}|buy`;
+      if (!firedAlerts.has(key)) {
+        firedAlerts.add(key);
+        const msg = `\uD83D\uDCC9 ${fav.name} has dropped to ${formatGpShort(currentPrice)} gp (target: \u2264${formatGpShort(fav.targetBuy)} gp)`;
+        showToast(msg, "buy");
+        if (typeof Notification !== "undefined" && Notification.permission === "granted") {
+          new Notification("GE Price Alert — Buy", { body: msg, icon: spriteUrl(0) });
+        }
+      }
+    }
+
+    // ── Sell alert: price rose to or above target ──────────────────────
+    if (fav.targetSell && currentPrice >= fav.targetSell) {
+      const key = `${fav.name}|sell`;
+      if (!firedAlerts.has(key)) {
+        firedAlerts.add(key);
+        const msg = `\uD83D\uDCC8 ${fav.name} has risen to ${formatGpShort(currentPrice)} gp (target: \u2265${formatGpShort(fav.targetSell)} gp)`;
+        showToast(msg, "sell");
+        if (typeof Notification !== "undefined" && Notification.permission === "granted") {
+          new Notification("GE Price Alert — Sell", { body: msg, icon: spriteUrl(0) });
+        }
+      }
+    }
+  }
+}
+
 /**
  * Wire the error-banner retry button.  Clears the cache, re-runs the full
  * data pipeline, and refreshes the market panel.
@@ -679,6 +838,89 @@ function bindErrorRetry(): void {
       const msg = err instanceof Error ? err.message : "Retry failed — see console.";
       showError(msg);
     }
+  });
+}
+
+// ─── Data Management (Export / Import) ──────────────────────────────────────
+
+/** localStorage keys included in the JSON backup. */
+const EXPORT_KEYS = [
+  "ge-analyzer:favorites",
+  "ge-analyzer:portfolio",
+  "ge-analyzer:portfolio-history",
+  "ge-analyzer:theme",
+] as const;
+
+/**
+ * Wire click handlers for the Export Data / Import Data buttons and the
+ * hidden file `<input>`.
+ */
+function bindDataManagement(): void {
+  // ── Export ──────────────────────────────────────────────────────────────
+  els.exportDataBtn.addEventListener("click", () => {
+    const payload: Record<string, unknown> = {};
+    for (const key of EXPORT_KEYS) {
+      const raw = localStorage.getItem(key);
+      if (raw !== null) {
+        try { payload[key] = JSON.parse(raw); } catch { payload[key] = raw; }
+      }
+    }
+
+    const json = JSON.stringify(payload, null, 2);
+    const blob = new Blob([json], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "ge-analyzer-backup.json";
+    document.body.appendChild(a);
+    a.click();
+
+    // Clean up.
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  });
+
+  // ── Import ─────────────────────────────────────────────────────────────
+  els.importDataBtn.addEventListener("click", () => {
+    // Reset so the same file can be re-imported if needed.
+    els.importFileInput.value = "";
+    els.importFileInput.click();
+  });
+
+  els.importFileInput.addEventListener("change", () => {
+    const file = els.importFileInput.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      try {
+        const data = JSON.parse(reader.result as string);
+        if (typeof data !== "object" || data === null) {
+          throw new Error("Invalid backup format.");
+        }
+
+        let restoredCount = 0;
+        for (const key of EXPORT_KEYS) {
+          if (key in data) {
+            localStorage.setItem(key, JSON.stringify(data[key]));
+            restoredCount++;
+          }
+        }
+
+        if (restoredCount === 0) {
+          alert("No recognised data keys found in the file.");
+          return;
+        }
+
+        alert("Data imported successfully!");
+        window.location.reload();
+      } catch (err) {
+        console.error("[UIService] Import failed:", err);
+        alert("Import failed — the file does not contain valid JSON.");
+      }
+    };
+    reader.readAsText(file);
   });
 }
 
@@ -721,6 +963,12 @@ async function refreshMarketPanel(): Promise<void> {
     latestMarketSummary = analyzer.formatForLLM(latestTopItems);
     applySortOrder(latestTopItems, els.top20SortSelect.value);
     renderMarketItems(latestTopItems);
+
+    // Check price alerts against ALL cached items (not just filtered top 20).
+    try {
+      const allItems = await analyzer.getTopItems({ topN: 99999, minVolume: 0 });
+      checkPriceAlerts(allItems);
+    } catch { /* non-critical — skip alerts on failure */ }
   } catch (err) {
     console.error("[UIService] Failed to refresh market panel:", err);
     const msg = err instanceof Error ? err.message : "Failed to load market data.";
@@ -975,12 +1223,17 @@ function spriteUrl(itemId: number): string {
  * and evenly spaced across its width.  The line is green when the trend
  * is upward (last > first) and red when downward.
  *
+ * Handles edge cases gracefully:
+ * - **0 data points**: Renders a centred "No price history" placeholder.
+ * - **1 data point**: Renders a single dot at the vertical midpoint.
+ * - **≥ 2 data points**: Full sparkline.
+ *
  * @param canvas - The target `<canvas>` DOM element.
- * @param data   - Array of numeric values (≥ 2) in chronological order.
+ * @param data   - Array of numeric values in chronological order.
  */
 function drawSparkline(canvas: HTMLCanvasElement, data: number[]): void {
   const ctx = canvas.getContext("2d");
-  if (!ctx || data.length < 2) return;
+  if (!ctx) return;
 
   // Use the element's laid-out size so the drawing matches CSS sizing.
   const w = canvas.offsetWidth || canvas.width;
@@ -988,6 +1241,27 @@ function drawSparkline(canvas: HTMLCanvasElement, data: number[]): void {
   canvas.width = w;
   canvas.height = h;
 
+  // ── No data: draw placeholder text ──
+  if (data.length === 0) {
+    const fontSize = Math.max(9, Math.round(h * 0.35));
+    ctx.font = `${fontSize}px "Segoe UI", sans-serif`;
+    ctx.fillStyle = "#888";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.fillText("No price history", w / 2, h / 2);
+    return;
+  }
+
+  // ── Single data point: draw a dot ──
+  if (data.length === 1) {
+    ctx.fillStyle = "#888";
+    ctx.beginPath();
+    ctx.arc(w / 2, h / 2, Math.max(2, Math.round(h * 0.12)), 0, Math.PI * 2);
+    ctx.fill();
+    return;
+  }
+
+  // ── ≥ 2 data points: full sparkline ──
   const padding = 2;                        // tiny top/bottom breathing room
   const min = Math.min(...data);
   const max = Math.max(...data);
@@ -1014,6 +1288,171 @@ function drawSparkline(canvas: HTMLCanvasElement, data: number[]): void {
   ctx.stroke();
 }
 
+// ─── Graph Modal Chart Renderer ─────────────────────────────────────────────
+
+/**
+ * Abbreviate a gp value for axis labels (e.g. 1200 → "1.2K", 3400000 → "3.4M").
+ */
+function axisLabel(value: number): string {
+  const abs = Math.abs(value);
+  const sign = value < 0 ? "-" : "";
+  if (abs >= 1_000_000_000) return `${sign}${(abs / 1_000_000_000).toFixed(1)}B`;
+  if (abs >= 1_000_000) return `${sign}${(abs / 1_000_000).toFixed(1)}M`;
+  if (abs >= 1_000) return `${sign}${(abs / 1_000).toFixed(1)}K`;
+  return `${sign}${abs}`;
+}
+
+/**
+ * Draw a full-featured area chart on the graph modal canvas, including:
+ * - Y-axis price labels (left)
+ * - X-axis day labels (bottom: "Day 1", "Day 2", … or "d-6", "d-5", …, "today")
+ * - Horizontal grid lines
+ * - Gradient-filled area under the curve
+ * - Trend-coloured line with data-point dots
+ *
+ * Handles edge cases (0 or 1 data points) the same as {@link drawSparkline}.
+ *
+ * @param canvas - The target `<canvas>` DOM element.
+ * @param data   - Array of numeric price values in chronological order.
+ */
+function drawGraphChart(canvas: HTMLCanvasElement, data: number[]): void {
+  const ctx = canvas.getContext("2d");
+  if (!ctx) return;
+
+  const dpr = window.devicePixelRatio || 1;
+  const cssW = canvas.offsetWidth || canvas.width;
+  const cssH = canvas.offsetHeight || canvas.height;
+  canvas.width = cssW * dpr;
+  canvas.height = cssH * dpr;
+  ctx.scale(dpr, dpr);
+
+  // ── No data: placeholder ──
+  if (data.length === 0) {
+    ctx.font = '12px "Segoe UI", sans-serif';
+    ctx.fillStyle = "#888";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.fillText("No price history available", cssW / 2, cssH / 2);
+    return;
+  }
+
+  // ── Single data point ──
+  if (data.length === 1) {
+    ctx.font = '11px "Segoe UI", sans-serif';
+    ctx.fillStyle = "#888";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.fillText(`${axisLabel(data[0])} gp (1 day)`, cssW / 2, cssH / 2);
+    return;
+  }
+
+  // ── Chart margins ──
+  const marginLeft = 52;
+  const marginRight = 10;
+  const marginTop = 10;
+  const marginBottom = 22;
+  const plotW = cssW - marginLeft - marginRight;
+  const plotH = cssH - marginTop - marginBottom;
+
+  const min = Math.min(...data);
+  const max = Math.max(...data);
+  const range = max - min || 1;
+
+  // Compute nice Y-axis ticks (4 horizontal lines).
+  const TICKS = 4;
+  const tickValues: number[] = [];
+  for (let i = 0; i <= TICKS; i++) {
+    tickValues.push(min + (range * i) / TICKS);
+  }
+
+  // ── Draw grid lines + Y-axis labels ──
+  ctx.font = '10px "Segoe UI", sans-serif';
+  ctx.textAlign = "right";
+  ctx.textBaseline = "middle";
+  for (const tv of tickValues) {
+    const y = marginTop + plotH - ((tv - min) / range) * plotH;
+    // Grid line
+    ctx.strokeStyle = "rgba(255,255,255,0.07)";
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(marginLeft, y);
+    ctx.lineTo(cssW - marginRight, y);
+    ctx.stroke();
+    // Label
+    ctx.fillStyle = "#888";
+    ctx.fillText(axisLabel(tv), marginLeft - 6, y);
+  }
+
+  // ── X-axis labels ──
+  ctx.textAlign = "center";
+  ctx.textBaseline = "top";
+  ctx.fillStyle = "#888";
+  const stepX = plotW / (data.length - 1);
+  // Show labels at first, last, and ~3 evenly-spaced middle points.
+  const labelCount = Math.min(data.length, 6);
+  const labelStep = (data.length - 1) / (labelCount - 1);
+  for (let li = 0; li < labelCount; li++) {
+    const idx = Math.round(li * labelStep);
+    const x = marginLeft + idx * stepX;
+    // Label: days ago relative to today.
+    const daysAgo = data.length - 1 - idx;
+    const label = daysAgo === 0 ? "today" : `d\u2212${daysAgo}`;
+    ctx.fillText(label, x, cssH - marginBottom + 6);
+  }
+
+  // ── Helper: data index → canvas coords ──
+  const toXY = (i: number): { x: number; y: number } => ({
+    x: marginLeft + i * stepX,
+    y: marginTop + plotH - ((data[i] - min) / range) * plotH,
+  });
+
+  // Trend colour.
+  const first = data[0];
+  const last = data[data.length - 1];
+  const lineColour = last > first ? "#4ec9b0" : last < first ? "#f44747" : "#888";
+
+  // ── Gradient fill under curve ──
+  ctx.beginPath();
+  ctx.moveTo(toXY(0).x, toXY(0).y);
+  for (let i = 1; i < data.length; i++) {
+    const p = toXY(i);
+    ctx.lineTo(p.x, p.y);
+  }
+  ctx.lineTo(toXY(data.length - 1).x, marginTop + plotH);
+  ctx.lineTo(toXY(0).x, marginTop + plotH);
+  ctx.closePath();
+  const grad = ctx.createLinearGradient(0, marginTop, 0, marginTop + plotH);
+  grad.addColorStop(0, lineColour + "44");
+  grad.addColorStop(1, lineColour + "08");
+  ctx.fillStyle = grad;
+  ctx.fill();
+
+  // ── Line ──
+  ctx.strokeStyle = lineColour;
+  ctx.lineWidth = 2;
+  ctx.lineJoin = "round";
+  ctx.lineCap = "round";
+  ctx.beginPath();
+  for (let i = 0; i < data.length; i++) {
+    const p = toXY(i);
+    if (i === 0) ctx.moveTo(p.x, p.y);
+    else ctx.lineTo(p.x, p.y);
+  }
+  ctx.stroke();
+
+  // ── Data-point dots ──
+  for (let i = 0; i < data.length; i++) {
+    const p = toXY(i);
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, 3, 0, Math.PI * 2);
+    ctx.fillStyle = lineColour;
+    ctx.fill();
+    ctx.strokeStyle = "rgba(0,0,0,0.5)";
+    ctx.lineWidth = 1;
+    ctx.stroke();
+  }
+}
+
 /**
  * Render all market items in the current view mode.
  */
@@ -1031,15 +1470,6 @@ function renderMarketItems(items: RankedItem[]): void {
   for (const item of items) {
     els.marketItems.appendChild(buildItemCard(item));
   }
-
-  // Draw sparklines now that canvases are in the DOM.
-  const canvases = els.marketItems.querySelectorAll<HTMLCanvasElement>("canvas.sparkline");
-  canvases.forEach((canvas) => {
-    const data: number[] | undefined = (canvas as any).__priceHistory;
-    if (data && data.length >= 2) {
-      drawSparkline(canvas, data);
-    }
-  });
 }
 
 // ─── Favourites Panel ────────────────────────────────────────────────────────
@@ -1085,15 +1515,6 @@ async function renderFavorites(): Promise<void> {
   for (const item of items) {
     els.favoritesItems.appendChild(buildItemCard(item));
   }
-
-  // Draw sparklines.
-  const canvases = els.favoritesItems.querySelectorAll<HTMLCanvasElement>("canvas.sparkline");
-  canvases.forEach((canvas) => {
-    const data: number[] | undefined = (canvas as any).__priceHistory;
-    if (data && data.length >= 2) {
-      drawSparkline(canvas, data);
-    }
-  });
 }
 
 /** Bind the collapse/expand toggle for the favourites section header. */
@@ -1140,7 +1561,7 @@ function bindTop20Collapse(): void {
 
 /**
  * Render search results into the dedicated #search-results container.
- * Uses the same card builder + sparkline drawing as the Top 20.
+ * Uses the same card builder as the Top 20.
  */
 function renderSearchResults(items: RankedItem[]): void {
   els.searchResults.innerHTML = "";
@@ -1158,15 +1579,6 @@ function renderSearchResults(items: RankedItem[]): void {
   for (const item of items) {
     els.searchResults.appendChild(buildItemCard(item));
   }
-
-  // Draw sparklines.
-  const canvases = els.searchResults.querySelectorAll<HTMLCanvasElement>("canvas.sparkline");
-  canvases.forEach((canvas) => {
-    const data: number[] | undefined = (canvas as any).__priceHistory;
-    if (data && data.length >= 2) {
-      drawSparkline(canvas, data);
-    }
-  });
 }
 
 /**
@@ -1258,6 +1670,21 @@ function buildItemCard(item: RankedItem): HTMLElement {
     flipWrap.appendChild(hypeBadge);
   }
 
+  // Price trend badge (only for Uptrend / Downtrend — skip Stable).
+  if (item.priceTrend === "Downtrend") {
+    const trendBadge = document.createElement("span");
+    trendBadge.className = "trend-badge trend-downtrend";
+    trendBadge.textContent = "\u26A0\uFE0F Crashing";
+    trendBadge.title = "Price has dropped more than 5% over the last 7 days \u2014 potential falling knife.";
+    flipWrap.appendChild(trendBadge);
+  } else if (item.priceTrend === "Uptrend") {
+    const trendBadge = document.createElement("span");
+    trendBadge.className = "trend-badge trend-uptrend";
+    trendBadge.textContent = "\uD83D\uDCC8 Rising";
+    trendBadge.title = "Price has risen more than 5% over the last 7 days \u2014 positive momentum.";
+    flipWrap.appendChild(trendBadge);
+  }
+
   header.appendChild(flipWrap);
 
   // Popout button — opens the floating detail modal.
@@ -1311,11 +1738,80 @@ function buildItemCard(item: RankedItem): HTMLElement {
   geLink.title = "Open on GE Database";
   geLink.addEventListener("click", (e) => e.stopPropagation());
 
+  // ── Inline alert popover (hidden until bell clicked) ──
+  const alertPopover = document.createElement("div");
+  alertPopover.className = "card-alert-popover";
+  alertPopover.innerHTML =
+    `<div class="card-alert-row">` +
+      `<label>Buy \u2264</label>` +
+      `<input class="card-alert-buy" type="number" min="0" placeholder="gp" />` +
+    `</div>` +
+    `<div class="card-alert-row">` +
+      `<label>Sell \u2265</label>` +
+      `<input class="card-alert-sell" type="number" min="0" placeholder="gp" />` +
+    `</div>`;
+  // Prevent card expand/collapse when interacting with the popover.
+  alertPopover.addEventListener("click", (e) => e.stopPropagation());
+
+  // Pre-fill existing alert thresholds.
+  const existingAlert = getFavoriteAlerts(item.name);
+  const popBuyInput = alertPopover.querySelector<HTMLInputElement>(".card-alert-buy")!;
+  const popSellInput = alertPopover.querySelector<HTMLInputElement>(".card-alert-sell")!;
+  if (existingAlert?.targetBuy) popBuyInput.value = String(existingAlert.targetBuy);
+  if (existingAlert?.targetSell) popSellInput.value = String(existingAlert.targetSell);
+
+  /** Persist inline alert values. Auto-favourites the item if thresholds are set. */
+  const saveInlineAlerts = (): void => {
+    const bv = popBuyInput.value ? Number(popBuyInput.value) : undefined;
+    const sv = popSellInput.value ? Number(popSellInput.value) : undefined;
+    if ((bv || sv) && !getFavorites().has(item.name)) {
+      toggleFavorite(item.name);
+      favBtn.textContent = "\u2605";
+      card.classList.add("favorited");
+    }
+    setFavoriteAlerts(item.name, bv, sv);
+    // Update bell active state.
+    alertBtn.classList.toggle("alert-active", !!(bv || sv));
+  };
+  popBuyInput.addEventListener("change", saveInlineAlerts);
+  popSellInput.addEventListener("change", saveInlineAlerts);
+
+  // Bell button — toggles the inline alert popover.
+  const alertBtn = document.createElement("button");
+  alertBtn.className = "alert-btn";
+  alertBtn.textContent = "\uD83D\uDD14";
+  alertBtn.title = "Set price alerts";
+  // Show active state if thresholds already exist.
+  if (existingAlert?.targetBuy || existingAlert?.targetSell) {
+    alertBtn.classList.add("alert-active");
+  }
+  alertBtn.addEventListener("click", (e) => {
+    e.stopPropagation();
+    const isOpen = alertPopover.classList.toggle("open");
+    // Close any other open popovers in the same list.
+    if (isOpen) {
+      card.parentElement?.querySelectorAll(".card-alert-popover.open").forEach((el) => {
+        if (el !== alertPopover) el.classList.remove("open");
+      });
+    }
+  });
+
   // Group action buttons in a horizontal row.
   const actions = document.createElement("span");
   actions.className = "card-actions";
   actions.appendChild(popoutBtn);
   actions.appendChild(favBtn);
+  actions.appendChild(alertBtn);
+  // Graph button — opens the dedicated chart modal.
+  const graphBtn = document.createElement("button");
+  graphBtn.className = "graph-btn";
+  graphBtn.textContent = "\u2581\u2583\u2585";
+  graphBtn.title = "View price chart";
+  graphBtn.addEventListener("click", (e) => {
+    e.stopPropagation();
+    showGraphModal(item);
+  });
+  actions.appendChild(graphBtn);
   actions.appendChild(addFlipCardBtn);
   actions.appendChild(wikiLink);
   actions.appendChild(geLink);
@@ -1346,16 +1842,8 @@ function buildItemCard(item: RankedItem): HTMLElement {
     card.classList.toggle("expanded");
   });
 
-  // \u2500\u2500 Sparkline canvas (between header and detail) \u2500\u2500
-  const sparkCanvas = document.createElement("canvas");
-  sparkCanvas.className = "sparkline";
-  sparkCanvas.width = 100;
-  sparkCanvas.height = 30;
-  // Attach price data for post-render drawing.
-  (sparkCanvas as any).__priceHistory = item.priceHistory;
-
   card.appendChild(header);
-  card.appendChild(sparkCanvas);
+  card.appendChild(alertPopover);
   card.appendChild(detail);
   return card;
 }
@@ -1372,7 +1860,7 @@ let itemModal: HTMLElement | null = null;
  * .item-modal-backdrop
  *   .item-modal
  *     .item-modal-header  (sprite + name + close btn)
- *     .item-modal-body    (badges, sparkline, detail rows)
+ *     .item-modal-body    (badges, detail rows)
  * ```
  */
 function ensureModal(): HTMLElement {
@@ -1506,6 +1994,11 @@ function showItemModal(item: RankedItem): void {
     item.volumeSpikeMultiplier > 1.5
       ? `<span class="hype-badge">\uD83D\uDD25 ${item.volumeSpikeMultiplier}x Vol</span>`
       : "",
+    item.priceTrend === "Downtrend"
+      ? `<span class="trend-badge trend-downtrend" title="Price has dropped more than 5% over the last 7 days \u2014 potential falling knife.">\u26A0\uFE0F Crashing</span>`
+      : item.priceTrend === "Uptrend"
+        ? `<span class="trend-badge trend-uptrend" title="Price has risen more than 5% over the last 7 days \u2014 positive momentum.">\uD83D\uDCC8 Rising</span>`
+        : "",
   ].filter(Boolean).join("");
 
   const rows = [
@@ -1527,14 +2020,46 @@ function showItemModal(item: RankedItem): void {
 
   mBody.innerHTML =
     `<div class="item-modal-badges">${badgesHtml}</div>` +
-    `<canvas class="sparkline modal-sparkline" width="340" height="60"></canvas>` +
-    `<div class="item-modal-details">${rows}</div>`;
+    `<div class="item-modal-details">${rows}</div>` +
+    `<div class="alert-inputs">` +
+      `<h4 class="alert-inputs-title">\uD83D\uDD14 Price Alerts</h4>` +
+      `<div class="alert-row">` +
+        `<label for="modal-alert-buy">Alert if drops below</label>` +
+        `<input id="modal-alert-buy" type="number" min="0" placeholder="Buy target (gp)" />` +
+      `</div>` +
+      `<div class="alert-row">` +
+        `<label for="modal-alert-sell">Alert if rises above</label>` +
+        `<input id="modal-alert-sell" type="number" min="0" placeholder="Sell target (gp)" />` +
+      `</div>` +
+    `</div>`;
 
-  // Draw the sparkline.
-  const canvas = mBody.querySelector<HTMLCanvasElement>("canvas.modal-sparkline");
-  if (canvas && item.priceHistory.length >= 2) {
-    drawSparkline(canvas, item.priceHistory);
-  }
+  // ── Price alert inputs ──────────────────────────────────────────────────
+  const alertBuyInput = mBody.querySelector<HTMLInputElement>("#modal-alert-buy")!;
+  const alertSellInput = mBody.querySelector<HTMLInputElement>("#modal-alert-sell")!;
+
+  // Pre-fill with existing alert thresholds (if any).
+  const existing = getFavoriteAlerts(item.name);
+  if (existing?.targetBuy) alertBuyInput.value = String(existing.targetBuy);
+  if (existing?.targetSell) alertSellInput.value = String(existing.targetSell);
+
+  /** Persist alert values on change. Auto-favourites the item if thresholds are set. */
+  const saveAlertValues = (): void => {
+    const buyVal = alertBuyInput.value ? Number(alertBuyInput.value) : undefined;
+    const sellVal = alertSellInput.value ? Number(alertSellInput.value) : undefined;
+
+    // Setting an alert implicitly favourites the item.
+    if ((buyVal || sellVal) && !getFavorites().has(item.name)) {
+      toggleFavorite(item.name);
+      // Update the modal's favourite button.
+      const favBtn = itemModal?.querySelector(".modal-fav-btn");
+      if (favBtn) favBtn.textContent = "\u2605";
+    }
+
+    setFavoriteAlerts(item.name, buyVal, sellVal);
+  };
+
+  alertBuyInput.addEventListener("change", saveAlertValues);
+  alertSellInput.addEventListener("change", saveAlertValues);
 
   backdrop.classList.add("visible");
 }
@@ -1542,6 +2067,198 @@ function showItemModal(item: RankedItem): void {
 /** Hide the floating item detail modal. */
 function hideItemModal(): void {
   if (itemModal) itemModal.classList.remove("visible");
+}
+
+// \u2500\u2500\u2500 Graph Modal \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
+
+/** Lazily-created singleton graph modal container. */
+let graphModal: HTMLElement | null = null;
+
+/** Create (once) and return the reusable graph modal element. */
+function ensureGraphModal(): HTMLElement {
+  if (graphModal) return graphModal;
+
+  const backdrop = document.createElement("div");
+  backdrop.className = "graph-modal-backdrop";
+  backdrop.addEventListener("click", (e) => {
+    if (e.target === backdrop) hideGraphModal();
+  });
+
+  const modal = document.createElement("div");
+  modal.className = "graph-modal";
+
+  const mHeader = document.createElement("div");
+  mHeader.className = "graph-modal-header";
+  mHeader.id = "graph-modal-header";
+
+  const closeBtn = document.createElement("button");
+  closeBtn.className = "item-modal-close";
+  closeBtn.textContent = "\u2715";
+  closeBtn.addEventListener("click", hideGraphModal);
+  mHeader.appendChild(closeBtn);
+
+  const mBody = document.createElement("div");
+  mBody.className = "graph-modal-body";
+  mBody.id = "graph-modal-body";
+
+  modal.appendChild(mHeader);
+  modal.appendChild(mBody);
+  backdrop.appendChild(modal);
+  document.body.appendChild(backdrop);
+
+  graphModal = backdrop;
+  return backdrop;
+}
+
+/**
+ * Fetch 7-day price history for a single item from the Weird Gloop API.
+ * Returns chronological daily prices (excluding today) or an empty array on failure.
+ */
+async function fetchItemHistory(name: string): Promise<number[]> {
+  try {
+    const url = `https://api.weirdgloop.org/exchange/history/rs/last90d?name=${encodeURIComponent(name)}`;
+    const resp = await fetch(url, {
+      headers: {
+        "User-Agent": "RS3-GE-Analyzer-Alt1Plugin/1.0",
+        Accept: "application/json",
+      },
+    });
+    if (!resp.ok) return [];
+    const json = await resp.json() as Record<string, Array<{ timestamp: number; price: number }>>;
+    const entries = json[name];
+    if (!Array.isArray(entries)) return [];
+
+    const cutoff = new Date();
+    cutoff.setDate(cutoff.getDate() - 7);
+    const cutoffMs = cutoff.getTime();
+    const todayStr = new Date().toISOString().slice(0, 10);
+
+    const dayMap = new Map<string, number>();
+    for (const e of entries) {
+      if (e.timestamp < cutoffMs) continue;
+      const day = new Date(e.timestamp).toISOString().slice(0, 10);
+      if (day === todayStr) continue;
+      dayMap.set(day, e.price);
+    }
+    const sorted = [...dayMap.entries()].sort((a, b) => (a[0] < b[0] ? -1 : 1));
+    return sorted.map((d) => d[1]);
+  } catch {
+    return [];
+  }
+}
+
+/**
+ * Populate the graph modal with a specific item\u2019s price chart and
+ * momentum analytics, then show it.
+ *
+ * If the item has fewer than 2 data points, an on-demand API fetch is
+ * attempted before rendering to backfill the chart.
+ */
+async function showGraphModal(item: RankedItem): Promise<void> {
+  const backdrop = ensureGraphModal();
+  const mHeader = backdrop.querySelector("#graph-modal-header") as HTMLElement;
+  const mBody = backdrop.querySelector("#graph-modal-body") as HTMLElement;
+
+  // \u2500\u2500 Header \u2500\u2500
+  const closeBtn = mHeader.querySelector(".item-modal-close") as HTMLElement;
+  mHeader.innerHTML = "";
+
+  const img = document.createElement("img");
+  img.className = "item-sprite";
+  img.src = spriteUrl(item.itemId);
+  img.alt = item.name;
+  img.width = 36;
+  img.height = 32;
+  img.onerror = () => { img.style.display = "none"; };
+
+  const title = document.createElement("span");
+  title.className = "graph-modal-title";
+  title.textContent = `${item.name} \u2014 Price Chart`;
+
+  mHeader.appendChild(img);
+  mHeader.appendChild(title);
+  mHeader.appendChild(closeBtn);
+
+  // ── On-demand history fetch if data is sparse ──
+  if (item.priceHistory.length < 2) {
+    // Show a loading state immediately.
+    mBody.innerHTML = `<div style="text-align:center;padding:24px;color:#888;">Loading price history\u2026</div>`;
+    backdrop.classList.add("visible");
+
+    const fetched = await fetchItemHistory(item.name);
+    if (fetched.length > 0) {
+      // Rebuild priceHistory: historical days + today's price.
+      item.priceHistory = [...fetched, item.price];
+      // Re-classify trend.
+      if (item.priceHistory.length >= 2 && item.priceHistory[0] > 0) {
+        const pct = (item.price - item.priceHistory[0]) / item.priceHistory[0];
+        item.priceTrend = pct < -0.05 ? "Downtrend" : pct > 0.05 ? "Uptrend" : "Stable";
+      }
+    }
+  }
+
+  const hist = item.priceHistory;
+  const hasData = hist.length >= 2;
+
+  // Compute momentum stats.
+  const currentPrice = item.price;
+  const oldestPrice = hasData ? hist[0] : currentPrice;
+  const highPrice = hasData ? Math.max(...hist) : currentPrice;
+  const lowPrice = hasData ? Math.min(...hist) : currentPrice;
+  const pctChange = oldestPrice > 0 ? ((currentPrice - oldestPrice) / oldestPrice) * 100 : 0;
+  const absChange = currentPrice - oldestPrice;
+  const volatility = hasData ? ((highPrice - lowPrice) / lowPrice) * 100 : 0;
+
+  // Trend direction and colour.
+  const trendLabel = item.priceTrend;
+  const trendColour = trendLabel === "Uptrend" ? "var(--accent-green-bright, #4ec9b0)"
+    : trendLabel === "Downtrend" ? "var(--accent-red, #f44747)" : "var(--text-muted, #888)";
+  const trendIcon = trendLabel === "Uptrend" ? "\uD83D\uDCC8" : trendLabel === "Downtrend" ? "\u26A0\uFE0F" : "\u27A1\uFE0F";
+
+  mBody.innerHTML =
+    `<canvas class="graph-modal-canvas" width="480" height="180"></canvas>` +
+    `<div class="graph-stats">` +
+      `<div class="graph-stat-row">` +
+        `<span class="graph-stat-label">7-Day Trend</span>` +
+        `<span class="graph-stat-value" style="color:${trendColour}">${trendIcon} ${trendLabel}</span>` +
+      `</div>` +
+      `<div class="graph-stat-row">` +
+        `<span class="graph-stat-label">Change</span>` +
+        `<span class="graph-stat-value" style="color:${trendColour}">${absChange >= 0 ? "+" : ""}${formatGpShort(absChange)} gp (${pctChange >= 0 ? "+" : ""}${pctChange.toFixed(1)}%)</span>` +
+      `</div>` +
+      `<div class="graph-stat-row">` +
+        `<span class="graph-stat-label">Current Price</span>` +
+        `<span class="graph-stat-value">${currentPrice.toLocaleString("en-US")} gp</span>` +
+      `</div>` +
+      `<div class="graph-stat-row">` +
+        `<span class="graph-stat-label">7-Day High</span>` +
+        `<span class="graph-stat-value">${highPrice.toLocaleString("en-US")} gp</span>` +
+      `</div>` +
+      `<div class="graph-stat-row">` +
+        `<span class="graph-stat-label">7-Day Low</span>` +
+        `<span class="graph-stat-value">${lowPrice.toLocaleString("en-US")} gp</span>` +
+      `</div>` +
+      `<div class="graph-stat-row">` +
+        `<span class="graph-stat-label">Volatility</span>` +
+        `<span class="graph-stat-value">${volatility.toFixed(1)}%</span>` +
+      `</div>` +
+      `<div class="graph-stat-row">` +
+        `<span class="graph-stat-label">Data Points</span>` +
+        `<span class="graph-stat-value">${hist.length} day${hist.length !== 1 ? "s" : ""}</span>` +
+      `</div>` +
+    `</div>`;
+
+  // Draw the chart after the modal is in the DOM.
+  backdrop.classList.add("visible");
+  requestAnimationFrame(() => {
+    const canvas = mBody.querySelector<HTMLCanvasElement>(".graph-modal-canvas");
+    if (canvas) drawGraphChart(canvas, hist);
+  });
+}
+
+/** Hide the graph modal. */
+function hideGraphModal(): void {
+  if (graphModal) graphModal.classList.remove("visible");
 }
 
 /**
@@ -2459,6 +3176,9 @@ function resolveElements(): void {
     statAvgProfit: q("stat-avg-profit"),
     statAvgRoi: q("stat-avg-roi"),
     completedFlipsList: q("completed-flips-list"),
+    exportDataBtn: q<HTMLButtonElement>("export-data-btn"),
+    importDataBtn: q<HTMLButtonElement>("import-data-btn"),
+    importFileInput: q<HTMLInputElement>("import-file-input"),
   };
 }
 
