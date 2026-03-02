@@ -954,6 +954,26 @@ button:disabled {
   color: var(--text-muted);
 }
 
+/* \\u2500\\u2500 Price trend (momentum) badges \\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500 */
+
+.trend-badge {
+  font-size: 10px;
+  padding: 1px 6px;
+  border-radius: 3px;
+  white-space: nowrap;
+  font-weight: 600;
+}
+
+.trend-downtrend {
+  background: rgba(244, 71, 71, 0.18);
+  color: var(--accent-red);
+}
+
+.trend-uptrend {
+  background: rgba(39, 174, 96, 0.18);
+  color: var(--accent-green-bright);
+}
+
 @keyframes hype-pulse {
   0%, 100% { opacity: 1; }
   50%      { opacity: 0.6; }
@@ -1058,10 +1078,18 @@ button:disabled {
 .sparkline {
   display: block;
   width: 100%;
-  height: 30px;
+  height: 0;
   padding: 0 8px;
   box-sizing: border-box;
-  opacity: 0.85;
+  opacity: 0;
+  cursor: pointer;
+  overflow: hidden;
+  transition: height 0.2s ease, opacity 0.2s ease;
+}
+
+.market-card.expanded .sparkline {
+  height: 40px;
+  opacity: 1;
 }
 
 .item-sprite {
@@ -1411,6 +1439,9 @@ button:disabled {
   width: 100%;
   height: 60px;
   margin-bottom: 8px;
+  opacity: 1;
+  overflow: visible;
+  transition: none;
 }
 
 .item-modal-details {
@@ -1520,15 +1551,14 @@ button:disabled {
 }
 
 .market-items.tile .sparkline {
-  height: 20px;
-  padding: 0 4px;
+  height: 0;
 }
 
 /* ─ Expanded card tweaks (tile view) ─ */
 
 .market-items.tile .market-card.expanded .sparkline {
-  height: 40px;
-  padding: 0 10px;
+  height: 50px;
+  padding: 0 6px;
 }
 
 /* ── Hybrid view (compact grid, list-style rows) ──────────────────────────── */
@@ -1550,8 +1580,7 @@ button:disabled {
 }
 
 .market-items.hybrid .sparkline {
-  height: 22px;
-  padding: 0 6px;
+  height: 0;
 }
 
 .market-items.hybrid .flip-badges {
@@ -2370,9 +2399,9 @@ body[data-layout="sidebar"] #portfolio-view {
     gap: 5px;
   }
 
-  /* Slightly larger sparklines on cards. */
-  .sparkline {
-    height: 36px;
+  /* Slightly larger sparklines on cards when expanded. */
+  .market-card.expanded .sparkline {
+    height: 50px;
   }
 
   /* Advisor chat gets more comfortable padding. */
@@ -3755,7 +3784,9 @@ __webpack_require__.r(__webpack_exports__);
  *  5. **Slice**    — keep only the top-N items.
  *  6. **Format**   — serialise the result into a compact string for LLM context.
  *
- * All calculations are pure math on local data — no network calls.
+ * All calculations are pure math on local data — the only network call is a
+ * fallback fetch to the Weird Gloop historical API when the local IndexedDB
+ * price-history store has insufficient data for sparkline rendering.
  */
 /** Default analyser settings. */
 const DEFAULTS = {
@@ -3972,6 +4003,15 @@ class MarketAnalyzerService {
             // Price history sparkline data: historical prices + today.
             const histPrices = priceHistoryMap.get(record.name) ?? [];
             const priceHistory = [...histPrices, record.price];
+            // 7-day price momentum: classify trend based on overall % change.
+            let priceTrend = "Stable";
+            if (priceHistory.length >= 2 && priceHistory[0] > 0) {
+                const percentChange = (record.price - priceHistory[0]) / priceHistory[0];
+                if (percentChange < -0.05)
+                    priceTrend = "Downtrend";
+                else if (percentChange > 0.05)
+                    priceTrend = "Uptrend";
+            }
             // Trade velocity: qualitative speed tier based on hourly volume vs buy limit.
             const hourlyVolume = Math.floor(globalVol / 24);
             const safeBuyLimit = (limit != null && limit > 0) ? limit : 0;
@@ -4005,6 +4045,7 @@ class MarketAnalyzerService {
                 volumeSpikeMultiplier,
                 tradeVelocity,
                 priceHistory,
+                priceTrend,
             });
         }
         return result;
@@ -4060,7 +4101,11 @@ class MarketAnalyzerService {
     /**
      * Build a `Map<itemName, number[]>` of chronological daily prices
      * for sparkline rendering.  Each array contains one price per past day
-     * (does **not** include today \u2014 the caller appends the current price).
+     * (does **not** include today — the caller appends the current price).
+     *
+     * When the local IndexedDB history is sparse (most items have ≤ 1 day),
+     * the method falls back to the Weird Gloop `last90d` API to fetch
+     * real historical prices, extracting data for the last {@link days} days.
      *
      * @param days - Number of calendar days to look back.
      */
@@ -4088,11 +4133,91 @@ class MarketAnalyzerService {
                 entries.sort((a, b) => (a.day < b.day ? -1 : a.day > b.day ? 1 : 0));
                 map.set(name, entries.map((e) => e.price));
             }
+            // ── Sparse-data fallback: fetch from Weird Gloop API ──────────────
+            // If most items have ≤ 1 day of local history, pull from the API so
+            // sparklines can render immediately after install / cache clear.
+            const allItems = await this.cache.getAll();
+            const itemNames = allItems.map((r) => r.name);
+            const sparse = itemNames.length > 0 &&
+                itemNames.filter((n) => (map.get(n)?.length ?? 0) >= 2).length < itemNames.length * 0.3;
+            if (sparse && itemNames.length > 0) {
+                console.log("[MarketAnalyzer] Local price history is sparse — fetching from Weird Gloop API…");
+                const apiMap = await this.fetchAPIHistory(itemNames, days);
+                // Merge: API data fills in gaps; local data takes precedence when present.
+                for (const [name, prices] of apiMap) {
+                    if (!map.has(name) || (map.get(name).length < prices.length)) {
+                        map.set(name, prices);
+                    }
+                }
+            }
         }
         catch (err) {
             console.warn("[MarketAnalyzer] Could not build price history map.", err);
         }
         return map;
+    }
+    /**
+     * Fetch historical prices from the Weird Gloop `/exchange/history/rs/last90d`
+     * endpoint and extract daily closing prices for the last {@link days} days.
+     *
+     * Items are batched into groups of 50 (the historical endpoint returns
+     * significantly more data per item than `/latest`).  Individual batch
+     * failures are logged but do not reject the returned promise.
+     *
+     * @param itemNames - Canonical RS3 item names.
+     * @param days      - Number of recent days to extract from the 90-day window.
+     * @returns A `Map<itemName, number[]>` of chronological daily prices.
+     */
+    async fetchAPIHistory(itemNames, days) {
+        const result = new Map();
+        const BATCH = 50;
+        const cutoff = new Date();
+        cutoff.setDate(cutoff.getDate() - days);
+        const cutoffTs = Math.floor(cutoff.getTime() / 1000);
+        const todayStr = new Date().toISOString().slice(0, 10);
+        const batches = [];
+        for (let i = 0; i < itemNames.length; i += BATCH) {
+            batches.push(itemNames.slice(i, i + BATCH));
+        }
+        const settled = await Promise.allSettled(batches.map(async (batch) => {
+            const nameParam = batch.map((n) => encodeURIComponent(n)).join("|");
+            const url = `https://api.weirdgloop.org/exchange/history/rs/last90d?name=${nameParam}`;
+            const resp = await fetch(url, {
+                headers: {
+                    "User-Agent": "RS3-GE-Analyzer-Alt1Plugin/1.0",
+                    Accept: "application/json",
+                },
+            });
+            if (!resp.ok)
+                throw new Error(`HTTP ${resp.status}`);
+            return resp.json();
+        }));
+        for (const res of settled) {
+            if (res.status !== "fulfilled") {
+                console.warn("[MarketAnalyzer] Historical API batch failed:", res.reason);
+                continue;
+            }
+            for (const [name, entries] of Object.entries(res.value)) {
+                if (!Array.isArray(entries))
+                    continue;
+                // Group by day, keep last price per day, filter to recent window.
+                const dayMap = new Map();
+                for (const e of entries) {
+                    if (e.timestamp < cutoffTs)
+                        continue;
+                    const day = new Date(e.timestamp * 1000).toISOString().slice(0, 10);
+                    if (day === todayStr)
+                        continue; // caller appends today's price
+                    dayMap.set(day, e.price);
+                }
+                const sorted = [...dayMap.entries()].sort((a, b) => (a[0] < b[0] ? -1 : 1));
+                if (sorted.length > 0) {
+                    result.set(name, sorted.map((d) => d[1]));
+                }
+            }
+        }
+        console.log(`[MarketAnalyzer] API history fetched for ${result.size} items.`);
+        return result;
     }
     /**
      * Format a large gp value into a human-readable abbreviated string.
@@ -5907,18 +6032,42 @@ function spriteUrl(itemId) {
  * and evenly spaced across its width.  The line is green when the trend
  * is upward (last > first) and red when downward.
  *
+ * Handles edge cases gracefully:
+ * - **0 data points**: Renders a centred "No price history" placeholder.
+ * - **1 data point**: Renders a single dot at the vertical midpoint.
+ * - **≥ 2 data points**: Full sparkline.
+ *
  * @param canvas - The target `<canvas>` DOM element.
- * @param data   - Array of numeric values (≥ 2) in chronological order.
+ * @param data   - Array of numeric values in chronological order.
  */
 function drawSparkline(canvas, data) {
     const ctx = canvas.getContext("2d");
-    if (!ctx || data.length < 2)
+    if (!ctx)
         return;
     // Use the element's laid-out size so the drawing matches CSS sizing.
     const w = canvas.offsetWidth || canvas.width;
     const h = canvas.offsetHeight || canvas.height;
     canvas.width = w;
     canvas.height = h;
+    // ── No data: draw placeholder text ──
+    if (data.length === 0) {
+        const fontSize = Math.max(9, Math.round(h * 0.35));
+        ctx.font = `${fontSize}px "Segoe UI", sans-serif`;
+        ctx.fillStyle = "#888";
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.fillText("No price history", w / 2, h / 2);
+        return;
+    }
+    // ── Single data point: draw a dot ──
+    if (data.length === 1) {
+        ctx.fillStyle = "#888";
+        ctx.beginPath();
+        ctx.arc(w / 2, h / 2, Math.max(2, Math.round(h * 0.12)), 0, Math.PI * 2);
+        ctx.fill();
+        return;
+    }
+    // ── ≥ 2 data points: full sparkline ──
     const padding = 2; // tiny top/bottom breathing room
     const min = Math.min(...data);
     const max = Math.max(...data);
@@ -5962,9 +6111,8 @@ function renderMarketItems(items) {
     const canvases = els.marketItems.querySelectorAll("canvas.sparkline");
     canvases.forEach((canvas) => {
         const data = canvas.__priceHistory;
-        if (data && data.length >= 2) {
+        if (data)
             drawSparkline(canvas, data);
-        }
     });
 }
 // ─── Favourites Panel ────────────────────────────────────────────────────────
@@ -6005,9 +6153,8 @@ async function renderFavorites() {
     const canvases = els.favoritesItems.querySelectorAll("canvas.sparkline");
     canvases.forEach((canvas) => {
         const data = canvas.__priceHistory;
-        if (data && data.length >= 2) {
+        if (data)
             drawSparkline(canvas, data);
-        }
     });
 }
 /** Bind the collapse/expand toggle for the favourites section header. */
@@ -6069,9 +6216,8 @@ function renderSearchResults(items) {
     const canvases = els.searchResults.querySelectorAll("canvas.sparkline");
     canvases.forEach((canvas) => {
         const data = canvas.__priceHistory;
-        if (data && data.length >= 2) {
+        if (data)
             drawSparkline(canvas, data);
-        }
     });
 }
 /**
@@ -6152,6 +6298,21 @@ function buildItemCard(item) {
         hypeBadge.className = "hype-badge";
         hypeBadge.textContent = `\uD83D\uDD25 ${item.volumeSpikeMultiplier}x Vol`;
         flipWrap.appendChild(hypeBadge);
+    }
+    // Price trend badge (only for Uptrend / Downtrend — skip Stable).
+    if (item.priceTrend === "Downtrend") {
+        const trendBadge = document.createElement("span");
+        trendBadge.className = "trend-badge trend-downtrend";
+        trendBadge.textContent = "\u26A0\uFE0F Crashing";
+        trendBadge.title = "Price has dropped more than 5% over the last 7 days \u2014 potential falling knife.";
+        flipWrap.appendChild(trendBadge);
+    }
+    else if (item.priceTrend === "Uptrend") {
+        const trendBadge = document.createElement("span");
+        trendBadge.className = "trend-badge trend-uptrend";
+        trendBadge.textContent = "\uD83D\uDCC8 Rising";
+        trendBadge.title = "Price has risen more than 5% over the last 7 days \u2014 positive momentum.";
+        flipWrap.appendChild(trendBadge);
     }
     header.appendChild(flipWrap);
     // Popout button — opens the floating detail modal.
@@ -6289,15 +6450,31 @@ function buildItemCard(item) {
     ].join("");
     // Toggle inline expand on click (multiple cards can be expanded).
     header.addEventListener("click", () => {
-        card.classList.toggle("expanded");
+        const wasExpanded = card.classList.toggle("expanded");
+        // Redraw sparkline once the CSS height transition finishes.
+        if (wasExpanded) {
+            const onReady = () => {
+                sparkCanvas.removeEventListener("transitionend", onReady);
+                const data = sparkCanvas.__priceHistory;
+                if (data)
+                    drawSparkline(sparkCanvas, data);
+            };
+            sparkCanvas.addEventListener("transitionend", onReady);
+        }
     });
     // \u2500\u2500 Sparkline canvas (between header and detail) \u2500\u2500
     const sparkCanvas = document.createElement("canvas");
     sparkCanvas.className = "sparkline";
     sparkCanvas.width = 100;
     sparkCanvas.height = 30;
+    sparkCanvas.title = "Click to view details";
     // Attach price data for post-render drawing.
     sparkCanvas.__priceHistory = item.priceHistory;
+    // Click the sparkline to open the enlarged detail modal.
+    sparkCanvas.addEventListener("click", (e) => {
+        e.stopPropagation();
+        showItemModal(item);
+    });
     card.appendChild(header);
     card.appendChild(alertPopover);
     card.appendChild(sparkCanvas);
@@ -6431,6 +6608,11 @@ function showItemModal(item) {
         item.volumeSpikeMultiplier > 1.5
             ? `<span class="hype-badge">\uD83D\uDD25 ${item.volumeSpikeMultiplier}x Vol</span>`
             : "",
+        item.priceTrend === "Downtrend"
+            ? `<span class="trend-badge trend-downtrend" title="Price has dropped more than 5% over the last 7 days \u2014 potential falling knife.">\u26A0\uFE0F Crashing</span>`
+            : item.priceTrend === "Uptrend"
+                ? `<span class="trend-badge trend-uptrend" title="Price has risen more than 5% over the last 7 days \u2014 positive momentum.">\uD83D\uDCC8 Rising</span>`
+                : "",
     ].filter(Boolean).join("");
     const rows = [
         `<div class="detail-row"><span class="detail-label" title="${DETAIL_TIPS["GE Price"]}">${DETAIL_LABELS["GE Price"]}</span><span class="detail-value">${item.price.toLocaleString("en-US")} gp</span></div>`,
@@ -6463,9 +6645,9 @@ function showItemModal(item) {
             `<input id="modal-alert-sell" type="number" min="0" placeholder="Sell target (gp)" />` +
             `</div>` +
             `</div>`;
-    // Draw the sparkline.
+    // Draw the sparkline (handles 0, 1, or ≥ 2 data points gracefully).
     const canvas = mBody.querySelector("canvas.modal-sparkline");
-    if (canvas && item.priceHistory.length >= 2) {
+    if (canvas) {
         drawSparkline(canvas, item.priceHistory);
     }
     // ── Price alert inputs ──────────────────────────────────────────────────
