@@ -2,7 +2,7 @@
 
 ## Architecture
 
-RS3 Alt1 Toolkit plugin using a RAG pipeline: `Weird Gloop API → IndexedDB cache → deterministic filtering → LLM synthesis`. All services live in `src/services/` with a barrel re-export via `src/services/index.ts`. The UI layer (`src/uiService.ts`) is the **only** file that touches the DOM — all services are UI-agnostic. Entry point `src/index.ts` is a thin orchestrator (~50 lines).
+RS3 Alt1 Toolkit plugin using a RAG pipeline: `Weird Gloop API → IndexedDB cache → deterministic filtering → LLM synthesis`. All services live in `src/services/` with a barrel re-export via `src/services/index.ts`. The UI layer (`src/uiService.ts`) is the **only** file that touches the DOM — all services are UI-agnostic. Entry point `src/index.ts` is a thin orchestrator (~80 lines) with startup overlay + step counter.
 
 ## Hard Constraints
 
@@ -47,6 +47,8 @@ npx serve dist --listen 8080   # local dev server
 - **Barrel imports**: Always import services/types from `./services` (the barrel), not from individual files like `./services/types`
 - **`HistoricalPriceRecord`** is re-exported from the barrel (`services/index.ts`) — use it in uiService for typed cache reads
 - **Deep-history scan checkbox**: `#deep-history-checkbox` next to the scan button; persisted in `ge-analyzer:deep-history`. When checked, `runFullMarketScan(..., deepHistory=true)` fetches 90-day history instead of 30-day per batch (~3–5× slower). One-time warning toast on enable.
+- **TTL-cached scoring maps**: `MarketAnalyzerService.getOrBuildMaps(days)` caches `avgVolumeMap` and `priceHistoryMap` in memory with a 10-minute TTL. All three public methods (`getTopItems`, `searchItems`, `getItemsByNames`) use this cache — maps are only rebuilt from IndexedDB when stale. `invalidateMapCache()` exists for manual reset, but is rarely needed since data-update paths (scan, reload, retry) construct a new service instance.
+- **Startup step counter**: `index.ts` shows a 5-step counter in the startup overlay ("Step 1 of 5"). Steps: Loading market data → Ranking top items → Loading favourites → Fetching item catalogue → Pre-fetching wiki data. `initUI` receives an `onStatus` callback to drive steps 2–5.
 - **Rate-limit retry & adaptive backoff**: `WeirdGloopService.fetchWithRetry()` retries 429s and network errors with exponential backoff (MAX_RETRIES=4, BACKOFF_BASE_MS=2 000 ms). `fetchLatestPrices` dispatches batches **sequentially** (not concurrently) with 300 ms inter-batch pauses. History fetches use **pipe-delimited batched requests** of 50 items each, dispatched sequentially with HISTORY_GROUP_DELAY_MS=1 000 ms between batches (previously individual per-item requests). `runFullMarketScan` uses 1 500 ms inter-batch delay with adaptive backoff: consecutive empty batches double the delay up to a 30 s ceiling; delay resets to baseline on a successful batch.
 
 ## File Roles
@@ -57,7 +59,7 @@ npx serve dist --listen 8080   # local dev server
 | `services/types.ts` | Every shared interface + `LLM_PROVIDERS` constant |
 | `services/coreKnowledge.ts` | Static RS3 economic rules (GE tax, buy limits, margin checking, high alch) |
 | `services/llmService.ts` | OpenAI-compatible chat-completion client; builds system + user prompt |
-| `services/marketAnalyzerService.ts` | Score → filter → rank → format. Includes trade velocity scoring, 7-day price momentum classification, and sparse-history fallback to Weird Gloop `last90d` API for chart data. Sparse fallback delegates to `WeirdGloopService.fetchHistoricalPrices` (batched, pipe-delimited) and is capped at 500 items to avoid rate-limit avalanche after full scans. |
+| `services/marketAnalyzerService.ts` | Score → filter → rank → format. Includes trade velocity scoring, 7-day price momentum classification, and sparse-history fallback to Weird Gloop `last90d` API for chart data. Sparse fallback delegates to `WeirdGloopService.fetchHistoricalPrices` (batched, pipe-delimited) and is capped at 500 items. TTL-cached `avgVolumeMap`/`priceHistoryMap` (10-min) avoids redundant IndexedDB reads on UI refresh. |
 | `services/initDataPipeline.ts` | Startup orchestrator + `SEED_ITEMS` list (~100 RS3 items). `runFullMarketScan` uses adaptive inter-batch backoff (1.5 s baseline, 30 s ceiling) |
 | `services/portfolioService.ts` | Active flip tracker + completed flip history with P&L stats (localStorage) |
 | `services/weirdGloopService.ts` | Weird Gloop RS3 GE API client — batched sequential fetching with `fetchWithRetry()` exponential backoff (429 / network errors) |
@@ -66,7 +68,7 @@ npx serve dist --listen 8080   # local dev server
 
 ## UI Layout (index.html, top → bottom)
 
-0. `#startup-overlay` — full-area spinner + status text (auto-removed after boot completes)
+0. `#startup-overlay` — full-area spinner + step counter ("Step 1 of 5") + status text (auto-removed after boot completes)
 1. `#background-sync-progress` — scan progress bar (hidden by default, shown during full market scan)
 2. `#error-banner` — dismissible error bar with retry (hidden by default)
 3. `#market-filters` — volume / price dropdowns + refresh button

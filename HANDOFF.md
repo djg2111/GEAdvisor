@@ -142,9 +142,13 @@ Called once at startup from `index.ts`:
 
 ### 4.4 Market Analyzer Service (`marketAnalyzerService.ts`)
 
-Pure math on local data with one network fallback — when the local IndexedDB price-history store is sparse (< 30% of items have ≥ 2 days), `buildPriceHistoryMap()` delegates to `WeirdGloopService.fetchHistoricalPrices` (pipe-delimited batched requests of 50, with 1 000 ms pauses) and persists results to IndexedDB. Capped at 500 items to avoid rate-limit avalanche after full scans:
+Pure math on local data with one network fallback — when the local IndexedDB price-history store is sparse (< 30% of items have ≥ 2 days), `buildPriceHistoryMap()` delegates to `WeirdGloopService.fetchHistoricalPrices` (pipe-delimited batched requests of 50, with 1 000 ms pauses) and persists results to IndexedDB. Capped at 500 items to avoid rate-limit avalanche after full scans.
+
+**TTL-cached scoring maps**: `getOrBuildMaps(days)` maintains in-memory caches of `avgVolumeMap` and `priceHistoryMap` with a 10-minute TTL (`MAP_CACHE_TTL_MS`). All three public entry points (`getTopItems`, `searchItems`, `getItemsByNames`) call `getOrBuildMaps(30)` instead of rebuilding maps from IndexedDB each time. `invalidateMapCache()` clears both maps manually; in practice this is rarely needed since all major data-update paths (full scan, force reload, retry) construct a new `MarketAnalyzerService` instance.
+
+Pipeline:
 1. Reads all cached records from `CacheService.getAll()`.
-2. Builds 7-day average volume map and price history map from the `price-history` store.
+2. Builds 7-day average volume map and price history map from the `price-history` store (or returns cached versions if within TTL).
 3. Scores each item via `scoreAndFilter()`:
    - `tradedValue = price × volume`
    - `recBuyPrice = floor(price × 0.99)` — 1% below market (realistic instant-buy entry)
@@ -164,6 +168,8 @@ Pure math on local data with one network fallback — when the local IndexedDB p
 - `getTopItems(overrides?)` — full pipeline with optional `Partial<MarketAnalyzerConfig>` runtime filter overrides.
 - `searchItems(query)` — filters cache by name substring, scores with no vol/price filters, returns top 50.
 - `getItemsByNames(names: Set<string>)` — looks up specific items by exact name set, used by the favourites panel.
+- `getOrBuildMaps(days)` — returns cached `avgVolumeMap` + `priceHistoryMap` if within 10-min TTL, otherwise rebuilds from IndexedDB.
+- `invalidateMapCache()` — clears cached maps (auto-reset when a new instance is constructed).
 - `formatForLLM(items)` — produces a numbered multi-line string with K/M/B/T abbreviations for LLM context injection.
 
 ### 4.5 Wiki Service (`wikiService.ts`)
@@ -363,11 +369,13 @@ All DOM manipulation isolated here — services remain UI-agnostic. ~2480 lines.
 
 ### 4.11 Entry Point (`index.ts`)
 
-Lean orchestrator (~50 lines):
+Lean orchestrator (~80 lines) with startup overlay management:
 1. Imports `alt1`, static assets (`appconfig.json`, `icon.png`), `style.css`.
 2. Detects `window.alt1` — if present, calls `alt1.identifyAppUrl()`; if absent, shows "add app" link.
-3. Calls `await initDataPipeline()`.
-4. Calls `await initUI()`.
+3. Shows `#startup-overlay` and calls `setStartupStatus(msg, step?)` to update status + step counter (e.g. "Step 1 of 5").
+4. Calls `await initDataPipeline()` (Step 1/5: "Loading market data…").
+5. Calls `await initUI(onStatus)` — `onStatus` callback drives Steps 2–5 (Ranking → Favourites → Catalogue → Wiki).
+6. `dismissOverlay()` fades and removes the overlay after boot completes.
 
 ### 4.12 HTML Structure (`index.html`)
 
@@ -548,7 +556,10 @@ Everything below is **complete and verified** (builds with 0 errors):
 - [x] Trade velocity scoring (Insta-Flip / Active / Slow / Very Slow badges with tooltips)
 - [x] Price momentum / trend classification (Uptrend / Downtrend / Stable based on 7-day % change, with falling-knife warning badges)
 - [x] Dedicated graph modal (📊 button on cards → full chart + momentum stats: trend, % change, high/low, volatility, data points) — with **on-demand cache-first history** (`ensureItemHistory`)
-- [x] Manual history refresh fallback — graph modal shows "Insufficient history • Refresh" button when < 7 data points (March 2026)- [x] Startup loading overlay — spinner + status text (“Loading market data…” / “Analysing markets…”) covers `#app` until boot completes, fades out on success (March 2026)- [x] Wiki service (two-step search → extract guide fetching + fallback to base item page + Cargo buy-limit API)
+- [x] Manual history refresh fallback — graph modal shows "Insufficient history • Refresh" button when < 7 data points (March 2026)
+- [x] Startup loading overlay — spinner + step counter ("Step 1 of 5") + status text covers `#app` until boot completes, fades out on success (March 2026)
+- [x] TTL-cached scoring maps — `getOrBuildMaps()` caches `avgVolumeMap` and `priceHistoryMap` in memory with 10-minute TTL; avoids rebuilding from IndexedDB on UI refresh (March 2026)
+- [x] Wiki service (two-step search → extract guide fetching + fallback to base item page + Cargo buy-limit API)
 - [x] LLM service (multi-provider, multi-turn chat, strict anti-hallucination + economic rules prompt)
 - [x] Core knowledge base (RS3 economic rules: GE tax, buy limits, margin checking, high alch)
 - [x] LLM provider selection UI (6 providers: Groq, OpenAI, OpenRouter, Together AI, Mistral AI, Custom)
