@@ -82,8 +82,8 @@ alt1minimal/
     ├── icon.png               # App icon (asset/resource)
     ├── index.html             # Full UI: settings, tabbed layout (market / advisor / portfolio), search, favourites, filters
     ├── index.ts               # Lean entry point: alt1 detection → initDataPipeline() → initUI(), startup loading overlay
-    ├── style.css              # Three themes (Classic Dark, OSRS Brown, RS3 Modern Blue), flexbox, cards, modals, graph modal, toasts, inline alert popovers, data-mgmt, responsive desktop breakpoint (~2440 lines)
-    ├── uiService.ts           # All DOM logic: settings, market render, search, favourites, portfolio, chat RAG, error recovery, price alerts, data export/import, CSV export, sortable flips table (~3100 lines)
+    ├── style.css              # Three themes (Classic Dark, OSRS Brown, RS3 Modern Blue), flexbox, cards, unified analytics modal, toasts, inline alert popovers, data-mgmt, compact-tiles toggle, responsive desktop breakpoint (~3060 lines)
+    ├── uiService.ts           # All DOM logic: settings, market render, search, favourites, portfolio, chat RAG, error recovery, price alerts, data export/import, CSV export, sortable flips table, unified analytics modal (~4265 lines)
     └── services/
         ├── index.ts               # Barrel re-export of all services + types + constants
         ├── types.ts               # All shared TypeScript interfaces + LLM_PROVIDERS preset array
@@ -94,7 +94,7 @@ alt1minimal/
         ├── wikiService.ts         # RS3 Wiki MediaWiki API client + Cargo buy-limit API
         ├── llmService.ts          # OpenAI-compatible chat-completion client + anti-hallucination + economic rules prompt
         ├── portfolioService.ts    # Active flip tracker with localStorage persistence
-        └── initDataPipeline.ts    # Orchestrator: open cache → check stale → fetch → insert → return. Also fetchGECatalogue()
+        └── initDataPipeline.ts    # Orchestrator: open cache → check stale → fetch → insert → health checks → return. Also fetchGECatalogue()
 ```
 
 ---
@@ -107,7 +107,9 @@ Called once at startup from `index.ts`:
 1. Opens IndexedDB (`ge-analyzer-cache` database, version 2).
 2. Checks staleness via cursor on `fetchedAt` index descending — if newest record > 24h old, cache is stale.
 3. If stale: fetches ~100 curated seed items from the Weird Gloop API → enriches with buy limits from the RS Wiki Cargo API → bulk-inserts into IndexedDB (both `prices` and `price-history` stores).
-4. Returns all cached `StoredPriceRecord[]`.
+4. **Health check A** (runs on every startup): If >50% of cached records are missing `highAlch` or `buyLimit`, re-enriches them via `WikiService` and persists via `bulkInsert`.
+5. **Health check B** (runs on every startup): If <30% of cached items have ≥2 days of price history, re-seeds history via `WeirdGloopService.fetchHistoricalPrices` and persists via `bulkInsertHistory`.
+6. Re-reads all cached records after health checks, then returns `StoredPriceRecord[]`.
 
 **Seed items** (~100): Curated list of heavily-traded RS3 items including rares, skilling supplies, potions, runes, PvM drops, summoning materials, and alchables. Defined as `SEED_ITEMS` array in `initDataPipeline.ts`.
 
@@ -257,7 +259,7 @@ All DOM manipulation isolated here — services remain UI-agnostic. ~2480 lines.
 `initUI()` flow:
 1. Resolves all DOM elements by ID (~50 refs, throws if missing).
 2. Populates provider dropdown from `LLM_PROVIDERS`.
-3. Restores all settings from `localStorage` (provider, model, endpoint, API key, view mode, layout).
+3. Restores all settings from `localStorage` (provider, model, endpoint, API key, view mode, compact-tiles, layout).
 4. Binds all events: settings, chat, view toggle, market filters, force reload, layout toggle, tab navigation, clear chat, portfolio, favourites collapse, Top 20 collapse.
 5. Creates `CacheService` + `MarketAnalyzerService` + `WikiService` + `PortfolioService` singletons.
 6. Runs `refreshMarketPanel()` → renders market items in the current view mode.
@@ -273,30 +275,33 @@ All DOM manipulation isolated here — services remain UI-agnostic. ~2480 lines.
 - **Sidebar**: All three sections visible side-by-side.
 
 **Market panel rendering**:
-- Three **view modes**: List (☰), Tile (▦), Hybrid (⊞) — toggled via buttons, persisted in localStorage (`ge-analyzer:view-mode`).
+- Three **view modes**: List (☰), Tile (▦), Hybrid (⊞) — toggled via buttons, persisted in localStorage (`ge-analyzer:view-mode`). An optional **Compact Tiles** checkbox (`ge-analyzer:compact-tiles`) hides predictive badges in tile/hybrid views for cleaner scanning.
 - `setViewMode(mode)` — updates active button styling and CSS class on market-items, search-results, and favourites-items containers.
 - `buildItemCard(item)` — creates a market card element with:
   - Jagex sprite, item name, price
   - Flip recommendation badges: Buy ≤, Sell ≥, profit/ea
   - Trade velocity badge (Insta-Flip / Active / Slow / Very Slow) with explanatory tooltip
   - Hype badge (🔥 Nx Vol) when volume spike > 1.5×
-  - **Predictive analytics badges** (March 2026): EMA trend (↑/↓ % vs 30-day EMA), predicted 24h price change (linear regression), daily volatility %. Shown in a `.predictive-badges` wrapper after the momentum badges.
-  - **Graph button** (📊) — opens the dedicated graph modal with an enlarged area chart, momentum stats, and an **inline range selector** (7/30/90 days) that syncs with the global `#history-range-select`. Uses **on-demand history** (`ensureItemHistory`): checks IndexedDB cache first, fetches from API if < 7 data points, persists via `bulkInsertHistory`, then renders.
+  - **Predictive analytics badges** (March 2026): EMA trend (↑/↓ % vs 30-day EMA), predicted 24h price change (linear regression), daily volatility %. Shown in a `.predictive-badges` wrapper after the momentum badges. Hidden via `.compact-hidden` in tile/hybrid view when compact mode is enabled; always visible in list view.
+  - **Analytics button** (↗) — opens the unified analytics modal combining item details (badges, recommendations, alerts, actions) with an interactive price chart, trend stats, and an **inline range selector** (7/30/90 days) that syncs with the global `#history-range-select`. Uses **on-demand history** (`ensureItemHistory`): checks IndexedDB cache first, fetches from API if < 7 data points, persists via `bulkInsertHistory`, then renders.
   - External links: Wiki and GE Database
-  - Expandable detail panel (12 rows with tooltips: GE price, rec buy/sell, flip profit, volumes, buy limit, capital, tax gap, margin)
-  - **Action button group** (`.card-actions`): Popout (↗), Favourite (☆/★), Alert (🔔), Graph (📊), Quick-add to portfolio (+)
+  - Expandable detail panel (13 rows with tooltips: GE price, rec buy/sell, flip profit, high alch, tax gap, margin, volumes, buy limit, capital, volume spike)
+  - **Action button group** (`.card-actions`): Analytics (↗), Favourite (☆/★), Alert (🔔), Quick-add to portfolio (+), Wiki, GE
 - Multiple cards can be expanded simultaneously.
-- Sprites loaded from `https://secure.runescape.com/m=itemdb_rs/obj_sprite.gif?id={itemId}`.
+- Sprites loaded from `https://secure.runescape.com/m=itemdb_rs/obj_sprite.gif?id={itemId}`. Each sprite `<img>` has a `title` tooltip showing the item ID.
 
-**Floating item detail modal**:
-- `showItemModal(item)` — creates a centred modal overlay with backdrop.
-- Contains: sprite, name, price, favourite button (★), quick-add button (+), close button (✕), badges, full detail rows, **price alert inputs** (buy/sell thresholds).
-- Backdrop click or ✕ button closes.
-- Lazy singleton — created once, reused for all items.
+**Unified analytics modal** (March 2026):
+- `showAnalyticsModal(item)` — opens a single scrollable centred overlay combining item details and interactive price chart.
+- Replaces the old separate `showItemModal` + `showGraphModal` pair (both deprecated but retained in code).
+- Contains: sprite (48×42, title tooltip with item ID), name (h2), current price, close button (✕), badges (velocity, hype, trend), action buttons (favourite, quick-add, Wiki, GE links), detail rows reordered as flip/profit metrics first then volume/liquidity metrics (includes High Alch value, always-visible Volume Spike showing "Normal" when ≤1.5×, and a "Predictive Analytics" sub-section with 30d EMA, Daily Volatility σ%, LR Slope, Predicted Price), **price alert inputs** (buy/sell thresholds), interactive price chart with range selector (7/30/90 days), stats grid (trend, change, high, low, volatility, data points), and manual refresh button for sparse history.
+- Lazy singleton — created once via `ensureAnalyticsModal()`, reused for all items.
+- Closes on backdrop click, ✕ button, or Escape key.
+- Keyboard accessible: `role="dialog"`, `aria-modal="true"`, focus trapped to close button on open.
+- Responsive: `90vw` width (max 920 px, min 320 px), two-column detail grid at ≥ 600 px, reduced padding/font on mobile.
 
 **Price alert system**:
 - **Inline card popover**: Each card has a 🔔 bell button in `.card-actions` that toggles a `.card-alert-popover` with compact Buy ≤ / Sell ≥ number inputs. Only one popover is open at a time per item list. Bell glows gold (`.alert-active`) when thresholds are set.
-- **Modal inputs**: Two number inputs in the item detail modal ("Alert if drops below" / "Alert if rises above") — same data, just a larger editing surface.
+- **Modal inputs**: Two number inputs in the unified analytics modal ("Alert if drops below" / "Alert if rises above") — same data, just a larger editing surface.
 - Values are saved to the `FavoriteItem.targetBuy` / `targetSell` fields (setting an alert auto-favourites the item).
 - `checkPriceAlerts(items)` runs on every `refreshMarketPanel()` against all cached items.
 - Alerts fire both a DOM toast (`#toast-container`, fixed top-right, auto-dismiss after 6 s) and a native browser `Notification` (if permission granted).
@@ -307,7 +312,7 @@ All DOM manipulation isolated here — services remain UI-agnostic. ~2480 lines.
 - Persisted as a JSON array of `FavoriteItem` objects in localStorage (`ge-analyzer:favorites`). Each entry has `name` and optional `targetBuy` / `targetSell` alert thresholds.
 - **Legacy migration**: Old `string[]` format auto-converts to `FavoriteItem[]` on first load via `loadFavorites()`.
 - `getFavorites()` returns a `Set<string>` of names for quick membership checks. `toggleFavorite(name)` / `setFavoriteAlerts(name, targetBuy?, targetSell?)` modify the underlying array.
-- Star button (☆/★) on every card header and in the modal header.
+- Star button (☆/★) on every card header and in the analytics modal header.
 - Favourited cards get a `.favorited` class with a gold left border.
 - **Favourites panel** (`#favorites-section`): appears between the search bar and Top 20, auto-hides when empty. Collapsible via ▾/▸ button in the header. Has its own sort dropdown (`#favorites-sort-select`) persisted to `ge-analyzer:fav-sort`.
 - `renderFavorites()` — calls `analyzer.getItemsByNames(favNames)`, sorts by the favourites sort dropdown, renders cards into `#favorites-items` container. Re-renders on every favourite toggle.
@@ -319,7 +324,7 @@ All DOM manipulation isolated here — services remain UI-agnostic. ~2480 lines.
 - Uses `suppressAutocomplete` flag to prevent the portfolio search dropdown from opening during programmatic form fill. Resets via `requestAnimationFrame`.
 
 **Full GE catalogue search** (`#search-section`):
-- Search input at the top of the market view with a per-section sort dropdown (`#search-sort-select`) and view toggle buttons (☰/▦/⊞). Debounced 300ms.
+- Search input at the top of the market view with a per-section sort dropdown (`#search-sort-select`), view toggle buttons (☰/▦/⊞), and compact-tiles checkbox. Debounced 300ms.
 - Searches the full ~7,000 item GE catalogue (`Module:GEIDs/data.json`) client-side.
 - Items not in cache: fetches prices from Weird Gloop API, buy limits from wiki Cargo API, enriches and inserts into IndexedDB — then scores and renders.
 - Results render into `#search-results` (separate container above Top 20, never replaces it).
@@ -396,7 +401,7 @@ Lean orchestrator (~80 lines) with startup overlay management:
       - `#error-banner` — dismissible error banner with retry button (hidden by default).
       - `#market-filters` — volume / price dropdowns + refresh button (above the search bar).
       - `#volume-custom-group` and `#budget-custom-group` — themed slider controls (hidden by default).
-      - `#search-section` — search input + `#search-sort-select` + view toggle buttons (☰/▦/⊞) + loading indicator + `#search-results`.
+      - `#search-section` — search input + `#search-sort-select` + view toggle buttons (☰/▦/⊞) + compact-tiles checkbox + loading indicator + `#search-results`.
       - `#favorites-section` (`.favorites-section`) — header with ★ Favourites title + `#favorites-sort-select` + collapse button, `#favorites-items` container.
       - `.top20-section` wrapper:
         - `#market-header` — "Top 20 Markets" h2 + `.market-header-actions` (`#full-market-scan-btn` + `#deep-history-checkbox` + `#top20-sort-select` + collapse ▾ button).
@@ -420,15 +425,16 @@ Lean orchestrator (~80 lines) with startup overlay management:
 - **Chat panel**: `flex: 1 1 0`, `min-height: 120px`.
 - **Market cards**: `.market-card` base with `.market-card-header` (flex, wrap, gap), expandable `.market-card-detail` (max-height transition).
   - **List view**: Full-width stacked cards.
-  - **Tile view**: CSS grid `repeat(auto-fill, minmax(130px, 1fr))`. Column flex-direction on header. Compact badge/sprite sizes.
-  - **Hybrid view**: CSS grid `repeat(auto-fill, minmax(200px, 1fr))`.
-- **Card action buttons** (`.card-actions`): Horizontal flex row containing popout (`.popout-btn`), favourite (`.fav-btn`), alert (`.alert-btn`), graph (`.graph-btn`), quick-add (`.quick-add-btn`). Always stays horizontal even in tile view's column layout.
+  - **Tile view**: CSS grid `repeat(auto-fill, minmax(130px, 1fr))`. Column flex-direction on header. Compact badge/sprite sizes. Predictive badges hidden when compact mode is enabled.
+  - **Hybrid view**: CSS grid `repeat(auto-fill, minmax(200px, 1fr))`. Predictive badges hidden when compact mode is enabled.
+- **Card action buttons** (`.card-actions`): Horizontal flex row containing analytics (`.analytics-btn`), favourite (`.fav-btn`), alert (`.alert-btn`), quick-add (`.quick-add-btn`). Always stays horizontal even in tile view's column layout.
 - **Favourite styling**: `.fav-btn` gold on hover (`#f0c040`), `.market-card.favorited` gets gold left border. `.fav-btn` uses scale(1.15) on hover.
 - **Quick-add button**: `.quick-add-btn` teal on hover (`#4ec9b0`).
 - **Favourites section**: `.favorites-section` with border, rounded corners, dark header (`#252526`), gold ★ title.
 - **Top 20 section**: `.top20-section` with matching border/rounded styling. `#market-header` gets dark header background when inside the section.
-- **Graph modal**: `.graph-modal-backdrop` with centred `.graph-modal` (max 520px). Header with sprite + title + close button. Body contains a `.graph-loading-msg` placeholder (dynamic text: "Checking cached history…" → "Fetching price history…"), a large `<canvas class="graph-modal-canvas">` (480×140) drawn via `drawGraphChart()`, a `.graph-history-status` strip (hidden by default, shown via `.visible` class when < 7 data points — contains "Insufficient history" text and a `.refresh-history-btn` button that calls `ensureItemHistory()` to manually fetch missing data), followed by `.graph-stats` — a column of `.graph-stat-row` elements showing N-Day Trend (with colour + icon), Change (absolute + percentage), Current Price, N-Day High, N-Day Low, Volatility %, and Data Points count. Lazy singleton pattern (`ensureGraphModal()`). History is loaded via `ensureItemHistory()` (cache-first, API fallback).
-- **Floating modal**: `.item-modal-backdrop` with centred `.item-modal` (max 400px, slide-in animation `modal-in`).
+- **Unified analytics modal** (March 2026): `.analytics-modal-backdrop` with centred `.analytics-modal` (90vw, max 920px, min 320px). Header with sprite (48×42, title tooltip with item ID), name (h2), current price, close button (✕). Scrollable `.analytics-content` body contains: `.analytics-badges` (velocity, hype, trend), `.analytics-actions` (favourite, quick-add, Wiki, GE), `.analytics-details-grid` (1fr, becomes 2-col at ≥ 600px; detail rows reordered: flip/profit first, then volume/liquidity; includes High Alch, always-visible Volume Spike, and "Predictive Analytics" sub-section with 30d EMA, Daily Volatility σ%, LR Slope, Predicted Price), alert inputs section, `.analytics-graph-section` with `.analytics-range-row` (7/30/90 days select), large `<canvas>` (480×140) via `drawGraphChart()`, `.analytics-stats-grid` (auto-fit minmax 140px) of `.analytics-stat-card` elements (trend, change, high, low, volatility, data points), and `.graph-history-status` strip with manual refresh button for sparse data. Lazy singleton (`ensureAnalyticsModal()`). Closes on backdrop click, ✕, or Escape. Responsive: reduced padding/font at ≤ 600px.
+- **Floating modal** _(deprecated)_: `.item-modal-backdrop` / `.item-modal` — retained in CSS for backwards compat but no longer created by any active code path.
+- **Graph modal** _(deprecated)_: `.graph-modal-backdrop` / `.graph-modal` — retained in CSS for backwards compat but no longer created by any active code path.
 - **Flip badges**: `.flip-badges` with flex-wrap. `.buy-badge`, `.sell-badge`, `.profit-badge`, `.hype-badge`. Responsive wrapping with `min-width: 60px` on `.item-name`.
 - **Portfolio**: `.portfolio-form`, `.autocomplete-wrap`, `.flip-card` with countdown timer styling, `.flip-card-actions` horizontal button group (✓ + ✕).
 - **Portfolio sub-nav**: `.portfolio-sub-nav` / `.portfolio-sub-btn` tab-style toggle with blue active border.
@@ -437,7 +443,7 @@ Lean orchestrator (~80 lines) with startup overlay management:
 - **Hype indicators**: `.market-card.hype` border glow, `.hype-badge` pulse animation.
 - **Trade velocity badges**: `.velocity-badge` with colour variants (`.velocity-insta`, `.velocity-active`, `.velocity-slow`, `.velocity-veryslow`) and explanatory `title` tooltips.
 - **Price trend badges**: `.trend-badge` with `.trend-downtrend` (red, "⚠️ Crashing") and `.trend-uptrend` (green, "📈 Rising"). Only shown for non-Stable trends. Renders on both card and modal badges.
-- **External links**: `.ext-link` / `.wiki-link` / `.ge-link` on cards and in the detail modal — open RS Wiki and GE Database pages.
+- **External links**: `.ext-link` / `.wiki-link` / `.ge-link` on cards and in the analytics modal — open RS Wiki and GE Database pages.
 - **Per-section sort selects**: `.section-sort-select` compact dropdown (10 px) in search section, Top 20 header (`.market-header-actions`), and favourites header (`.favorites-header-actions`).
 - **Slider theming**: WebKit (`::-webkit-slider-runnable-track`, `::-webkit-slider-thumb`) and Firefox (`::-moz-range-track`, `::-moz-range-thumb`) pseudo-elements styled via `--border-input` / `--accent-primary` custom properties. Hover and focus states included.
 - **Error banner**: `#error-banner` — fixed top bar with dismiss and retry buttons (hidden by default, shown via JS).
@@ -469,6 +475,7 @@ Lean orchestrator (~80 lines) with startup overlay management:
 | `ge-analyzer:portfolio` | Serialised `ActiveFlip[]` portfolio data |
 | `ge-analyzer:portfolio-history` | Serialised `CompletedFlip[]` completed flip history |
 | `ge-analyzer:deep-history` | Deep-history checkbox state (`"true"` / `"false"`, default false) |
+| `ge-analyzer:compact-tiles` | Compact-tiles checkbox state (`"true"` / `"false"`, default false) — hides predictive badges in tile/hybrid views |
 
 ---
 
@@ -482,7 +489,7 @@ All defined in `src/services/types.ts`:
 | `WeirdGloopLatestResponse` | `{ [itemName: string]: WeirdGloopPriceRecord }` |
 | `StoredPriceRecord` | Extends API record with `name` (keyPath) + `fetchedAt` (TTL) |
 | `HistoricalPriceRecord` | Extends `StoredPriceRecord` with `day` (ISO date, compound key with `name`) |
-| `RankedItem` | 19 fields: `name`, `itemId`, `price`, `recBuyPrice`, `volume`, `tradedValue`, `buyLimit?`, `effectivePlayerVolume`, `maxCapitalPer4H`, `taxGap`, `recSellPrice`, `estFlipProfit`, `isRisky`, `volumeSpikeMultiplier`, `tradeVelocity`, `priceHistory`, `priceTrend` |
+| `RankedItem` | 23 fields: `name`, `itemId`, `price`, `recBuyPrice`, `volume`, `tradedValue`, `buyLimit?`, `effectivePlayerVolume`, `maxCapitalPer4H`, `taxGap`, `recSellPrice`, `estFlipProfit`, `isRisky`, `volumeSpikeMultiplier`, `tradeVelocity`, `priceHistory`, `priceTrend`, `ema30d`, `volatility`, `linearSlope`, `predictedNextPrice`, `highAlch?` |
 | `MarketAnalyzerConfig` | `topN` (20), `minVolume` (0), `maxVolume?`, `maxPrice?` |
 | `CacheServiceConfig` | `dbName`, `storeName`, `ttlMs` (default 24h) |
 | `WeirdGloopServiceConfig` | `batchSize` (default 100) |
@@ -548,6 +555,7 @@ Everything below is **complete and verified** (builds with 0 errors):
 - [x] Weird Gloop API service (batched sequential fetching with `fetchWithRetry` exponential backoff)
 - [x] IndexedDB cache service v2 (TTL-based staleness, bulk insert, prices + price-history stores)
 - [x] Data pipeline orchestrator (seed list of ~100 items, buy-limit enrichment from wiki)
+- [x] Startup health checks — re-enriches missing `highAlch`/`buyLimit` (>50% threshold) and re-seeds sparse history (<30% coverage) on every launch (March 2026)
 - [x] Full GE catalogue fetch (~7,000 items from `Module:GEIDs/data.json`)
 - [x] Market analyzer service (scoring, filtering, ranking, LLM formatting, runtime overrides)
 - [x] Player-centric scoring (effective player volume, max capital per 4h, buy-limit constraints)
@@ -555,8 +563,8 @@ Everything below is **complete and verified** (builds with 0 errors):
 - [x] Volume spike / hype detection (7-day SMA comparison, >1.5× threshold)
 - [x] Trade velocity scoring (Insta-Flip / Active / Slow / Very Slow badges with tooltips)
 - [x] Price momentum / trend classification (Uptrend / Downtrend / Stable based on 7-day % change, with falling-knife warning badges)
-- [x] Dedicated graph modal (📊 button on cards → full chart + momentum stats: trend, % change, high/low, volatility, data points) — with **on-demand cache-first history** (`ensureItemHistory`)
-- [x] Manual history refresh fallback — graph modal shows "Insufficient history • Refresh" button when < 7 data points (March 2026)
+- [x] Unified analytics modal (↗ button on cards → combined item details + interactive price chart + momentum stats + alert inputs + action buttons) — replaces old separate detail & graph modals (March 2026)
+- [x] Manual history refresh fallback — analytics modal shows "Insufficient history • Refresh" button when < 7 data points (March 2026)
 - [x] Startup loading overlay — spinner + step counter ("Step 1 of 5") + status text covers `#app` until boot completes, fades out on success (March 2026)
 - [x] TTL-cached scoring maps — `getOrBuildMaps()` caches `avgVolumeMap` and `priceHistoryMap` in memory with 10-minute TTL; avoids rebuilding from IndexedDB on UI refresh (March 2026)
 - [x] Wiki service (two-step search → extract guide fetching + fallback to base item page + Cargo buy-limit API)
@@ -568,8 +576,9 @@ Everything below is **complete and verified** (builds with 0 errors):
 - [x] Conditional Authorization header (omitted for keyless self-hosted models)
 - [x] Tabbed + Sidebar layout modes (persisted in localStorage)
 - [x] Three market view modes: List, Tile, Hybrid (persisted in localStorage)
+- [x] Compact tiles toggle — checkbox hides predictive badges in tile/hybrid views for cleaner scanning (persisted in localStorage)
 - [x] Market item cards with Jagex sprites, flip badges, expandable detail panels
-- [x] Floating item detail modal (centred overlay, full data)
+- [x] Unified analytics modal (centred overlay combining item details, chart, and actions)
 - [x] Dynamic market filters: Trading Volume (Any/High/Low/Custom), Max Price (Unlimited/10M/100M/500M/Custom)
 - [x] Custom volume/budget slider controls with synced text inputs (themed per CSS theme)
 - [x] Market refresh button (re-runs filtering pipeline with current filter config)
@@ -579,7 +588,7 @@ Everything below is **complete and verified** (builds with 0 errors):
 - [x] Full market background scan with progress bar, cancel support, and optional 90-day deep history checkbox (persisted in localStorage)
 - [x] Rate-limit retry with exponential backoff (429 / network errors) in `WeirdGloopService`; adaptive inter-batch backoff (1.5 s → 30 s ceiling) in `runFullMarketScan`
 - [x] Separate search results section (above Top 20, never replaces it)
-- [x] External links on market cards and detail modal (RS Wiki + GE Database)
+- [x] External links on market cards and analytics modal (RS Wiki + GE Database)
 - [x] Favourites system (star toggle on cards + modal, localStorage persistence, dedicated panel with collapse + per-section sort)
 - [x] Price alert system (per-item buy/sell thresholds on favourites, native Notification API + DOM toast notifications, session dedup, auto-favourite on alert set)
 - [x] Quick-add to portfolio (+ button on cards + modal, pre-fills flip form, switches to portfolio tab)
@@ -594,7 +603,7 @@ Everything below is **complete and verified** (builds with 0 errors):
 - [x] Chat history persistence (localStorage, max 50 messages, clear button)
 - [x] Multi-turn LLM conversation with RAG context
 - [x] Full HTML UI (settings panel, tabbed/sidebar layout, market/advisor/portfolio sections)
-- [x] Dark-themed CSS (~2440 lines — three themes, cards, tiles, grids, modals, graph modal, filters, chat, portfolio, velocity badges, external links, toast notifications, alert inputs, inline alert popovers, responsive desktop breakpoint)
+- [x] Dark-themed CSS (~2900 lines — three themes, cards, tiles, grids, unified analytics modal, filters, chat, portfolio, velocity badges, external links, toast notifications, alert inputs, inline alert popovers, responsive desktop breakpoint)
 - [x] Error recovery UI (dismissible error banner with retry button, try/catch wrappers across pipeline and UI)
 - [x] Webpack build passes (`npm run build` — 0 errors, 0 warnings)
 - [x] CSS scaling fix (`#app` height 95% for Alt1 zoom compatibility)
@@ -625,7 +634,8 @@ Everything below is **complete and verified** (builds with 0 errors):
 | Graph modal showing no data for low-volume items with no fallback action | Users had no way to manually trigger history fetch when automatic cache had insufficient data | Added `.graph-history-status` strip with Refresh button: calls `ensureItemHistory()`, re-renders graph on success, toast on failure. Only visible when < 7 data points (March 2026) |
 | Full market scan history fetches hitting 429 rate limits after first batch | `fetchHistoricalPrices` used individual per-item HTTP requests (100 requests per 100-item batch in concurrent groups of 10), exhausting the API rate limit | Rewrote to use **pipe-delimited batched requests** of 50 items each, dispatched sequentially with 1 000 ms pauses — reduces 100 requests to 2 per scan batch (March 2026) |
 | Post-scan `refreshMarketPanel` triggering 30 K+ 429 errors | `marketAnalyzerService.fetchAPIHistory` had its own per-item fetch loop (no retry, no delay, CONCURRENCY=10); after a 7 059-item scan the sparse-data fallback tried to fetch history for all ~1 849 cached items individually | Replaced bespoke `fetchAPIHistory` with delegation to `WeirdGloopService.fetchHistoricalPrices` (batched pipe-delimited, sequential, 1 s pauses). Also capped sparse fallback at 500 items and persisted results to IndexedDB (March 2026) |
-| CORS failures on Firefox but not Chrome | `fetchWithRetry()` set a custom `User-Agent` header. Firefox sends it (non-safelisted → triggers CORS preflight), but the API only allows `accept` in `Access-Control-Allow-Headers`. Chrome silently strips `User-Agent` so no preflight occurs | Removed the custom `User-Agent` header from `fetchWithRetry()` — browser sends its own `User-Agent` automatically. Never set non-safelisted headers in browser `fetch()` (March 2026) |
+| CORS failures on Firefox but not Chrome | `fetchWithRetry()` in `weirdGloopService.ts` and `fetchBuyLimitBatch`/`fetchAlchValueBatch` in `wikiService.ts` set a custom `User-Agent` header. Firefox sends it (non-safelisted → triggers CORS preflight), but the APIs only allow `accept` in `Access-Control-Allow-Headers`. Chrome silently strips `User-Agent` so no preflight occurs | Removed the custom `User-Agent` header from all browser `fetch()` calls in both services — browser sends its own `User-Agent` automatically. Never set non-safelisted headers in browser `fetch()` (March 2026) |
+| Two separate modals (item detail + graph) with duplicated data and disjointed UX | `showItemModal` and `showGraphModal` were independent singletons — users had to open two modals to see all item info, and features like alerts/actions were only in one | Consolidated into `showAnalyticsModal(item)` — a single scrollable overlay combining badges, action buttons, detail rows, alert inputs, interactive price chart with range selector, and stats grid. Old functions deprecated but retained. Single ↗ button per card (March 2026) |
 
 ---
 

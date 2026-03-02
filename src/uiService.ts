@@ -52,6 +52,10 @@ type ViewMode = "list" | "tile" | "hybrid";
 /** `localStorage` key for persisted view mode preference. */
 const LS_VIEW_MODE = "ge-analyzer:view-mode";
 
+// Compact tiles toggle – reduces predictive badge clutter in grid view – March 2026
+/** `localStorage` key for persisted compact-tiles preference. */
+const LS_COMPACT_TILES = "ge-analyzer:compact-tiles";
+
 /** `localStorage` key for persisted interface layout preference. */
 const LS_LAYOUT = "ge-analyzer:layout";
 
@@ -101,6 +105,11 @@ const DETAIL_LABELS: Record<string, string> = {
   "Max Capital (4h)":    "Max Capital (4h)",
   "Tax Gap":             "Tax Gap",
   "Est. Margin (2% tax)":"Est. Margin (2% tax)",
+  "High Alch":           "High Alch",
+  "30d EMA":             "30d EMA",
+  "Daily Volatility":    "Daily Volatility",
+  "LR Slope":            "LR Slope",
+  "Predicted Price":     "Predicted Price",
 };
 
 /**
@@ -121,6 +130,11 @@ const DETAIL_TIPS: Record<string, string> = {
   "Max Capital (4h)":    "Maximum gp you need to fill one full buy-limit window — GE price × buy limit.",
   "Tax Gap":             "Minimum price difference needed between buy and sell to break even after the 2% GE tax.",
   "Est. Margin (2% tax)":"The flat gp amount the 2% GE tax takes from one sale at the current price.",
+  "High Alch":           "High Alchemy value in gp \u2014 used as the sell-price floor to prevent recommending sales below alch value.",
+  "30d EMA":             "30-day Exponential Moving Average. Price above EMA = bullish; below = bearish.",
+  "Daily Volatility":    "Standard deviation of daily percentage price changes. Higher \u2192 wider swings \u2192 more risk but potentially faster flips.",
+  "LR Slope":            "Linear-regression slope of the price series (gp per day). Positive = upward drift, negative = declining.",
+  "Predicted Price":     "Next-day price predicted by linear regression of the historical price series.",
 };
 
 // ─── Favorites helpers ──────────────────────────────────────────────────────
@@ -274,6 +288,7 @@ let els: {
   viewListBtn: HTMLButtonElement;
   viewTileBtn: HTMLButtonElement;
   viewHybridBtn: HTMLButtonElement;
+  compactTilesToggle: HTMLInputElement;
   top20CollapseBtn: HTMLButtonElement;
   chatHistory: HTMLElement;
   chatInput: HTMLInputElement;
@@ -336,6 +351,9 @@ let latestSearchResults: RankedItem[] = [];
 
 /** Currently active view mode for the market panel. */
 let currentView: ViewMode = "list";
+
+/** Whether compact-tiles mode is enabled (hides predictive badges in tile/hybrid view). */
+let compactMode = false;
 
 /** Shared LLM service instance — persists conversation history across sends. */
 let llm: LLMService | null = null;
@@ -1306,6 +1324,18 @@ function bindViewToggle(): void {
   els.viewListBtn.addEventListener("click", () => setViewMode("list"));
   els.viewTileBtn.addEventListener("click", () => setViewMode("tile"));
   els.viewHybridBtn.addEventListener("click", () => setViewMode("hybrid"));
+
+  // Compact tiles toggle – reduces predictive badge clutter in grid view – March 2026
+  compactMode = localStorage.getItem(LS_COMPACT_TILES) === "true";
+  els.compactTilesToggle.checked = compactMode;
+  els.compactTilesToggle.addEventListener("change", () => {
+    compactMode = els.compactTilesToggle.checked;
+    localStorage.setItem(LS_COMPACT_TILES, compactMode ? "true" : "false");
+    // Re-render all market panels with the new compact preference.
+    if (latestTopItems.length > 0) renderMarketItems(latestTopItems);
+    if (analyzer) renderFavorites();
+    if (latestSearchResults.length > 0) renderSearchResults(latestSearchResults);
+  });
 }
 
 /**
@@ -1814,11 +1844,16 @@ function buildItemCard(item: RankedItem): HTMLElement {
   }
 
   // Usability enhancement – March 2026: predictive analytics badges.
+  // Compact tiles toggle – hides these badges in tile/hybrid view – March 2026
+  const showPredictiveBadges = !compactMode || currentView === "list";
   const predictiveWrap = document.createElement("span");
   predictiveWrap.className = "predictive-badges";
+  if (compactMode && currentView !== "list") {
+    predictiveWrap.classList.add("compact-hidden");
+  }
 
   // EMA Trend badge.
-  if (item.ema30d > 0 && item.price > 0) {
+  if (showPredictiveBadges && item.ema30d > 0 && item.price > 0) {
     const emaPct = ((item.price - item.ema30d) / item.ema30d) * 100;
     const emaDir = emaPct > 0 ? "up" : emaPct < 0 ? "down" : "";
     const emaBadge = document.createElement("span");
@@ -1829,7 +1864,7 @@ function buildItemCard(item: RankedItem): HTMLElement {
   }
 
   // Predicted 24h badge.
-  if (item.predictedNextPrice > 0 && item.price > 0) {
+  if (showPredictiveBadges && item.predictedNextPrice > 0 && item.price > 0) {
     const predPct = ((item.predictedNextPrice - item.price) / item.price) * 100;
     const predDir = predPct > 0.1 ? "up" : predPct < -0.1 ? "down" : "neutral";
     const predBadge = document.createElement("span");
@@ -1840,7 +1875,7 @@ function buildItemCard(item: RankedItem): HTMLElement {
   }
 
   // Volatility badge.
-  if (item.volatility > 0) {
+  if (showPredictiveBadges && item.volatility > 0) {
     const volBadge = document.createElement("span");
     volBadge.className = "vol-badge";
     volBadge.textContent = `Vol ${(item.volatility * 100).toFixed(1)}%`;
@@ -1854,14 +1889,14 @@ function buildItemCard(item: RankedItem): HTMLElement {
 
   header.appendChild(flipWrap);
 
-  // Popout button — opens the floating detail modal.
-  const popoutBtn = document.createElement("button");
-  popoutBtn.className = "popout-btn";
-  popoutBtn.textContent = "\u2197";
-  popoutBtn.title = "View details";
-  popoutBtn.addEventListener("click", (e) => {
+  // Analytics button — opens the unified analytics modal.
+  const analyticsBtn = document.createElement("button");
+  analyticsBtn.className = "popout-btn";
+  analyticsBtn.textContent = "\u2197";
+  analyticsBtn.title = "View Analytics";
+  analyticsBtn.addEventListener("click", (e) => {
     e.stopPropagation();
-    showItemModal(item);
+    showAnalyticsModal(item);
   });
   // Favorite toggle button.
   const favBtn = document.createElement("button");
@@ -1966,19 +2001,9 @@ function buildItemCard(item: RankedItem): HTMLElement {
   // Group action buttons in a horizontal row.
   const actions = document.createElement("span");
   actions.className = "card-actions";
-  actions.appendChild(popoutBtn);
+  actions.appendChild(analyticsBtn);
   actions.appendChild(favBtn);
   actions.appendChild(alertBtn);
-  // Graph button — opens the dedicated chart modal.
-  const graphBtn = document.createElement("button");
-  graphBtn.className = "graph-btn";
-  graphBtn.textContent = "\u2581\u2583\u2585";
-  graphBtn.title = "View price chart";
-  graphBtn.addEventListener("click", (e) => {
-    e.stopPropagation();
-    showGraphModal(item);
-  });
-  actions.appendChild(graphBtn);
   actions.appendChild(addFlipCardBtn);
   actions.appendChild(wikiLink);
   actions.appendChild(geLink);
@@ -2631,6 +2656,544 @@ function bindRefreshHistoryBtn(container: HTMLElement, item: RankedItem): void {
 /** Hide the graph modal. */
 function hideGraphModal(): void {
   if (graphModal) graphModal.classList.remove("visible");
+}
+
+// ─── Unified Analytics Modal – combines details + graph – March 2026 ────────
+
+/** Lazily-created singleton analytics modal container. */
+let analyticsModal: HTMLElement | null = null;
+
+/** Create (once) and return the reusable analytics modal backdrop + shell. */
+function ensureAnalyticsModal(): HTMLElement {
+  if (analyticsModal) return analyticsModal;
+
+  const backdrop = document.createElement("div");
+  backdrop.className = "analytics-modal-backdrop";
+  backdrop.addEventListener("click", (e) => {
+    if (e.target === backdrop) hideAnalyticsModal();
+  });
+
+  const modal = document.createElement("div");
+  modal.className = "analytics-modal";
+  modal.id = "analytics-modal";
+  // Trap focus inside modal for accessibility.
+  modal.setAttribute("role", "dialog");
+  modal.setAttribute("aria-modal", "true");
+
+  backdrop.appendChild(modal);
+  document.body.appendChild(backdrop);
+
+  // Global Escape key handler.
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && backdrop.classList.contains("visible")) {
+      hideAnalyticsModal();
+    }
+  });
+
+  analyticsModal = backdrop;
+  return backdrop;
+}
+
+/** Hide the unified analytics modal. */
+function hideAnalyticsModal(): void {
+  if (analyticsModal) analyticsModal.classList.remove("visible");
+}
+
+/**
+ * Show the unified analytics modal for a given item.
+ * Combines item details (badges, recommendations, alert setup, actions) with
+ * the interactive price-history chart and trend stats — all in one scrollable
+ * overlay.
+ *
+ * @param item - The ranked item to display.
+ */
+async function showAnalyticsModal(item: RankedItem): Promise<void> {
+  const backdrop = ensureAnalyticsModal();
+  const modal = backdrop.querySelector("#analytics-modal") as HTMLElement;
+
+  // Read the current range from the market-filters dropdown.
+  const range = parseInt(els.historyRangeSelect.value, 10) || 7;
+
+  // Show loading state immediately.
+  modal.innerHTML = "";
+
+  // ── Header ──────────────────────────────────────────────────────────────
+  const header = document.createElement("div");
+  header.className = "analytics-modal-header";
+
+  const img = document.createElement("img");
+  img.className = "item-sprite";
+  img.src = spriteUrl(item.itemId);
+  img.alt = item.name;
+  img.width = 48;
+  img.height = 42;
+  img.loading = "lazy";
+  img.title = `Item ID: ${item.itemId}`;
+  img.onerror = () => { img.style.display = "none"; };
+
+  const nameEl = document.createElement("span");
+  nameEl.className = "analytics-modal-name";
+  nameEl.textContent = item.name;
+
+  const priceEl = document.createElement("span");
+  priceEl.className = "analytics-modal-price";
+  priceEl.textContent = `${formatGpShort(item.price)} gp`;
+
+  const closeBtn = document.createElement("button");
+  closeBtn.className = "analytics-modal-close";
+  closeBtn.textContent = "\u2715";
+  closeBtn.title = "Close (Esc)";
+  closeBtn.addEventListener("click", hideAnalyticsModal);
+
+  header.appendChild(img);
+  header.appendChild(nameEl);
+  header.appendChild(priceEl);
+  header.appendChild(closeBtn);
+
+  // ── Content wrapper ────────────────────────────────────────────────────
+  const content = document.createElement("div");
+  content.className = "analytics-content";
+
+  // ── Badges ──────────────────────────────────────────────────────────────
+  const velocityClsMap: Record<string, string> = {
+    "Insta-Flip": "velocity-insta",
+    "Active": "velocity-active",
+    "Slow": "velocity-slow",
+    "Very Slow": "velocity-veryslow",
+  };
+  const velocityTipMap: Record<string, string> = {
+    "Insta-Flip": "Very high hourly volume \u2014 offers typically fill within seconds to a few minutes.",
+    "Active": "Solid hourly volume \u2014 expect fills within a few minutes to ~30 min.",
+    "Slow": "Low hourly volume \u2014 may take 30 min to several hours to fill.",
+    "Very Slow": "Very low hourly volume \u2014 fills can take many hours or may not complete in a 4 h window.",
+  };
+
+  const badgesHtml = [
+    `<span class="buy-badge" title="Suggested buy-offer price \u2014 ~1% below the GE mid-price for a realistic instant-buy entry.">Buy \u2264 ${formatGpShort(item.recBuyPrice)}</span>`,
+    `<span class="sell-badge${item.isRisky ? " risky" : ""}" title="Suggested sell price \u2014 ~3% above mid-price to cover the 2% GE tax and leave profit.">Sell \u2265 ${formatGpShort(item.recSellPrice)}</span>`,
+    `<span class="profit-badge${item.estFlipProfit <= 0 ? " negative" : ""}" title="Estimated profit per item after paying the 2% GE tax on the sale.">${item.estFlipProfit > 0 ? "+" : ""}${formatGpShort(item.estFlipProfit)}/ea</span>`,
+    `<span class="velocity-badge ${velocityClsMap[item.tradeVelocity] ?? "velocity-slow"}" title="${velocityTipMap[item.tradeVelocity] ?? ""}">${item.tradeVelocity}</span>`,
+    item.volumeSpikeMultiplier > 1.5
+      ? `<span class="hype-badge">\uD83D\uDD25 ${item.volumeSpikeMultiplier}x Vol</span>`
+      : "",
+    item.priceTrend === "Downtrend"
+      ? `<span class="trend-badge trend-downtrend" title="Price has dropped more than 5% over the last 7 days.">\u26A0\uFE0F Crashing</span>`
+      : item.priceTrend === "Uptrend"
+        ? `<span class="trend-badge trend-uptrend" title="Price has risen more than 5% over the last 7 days.">\uD83D\uDCC8 Rising</span>`
+        : "",
+  ].filter(Boolean).join("");
+
+  const badgesEl = document.createElement("div");
+  badgesEl.className = "analytics-badges";
+  badgesEl.innerHTML = badgesHtml;
+  content.appendChild(badgesEl);
+
+  // ── Action buttons ──────────────────────────────────────────────────────
+  const actionsEl = document.createElement("div");
+  actionsEl.className = "analytics-actions";
+
+  // Favourite toggle.
+  const modalFavBtn = document.createElement("button");
+  modalFavBtn.className = "fav-btn modal-fav-btn";
+  modalFavBtn.textContent = getFavorites().has(item.name) ? "\u2605" : "\u2606";
+  modalFavBtn.title = "Toggle favourite";
+  modalFavBtn.addEventListener("click", () => {
+    const nowFav = toggleFavorite(item.name);
+    modalFavBtn.textContent = nowFav ? "\u2605" : "\u2606";
+  });
+  actionsEl.appendChild(modalFavBtn);
+
+  // Quick-add-to-portfolio.
+  const modalAddBtn = document.createElement("button");
+  modalAddBtn.className = "quick-add-btn modal-quick-add-btn";
+  modalAddBtn.textContent = "+";
+  modalAddBtn.title = "Add to portfolio";
+  modalAddBtn.addEventListener("click", () => {
+    hideAnalyticsModal();
+    quickAddToPortfolio(item);
+  });
+  actionsEl.appendChild(modalAddBtn);
+
+  // External link: RS3 Wiki.
+  const modalWikiLink = document.createElement("a");
+  modalWikiLink.className = "ext-link wiki-link";
+  modalWikiLink.href = `https://runescape.wiki/w/${encodeURIComponent(item.name)}`;
+  modalWikiLink.target = "_blank";
+  modalWikiLink.rel = "noopener noreferrer";
+  modalWikiLink.textContent = "Wiki";
+  modalWikiLink.title = "Open on RS3 Wiki";
+  actionsEl.appendChild(modalWikiLink);
+
+  // External link: GE Database.
+  const modalGeLink = document.createElement("a");
+  modalGeLink.className = "ext-link ge-link";
+  modalGeLink.href = `https://secure.runescape.com/m=itemdb_rs/viewitem?obj=${item.itemId}`;
+  modalGeLink.target = "_blank";
+  modalGeLink.rel = "noopener noreferrer";
+  modalGeLink.textContent = "GE";
+  modalGeLink.title = "Open on GE Database";
+  actionsEl.appendChild(modalGeLink);
+
+  content.appendChild(actionsEl);
+
+  // ── Detail rows ─────────────────────────────────────────────────────────
+  const detailsTitle = document.createElement("h3");
+  detailsTitle.className = "analytics-section-title";
+  detailsTitle.textContent = "Market Details";
+  content.appendChild(detailsTitle);
+
+  const detailRows = [
+    `<div class="detail-row"><span class="detail-label" title="${DETAIL_TIPS["GE Price"]}">${DETAIL_LABELS["GE Price"]}</span><span class="detail-value">${item.price.toLocaleString("en-US")} gp</span></div>`,
+    `<div class="detail-row"><span class="detail-label" title="${DETAIL_TIPS["Rec. Buy Price"]}">${DETAIL_LABELS["Rec. Buy Price"]}</span><span class="detail-value buy-highlight">${item.recBuyPrice.toLocaleString("en-US")} gp</span></div>`,
+    `<div class="detail-row"><span class="detail-label" title="${DETAIL_TIPS["Rec. Sell Price"]}">${DETAIL_LABELS["Rec. Sell Price"]}</span><span class="detail-value sell-highlight">${item.recSellPrice.toLocaleString("en-US")} gp</span></div>`,
+    `<div class="detail-row"><span class="detail-label" title="${DETAIL_TIPS["Est. Flip Profit"]}">${DETAIL_LABELS["Est. Flip Profit"]}</span><span class="detail-value${item.estFlipProfit <= 0 ? " risky-text" : " profit-highlight"}">${item.estFlipProfit > 0 ? "+" : ""}${item.estFlipProfit.toLocaleString("en-US")} gp/ea</span></div>`,
+    `<div class="detail-row"><span class="detail-label" title="${DETAIL_TIPS["High Alch"]}">${DETAIL_LABELS["High Alch"]}</span><span class="detail-value">${item.highAlch != null ? item.highAlch.toLocaleString("en-US") + " gp" : "Unknown"}</span></div>`,
+    `<div class="detail-row"><span class="detail-label" title="${DETAIL_TIPS["Tax Gap"]}">${DETAIL_LABELS["Tax Gap"]}</span><span class="detail-value${item.isRisky ? " risky-text" : ""}">${formatGpShort(item.taxGap)} gp${item.isRisky ? " \u26a0 risky" : ""}</span></div>`,
+    `<div class="detail-row"><span class="detail-label" title="${DETAIL_TIPS["Est. Margin (2% tax)"]}">${DETAIL_LABELS["Est. Margin (2% tax)"]}</span><span class="detail-value">${formatGpShort(Math.round(item.price * 0.02))} gp</span></div>`,
+    `<div class="detail-row"><span class="detail-label" title="${DETAIL_TIPS["24h Global Vol"]}">${DETAIL_LABELS["24h Global Vol"]}</span><span class="detail-value">${formatVolume(item.volume)}</span></div>`,
+    `<div class="detail-row"><span class="detail-label" title="${DETAIL_TIPS["Eff. Player Vol"]}">${DETAIL_LABELS["Eff. Player Vol"]}</span><span class="detail-value">${formatVolume(item.effectivePlayerVolume)}</span></div>`,
+    `<div class="detail-row"><span class="detail-label" title="${DETAIL_TIPS["Volume Spike"]}">${DETAIL_LABELS["Volume Spike"]}</span><span class="detail-value${item.volumeSpikeMultiplier > 1.5 ? " hype-text" : ""}">${item.volumeSpikeMultiplier > 1.5 ? "\uD83D\uDD25 " + item.volumeSpikeMultiplier + "x above 7-day avg" : "Normal"}</span></div>`,
+    `<div class="detail-row"><span class="detail-label" title="${DETAIL_TIPS["Player Traded Val"]}">${DETAIL_LABELS["Player Traded Val"]}</span><span class="detail-value">${formatGpShort(item.tradedValue)} gp</span></div>`,
+    `<div class="detail-row"><span class="detail-label" title="${DETAIL_TIPS["Buy Limit (4h)"]}">${DETAIL_LABELS["Buy Limit (4h)"]}</span><span class="detail-value">${item.buyLimit != null ? item.buyLimit.toLocaleString("en-US") : "Unknown"}</span></div>`,
+    `<div class="detail-row"><span class="detail-label" title="${DETAIL_TIPS["Max Capital (4h)"]}">${DETAIL_LABELS["Max Capital (4h)"]}</span><span class="detail-value">${item.maxCapitalPer4H > 0 ? formatGpShort(item.maxCapitalPer4H) + " gp" : "Unknown"}</span></div>`,
+  ].join("");
+
+  const detailsGrid = document.createElement("div");
+  detailsGrid.className = "analytics-details-grid";
+  detailsGrid.innerHTML = detailRows;
+  content.appendChild(detailsGrid);
+
+  // ── Predictive Analytics ─────────────────────────────────────────────────
+  const predTitle = document.createElement("h3");
+  predTitle.className = "analytics-section-title";
+  predTitle.textContent = "Predictive Analytics";
+  content.appendChild(predTitle);
+
+  const emaPct = item.ema30d > 0 && item.price > 0
+    ? ((item.price - item.ema30d) / item.ema30d) * 100
+    : 0;
+  const emaSignal = emaPct > 2 ? "bullish" : emaPct < -2 ? "bearish" : "neutral";
+  const predPct = item.predictedNextPrice > 0 && item.price > 0
+    ? ((item.predictedNextPrice - item.price) / item.price) * 100
+    : 0;
+
+  const predRows = [
+    `<div class="detail-row"><span class="detail-label" title="${DETAIL_TIPS["30d EMA"]}">${DETAIL_LABELS["30d EMA"]}</span><span class="detail-value">${item.ema30d > 0 ? formatGpShort(Math.round(item.ema30d)) + " gp (" + (emaPct >= 0 ? "+" : "") + emaPct.toFixed(1) + "% " + emaSignal + ")" : "Insufficient data"}</span></div>`,
+    `<div class="detail-row"><span class="detail-label" title="${DETAIL_TIPS["Daily Volatility"]}">${DETAIL_LABELS["Daily Volatility"]}</span><span class="detail-value">${item.volatility > 0 ? (item.volatility * 100).toFixed(1) + "%" : "Insufficient data"}</span></div>`,
+    `<div class="detail-row"><span class="detail-label" title="${DETAIL_TIPS["LR Slope"]}">${DETAIL_LABELS["LR Slope"]}</span><span class="detail-value">${item.linearSlope !== 0 ? (item.linearSlope >= 0 ? "+" : "") + formatGpShort(Math.round(item.linearSlope)) + " gp/day" : "Insufficient data"}</span></div>`,
+    `<div class="detail-row"><span class="detail-label" title="${DETAIL_TIPS["Predicted Price"]}">${DETAIL_LABELS["Predicted Price"]}</span><span class="detail-value">${item.predictedNextPrice > 0 ? formatGpShort(Math.round(item.predictedNextPrice)) + " gp (" + (predPct >= 0 ? "+" : "") + predPct.toFixed(1) + "%)" : "Insufficient data"}</span></div>`,
+  ].join("");
+
+  const predGrid = document.createElement("div");
+  predGrid.className = "analytics-details-grid";
+  predGrid.innerHTML = predRows;
+  content.appendChild(predGrid);
+
+  // ── Price alerts ────────────────────────────────────────────────────────
+  const alertSection = document.createElement("div");
+  alertSection.className = "alert-inputs";
+  alertSection.innerHTML =
+    `<h4 class="alert-inputs-title">\uD83D\uDD14 Price Alerts</h4>` +
+    `<div class="alert-row">` +
+      `<label for="analytics-alert-buy">Alert if drops below</label>` +
+      `<input id="analytics-alert-buy" type="number" min="0" placeholder="Buy target (gp)" />` +
+    `</div>` +
+    `<div class="alert-row">` +
+      `<label for="analytics-alert-sell">Alert if rises above</label>` +
+      `<input id="analytics-alert-sell" type="number" min="0" placeholder="Sell target (gp)" />` +
+    `</div>`;
+  content.appendChild(alertSection);
+
+  // ── Price History section ───────────────────────────────────────────────
+  const graphTitle = document.createElement("h3");
+  graphTitle.className = "analytics-section-title";
+  graphTitle.textContent = "Price History";
+  content.appendChild(graphTitle);
+
+  const graphSection = document.createElement("div");
+  graphSection.className = "analytics-graph-section";
+  graphSection.innerHTML =
+    `<div class="analytics-range-row">` +
+      `<label>Range:</label>` +
+      `<select class="graph-range-inline">` +
+        [7, 30, 90].map((d) =>
+          `<option value="${d}"${d === range ? " selected" : ""}>History: ${d} days</option>`
+        ).join("") +
+      `</select>` +
+    `</div>` +
+    `<div class="graph-loading-msg" style="text-align:center;padding:24px;color:#888;">Checking cached history\u2026</div>`;
+  content.appendChild(graphSection);
+
+  // ── Assemble and show ──────────────────────────────────────────────────
+  modal.appendChild(header);
+  modal.appendChild(content);
+  backdrop.classList.add("visible");
+
+  // Focus the close button for keyboard accessibility.
+  closeBtn.focus();
+
+  // ── Wire alert inputs ──────────────────────────────────────────────────
+  const alertBuyInput = alertSection.querySelector<HTMLInputElement>("#analytics-alert-buy")!;
+  const alertSellInput = alertSection.querySelector<HTMLInputElement>("#analytics-alert-sell")!;
+
+  const existing = getFavoriteAlerts(item.name);
+  if (existing?.targetBuy) alertBuyInput.value = String(existing.targetBuy);
+  if (existing?.targetSell) alertSellInput.value = String(existing.targetSell);
+
+  const saveAlertValues = (): void => {
+    const buyVal = alertBuyInput.value ? Number(alertBuyInput.value) : undefined;
+    const sellVal = alertSellInput.value ? Number(alertSellInput.value) : undefined;
+    if ((buyVal || sellVal) && !getFavorites().has(item.name)) {
+      toggleFavorite(item.name);
+      modalFavBtn.textContent = "\u2605";
+    }
+    setFavoriteAlerts(item.name, buyVal, sellVal);
+  };
+  alertBuyInput.addEventListener("change", saveAlertValues);
+  alertSellInput.addEventListener("change", saveAlertValues);
+
+  // ── Async: fetch history & render graph ─────────────────────────────────
+  const cachedCount = (await cache.getHistoricalRecords(item.name, 90)).length;
+  const loadingEl = graphSection.querySelector(".graph-loading-msg") as HTMLElement;
+  if (cachedCount < 7 && loadingEl) {
+    loadingEl.textContent = "Fetching price history\u2026";
+  }
+
+  let fetched: number[];
+  try {
+    fetched = await fetchItemHistory(item.name, range);
+  } catch {
+    showToast("History unavailable \u2014 could not fetch price data.", "info");
+    fetched = [];
+  }
+  const hist = fetched.length > 0
+    ? [...fetched, item.price]
+    : (item.priceHistory.length >= 2 ? item.priceHistory : [item.price]);
+  const hasData = hist.length >= 2;
+
+  // Update item priceHistory if we got fresh data and range is 7d.
+  if (fetched.length > 0 && range <= 7) {
+    item.priceHistory = [...fetched, item.price];
+    if (item.priceHistory.length >= 2 && item.priceHistory[0] > 0) {
+      const pct = (item.price - item.priceHistory[0]) / item.priceHistory[0];
+      item.priceTrend = pct < -0.05 ? "Downtrend" : pct > 0.05 ? "Uptrend" : "Stable";
+    }
+  }
+
+  // Compute momentum stats.
+  const currentPrice = item.price;
+  const oldestPrice = hasData ? hist[0] : currentPrice;
+  const highPrice = hasData ? Math.max(...hist) : currentPrice;
+  const lowPrice = hasData ? Math.min(...hist) : currentPrice;
+  const pctChange = oldestPrice > 0 ? ((currentPrice - oldestPrice) / oldestPrice) * 100 : 0;
+  const absChange = currentPrice - oldestPrice;
+  const volatility = hasData ? ((highPrice - lowPrice) / lowPrice) * 100 : 0;
+
+  const trendLabel = pctChange < -5 ? "Downtrend" : pctChange > 5 ? "Uptrend" : "Stable";
+  const trendColour = trendLabel === "Uptrend" ? "var(--accent-green-bright, #4ec9b0)"
+    : trendLabel === "Downtrend" ? "var(--accent-red, #f44747)" : "var(--text-muted, #888)";
+  const trendIcon = trendLabel === "Uptrend" ? "\uD83D\uDCC8" : trendLabel === "Downtrend" ? "\u26A0\uFE0F" : "\u27A1\uFE0F";
+
+  const insufficientData = hist.length < 7;
+
+  // Replace loading message with chart + stats.
+  graphSection.innerHTML =
+    `<div class="analytics-range-row">` +
+      `<label>Range:</label>` +
+      `<select class="graph-range-inline">` +
+        [7, 30, 90].map((d) =>
+          `<option value="${d}"${d === range ? " selected" : ""}>History: ${d} days</option>`
+        ).join("") +
+      `</select>` +
+    `</div>` +
+    `<canvas class="graph-modal-canvas" width="480" height="200"${insufficientData ? ' style="display:none"' : ''}></canvas>` +
+    `<div class="graph-history-status${insufficientData ? ' visible' : ''}">` +
+      `Insufficient history \u2022 ` +
+      `<button class="refresh-history-btn">Refresh</button>` +
+    `</div>` +
+    `<div class="analytics-stats-grid">` +
+      `<div class="analytics-stat-card">` +
+        `<span class="analytics-stat-label">${range}-Day Trend</span>` +
+        `<span class="analytics-stat-value" style="color:${trendColour}">${trendIcon} ${trendLabel}</span>` +
+      `</div>` +
+      `<div class="analytics-stat-card">` +
+        `<span class="analytics-stat-label">Change</span>` +
+        `<span class="analytics-stat-value" style="color:${trendColour}">${absChange >= 0 ? "+" : ""}${formatGpShort(absChange)} gp (${pctChange >= 0 ? "+" : ""}${pctChange.toFixed(1)}%)</span>` +
+      `</div>` +
+      `<div class="analytics-stat-card">` +
+        `<span class="analytics-stat-label">Current Price</span>` +
+        `<span class="analytics-stat-value">${currentPrice.toLocaleString("en-US")} gp</span>` +
+      `</div>` +
+      `<div class="analytics-stat-card">` +
+        `<span class="analytics-stat-label">${range}-Day High</span>` +
+        `<span class="analytics-stat-value">${highPrice.toLocaleString("en-US")} gp</span>` +
+      `</div>` +
+      `<div class="analytics-stat-card">` +
+        `<span class="analytics-stat-label">${range}-Day Low</span>` +
+        `<span class="analytics-stat-value">${lowPrice.toLocaleString("en-US")} gp</span>` +
+      `</div>` +
+      `<div class="analytics-stat-card">` +
+        `<span class="analytics-stat-label">Volatility</span>` +
+        `<span class="analytics-stat-value">${volatility.toFixed(1)}%</span>` +
+      `</div>` +
+      `<div class="analytics-stat-card">` +
+        `<span class="analytics-stat-label">Data Points</span>` +
+        `<span class="analytics-stat-value">${hist.length} day${hist.length !== 1 ? "s" : ""}</span>` +
+      `</div>` +
+    `</div>`;
+
+  // Bind inline range dropdown.
+  const inlineRange = graphSection.querySelector<HTMLSelectElement>(".graph-range-inline");
+  if (inlineRange) {
+    inlineRange.addEventListener("change", () => {
+      const newRange = parseInt(inlineRange.value, 10) || 7;
+      els.historyRangeSelect.value = String(newRange);
+      refreshAnalyticsGraph(item, graphSection, newRange);
+    });
+  }
+
+  // Bind manual refresh button.
+  bindAnalyticsRefreshBtn(graphSection, item);
+
+  // Draw the chart.
+  requestAnimationFrame(() => {
+    const canvas = graphSection.querySelector<HTMLCanvasElement>(".graph-modal-canvas");
+    if (canvas && !insufficientData) drawGraphChart(canvas, hist);
+  });
+}
+
+/**
+ * Refresh the analytics modal graph section with a new range.
+ * Called when the in-modal range dropdown changes.
+ */
+async function refreshAnalyticsGraph(
+  item: RankedItem,
+  graphSection: HTMLElement,
+  range: number,
+): Promise<void> {
+  const canvas = graphSection.querySelector<HTMLCanvasElement>(".graph-modal-canvas");
+  if (canvas) {
+    const ctx = canvas.getContext("2d");
+    if (ctx) {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.font = "12px 'Segoe UI', sans-serif";
+      ctx.fillStyle = "#888";
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.fillText("Fetching history\u2026", canvas.width / 2, canvas.height / 2);
+    }
+  }
+
+  let fetched: number[];
+  try {
+    fetched = await fetchItemHistory(item.name, range);
+  } catch {
+    showToast("History unavailable \u2014 could not fetch price data.", "info");
+    fetched = [];
+  }
+  const hist = fetched.length > 0 ? [...fetched, item.price] : [item.price];
+
+  const hasData = hist.length >= 2;
+  const currentPrice = item.price;
+  const oldestPrice = hasData ? hist[0] : currentPrice;
+  const highPrice = hasData ? Math.max(...hist) : currentPrice;
+  const lowPrice = hasData ? Math.min(...hist) : currentPrice;
+  const pctChange = oldestPrice > 0 ? ((currentPrice - oldestPrice) / oldestPrice) * 100 : 0;
+  const absChange = currentPrice - oldestPrice;
+  const volatility = hasData ? ((highPrice - lowPrice) / lowPrice) * 100 : 0;
+
+  const trendLabel = pctChange < -5 ? "Downtrend" : pctChange > 5 ? "Uptrend" : "Stable";
+  const trendColour = trendLabel === "Uptrend" ? "var(--accent-green-bright, #4ec9b0)"
+    : trendLabel === "Downtrend" ? "var(--accent-red, #f44747)" : "var(--text-muted, #888)";
+  const trendIcon = trendLabel === "Uptrend" ? "\uD83D\uDCC8" : trendLabel === "Downtrend" ? "\u26A0\uFE0F" : "\u27A1\uFE0F";
+
+  // Update stats grid.
+  const statsGrid = graphSection.querySelector(".analytics-stats-grid");
+  if (statsGrid) {
+    statsGrid.innerHTML =
+      `<div class="analytics-stat-card">` +
+        `<span class="analytics-stat-label">${range}-Day Trend</span>` +
+        `<span class="analytics-stat-value" style="color:${trendColour}">${trendIcon} ${trendLabel}</span>` +
+      `</div>` +
+      `<div class="analytics-stat-card">` +
+        `<span class="analytics-stat-label">Change</span>` +
+        `<span class="analytics-stat-value" style="color:${trendColour}">${absChange >= 0 ? "+" : ""}${formatGpShort(absChange)} gp (${pctChange >= 0 ? "+" : ""}${pctChange.toFixed(1)}%)</span>` +
+      `</div>` +
+      `<div class="analytics-stat-card">` +
+        `<span class="analytics-stat-label">Current Price</span>` +
+        `<span class="analytics-stat-value">${currentPrice.toLocaleString("en-US")} gp</span>` +
+      `</div>` +
+      `<div class="analytics-stat-card">` +
+        `<span class="analytics-stat-label">${range}-Day High</span>` +
+        `<span class="analytics-stat-value">${highPrice.toLocaleString("en-US")} gp</span>` +
+      `</div>` +
+      `<div class="analytics-stat-card">` +
+        `<span class="analytics-stat-label">${range}-Day Low</span>` +
+        `<span class="analytics-stat-value">${lowPrice.toLocaleString("en-US")} gp</span>` +
+      `</div>` +
+      `<div class="analytics-stat-card">` +
+        `<span class="analytics-stat-label">Volatility</span>` +
+        `<span class="analytics-stat-value">${volatility.toFixed(1)}%</span>` +
+      `</div>` +
+      `<div class="analytics-stat-card">` +
+        `<span class="analytics-stat-label">Data Points</span>` +
+        `<span class="analytics-stat-value">${hist.length} day${hist.length !== 1 ? "s" : ""}</span>` +
+      `</div>`;
+  }
+
+  // Update history-status visibility after range refresh.
+  const statusEl = graphSection.querySelector<HTMLElement>(".graph-history-status");
+  if (hist.length < 7) {
+    statusEl?.classList.add("visible");
+    if (canvas) canvas.style.display = "none";
+  } else {
+    statusEl?.classList.remove("visible");
+    if (canvas) canvas.style.display = "";
+  }
+
+  requestAnimationFrame(() => {
+    if (canvas && hist.length >= 2) drawGraphChart(canvas, hist);
+  });
+}
+
+/**
+ * Bind the "Refresh" button in the analytics modal's graph section.
+ */
+function bindAnalyticsRefreshBtn(graphSection: HTMLElement, item: RankedItem): void {
+  const btn = graphSection.querySelector<HTMLButtonElement>(".refresh-history-btn");
+  if (!btn) return;
+
+  btn.addEventListener("click", async () => {
+    btn.disabled = true;
+    btn.textContent = "Fetching\u2026";
+
+    try {
+      const prices = await ensureItemHistory(item.name, 90);
+      const range = parseInt(
+        (graphSection.querySelector<HTMLSelectElement>(".graph-range-inline")?.value) || "7", 10
+      );
+      const sliced = (range < 90 && prices.length > range) ? prices.slice(-range) : prices;
+      const hist = sliced.length > 0 ? [...sliced, item.price] : [item.price];
+
+      const canvas = graphSection.querySelector<HTMLCanvasElement>(".graph-modal-canvas");
+      const statusEl = graphSection.querySelector<HTMLElement>(".graph-history-status");
+
+      if (hist.length >= 7) {
+        if (canvas) { canvas.style.display = ""; drawGraphChart(canvas, hist); }
+        statusEl?.classList.remove("visible");
+      } else {
+        if (canvas) { canvas.style.display = ""; drawGraphChart(canvas, hist); }
+        btn.textContent = "Refresh";
+        btn.disabled = false;
+      }
+
+      refreshAnalyticsGraph(item, graphSection, range);
+    } catch {
+      showToast("Failed to load history", "info");
+      btn.textContent = "Refresh";
+      btn.disabled = false;
+    }
+  });
 }
 
 /**
@@ -3662,6 +4225,7 @@ function resolveElements(): void {
     viewListBtn: q<HTMLButtonElement>("view-list-btn"),
     viewTileBtn: q<HTMLButtonElement>("view-tile-btn"),
     viewHybridBtn: q<HTMLButtonElement>("view-hybrid-btn"),
+    compactTilesToggle: q<HTMLInputElement>("compact-tiles-toggle"),
     top20CollapseBtn: q<HTMLButtonElement>("top20-collapse-btn"),
     chatHistory: q("chat-history"),
     chatInput: q<HTMLInputElement>("chat-input"),

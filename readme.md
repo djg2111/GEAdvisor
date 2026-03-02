@@ -37,17 +37,18 @@ Uses a **RAG (Retrieval-Augmented Generation) pipeline** to combine live GE mark
 - **Flip recommendations** — buy/sell prices with profit-per-item after 2% GE tax
 - **Trade velocity** — Insta-Flip / Active / Slow / Very Slow badges with explanatory tooltips
 - **Hype detection** — volume spike badges when today's volume exceeds the 7-day average by 1.5×
-- **Dedicated graph modal** — 📊 button on every card opens a full chart modal with gradient area chart, trend analysis, price change stats, high/low, and volatility — with a **history-range selector** (7 / 30 / 90 days) inside the modal and in the market filter bar. Uses **on-demand cache-first history loading**: checks IndexedDB first, fetches from the Weird Gloop API only when data is sparse, and persists results for future use
-- **Manual history refresh** — graph modal shows a "Refresh" button when price history is insufficient (< 7 days), letting users manually fetch missing data\n- **Startup loading overlay** — spinner with step counter (Step 1 of 5) and status text keeps users informed during data pipeline and market analysis bootstrap; TTL-cached scoring maps avoid redundant IndexedDB reads on UI refresh
-- **Predictive analytics badges** — EMA trend (↑/↓ vs 30-day EMA), predicted 24h price change (linear regression), and daily volatility % shown directly on every market card
+- **Unified analytics modal** — ↗ button on every card opens a single scrollable overlay combining item details (badges, recommendations, price alerts, actions) with an interactive gradient area chart, trend stats, high/low, and volatility — with a **history-range selector** (7 / 30 / 90 days) inside the modal and in the market filter bar. Detail rows include High Alch value, always-visible Volume Spike indicator, and a dedicated "Predictive Analytics" section (30d EMA, Daily Volatility σ%, LR Slope, Predicted Price). Item sprite tooltip shows the item ID. Uses **on-demand cache-first history loading**: checks IndexedDB first, fetches from the Weird Gloop API only when data is sparse, and persists results for future use
+- **Manual history refresh** — analytics modal shows a “Refresh” button when price history is insufficient (< 7 days), letting users manually fetch missing data\n- **Startup loading overlay** — spinner with step counter (Step 1 of 5) and status text keeps users informed during data pipeline and market analysis bootstrap; TTL-cached scoring maps avoid redundant IndexedDB reads on UI refresh
+- **Predictive analytics badges** — EMA trend (↑/↓ vs 30-day EMA), predicted 24h price change (linear regression), and daily volatility % shown directly on every market card (hidden in tile/hybrid view when compact mode is enabled)
 - **Price momentum badges** — "⚠️ Crashing" / "📈 Rising" warnings when 7-day trend exceeds ±5 %
-- **Three view modes** — List, Tile, and Hybrid layouts
+- **Three view modes** — List, Tile, and Hybrid layouts with an optional **Compact Tiles** toggle that hides predictive badges for cleaner scanning
 - **Per-section sorting** — independent sort controls (Default, A–Z, Price ↓, Profit ↓) on Top 20, Search Results, and Favourites
 - **Dynamic filters** — volume and price filters with themed custom slider controls
 - **Full GE search** — search all ~7,000 tradeable items with on-demand price fetching
 - **Full market background scan** — scan all ~7,000 items with progress bar and cancel support; optional **90-day deep history** checkbox for complete sparklines on every item
 - **Rate-limit resilience** — automatic retry with exponential backoff on API 429s and network errors; adaptive inter-batch delays during full scans
-- **External links** — quick Wiki and GE Database links on every card and in the detail modal
+- **Startup data recovery** — automatic health checks on every launch re-enrich missing buy limits and high alch values, and re-seed sparse price history, recovering from prior failed fetches
+- **External links** — quick Wiki and GE Database links on every card and in the analytics modal
 
 ### AI Advisor
 - **Multi-turn RAG chat** — ask questions about items, flipping strategies, or money-making methods
@@ -64,13 +65,13 @@ Uses a **RAG (Retrieval-Augmented Generation) pipeline** to combine live GE mark
 
 ### Extras
 - **Favourites** — star any item for quick access in a dedicated collapsible panel with its own sort control
-- **Price alerts** — set buy/sell thresholds via the inline 🔔 bell on any card or in the detail modal; triggers native browser notifications and in-app toasts when prices cross your targets
+- **Price alerts** — set buy/sell thresholds via the inline 🔔 bell on any card or in the analytics modal; triggers native browser notifications and in-app toasts when prices cross your targets
 - **Export / Import** — back up favourites, portfolio, flip history, and theme to a JSON file; restore from any previous backup
 - **Quick-add** — one-click add from any market card to the portfolio form
 - **Three CSS themes** — Classic Dark, OSRS Brown, and RS3 Modern Blue (all themed via CSS variables)
 - **Responsive desktop layout** — wider modals and expanded grids at ≥ 800 px
 - **Error recovery UI** — dismissible error banner with retry button for network/cache failures
-- **Persistent state** — all settings, chat history, favourites, sort preferences, and portfolio data saved to localStorage
+- **Persistent state** — all settings, chat history, favourites, sort preferences, compact-tiles preference, and portfolio data saved to localStorage
 - **Tabbed & sidebar layouts** — switch between compact tabbed view or full sidebar mode
 
 ---
@@ -115,7 +116,7 @@ Weird Gloop API → IndexedDB Cache → Deterministic Filtering → LLM Synthesi
 |-------|---------|------|
 | **Data ingestion** | `weirdGloopService.ts`, `wikiService.ts` | Fetch GE prices + Wiki guides (rate-limit retry with exponential backoff) |
 | **Caching** | `cacheService.ts` | IndexedDB with 24h TTL, prices + price-history stores |
-| **Pipeline** | `initDataPipeline.ts` | Startup orchestrator: cache check → fetch → enrich → insert (adaptive backoff on empty batches) |
+| **Pipeline** | `initDataPipeline.ts` | Startup orchestrator: cache check → fetch → enrich → insert → health checks (adaptive backoff on empty batches) |
 | **Analysis** | `marketAnalyzerService.ts` | Score → filter → rank → format (pure math, no network) |
 | **Knowledge** | `coreKnowledge.ts` | Static RS3 economic rules (GE tax, buy limits, etc.) |
 | **LLM** | `llmService.ts` | OpenAI-compatible chat client with anti-hallucination prompt |

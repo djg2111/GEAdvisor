@@ -488,6 +488,7 @@ export class MarketAnalyzerService {
         volatility,
         linearSlope,
         predictedNextPrice,
+        highAlch: record.highAlch,
       });
     }
 

@@ -305,7 +305,7 @@ export class WikiService {
 
     const response = await fetch(url, {
       method: "GET",
-      headers: { Accept: "application/json", "User-Agent": "GE-Market-Analyzer/1.0" },
+      headers: { Accept: "application/json" },
     });
 
     if (!response.ok) {
@@ -406,7 +406,7 @@ export class WikiService {
 
     const response = await fetch(url, {
       method: "GET",
-      headers: { Accept: "application/json", "User-Agent": "GE-Market-Analyzer/1.0" },
+      headers: { Accept: "application/json" },
     });
 
     if (!response.ok) {

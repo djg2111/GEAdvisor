@@ -195,6 +195,11 @@ export interface RankedItem {
    * (i.e. day N+1).  `0` when insufficient history.
    */
   predictedNextPrice: number;
+  /**
+   * High Alchemy value in gp.  Used as a sell-price floor in the
+   * recommended-sell calculation.  `undefined` when unknown.
+   */
+  highAlch?: number;
 }
 
 /** Tuneable knobs for the {@link MarketAnalyzerService}. */
