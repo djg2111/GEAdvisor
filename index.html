@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>GE Market Analyzer</title>
+</head>
+<body data-layout="tabbed">
+	<!-- ── Alt1 detection banner (hidden once services load) ───────────── -->
+	<div id="alt1-status"></div>
+
+	<!-- ── App shell ──────────────────────────────────────────────────── -->
+	<div id="app">
+
+		<!-- ── Settings panel (collapsible) ───────────────────────────── -->
+		<details id="settings-panel">
+			<summary>⚙ Settings</summary>
+			<div class="settings-body">
+
+				<!-- Interface layout -->
+				<label>Interface Layout</label>
+				<div class="layout-toggle">
+					<button id="layout-tabbed-btn" class="layout-btn active" type="button">Tabbed</button>
+					<button id="layout-sidebar-btn" class="layout-btn" type="button">Sidebar</button>
+				</div>
+
+				<!-- Theme selector -->
+				<label for="theme-select">Theme</label>
+				<select id="theme-select">
+					<option value="classic">Classic Dark</option>
+					<option value="osrs">Old School (Brown)</option>
+					<option value="rs3-modern">RS3 Modern (Blue)</option>
+				</select>
+
+				<!-- Provider selector -->
+				<label for="provider-select">LLM Provider</label>
+				<select id="provider-select">
+					<!-- Options populated dynamically from LLM_PROVIDERS -->
+				</select>
+
+				<!-- Custom endpoint (shown only when provider === "custom") -->
+				<div id="custom-endpoint-group" class="settings-field hidden">
+					<label for="custom-endpoint-input">Endpoint URL</label>
+					<input
+						id="custom-endpoint-input"
+						type="text"
+						placeholder="http://localhost:1234/v1/chat/completions"
+						autocomplete="off"
+						spellcheck="false"
+					/>
+				</div>
+
+				<!-- Model selector (searchable datalist) -->
+				<label for="model-input">Model</label>
+				<input
+					id="model-input"
+					type="text"
+					list="model-options"
+					placeholder="(use provider default)"
+					autocomplete="off"
+					spellcheck="false"
+				/>
+				<datalist id="model-options">
+					<!-- Options populated dynamically per provider -->
+				</datalist>
+
+				<!-- API key -->
+				<label for="api-key-input">API Key</label>
+				<div class="settings-row">
+					<input
+						id="api-key-input"
+						type="password"
+						placeholder="gsk_…"
+						autocomplete="off"
+						spellcheck="false"
+					/>
+					<button id="save-key-btn" type="button">Save</button>
+				</div>
+				<span id="key-status" class="status-hint"></span>
+
+				<!-- Force reload cache -->
+				<div class="settings-field" style="margin-top:8px">
+					<button id="force-reload-btn" class="danger-btn" type="button">⟳ Force Reload Data</button>
+					<span id="reload-status" class="status-hint"></span>
+				</div>
+			</div>
+		</details>
+
+		<!-- ── Tab navigation (visible only in tabbed layout) ─────────── -->
+		<nav id="view-tabs">
+			<button id="tab-market-btn" class="tab-btn active" type="button">Market Data</button>
+			<button id="tab-advisor-btn" class="tab-btn" type="button">Ask Advisor</button>
+			<button id="tab-portfolio-btn" class="tab-btn" type="button">Portfolio</button>
+		</nav>
+
+		<!-- ── Main content area ──────────────────────────────────────── -->
+		<main id="app-content">
+
+			<!-- ── Market data view ───────────────────────────────────── -->
+			<section id="market-view" class="active-tab">
+				<!-- ── Search section (above Top 20) ──────────────────── -->
+				<div id="search-section">
+					<input type="search" id="market-search-input" placeholder="Search all GE items…" autocomplete="off" spellcheck="false" />
+					<div id="search-loading" class="loader" style="display:none"></div>
+					<div id="search-results"></div>
+				</div>
+
+				<!-- ── Favourites section ──────────────────────────────── -->
+				<div id="favorites-section" class="favorites-section" style="display:none">
+					<div class="favorites-header">
+						<h3>★ Favourites</h3>
+						<button id="favorites-collapse-btn" class="view-btn" type="button" title="Collapse favourites">▾</button>
+					</div>
+					<div id="favorites-items"></div>
+				</div>
+
+				<!-- ── Recommended items ───────────────────────────────── -->
+				<div class="top20-section">
+				<div id="market-header">
+					<h2>Top 20 Markets</h2>
+					<div id="view-toggle" class="view-toggle">
+						<button id="view-list-btn" class="view-btn active" type="button" title="List view">☰</button>
+						<button id="view-tile-btn" class="view-btn" type="button" title="Tile view">▦</button>
+						<button id="view-hybrid-btn" class="view-btn" type="button" title="Hybrid view">⊞</button>
+						<button id="top20-collapse-btn" class="view-btn" type="button" title="Collapse Top 20">▾</button>
+					</div>
+				</div>
+				<div id="market-filters" class="filter-bar">
+					<select id="filter-volume" title="Trading style">
+						<option value="any">Vol: Any</option>
+						<option value="high">Vol: High (&gt;50K)</option>
+						<option value="low">Vol: Low (&lt;1K)</option>
+						<option value="custom">Vol: Custom</option>
+					</select>
+					<select id="filter-price" title="Max item budget">
+						<option value="0">Budget: Unlimited</option>
+						<option value="10000000">Budget: &lt;10M</option>
+						<option value="100000000">Budget: &lt;100M</option>
+						<option value="500000000">Budget: &lt;500M</option>
+						<option value="custom">Budget: Custom</option>
+					</select>
+					<button id="refresh-market-btn" class="refresh-btn" type="button">⟳ Refresh</button>
+				</div>
+
+				<!-- Precise volume controls (visible when "Vol: Custom" selected) -->
+				<div id="volume-custom-group" class="custom-filter-group" style="display:none">
+					<label class="custom-filter-label">Min Volume</label>
+					<div class="slider-row">
+						<input id="volume-min-slider" type="range" min="0" max="200000" step="500" value="0" />
+						<input id="volume-min-input" type="number" min="0" placeholder="0" value="0" />
+					</div>
+					<label class="custom-filter-label">Max Volume <span class="hint">(0 = no limit)</span></label>
+					<div class="slider-row">
+						<input id="volume-max-slider" type="range" min="0" max="500000" step="1000" value="0" />
+						<input id="volume-max-input" type="number" min="0" placeholder="0" value="0" />
+					</div>
+				</div>
+
+				<!-- Precise budget controls (visible when "Budget: Custom" selected) -->
+				<div id="budget-custom-group" class="custom-filter-group" style="display:none">
+					<label class="custom-filter-label">Max Price (gp) <span class="hint">(0 = no limit)</span></label>
+					<div class="slider-row">
+						<input id="budget-slider" type="range" min="0" max="2000000000" step="1000000" value="0" />
+						<input id="budget-input" type="number" min="0" placeholder="0" value="0" />
+					</div>
+				</div>
+				<div id="market-loading" class="loader">Loading market data…</div>
+				<div id="market-items"></div>
+				</div><!-- /.top20-section -->
+			</section>
+
+			<!-- ── Advisor / chat view ────────────────────────────────── -->
+			<section id="advisor-view">
+				<div id="advisor-header">
+					<h2>Ask the Advisor</h2>
+					<button id="clear-chat-btn" type="button" title="Clear chat history">🗑 Clear</button>
+				</div>
+				<div id="chat-history"></div>
+				<div id="chat-input-row">
+					<input
+						id="chat-input"
+						type="text"
+						placeholder="e.g. What should I flip right now?"
+						autocomplete="off"
+						spellcheck="false"
+					/>
+					<button id="chat-send-btn" type="button">Send</button>
+				</div>
+			</section>
+
+			<!-- ── Portfolio / active flip tracker ────────────────────────────── -->
+			<section id="portfolio-view">
+				<h2>Active Portfolio</h2>
+
+				<!-- Sub-navigation: Active Flips vs History & Stats -->
+				<div id="portfolio-sub-nav" class="portfolio-sub-nav">
+					<button id="portfolio-active-btn" class="portfolio-sub-btn active" type="button">Active Flips</button>
+					<button id="portfolio-history-btn" class="portfolio-sub-btn" type="button">History &amp; Stats</button>
+				</div>
+
+				<!-- Active flips pane -->
+				<div id="portfolio-active-container">
+				<!-- Add-flip form -->
+				<div id="portfolio-form" class="portfolio-form">
+					<div class="autocomplete-wrap">
+						<input id="flip-item-name" type="text" placeholder="Search or pick an item…" autocomplete="off" spellcheck="false" />
+						<div id="flip-suggestions" class="autocomplete-list"></div>
+					</div>
+					<div class="portfolio-form-row">
+						<input id="flip-buy-price" type="number" min="1" placeholder="Buy price" />
+						<input id="flip-quantity" type="number" min="1" placeholder="Qty" />
+						<input id="flip-sell-price" type="number" min="1" placeholder="Sell price" />
+					</div>
+					<button id="add-flip-btn" type="button">+ Add Flip</button>
+				</div>
+
+				<!-- Active flips list -->
+				<div id="active-flips-list"></div>
+				</div>
+
+				<!-- History & Stats pane (hidden by default) -->
+				<div id="portfolio-history-container" style="display:none">
+					<div id="portfolio-stats" class="portfolio-stats">
+						<div class="stat-card">
+							<span class="stat-label">Total Profit</span>
+							<span id="stat-total-profit" class="stat-value">0 gp</span>
+						</div>
+						<div class="stat-card">
+							<span class="stat-label">Completed Flips</span>
+							<span id="stat-total-flips" class="stat-value">0</span>
+						</div>
+						<div class="stat-card">
+							<span class="stat-label">Avg Profit</span>
+							<span id="stat-avg-profit" class="stat-value">0 gp</span>
+						</div>
+						<div class="stat-card">
+							<span class="stat-label">Avg ROI</span>
+							<span id="stat-avg-roi" class="stat-value">0%</span>
+						</div>
+					</div>
+					<div id="completed-flips-list"></div>
+				</div>
+			</section>
+
+		</main>
+	</div>
+
+	<!-- HtmlWebpackPlugin injects the script tag automatically -->
+<script defer src="main.js"></script></body>
+</html>
