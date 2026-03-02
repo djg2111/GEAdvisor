@@ -747,6 +747,13 @@ button:disabled {
   white-space: nowrap;
 }
 
+.buy-badge[title],
+.sell-badge[title],
+.profit-badge[title],
+.velocity-badge[title] {
+  cursor: help;
+}
+
 .buy-badge {
   background: var(--badge-buy-bg);
   color: var(--accent-blue-text);
@@ -779,6 +786,36 @@ button:disabled {
   color: var(--accent-gold-hype);
   font-weight: 600;
   animation: hype-pulse 2s ease-in-out infinite;
+}
+
+/* ── Trade velocity badges ────────────────────────────────────────────── */
+
+.velocity-badge {
+  font-size: 10px;
+  padding: 1px 6px;
+  border-radius: 3px;
+  white-space: nowrap;
+  font-weight: 600;
+}
+
+.velocity-insta {
+  background: rgba(39, 174, 96, 0.18);
+  color: var(--accent-green-bright);
+}
+
+.velocity-active {
+  background: rgba(86, 156, 214, 0.18);
+  color: var(--accent-blue-text);
+}
+
+.velocity-slow {
+  background: rgba(240, 192, 64, 0.18);
+  color: var(--accent-gold);
+}
+
+.velocity-veryslow {
+  background: rgba(136, 136, 136, 0.18);
+  color: var(--text-muted);
 }
 
 @keyframes hype-pulse {
@@ -1125,6 +1162,11 @@ button:disabled {
   color: var(--text-muted);
 }
 
+.item-modal-details .detail-label[title] {
+  cursor: help;
+  border-bottom: 1px dotted var(--text-dimmed);
+}
+
 .item-modal-details .detail-value {
   color: var(--text-main);
   font-weight: 600;
@@ -1139,6 +1181,11 @@ button:disabled {
 
 .detail-label {
   color: var(--text-muted);
+}
+
+.detail-label[title] {
+  cursor: help;
+  border-bottom: 1px dotted var(--text-dimmed);
 }
 
 .detail-value {
@@ -3483,6 +3530,22 @@ class MarketAnalyzerService {
             // Price history sparkline data: historical prices + today.
             const histPrices = priceHistoryMap.get(record.name) ?? [];
             const priceHistory = [...histPrices, record.price];
+            // Trade velocity: qualitative speed tier based on hourly volume vs buy limit.
+            const hourlyVolume = Math.floor(globalVol / 24);
+            const safeBuyLimit = (limit != null && limit > 0) ? limit : 0;
+            let tradeVelocity;
+            if (hourlyVolume > 5000 || (safeBuyLimit > 0 && hourlyVolume > safeBuyLimit * 5)) {
+                tradeVelocity = "Insta-Flip";
+            }
+            else if (hourlyVolume > 500 || (safeBuyLimit > 0 && hourlyVolume > safeBuyLimit)) {
+                tradeVelocity = "Active";
+            }
+            else if (hourlyVolume > 50) {
+                tradeVelocity = "Slow";
+            }
+            else {
+                tradeVelocity = "Very Slow";
+            }
             result.push({
                 name: record.name,
                 itemId: record.id,
@@ -3498,6 +3561,7 @@ class MarketAnalyzerService {
                 estFlipProfit,
                 isRisky,
                 volumeSpikeMultiplier,
+                tradeVelocity,
                 priceHistory,
             });
         }
@@ -4452,6 +4516,44 @@ const MAX_SAVED_MESSAGES = 50;
 const BUY_LIMIT_WINDOW_MS = 4 * 60 * 60 * 1000;
 /** Portfolio countdown refresh interval in milliseconds (every 30 s). */
 const PORTFOLIO_TICK_MS = 30000;
+// ─── Detail-row label text & tooltip descriptions ───────────────────────────
+/**
+ * Canonical display text for each detail-row label.
+ * Centralised so the card and modal stay in sync.
+ */
+const DETAIL_LABELS = {
+    "GE Price": "GE Price",
+    "Rec. Buy Price": "Rec. Buy Price",
+    "Rec. Sell Price": "Rec. Sell Price",
+    "Est. Flip Profit": "Est. Flip Profit",
+    "24h Global Vol": "24h Global Vol",
+    "Eff. Player Vol": "Eff. Player Vol",
+    "Volume Spike": "Volume Spike",
+    "Player Traded Val": "Player Traded Val",
+    "Buy Limit (4h)": "Buy Limit (4h)",
+    "Max Capital (4h)": "Max Capital (4h)",
+    "Tax Gap": "Tax Gap",
+    "Est. Margin (2% tax)": "Est. Margin (2% tax)",
+};
+/**
+ * Hover tooltip explanations for each detail-row metric.
+ * Displayed as the native `title` attribute so users can learn
+ * what each number means without leaving the overlay.
+ */
+const DETAIL_TIPS = {
+    "GE Price": "Latest mid-price reported by the Grand Exchange API.",
+    "Rec. Buy Price": "Suggested buy-offer price — ~1% below the GE mid-price for a realistic instant-buy entry.",
+    "Rec. Sell Price": "Suggested sell price — ~3% above mid-price to cover the 2% GE tax and still leave profit.",
+    "Est. Flip Profit": "Estimated profit per item if you buy at the rec. buy price and sell at the rec. sell price, after the 2% GE tax.",
+    "24h Global Vol": "Total number of this item traded across all players in the last 24 hours.",
+    "Eff. Player Vol": "The lower of global daily volume and your personal daily limit (buy limit × 6 windows). Reflects how many you can realistically flip per day.",
+    "Volume Spike": "Today's volume compared to its 7-day average. Values above 1.5× indicate unusual hype or demand.",
+    "Player Traded Val": "Total gp throughput a single player can achieve per day — GE price × effective player volume.",
+    "Buy Limit (4h)": "Maximum quantity you can buy from the GE every 4 hours. Set by Jagex per item.",
+    "Max Capital (4h)": "Maximum gp you need to fill one full buy-limit window — GE price × buy limit.",
+    "Tax Gap": "Minimum price difference needed between buy and sell to break even after the 2% GE tax.",
+    "Est. Margin (2% tax)": "The flat gp amount the 2% GE tax takes from one sale at the current price.",
+};
 // ─── Favorites helpers ──────────────────────────────────────────────────────
 /** Return the Set of favourited item names from localStorage. */
 function getFavorites() {
@@ -5234,17 +5336,38 @@ function buildItemCard(item) {
     const buyBadge = document.createElement("span");
     buyBadge.className = "buy-badge";
     buyBadge.textContent = `Buy ≤ ${formatGpShort(item.recBuyPrice)}`;
+    buyBadge.title = "Recommended buy offer — ~1% below the GE mid-price for a realistic instant-buy entry.";
     const sellBadge = document.createElement("span");
     sellBadge.className = `sell-badge${item.isRisky ? " risky" : ""}`;
     sellBadge.textContent = item.isRisky
         ? `⚠ Sell ≥ ${formatGpShort(item.recSellPrice)}`
         : `Sell ≥ ${formatGpShort(item.recSellPrice)}`;
+    sellBadge.title = "Recommended sell price — ~3% above mid-price to cover the 2% GE tax and leave profit.";
     const profitBadge = document.createElement("span");
     profitBadge.className = `profit-badge${item.estFlipProfit <= 0 ? " negative" : ""}`;
     profitBadge.textContent = `${item.estFlipProfit > 0 ? "+" : ""}${formatGpShort(item.estFlipProfit)}/ea`;
+    profitBadge.title = "Estimated profit per item after paying the 2% GE tax on the sale.";
     flipWrap.appendChild(buyBadge);
     flipWrap.appendChild(sellBadge);
     flipWrap.appendChild(profitBadge);
+    // Trade velocity badge.
+    const velocityBadge = document.createElement("span");
+    const velocityCls = {
+        "Insta-Flip": "velocity-insta",
+        "Active": "velocity-active",
+        "Slow": "velocity-slow",
+        "Very Slow": "velocity-veryslow",
+    };
+    const velocityTip = {
+        "Insta-Flip": "Very high hourly volume — offers typically fill within seconds to a few minutes.",
+        "Active": "Solid hourly volume — expect fills within a few minutes to ~30 min.",
+        "Slow": "Low hourly volume — may take 30 min to several hours to fill.",
+        "Very Slow": "Very low hourly volume — fills can take many hours or may not complete in a 4 h window.",
+    };
+    velocityBadge.className = `velocity-badge ${velocityCls[item.tradeVelocity] ?? "velocity-slow"}`;
+    velocityBadge.textContent = item.tradeVelocity;
+    velocityBadge.title = velocityTip[item.tradeVelocity] ?? "";
+    flipWrap.appendChild(velocityBadge);
     // Hype badge (only when volume spike detected).
     if (item.volumeSpikeMultiplier > 1.5) {
         const hypeBadge = document.createElement("span");
@@ -5293,20 +5416,20 @@ function buildItemCard(item) {
     const detail = document.createElement("div");
     detail.className = "market-card-detail";
     detail.innerHTML = [
-        `<div class="detail-row"><span class="detail-label">GE Price</span><span class="detail-value">${item.price.toLocaleString("en-US")} gp</span></div>`,
-        `<div class="detail-row"><span class="detail-label">Rec. Buy Price</span><span class="detail-value buy-highlight">${item.recBuyPrice.toLocaleString("en-US")} gp</span></div>`,
-        `<div class="detail-row"><span class="detail-label">Rec. Sell Price</span><span class="detail-value sell-highlight">${item.recSellPrice.toLocaleString("en-US")} gp</span></div>`,
-        `<div class="detail-row"><span class="detail-label">Est. Flip Profit</span><span class="detail-value${item.estFlipProfit <= 0 ? " risky-text" : " profit-highlight"}">${item.estFlipProfit > 0 ? "+" : ""}${item.estFlipProfit.toLocaleString("en-US")} gp/ea</span></div>`,
-        `<div class="detail-row"><span class="detail-label">24h Global Vol</span><span class="detail-value">${formatVolume(item.volume)}</span></div>`,
-        `<div class="detail-row"><span class="detail-label">Eff. Player Vol</span><span class="detail-value">${formatVolume(item.effectivePlayerVolume)}</span></div>`,
+        `<div class="detail-row"><span class="detail-label" title="${DETAIL_TIPS["GE Price"]}">${DETAIL_LABELS["GE Price"]}</span><span class="detail-value">${item.price.toLocaleString("en-US")} gp</span></div>`,
+        `<div class="detail-row"><span class="detail-label" title="${DETAIL_TIPS["Rec. Buy Price"]}">${DETAIL_LABELS["Rec. Buy Price"]}</span><span class="detail-value buy-highlight">${item.recBuyPrice.toLocaleString("en-US")} gp</span></div>`,
+        `<div class="detail-row"><span class="detail-label" title="${DETAIL_TIPS["Rec. Sell Price"]}">${DETAIL_LABELS["Rec. Sell Price"]}</span><span class="detail-value sell-highlight">${item.recSellPrice.toLocaleString("en-US")} gp</span></div>`,
+        `<div class="detail-row"><span class="detail-label" title="${DETAIL_TIPS["Est. Flip Profit"]}">${DETAIL_LABELS["Est. Flip Profit"]}</span><span class="detail-value${item.estFlipProfit <= 0 ? " risky-text" : " profit-highlight"}">${item.estFlipProfit > 0 ? "+" : ""}${item.estFlipProfit.toLocaleString("en-US")} gp/ea</span></div>`,
+        `<div class="detail-row"><span class="detail-label" title="${DETAIL_TIPS["24h Global Vol"]}">${DETAIL_LABELS["24h Global Vol"]}</span><span class="detail-value">${formatVolume(item.volume)}</span></div>`,
+        `<div class="detail-row"><span class="detail-label" title="${DETAIL_TIPS["Eff. Player Vol"]}">${DETAIL_LABELS["Eff. Player Vol"]}</span><span class="detail-value">${formatVolume(item.effectivePlayerVolume)}</span></div>`,
         item.volumeSpikeMultiplier > 1.5
-            ? `<div class="detail-row"><span class="detail-label">Volume Spike</span><span class="detail-value hype-text">\uD83D\uDD25 ${item.volumeSpikeMultiplier}x above 7-day avg</span></div>`
+            ? `<div class="detail-row"><span class="detail-label" title="${DETAIL_TIPS["Volume Spike"]}">${DETAIL_LABELS["Volume Spike"]}</span><span class="detail-value hype-text">\uD83D\uDD25 ${item.volumeSpikeMultiplier}x above 7-day avg</span></div>`
             : "",
-        `<div class="detail-row"><span class="detail-label">Player Traded Val</span><span class="detail-value">${formatGpShort(item.tradedValue)} gp</span></div>`,
-        `<div class="detail-row"><span class="detail-label">Buy Limit (4h)</span><span class="detail-value">${item.buyLimit != null ? item.buyLimit.toLocaleString("en-US") : "Unknown"}</span></div>`,
-        `<div class="detail-row"><span class="detail-label">Max Capital (4h)</span><span class="detail-value">${item.maxCapitalPer4H > 0 ? formatGpShort(item.maxCapitalPer4H) + " gp" : "Unknown"}</span></div>`,
-        `<div class="detail-row"><span class="detail-label">Tax Gap</span><span class="detail-value${item.isRisky ? " risky-text" : ""}">${formatGpShort(item.taxGap)} gp${item.isRisky ? " ⚠ risky" : ""}</span></div>`,
-        `<div class="detail-row"><span class="detail-label">Est. Margin (2% tax)</span><span class="detail-value">${formatGpShort(Math.round(item.price * 0.02))} gp</span></div>`,
+        `<div class="detail-row"><span class="detail-label" title="${DETAIL_TIPS["Player Traded Val"]}">${DETAIL_LABELS["Player Traded Val"]}</span><span class="detail-value">${formatGpShort(item.tradedValue)} gp</span></div>`,
+        `<div class="detail-row"><span class="detail-label" title="${DETAIL_TIPS["Buy Limit (4h)"]}">${DETAIL_LABELS["Buy Limit (4h)"]}</span><span class="detail-value">${item.buyLimit != null ? item.buyLimit.toLocaleString("en-US") : "Unknown"}</span></div>`,
+        `<div class="detail-row"><span class="detail-label" title="${DETAIL_TIPS["Max Capital (4h)"]}">${DETAIL_LABELS["Max Capital (4h)"]}</span><span class="detail-value">${item.maxCapitalPer4H > 0 ? formatGpShort(item.maxCapitalPer4H) + " gp" : "Unknown"}</span></div>`,
+        `<div class="detail-row"><span class="detail-label" title="${DETAIL_TIPS["Tax Gap"]}">${DETAIL_LABELS["Tax Gap"]}</span><span class="detail-value${item.isRisky ? " risky-text" : ""}">${formatGpShort(item.taxGap)} gp${item.isRisky ? " ⚠ risky" : ""}</span></div>`,
+        `<div class="detail-row"><span class="detail-label" title="${DETAIL_TIPS["Est. Margin (2% tax)"]}">${DETAIL_LABELS["Est. Margin (2% tax)"]}</span><span class="detail-value">${formatGpShort(Math.round(item.price * 0.02))} gp</span></div>`,
     ].join("");
     // Toggle inline expand on click (multiple cards can be expanded).
     header.addEventListener("click", () => {
@@ -5414,29 +5537,41 @@ function showItemModal(item) {
     mHeader.appendChild(modalAddBtn);
     mHeader.appendChild(closeBtn);
     // Build body contents.
+    const velocityClsMap = {
+        "Insta-Flip": "velocity-insta",
+        "Active": "velocity-active",
+        "Slow": "velocity-slow",
+        "Very Slow": "velocity-veryslow",
+    };
     const badgesHtml = [
-        `<span class="buy-badge">Buy \u2264 ${formatGpShort(item.recBuyPrice)}</span>`,
-        `<span class="sell-badge${item.isRisky ? " risky" : ""}>Sell \u2265 ${formatGpShort(item.recSellPrice)}</span>`,
-        `<span class="profit-badge${item.estFlipProfit <= 0 ? " negative" : ""}">${item.estFlipProfit > 0 ? "+" : ""}${formatGpShort(item.estFlipProfit)}/ea</span>`,
+        `<span class="buy-badge" title="Suggested buy-offer price \u2014 ~1% below the GE mid-price for a realistic instant-buy entry.">Buy \u2264 ${formatGpShort(item.recBuyPrice)}</span>`,
+        `<span class="sell-badge${item.isRisky ? " risky" : ""}" title="Suggested sell price \u2014 ~3% above mid-price to cover the 2% GE tax and leave profit.">Sell \u2265 ${formatGpShort(item.recSellPrice)}</span>`,
+        `<span class="profit-badge${item.estFlipProfit <= 0 ? " negative" : ""}" title="Estimated profit per item after paying the 2% GE tax on the sale.">${item.estFlipProfit > 0 ? "+" : ""}${formatGpShort(item.estFlipProfit)}/ea</span>`,
+        `<span class="velocity-badge ${velocityClsMap[item.tradeVelocity] ?? "velocity-slow"}" title="${{
+            "Insta-Flip": "Very high hourly volume \u2014 offers typically fill within seconds to a few minutes.",
+            "Active": "Solid hourly volume \u2014 expect fills within a few minutes to ~30 min.",
+            "Slow": "Low hourly volume \u2014 may take 30 min to several hours to fill.",
+            "Very Slow": "Very low hourly volume \u2014 fills can take many hours or may not complete in a 4 h window.",
+        }[item.tradeVelocity] ?? ""}">${item.tradeVelocity}</span>`,
         item.volumeSpikeMultiplier > 1.5
             ? `<span class="hype-badge">\uD83D\uDD25 ${item.volumeSpikeMultiplier}x Vol</span>`
             : "",
     ].filter(Boolean).join("");
     const rows = [
-        `<div class="detail-row"><span class="detail-label">GE Price</span><span class="detail-value">${item.price.toLocaleString("en-US")} gp</span></div>`,
-        `<div class="detail-row"><span class="detail-label">Rec. Buy Price</span><span class="detail-value buy-highlight">${item.recBuyPrice.toLocaleString("en-US")} gp</span></div>`,
-        `<div class="detail-row"><span class="detail-label">Rec. Sell Price</span><span class="detail-value sell-highlight">${item.recSellPrice.toLocaleString("en-US")} gp</span></div>`,
-        `<div class="detail-row"><span class="detail-label">Est. Flip Profit</span><span class="detail-value${item.estFlipProfit <= 0 ? " risky-text" : " profit-highlight"}">${item.estFlipProfit > 0 ? "+" : ""}${item.estFlipProfit.toLocaleString("en-US")} gp/ea</span></div>`,
-        `<div class="detail-row"><span class="detail-label">24h Global Vol</span><span class="detail-value">${formatVolume(item.volume)}</span></div>`,
-        `<div class="detail-row"><span class="detail-label">Eff. Player Vol</span><span class="detail-value">${formatVolume(item.effectivePlayerVolume)}</span></div>`,
+        `<div class="detail-row"><span class="detail-label" title="${DETAIL_TIPS["GE Price"]}">${DETAIL_LABELS["GE Price"]}</span><span class="detail-value">${item.price.toLocaleString("en-US")} gp</span></div>`,
+        `<div class="detail-row"><span class="detail-label" title="${DETAIL_TIPS["Rec. Buy Price"]}">${DETAIL_LABELS["Rec. Buy Price"]}</span><span class="detail-value buy-highlight">${item.recBuyPrice.toLocaleString("en-US")} gp</span></div>`,
+        `<div class="detail-row"><span class="detail-label" title="${DETAIL_TIPS["Rec. Sell Price"]}">${DETAIL_LABELS["Rec. Sell Price"]}</span><span class="detail-value sell-highlight">${item.recSellPrice.toLocaleString("en-US")} gp</span></div>`,
+        `<div class="detail-row"><span class="detail-label" title="${DETAIL_TIPS["Est. Flip Profit"]}">${DETAIL_LABELS["Est. Flip Profit"]}</span><span class="detail-value${item.estFlipProfit <= 0 ? " risky-text" : " profit-highlight"}">${item.estFlipProfit > 0 ? "+" : ""}${item.estFlipProfit.toLocaleString("en-US")} gp/ea</span></div>`,
+        `<div class="detail-row"><span class="detail-label" title="${DETAIL_TIPS["24h Global Vol"]}">${DETAIL_LABELS["24h Global Vol"]}</span><span class="detail-value">${formatVolume(item.volume)}</span></div>`,
+        `<div class="detail-row"><span class="detail-label" title="${DETAIL_TIPS["Eff. Player Vol"]}">${DETAIL_LABELS["Eff. Player Vol"]}</span><span class="detail-value">${formatVolume(item.effectivePlayerVolume)}</span></div>`,
         item.volumeSpikeMultiplier > 1.5
-            ? `<div class="detail-row"><span class="detail-label">Volume Spike</span><span class="detail-value hype-text">\uD83D\uDD25 ${item.volumeSpikeMultiplier}x above 7-day avg</span></div>`
+            ? `<div class="detail-row"><span class="detail-label" title="${DETAIL_TIPS["Volume Spike"]}">${DETAIL_LABELS["Volume Spike"]}</span><span class="detail-value hype-text">\uD83D\uDD25 ${item.volumeSpikeMultiplier}x above 7-day avg</span></div>`
             : "",
-        `<div class="detail-row"><span class="detail-label">Player Traded Val</span><span class="detail-value">${formatGpShort(item.tradedValue)} gp</span></div>`,
-        `<div class="detail-row"><span class="detail-label">Buy Limit (4h)</span><span class="detail-value">${item.buyLimit != null ? item.buyLimit.toLocaleString("en-US") : "Unknown"}</span></div>`,
-        `<div class="detail-row"><span class="detail-label">Max Capital (4h)</span><span class="detail-value">${item.maxCapitalPer4H > 0 ? formatGpShort(item.maxCapitalPer4H) + " gp" : "Unknown"}</span></div>`,
-        `<div class="detail-row"><span class="detail-label">Tax Gap</span><span class="detail-value${item.isRisky ? " risky-text" : ""}">${formatGpShort(item.taxGap)} gp${item.isRisky ? " \u26a0 risky" : ""}</span></div>`,
-        `<div class="detail-row"><span class="detail-label">Est. Margin (2% tax)</span><span class="detail-value">${formatGpShort(Math.round(item.price * 0.02))} gp</span></div>`,
+        `<div class="detail-row"><span class="detail-label" title="${DETAIL_TIPS["Player Traded Val"]}">${DETAIL_LABELS["Player Traded Val"]}</span><span class="detail-value">${formatGpShort(item.tradedValue)} gp</span></div>`,
+        `<div class="detail-row"><span class="detail-label" title="${DETAIL_TIPS["Buy Limit (4h)"]}">${DETAIL_LABELS["Buy Limit (4h)"]}</span><span class="detail-value">${item.buyLimit != null ? item.buyLimit.toLocaleString("en-US") : "Unknown"}</span></div>`,
+        `<div class="detail-row"><span class="detail-label" title="${DETAIL_TIPS["Max Capital (4h)"]}">${DETAIL_LABELS["Max Capital (4h)"]}</span><span class="detail-value">${item.maxCapitalPer4H > 0 ? formatGpShort(item.maxCapitalPer4H) + " gp" : "Unknown"}</span></div>`,
+        `<div class="detail-row"><span class="detail-label" title="${DETAIL_TIPS["Tax Gap"]}">${DETAIL_LABELS["Tax Gap"]}</span><span class="detail-value${item.isRisky ? " risky-text" : ""}">${formatGpShort(item.taxGap)} gp${item.isRisky ? " \u26a0 risky" : ""}</span></div>`,
+        `<div class="detail-row"><span class="detail-label" title="${DETAIL_TIPS["Est. Margin (2% tax)"]}">${DETAIL_LABELS["Est. Margin (2% tax)"]}</span><span class="detail-value">${formatGpShort(Math.round(item.price * 0.02))} gp</span></div>`,
     ].filter(Boolean).join("");
     mBody.innerHTML =
         `<div class="item-modal-badges">${badgesHtml}</div>` +
