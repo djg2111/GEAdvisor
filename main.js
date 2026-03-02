@@ -560,6 +560,24 @@ button:disabled {
   margin: 0;
 }
 
+.market-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* ── Per-section sort selects ─────────────────────────────────────────────── */
+
+.section-sort-select {
+  font-size: 10px;
+  padding: 1px 4px;
+  background: var(--bg-input);
+  border: 1px solid var(--border-input);
+  color: var(--text-muted);
+  border-radius: 3px;
+  cursor: pointer;
+}
+
 /* ── View toggle buttons ──────────────────────────────────────────────────── */
 
 .view-toggle {
@@ -663,6 +681,60 @@ button:disabled {
   height: 16px;
   cursor: pointer;
   accent-color: var(--accent-primary);
+  -webkit-appearance: none;
+  appearance: none;
+  background: transparent;
+}
+
+/* Track */
+.slider-row input[type="range"]::-webkit-slider-runnable-track {
+  height: 4px;
+  border-radius: 2px;
+  background: var(--border-input);
+}
+
+.slider-row input[type="range"]::-moz-range-track {
+  height: 4px;
+  border-radius: 2px;
+  border: none;
+  background: var(--border-input);
+}
+
+/* Thumb */
+.slider-row input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--accent-primary);
+  border: none;
+  margin-top: -5px;
+  transition: background 0.15s;
+}
+
+.slider-row input[type="range"]::-moz-range-thumb {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--accent-primary);
+  border: none;
+}
+
+/* Hover / focus */
+.slider-row input[type="range"]:hover::-webkit-slider-thumb {
+  background: var(--accent-primary-hover);
+}
+
+.slider-row input[type="range"]:hover::-moz-range-thumb {
+  background: var(--accent-primary-hover);
+}
+
+.slider-row input[type="range"]:focus {
+  outline: none;
+}
+
+.slider-row input[type="range"]:focus::-webkit-slider-thumb {
+  box-shadow: 0 0 0 2px var(--accent-focus);
 }
 
 .slider-row input[type="number"] {
@@ -687,6 +759,46 @@ button:disabled {
   font-style: italic;
   font-size: 12px;
   padding: 4px 0;
+}
+
+/* ── Error recovery banner ────────────────────────────────────────────────── */
+
+.error-banner {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  margin: 4px 0 6px;
+  background: var(--accent-red-bg);
+  border: 1px solid var(--accent-red-border);
+  border-radius: 4px;
+  color: var(--accent-red);
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.error-banner.hidden {
+  display: none;
+}
+
+.error-banner span {
+  flex: 1;
+}
+
+.error-banner button {
+  flex-shrink: 0;
+  padding: 4px 12px;
+  font-size: 11px;
+  background: var(--accent-red-border);
+  color: var(--text-bright);
+  border: none;
+  border-radius: 3px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.error-banner button:hover {
+  background: var(--accent-red-border-hover);
 }
 
 .market-empty {
@@ -870,10 +982,24 @@ button:disabled {
 /* ── Search section ────────────────────────────────────────────────────── */
 
 #search-section {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
   margin-bottom: 6px;
 }
 
+#search-section #market-search-input {
+  flex: 1 1 0;
+  min-width: 0;
+}
+
+#search-section .view-toggle {
+  flex-shrink: 0;
+}
+
 #search-results {
+  width: 100%;
   margin-top: 6px;
 }
 
@@ -882,6 +1008,7 @@ button:disabled {
 }
 
 #search-loading {
+  width: 100%;
   font-size: 12px;
   color: var(--text-muted);
   padding: 4px 0;
@@ -1034,6 +1161,32 @@ button:disabled {
   background: rgba(78, 201, 176, 0.12);
 }
 
+/* ── External link buttons (Wiki / GE) ─────────────────────────────────────── */
+
+.ext-link {
+  all: unset;
+  cursor: pointer;
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1;
+  color: var(--text-muted);
+  padding: 2px 5px;
+  border-radius: 3px;
+  flex-shrink: 0;
+  text-decoration: none;
+  transition: color 0.15s, background 0.15s;
+}
+
+.ext-link.wiki-link:hover {
+  color: var(--accent-blue-text);
+  background: rgba(86, 156, 214, 0.12);
+}
+
+.ext-link.ge-link:hover {
+  color: var(--accent-gold);
+  background: rgba(240, 192, 64, 0.12);
+}
+
 /* ── Favourites section ────────────────────────────────────────────────────────────── */
 
 .favorites-section {
@@ -1051,6 +1204,22 @@ button:disabled {
   padding: 4px 10px;
   background: var(--bg-panel);
   border-bottom: 1px solid var(--border-section);
+}
+
+.favorites-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+#favorites-sort-select {
+  font-size: 10px;
+  padding: 1px 4px;
+  background: var(--bg-input);
+  border: 1px solid var(--border-input);
+  color: var(--text-muted);
+  border-radius: 3px;
+  cursor: pointer;
 }
 
 .favorites-header h3 {
@@ -1955,6 +2124,73 @@ body[data-layout="sidebar"] #portfolio-view {
   flex-direction: column;
   min-width: 0;
   border-left: 1px solid var(--border-main);
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   Desktop / wide-viewport overrides
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+@media (min-width: 800px) {
+  /* More breathing room on the main content and settings. */
+  #app-content {
+    padding: 0 8px;
+  }
+
+  #market-view {
+    padding: 10px 18px;
+  }
+
+  #settings-panel {
+    padding: 8px 18px;
+  }
+
+  /* Wider modal with larger sparkline. */
+  .item-modal {
+    width: 560px;
+    max-width: 600px;
+  }
+
+  .modal-sparkline {
+    height: 80px;
+  }
+
+  .item-modal-header {
+    padding: 12px 16px;
+  }
+
+  .item-modal-body {
+    padding: 0 4px;
+  }
+
+  .item-modal-details .detail-row {
+    padding: 3px 0;
+  }
+
+  /* Tile view — allow more cards per row on wider screens. */
+  .market-items.tile {
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 6px;
+  }
+
+  /* Hybrid view — wider minimum for richer card content. */
+  .market-items.hybrid {
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 5px;
+  }
+
+  /* Slightly larger sparklines on cards. */
+  .sparkline {
+    height: 36px;
+  }
+
+  /* Advisor chat gets more comfortable padding. */
+  #advisor-view {
+    padding: 10px 18px;
+  }
+
+  #portfolio-view {
+    padding: 10px 18px;
+  }
 }
 `, ""]);
 // Exports
@@ -2926,7 +3162,14 @@ async function initDataPipeline() {
     if (stale) {
         console.log("[initDataPipeline] Cache is stale — fetching fresh prices…");
         // Step 3a — Fetch from API (batched + concurrent).
-        const prices = await api.fetchLatestPrices(SEED_ITEMS);
+        let prices;
+        try {
+            prices = await api.fetchLatestPrices(SEED_ITEMS);
+        }
+        catch (fetchErr) {
+            console.error("[initDataPipeline] Network error fetching prices:", fetchErr);
+            throw new Error("Could not reach the Weird Gloop API — check your internet connection and try again.");
+        }
         if (prices.size === 0) {
             console.warn("[initDataPipeline] API returned zero records. Cache will remain empty.");
         }
@@ -2934,7 +3177,14 @@ async function initDataPipeline() {
             // Step 3b — Enrich records with GE buy limits from the wiki.
             const wiki = new _wikiService__WEBPACK_IMPORTED_MODULE_2__.WikiService();
             const itemNames = Array.from(prices.keys());
-            const buyLimits = await wiki.getBulkBuyLimits(itemNames);
+            let buyLimits;
+            try {
+                buyLimits = await wiki.getBulkBuyLimits(itemNames);
+            }
+            catch (wikiErr) {
+                console.warn("[initDataPipeline] Wiki buy-limit fetch failed — continuing without limits.", wikiErr);
+                buyLimits = new Map();
+            }
             for (const [name, record] of prices) {
                 const limit = buyLimits.get(name);
                 if (limit !== undefined) {
@@ -4614,6 +4864,8 @@ let latestMarketSummary = "";
 let latestWikiText = "";
 /** The top items array, cached for wiki lookups per chat message. */
 let latestTopItems = [];
+/** The latest search results, cached for re-sorting without re-fetching. */
+let latestSearchResults = [];
 /** Currently active view mode for the market panel. */
 let currentView = "list";
 /** Shared LLM service instance — persists conversation history across sends. */
@@ -4653,6 +4905,7 @@ async function initUI() {
     bindTabNavigation();
     bindClearChat();
     bindPortfolio();
+    bindErrorRetry();
     // Initialise shared service singletons.
     cache = new _services__WEBPACK_IMPORTED_MODULE_0__.CacheService();
     await cache.open();
@@ -4660,15 +4913,30 @@ async function initUI() {
     wiki = new _services__WEBPACK_IMPORTED_MODULE_0__.WikiService();
     portfolio = new _services__WEBPACK_IMPORTED_MODULE_0__.PortfolioService();
     // Run the initial market analysis and render.
-    await refreshMarketPanel();
+    try {
+        await refreshMarketPanel();
+    }
+    catch (err) {
+        console.error("[UIService] Startup: market panel failed:", err);
+        const msg = err instanceof Error ? err.message : "Could not load market data.";
+        showError(msg);
+    }
     // Render the favourites section (if any favourites exist).
+    restoreFavSort();
+    bindFavSort();
     await renderFavorites();
     bindFavoritesCollapse();
     bindTop20Collapse();
     // Build the full item catalogue for portfolio autocomplete.
     await loadItemCatalogue();
-    // Fetch the full GE catalogue (∼7 000 items) for market search.
-    geCatalogue = await (0,_services__WEBPACK_IMPORTED_MODULE_0__.fetchGECatalogue)();
+    // Fetch the full GE catalogue (~7 000 items) for market search.
+    try {
+        geCatalogue = await (0,_services__WEBPACK_IMPORTED_MODULE_0__.fetchGECatalogue)();
+    }
+    catch (err) {
+        console.warn("[UIService] GE catalogue fetch failed:", err);
+        geCatalogue = [];
+    }
     // Pre-fetch wiki text for the first batch of items so that the first
     // chat message doesn't have to wait for wiki I/O.
     await prefetchWikiText();
@@ -4832,8 +5100,10 @@ function bindForceReload() {
         }
         catch (err) {
             console.error("[UIService] Force reload failed:", err);
-            els.reloadStatus.textContent = "Reload failed — see console.";
+            const msg = err instanceof Error ? err.message : "Reload failed — see console.";
+            els.reloadStatus.textContent = msg;
             els.reloadStatus.classList.add("error");
+            showError(msg);
         }
         finally {
             els.forceReloadBtn.disabled = false;
@@ -4924,25 +5194,86 @@ function debounce(fn, ms) {
         timer = setTimeout(() => fn(...args), ms);
     });
 }
+// ─── Error Banner ───────────────────────────────────────────────────────────
+/**
+ * Show the global error banner with the given message.
+ * Also hides the market-loading spinner so it doesn't compete visually.
+ */
+function showError(message) {
+    els.errorBannerMsg.textContent = message;
+    els.errorBanner.classList.remove("hidden");
+    els.marketLoading.style.display = "none";
+}
+/** Hide the global error banner and clear its message. */
+function hideError() {
+    els.errorBanner.classList.add("hidden");
+    els.errorBannerMsg.textContent = "";
+}
+/**
+ * Wire the error-banner retry button.  Clears the cache, re-runs the full
+ * data pipeline, and refreshes the market panel.
+ */
+function bindErrorRetry() {
+    els.errorRetryBtn.addEventListener("click", async () => {
+        hideError();
+        els.marketLoading.style.display = "";
+        els.marketLoading.textContent = "Retrying…";
+        try {
+            await cache.clear();
+            await (0,_services__WEBPACK_IMPORTED_MODULE_0__.initDataPipeline)();
+            cache = new _services__WEBPACK_IMPORTED_MODULE_0__.CacheService();
+            await cache.open();
+            analyzer = new _services__WEBPACK_IMPORTED_MODULE_0__.MarketAnalyzerService(cache);
+            await refreshMarketPanel();
+        }
+        catch (err) {
+            console.error("[UIService] Retry failed:", err);
+            const msg = err instanceof Error ? err.message : "Retry failed — see console.";
+            showError(msg);
+        }
+    });
+}
 // ─── Market Panel ───────────────────────────────────────────────────────────
 /** Whether the market panel is currently showing search results. */
 let isSearchActive = false;
+const TOP20_SORT_KEY = "ge-analyzer:top20-sort";
+const SEARCH_SORT_KEY = "ge-analyzer:search-sort";
+/**
+ * Sort an array of {@link RankedItem} in place based on the given sort key.
+ * Returns the same array reference for convenience.
+ */
+function applySortOrder(items, sortKey) {
+    if (sortKey === "alpha") {
+        items.sort((a, b) => a.name.localeCompare(b.name));
+    }
+    else if (sortKey === "price-desc") {
+        items.sort((a, b) => b.price - a.price);
+    }
+    else if (sortKey === "profit-desc") {
+        items.sort((a, b) => b.estFlipProfit - a.estFlipProfit);
+    }
+    return items;
+}
 /**
  * Run the market analyzer and render the top-N list into the DOM.
  */
 async function refreshMarketPanel() {
+    hideError();
     els.marketLoading.style.display = "";
+    els.marketLoading.textContent = "Loading market data…";
+    els.marketLoading.classList.remove("error");
     els.marketItems.innerHTML = "";
     try {
         const filters = readFilterConfig();
         latestTopItems = await analyzer.getTopItems(filters);
         latestMarketSummary = analyzer.formatForLLM(latestTopItems);
+        applySortOrder(latestTopItems, els.top20SortSelect.value);
         renderMarketItems(latestTopItems);
     }
     catch (err) {
         console.error("[UIService] Failed to refresh market panel:", err);
-        els.marketLoading.textContent = "Failed to load market data.";
-        els.marketLoading.classList.add("error");
+        const msg = err instanceof Error ? err.message : "Failed to load market data.";
+        showError(msg);
         return;
     }
     els.marketLoading.style.display = "none";
@@ -5001,10 +5332,31 @@ function bindMarketFilters() {
     syncSliderAndInput(els.volumeMaxSlider, els.volumeMaxInput);
     // ── Sync slider ↔ text input for budget ───────────────────────────────
     syncSliderAndInput(els.budgetSlider, els.budgetInput);
+    // ── Top 20 sort dropdown ───────────────────────────────────────────────
+    const savedTop20Sort = localStorage.getItem(TOP20_SORT_KEY);
+    if (savedTop20Sort)
+        els.top20SortSelect.value = savedTop20Sort;
+    els.top20SortSelect.addEventListener("change", () => {
+        localStorage.setItem(TOP20_SORT_KEY, els.top20SortSelect.value);
+        applySortOrder(latestTopItems, els.top20SortSelect.value);
+        renderMarketItems(latestTopItems);
+    });
+    // ── Search sort dropdown ──────────────────────────────────────────────
+    const savedSearchSort = localStorage.getItem(SEARCH_SORT_KEY);
+    if (savedSearchSort)
+        els.searchSortSelect.value = savedSearchSort;
+    els.searchSortSelect.addEventListener("change", () => {
+        localStorage.setItem(SEARCH_SORT_KEY, els.searchSortSelect.value);
+        if (latestSearchResults.length > 0) {
+            applySortOrder(latestSearchResults, els.searchSortSelect.value);
+            renderSearchResults(latestSearchResults);
+        }
+    });
     // ── Refresh button ────────────────────────────────────────────────────
     els.refreshMarketBtn.addEventListener("click", async () => {
         els.marketSearchInput.value = "";
         isSearchActive = false;
+        latestSearchResults = [];
         await refreshMarketPanel();
         // Re-fetch wiki text for the new filtered set so the LLM context stays in sync.
         await prefetchWikiText();
@@ -5053,7 +5405,9 @@ function bindMarketFilters() {
                 }
                 // 4. Now all matched items should be in cache — score them.
                 const results = await analyzer.searchItems(query);
-                renderSearchResults(results);
+                latestSearchResults = results;
+                applySortOrder(latestSearchResults, els.searchSortSelect.value);
+                renderSearchResults(latestSearchResults);
                 if (results.length === 0) {
                     els.searchLoading.textContent = `No price data for "${query}".`;
                     els.searchLoading.style.display = "";
@@ -5067,6 +5421,7 @@ function bindMarketFilters() {
         }
         else if (query.length === 0) {
             isSearchActive = false;
+            latestSearchResults = [];
             els.searchResults.innerHTML = "";
             els.searchLoading.style.display = "none";
         }
@@ -5216,6 +5571,9 @@ async function renderFavorites() {
     if (favoritesCollapsed)
         return;
     const items = await analyzer.getItemsByNames(favNames);
+    // Apply sort — use the favourites-specific dropdown.
+    const favSort = els.favoritesSortSelect.value;
+    applySortOrder(items, favSort);
     els.favoritesItems.innerHTML = "";
     els.favoritesItems.className = `market-items ${currentView}`;
     if (items.length === 0) {
@@ -5245,6 +5603,20 @@ function bindFavoritesCollapse() {
         els.favoritesItems.style.display = favoritesCollapsed ? "none" : "";
     });
 }
+const FAV_SORT_KEY = "ge-analyzer:fav-sort";
+/** Restore the persisted favourites sort preference. */
+function restoreFavSort() {
+    const saved = localStorage.getItem(FAV_SORT_KEY);
+    if (saved)
+        els.favoritesSortSelect.value = saved;
+}
+/** Bind the favourites sort dropdown change event. */
+function bindFavSort() {
+    els.favoritesSortSelect.addEventListener("change", () => {
+        localStorage.setItem(FAV_SORT_KEY, els.favoritesSortSelect.value);
+        renderFavorites();
+    });
+}
 /** Whether the Top 20 body is collapsed. */
 let top20Collapsed = false;
 /** Bind the collapse/expand toggle for the Top 20 section. */
@@ -5253,19 +5625,10 @@ function bindTop20Collapse() {
         top20Collapsed = !top20Collapsed;
         els.top20CollapseBtn.textContent = top20Collapsed ? "▸" : "▾";
         const hide = top20Collapsed ? "none" : "";
-        // Hide filters, custom groups, loading indicator, and items list.
-        document.getElementById("market-filters").style.display = hide;
+        // Hide loading indicator and items list (filters are now global, above search).
         els.marketItems.style.display = hide;
         if (top20Collapsed) {
-            // Always hide when collapsing.
-            els.volumeCustomGroup.style.display = "none";
-            els.budgetCustomGroup.style.display = "none";
             els.marketLoading.style.display = "none";
-        }
-        else {
-            // Restore custom group visibility based on current dropdown selection.
-            els.volumeCustomGroup.style.display = els.filterVolume.value === "custom" ? "" : "none";
-            els.budgetCustomGroup.style.display = els.filterPrice.value === "custom" ? "" : "none";
         }
     });
 }
@@ -5405,12 +5768,32 @@ function buildItemCard(item) {
         e.stopPropagation();
         quickAddToPortfolio(item);
     });
+    // External link: RS3 Wiki.
+    const wikiLink = document.createElement("a");
+    wikiLink.className = "ext-link wiki-link";
+    wikiLink.href = `https://runescape.wiki/w/${encodeURIComponent(item.name)}`;
+    wikiLink.target = "_blank";
+    wikiLink.rel = "noopener noreferrer";
+    wikiLink.textContent = "Wiki";
+    wikiLink.title = "Open on RS3 Wiki";
+    wikiLink.addEventListener("click", (e) => e.stopPropagation());
+    // External link: GE Database.
+    const geLink = document.createElement("a");
+    geLink.className = "ext-link ge-link";
+    geLink.href = `https://secure.runescape.com/m=itemdb_rs/viewitem?obj=${item.itemId}`;
+    geLink.target = "_blank";
+    geLink.rel = "noopener noreferrer";
+    geLink.textContent = "GE";
+    geLink.title = "Open on GE Database";
+    geLink.addEventListener("click", (e) => e.stopPropagation());
     // Group action buttons in a horizontal row.
     const actions = document.createElement("span");
     actions.className = "card-actions";
     actions.appendChild(popoutBtn);
     actions.appendChild(favBtn);
     actions.appendChild(addFlipCardBtn);
+    actions.appendChild(wikiLink);
+    actions.appendChild(geLink);
     header.appendChild(actions);
     // ── Detail panel (hidden until expanded) ──
     const detail = document.createElement("div");
@@ -5535,6 +5918,24 @@ function showItemModal(item) {
         quickAddToPortfolio(item);
     });
     mHeader.appendChild(modalAddBtn);
+    // External link: RS3 Wiki.
+    const modalWikiLink = document.createElement("a");
+    modalWikiLink.className = "ext-link wiki-link";
+    modalWikiLink.href = `https://runescape.wiki/w/${encodeURIComponent(item.name)}`;
+    modalWikiLink.target = "_blank";
+    modalWikiLink.rel = "noopener noreferrer";
+    modalWikiLink.textContent = "Wiki";
+    modalWikiLink.title = "Open on RS3 Wiki";
+    mHeader.appendChild(modalWikiLink);
+    // External link: GE Database.
+    const modalGeLink = document.createElement("a");
+    modalGeLink.className = "ext-link ge-link";
+    modalGeLink.href = `https://secure.runescape.com/m=itemdb_rs/viewitem?obj=${item.itemId}`;
+    modalGeLink.target = "_blank";
+    modalGeLink.rel = "noopener noreferrer";
+    modalGeLink.textContent = "GE";
+    modalGeLink.title = "Open on GE Database";
+    mHeader.appendChild(modalGeLink);
     mHeader.appendChild(closeBtn);
     // Build body contents.
     const velocityClsMap = {
@@ -6348,6 +6749,8 @@ function resolveElements() {
         keyStatus: q("key-status"),
         filterVolume: q("filter-volume"),
         filterPrice: q("filter-price"),
+        top20SortSelect: q("top20-sort-select"),
+        searchSortSelect: q("search-sort-select"),
         volumeCustomGroup: q("volume-custom-group"),
         volumeMinSlider: q("volume-min-slider"),
         volumeMinInput: q("volume-min-input"),
@@ -6362,9 +6765,13 @@ function resolveElements() {
         favoritesSection: q("favorites-section"),
         favoritesItems: q("favorites-items"),
         favoritesCollapseBtn: q("favorites-collapse-btn"),
+        favoritesSortSelect: q("favorites-sort-select"),
         refreshMarketBtn: q("refresh-market-btn"),
         marketLoading: q("market-loading"),
         marketItems: q("market-items"),
+        errorBanner: q("error-banner"),
+        errorBannerMsg: q("error-banner-msg"),
+        errorRetryBtn: q("error-retry-btn"),
         viewListBtn: q("view-list-btn"),
         viewTileBtn: q("view-tile-btn"),
         viewHybridBtn: q("view-hybrid-btn"),

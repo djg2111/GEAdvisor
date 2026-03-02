@@ -98,33 +98,13 @@
 
 			<!-- ── Market data view ───────────────────────────────────── -->
 			<section id="market-view" class="active-tab">
-				<!-- ── Search section (above Top 20) ──────────────────── -->
-				<div id="search-section">
-					<input type="search" id="market-search-input" placeholder="Search all GE items…" autocomplete="off" spellcheck="false" />
-					<div id="search-loading" class="loader" style="display:none"></div>
-					<div id="search-results"></div>
+				<!-- ── Error recovery banner ──────────────────────────── -->
+				<div id="error-banner" class="error-banner hidden">
+					<span id="error-banner-msg">Something went wrong.</span>
+					<button id="error-retry-btn" type="button">⟳ Retry</button>
 				</div>
 
-				<!-- ── Favourites section ──────────────────────────────── -->
-				<div id="favorites-section" class="favorites-section" style="display:none">
-					<div class="favorites-header">
-						<h3>★ Favourites</h3>
-						<button id="favorites-collapse-btn" class="view-btn" type="button" title="Collapse favourites">▾</button>
-					</div>
-					<div id="favorites-items"></div>
-				</div>
-
-				<!-- ── Recommended items ───────────────────────────────── -->
-				<div class="top20-section">
-				<div id="market-header">
-					<h2>Top 20 Markets</h2>
-					<div id="view-toggle" class="view-toggle">
-						<button id="view-list-btn" class="view-btn active" type="button" title="List view">☰</button>
-						<button id="view-tile-btn" class="view-btn" type="button" title="Tile view">▦</button>
-						<button id="view-hybrid-btn" class="view-btn" type="button" title="Hybrid view">⊞</button>
-						<button id="top20-collapse-btn" class="view-btn" type="button" title="Collapse Top 20">▾</button>
-					</div>
-				</div>
+				<!-- ── Market filters (global, above search) ─────────── -->
 				<div id="market-filters" class="filter-bar">
 					<select id="filter-volume" title="Trading style">
 						<option value="any">Vol: Any</option>
@@ -162,6 +142,56 @@
 					<div class="slider-row">
 						<input id="budget-slider" type="range" min="0" max="2000000000" step="1000000" value="0" />
 						<input id="budget-input" type="number" min="0" placeholder="0" value="0" />
+					</div>
+				</div>
+
+				<!-- ── Search section (above Top 20) ──────────────────── -->
+				<div id="search-section">
+					<input type="search" id="market-search-input" placeholder="Search all GE items…" autocomplete="off" spellcheck="false" />
+					<select id="search-sort-select" class="section-sort-select" title="Sort search results">
+						<option value="default">Sort: Default</option>
+						<option value="alpha">Sort: A–Z</option>
+						<option value="price-desc">Sort: Price ↓</option>
+						<option value="profit-desc">Sort: Profit ↓</option>
+					</select>
+					<div id="view-toggle" class="view-toggle">
+						<button id="view-list-btn" class="view-btn active" type="button" title="List view">☰</button>
+						<button id="view-tile-btn" class="view-btn" type="button" title="Tile view">▦</button>
+						<button id="view-hybrid-btn" class="view-btn" type="button" title="Hybrid view">⊞</button>
+					</div>
+					<div id="search-loading" class="loader" style="display:none"></div>
+					<div id="search-results"></div>
+				</div>
+
+				<!-- ── Favourites section ──────────────────────────────── -->
+				<div id="favorites-section" class="favorites-section" style="display:none">
+					<div class="favorites-header">
+						<h3>★ Favourites</h3>
+						<div class="favorites-header-actions">
+							<select id="favorites-sort-select" title="Sort favourites">
+								<option value="default">Default</option>
+								<option value="alpha">Alphabetical</option>
+								<option value="price-desc">Price (High to Low)</option>
+								<option value="profit-desc">Profit (High to Low)</option>
+							</select>
+							<button id="favorites-collapse-btn" class="view-btn" type="button" title="Collapse favourites">▾</button>
+						</div>
+					</div>
+					<div id="favorites-items"></div>
+				</div>
+
+				<!-- ── Recommended items ───────────────────────────────── -->
+				<div class="top20-section">
+				<div id="market-header">
+					<h2>Top 20 Markets</h2>
+					<div class="market-header-actions">
+						<select id="top20-sort-select" class="section-sort-select" title="Sort Top 20">
+							<option value="default">Sort: Default</option>
+							<option value="alpha">Sort: A–Z</option>
+							<option value="price-desc">Sort: Price ↓</option>
+							<option value="profit-desc">Sort: Profit ↓</option>
+						</select>
+						<button id="top20-collapse-btn" class="view-btn" type="button" title="Collapse Top 20">▾</button>
 					</div>
 				</div>
 				<div id="market-loading" class="loader">Loading market data…</div>
