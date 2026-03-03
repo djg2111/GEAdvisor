@@ -173,7 +173,7 @@ Pipeline:
 - `getOrBuildMaps(days)` — returns cached `avgVolumeMap` + `priceHistoryMap` if within 10-min TTL, otherwise rebuilds from IndexedDB.
 - `invalidateMapCache()` — clears cached maps (auto-reset when a new instance is constructed).
 - `formatForLLM(items)` — produces a numbered multi-line string with K/M/B/T abbreviations for LLM context injection. Now includes High Alch value, Trade Velocity tier, and `[LIMITED DATA]` tag when < 3 history points.
-- `getFormattedForLLM()` — returns the top 200 items by traded value with **no volume or price filters** (`LLM_CONTEXT_TOP_N = 200`). Used by the chat advisor to get a much broader market view than the UI's filtered top-20 panel. ≈ 15K tokens — fits comfortably in all supported provider context windows.
+- `getFormattedForLLM()` — returns the top 100 items by traded value with **no volume or price filters** (`LLM_CONTEXT_TOP_N = 100`), using a compact label-free format (`formatForLLMCompact`) to minimise payload size. Used by the chat advisor to get a much broader market view than the UI's filtered top-20 panel. ≈ 20–30 KB of text.
 
 ### 4.5 Wiki Service (`wikiService.ts`)
 
@@ -217,6 +217,7 @@ Both constants have a **supremacy clause** in the system prompt — they overrid
   - **System prompt**: RS3 GE specialist persona + 12 numbered rules (anti-hallucination, analytical reasoning framework, data interpretation) + `RS3_ECONOMIC_RULES` (8 economic laws) + `DATA_FIELD_LEGEND` (field-by-field explanation of market data format) from `coreKnowledge.ts` with supremacy clause. Instructs the LLM to rank recommendations by gp/hr, include actionable buy/sell prices, and correctly handle insufficient-data cases (slope ±0.0 + volatility 0%).
   - **User message**: Three delimited sections: `=== GRAND EXCHANGE DATA ===`, `=== WIKI GUIDE TEXT ===`, `=== PLAYER QUESTION ===`.
 - **Conversation trimming** (`buildTrimmedHistory()`): Before each API call, builds a size-efficient copy of the message history. Strips the bulky `=== GRAND EXCHANGE DATA ===` and `=== WIKI GUIDE TEXT ===` blocks from **all user messages except the most recent one**, retaining only the `=== PLAYER QUESTION ===` section. Also caps the conversation to `MAX_HISTORY_PAIRS` (8) user+assistant exchanges on top of the system prompt. This prevents HTTP 413 (Content Too Large) errors that previously occurred after 3–4 multi-turn exchanges with Groq.
+- **Payload size guard**: After building the JSON body, `generateAdvice()` checks the byte length against `MAX_BODY_BYTES` (95 KB). If exceeded, it progressively halves the market-data lines in the most recent user message (up to 4 attempts) until the payload fits. Groq's gateway returns 413 above ~100 KB.
 - Error handling: `LLMRequestError` class with `status` and `responseBody`. Descriptive messages for 401/403/413/429/5xx.
 
 ### 4.8 LLM Provider System (`types.ts`)

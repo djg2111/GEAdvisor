@@ -45,6 +45,13 @@ const DATA_BLOCK_RE =
   /=== GRAND EXCHANGE DATA ===[\s\S]*?(?==== PLAYER QUESTION ===)/;
 
 /**
+ * Maximum JSON body size (in bytes) we allow before truncating the market
+ * data.  Groq's gateway returns HTTP 413 above ~100 KB.  We stay well
+ * under at 95 KB so there's headroom for JSON escaping overhead.
+ */
+const MAX_BODY_BYTES = 95_000;
+
+/**
  * Service that synthesises GE market data and RS3 Wiki text into
  * actionable money-making advice via an LLM chat-completion API.
  *
@@ -162,12 +169,38 @@ export class LLMService {
       `[LLMService] Sending ${trimmed.length} messages (${this._messages.length} in full history) to ${this.model} at ${this.endpoint}…`
     );
 
-    const body: ChatCompletionRequest = {
+    let body: ChatCompletionRequest = {
       model: this.model,
       messages: trimmed,
       temperature: this.temperature,
       max_completion_tokens: this.maxTokens,
     };
+
+    // Guard against oversized payloads (Groq returns 413 above ~100 KB).
+    // If too large, progressively halve the market-data lines in the most
+    // recent user message until the body fits.
+    let jsonBody = JSON.stringify(body);
+    const encoder = new TextEncoder();
+    let byteLen = encoder.encode(jsonBody).length;
+
+    if (byteLen > MAX_BODY_BYTES) {
+      console.warn(
+        `[LLMService] Payload too large (${(byteLen / 1024).toFixed(1)} KB). Truncating market data…`
+      );
+      const lastUserIdx = this.findLastUserIdx(trimmed);
+      if (lastUserIdx >= 0) {
+        let truncated = trimmed;
+        for (let attempt = 0; attempt < 4 && byteLen > MAX_BODY_BYTES; attempt++) {
+          truncated = this.halveMarketData(truncated, lastUserIdx);
+          body = { ...body, messages: truncated };
+          jsonBody = JSON.stringify(body);
+          byteLen = encoder.encode(jsonBody).length;
+          console.log(
+            `[LLMService]   Attempt ${attempt + 1}: ${(byteLen / 1024).toFixed(1)} KB`
+          );
+        }
+      }
+    }
 
     const headers: Record<string, string> = {
       "Content-Type": "application/json",
@@ -179,7 +212,7 @@ export class LLMService {
     const response = await fetch(this.endpoint, {
       method: "POST",
       headers,
-      body: JSON.stringify(body),
+      body: jsonBody,
     });
 
     if (!response.ok) {
@@ -356,6 +389,52 @@ export class LLMService {
     }
 
     return trimmed;
+  }
+
+  /**
+   * Find the index of the last user message in a `ChatMessage[]`.
+   * @returns Index, or -1 if none.
+   */
+  private findLastUserIdx(messages: ChatMessage[]): number {
+    for (let i = messages.length - 1; i >= 0; i--) {
+      if (messages[i].role === "user") return i;
+    }
+    return -1;
+  }
+
+  /**
+   * Halve the market-data section of the user message at `idx`.
+   *
+   * Locates the `=== GRAND EXCHANGE DATA ===` block and keeps only the
+   * first half of its lines (i.e. the top-ranked half of items).  Returns
+   * a shallow copy of the array with the modified user message.
+   */
+  private halveMarketData(
+    messages: ChatMessage[],
+    idx: number
+  ): ChatMessage[] {
+    const msg = messages[idx];
+    const dataStart = msg.content.indexOf("=== GRAND EXCHANGE DATA ===");
+    const dataEnd = msg.content.indexOf("\n=== WIKI GUIDE TEXT ===");
+
+    if (dataStart < 0 || dataEnd < 0) return messages; // safety
+
+    const dataBlock = msg.content.slice(
+      dataStart + "=== GRAND EXCHANGE DATA ===".length + 1,
+      dataEnd
+    );
+    const lines = dataBlock.split("\n");
+    const half = lines.slice(0, Math.max(Math.ceil(lines.length / 2), 5));
+
+    const newContent =
+      msg.content.slice(0, dataStart + "=== GRAND EXCHANGE DATA ===".length + 1) +
+      half.join("\n") +
+      `\n[Truncated to ${half.length} items to fit request limits]\n` +
+      msg.content.slice(dataEnd);
+
+    const copy = [...messages];
+    copy[idx] = { ...msg, content: newContent };
+    return copy;
   }
 
   // ─── Private: Error Handling ──────────────────────────────────────────

@@ -116,10 +116,10 @@ const DEFAULTS: MarketAnalyzerConfig = {
 
 /**
  * Number of top items (by traded value, no filters) included in the LLM
- * chat context.  200 items ≈ 15K tokens — fits comfortably in all
- * supported provider context windows.
+ * chat context.  100 items ≈ 20–30 KB of text — fits within Groq's
+ * request body size limit alongside the system prompt and wiki text.
  */
-const LLM_CONTEXT_TOP_N = 200;
+const LLM_CONTEXT_TOP_N = 100;
 
 /**
  * Stateless service that reads cached GE price data and produces a ranked,
@@ -311,7 +311,10 @@ export class MarketAnalyzerService {
    * **no volume or price filters**, giving the LLM a much wider view of
    * the market than the UI's filtered top-20 panel.
    *
-   * @returns A formatted string with up to 200 items for LLM context injection.
+   * Uses a compact line format (no repeated field labels) to minimise
+   * payload size while preserving all analytical data.
+   *
+   * @returns A formatted string with up to 100 items for LLM context injection.
    */
   async getFormattedForLLM(): Promise<string> {
     const items = await this.getTopItems({
@@ -320,7 +323,62 @@ export class MarketAnalyzerService {
       maxVolume: 0,
       maxPrice: 0,
     });
-    return this.formatForLLM(items);
+    return this.formatForLLMCompact(items);
+  }
+
+  /**
+   * Compact LLM serialisation — same data as {@link formatForLLM} but with
+   * abbreviated field labels to reduce payload size.
+   *
+   * Header line explains the field order so each data line stays short:
+   * ```
+   * # Fields: Name | Price | Buy | Sell | Profit | Limit | EffVol | 4HCap | TaxGap | Alch | Velocity | Slope | Vol% | Pred
+   * 1. Blood rune | 618 | 612 | 637 | 12 | 25K | 150K | 15.45M | 13 | 480 | Insta-Flip | +0.5 | 2.3% | 620
+   * ```
+   *
+   * @param items - Pre-ranked items.
+   * @returns Multi-line string optimised for minimal payload size.
+   */
+  private formatForLLMCompact(items: RankedItem[]): string {
+    if (items.length === 0) {
+      return "[No liquid items available — cache may be empty.]";
+    }
+
+    const header = `=== RS3 Grand Exchange — Top ${items.length} by Traded Value (unfiltered) ===`;
+    const legend = "# Fields: Name | Price | Buy | Sell | Profit | Limit | EffVol | 4HCap | TaxGap | Alch | Velocity | Slope | Vol% | Pred | Flags";
+
+    const lines = items.map((item, idx) => {
+      const rank = String(idx + 1).padStart(2, " ");
+      const price = this.formatGp(item.price);
+      const buy = this.formatGp(item.recBuyPrice);
+      const sell = this.formatGp(item.recSellPrice);
+      const profit = this.formatGp(item.estFlipProfit);
+      const limit = item.buyLimit != null
+        ? this.formatGp(item.buyLimit)
+        : "?";
+      const effVol = this.formatGp(item.effectivePlayerVolume);
+      const cap4h = item.maxCapitalPer4H > 0
+        ? this.formatGp(item.maxCapitalPer4H)
+        : "?";
+      const taxGap = this.formatGp(item.taxGap);
+      const alch = item.highAlch != null && item.highAlch > 0
+        ? this.formatGp(item.highAlch)
+        : "?";
+      const velocity = item.tradeVelocity;
+      const slope = item.linearSlope >= 0
+        ? `+${item.linearSlope.toFixed(1)}`
+        : item.linearSlope.toFixed(1);
+      const vol = `${(item.volatility * 100).toFixed(1)}%`;
+      const pred = this.formatGp(Math.round(item.predictedNextPrice));
+      const flags: string[] = [];
+      if (item.isRisky) flags.push("⚠RISKY");
+      if (item.priceHistory.length < 3) flags.push("LIMITED-DATA");
+      if (item.volumeSpikeMultiplier > 0) flags.push(`🔥${item.volumeSpikeMultiplier}x`);
+      const flagStr = flags.length > 0 ? " " + flags.join(" ") : "";
+      return `${rank}. ${item.name} | ${price} | ${buy} | ${sell} | ${profit} | ${limit} | ${effVol} | ${cap4h} | ${taxGap} | ${alch} | ${velocity} | ${slope} | ${vol} | ${pred}${flagStr}`;
+    });
+
+    return [header, legend, ...lines].join("\n");
   }
 
   /**
