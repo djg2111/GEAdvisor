@@ -134,7 +134,7 @@ See [HANDOFF.md](HANDOFF.md) for exhaustive architecture documentation.
 
 | Provider | Cost | Default Model | Notes |
 |----------|------|---------------|-------|
-| **Groq** ⭐ | ✅ FREE | `llama3-8b-8192` | Generous free tier, no credit card required — **recommended** |
+| **Groq** ⭐ | ✅ FREE | `llama-3.1-8b-instant` | Generous free tier, no credit card required — **recommended** |
 | **OpenRouter** | 🆓 Free Tier | `meta-llama/llama-3-8b-instruct` | Free tier for select models |
 | **Together AI** | 🆓 Free Tier | `meta-llama/Llama-3-8b-chat-hf` | $5 free credit on signup |
 | **Mistral AI** | 💲 Low Cost | `mistral-small-latest` | Competitive per-token pricing |

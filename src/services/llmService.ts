@@ -20,11 +20,11 @@ import type {
 } from "./types";
 import { RS3_ECONOMIC_RULES } from "./coreKnowledge";
 
-/** Sensible defaults — Groq free tier with `llama3-8b-8192`. */
+/** Sensible defaults — Groq free tier with `llama-3.1-8b-instant`. */
 const DEFAULTS: LLMConfig = {
   apiKey: "",
   endpoint: "https://api.groq.com/openai/v1/chat/completions",
-  model: "llama3-8b-8192",
+  model: "llama-3.1-8b-instant",
   temperature: 0.4,
   maxTokens: 1024,
 };
@@ -142,7 +142,7 @@ export class LLMService {
       model: this.model,
       messages: [...this._messages],
       temperature: this.temperature,
-      max_tokens: this.maxTokens,
+      max_completion_tokens: this.maxTokens,
     };
 
     const headers: Record<string, string> = {
@@ -313,7 +313,9 @@ export class LLMService {
       default:
         hint = status >= 500
           ? "Server error on the LLM provider side. Try again later."
-          : `Unexpected HTTP ${status}.`;
+          : status === 400
+            ? "Bad request — the model may be deprecated or the request body is invalid. Try a different model."
+            : `Unexpected HTTP ${status}.`;
     }
 
     throw new LLMRequestError(

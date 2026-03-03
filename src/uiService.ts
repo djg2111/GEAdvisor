@@ -577,7 +577,7 @@ const SETUP_GUIDES: Record<string, { steps: string[]; note?: string }> = {
       'Once logged in, navigate to <strong>API Keys</strong> in the left sidebar (or visit <a href="https://console.groq.com/keys" target="_blank" rel="noopener">console.groq.com/keys</a>).',
       'Click <strong>Create API Key</strong>, give it a name (e.g. "GE Analyzer"), and copy the key.',
       "Paste the key into the <em>API Key</em> field above and click <strong>Save</strong>.",
-      "Select a model (the default <strong>Llama 3 8B</strong> works great) and you\u2019re ready to go!",
+      "Select a model (the default <strong>Llama 3.1 8B Instant</strong> works great) and you\u2019re ready to go!",
     ],
     note: "Groq\u2019s free tier allows thousands of requests per day with fast inference \u2014 perfect for this plugin. Rate limits reset daily.",
   },

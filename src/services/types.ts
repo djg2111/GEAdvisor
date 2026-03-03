@@ -301,9 +301,9 @@ export interface WikiGuideResult {
 
 /** A single model option within a provider's suggested model list. */
 export interface ModelOption {
-  /** Model identifier sent to the API (e.g. `"llama3-8b-8192"`). */
+  /** Model identifier sent to the API (e.g. `"llama-3.1-8b-instant"`). */
   id: string;
-  /** Short human-readable label shown in the dropdown (e.g. `"Llama 3 8B"`). */
+  /** Short human-readable label shown in the dropdown (e.g. `"Llama 3.1 8B Instant"`). */
   label: string;
   /** Mark as the recommended pick for this plugin's RAG use-case. */
   recommended?: boolean;
@@ -344,15 +344,15 @@ export const LLM_PROVIDERS: readonly LLMProvider[] = [
     id: "groq",
     label: "Groq",
     endpoint: "https://api.groq.com/openai/v1/chat/completions",
-    defaultModel: "llama3-8b-8192",
+    defaultModel: "llama-3.1-8b-instant",
     keyPlaceholder: "gsk_…",
     models: [
-      { id: "llama3-8b-8192",      label: "Llama 3 8B",           recommended: true },
-      { id: "llama3-70b-8192",     label: "Llama 3 70B" },
-      { id: "llama-3.1-8b-instant", label: "Llama 3.1 8B Instant" },
-      { id: "llama-3.1-70b-versatile", label: "Llama 3.1 70B Versatile" },
-      { id: "gemma2-9b-it",        label: "Gemma 2 9B" },
-      { id: "mixtral-8x7b-32768",  label: "Mixtral 8×7B" },
+      { id: "llama-3.1-8b-instant",         label: "Llama 3.1 8B Instant",      recommended: true },
+      { id: "llama-3.3-70b-versatile",       label: "Llama 3.3 70B Versatile" },
+      { id: "openai/gpt-oss-20b",            label: "GPT-OSS 20B" },
+      { id: "openai/gpt-oss-120b",           label: "GPT-OSS 120B" },
+      { id: "meta-llama/llama-4-scout-17b-16e-instruct", label: "Llama 4 Scout 17B (Preview)" },
+      { id: "qwen/qwen3-32b",                label: "Qwen3 32B (Preview)" },
     ],
     costTier: "free",
     costNote: "Generous free tier — no credit card required",
@@ -451,7 +451,7 @@ export interface LLMConfig {
   endpoint: string;
   /**
    * Model identifier to request.
-   * @default "llama3-8b-8192"
+   * @default "llama-3.1-8b-instant"
    */
   model: string;
   /**
@@ -477,7 +477,10 @@ export interface ChatCompletionRequest {
   model: string;
   messages: ChatMessage[];
   temperature: number;
-  max_tokens: number;
+  /** Preferred field for max output tokens (OpenAI, Groq). */
+  max_completion_tokens?: number;
+  /** Legacy field kept for backward compat with older OpenAI-compatible APIs. */
+  max_tokens?: number;
 }
 
 /** Minimal subset of the chat-completion response we need to read. */

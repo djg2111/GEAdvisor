@@ -202,7 +202,7 @@ These rules have a **supremacy clause** in the system prompt — they override a
 ### 4.7 LLM Service (`llmService.ts`)
 
 - Default endpoint: `https://api.groq.com/openai/v1/chat/completions`
-- Default model: `llama3-8b-8192`, temperature 0.4, max_tokens 1024.
+- Default model: `llama-3.1-8b-instant`, temperature 0.4, max_tokens 1024.
 - Constructor: `Partial<LLMConfig>` — all fields optional (defaults to Groq free tier). API key may be omitted for self-hosted models.
 - Authorization header is **conditionally included** only when `apiKey` is non-empty (supports keyless self-hosted models like Ollama / LM Studio).
 - **Multi-turn chat**: Maintains conversation history across sends. History is persisted to localStorage (`ge-analyzer:chat-history`, max 50 messages). Clear button resets history.
@@ -217,7 +217,7 @@ The settings panel supports **6 LLM providers** via the `LLM_PROVIDERS` constant
 
 | Provider | Endpoint | Default Model | Key Hint | Cost Tier |
 |----------|----------|---------------|----------|-----------|
-| **Groq** (default) | `api.groq.com/openai/v1/chat/completions` | `llama3-8b-8192` | `gsk_…` | ✅ FREE |
+| **Groq** (default) | `api.groq.com/openai/v1/chat/completions` | `llama-3.1-8b-instant` | `gsk_…` | ✅ FREE |
 | **OpenAI** | `api.openai.com/v1/chat/completions` | `gpt-4o-mini` | `sk-…` | 💳 Paid |
 | **OpenRouter** | `openrouter.ai/api/v1/chat/completions` | `meta-llama/llama-3-8b-instruct` | `sk-or-…` | 🆓 Free Tier |
 | **Together AI** | `api.together.xyz/v1/chat/completions` | `meta-llama/Llama-3-8b-chat-hf` | `tok_…` | 🆓 Free Tier |
@@ -473,7 +473,7 @@ Lean orchestrator (~80 lines) with startup overlay management:
 |-----|---------|
 | `ge-analyzer:llm-api-key` | Bearer token for the selected LLM provider |
 | `ge-analyzer:llm-provider` | Selected provider ID (e.g. `groq`, `openai`, `custom`) |
-| `ge-analyzer:llm-model` | Model identifier (e.g. `llama3-8b-8192`) |
+| `ge-analyzer:llm-model` | Model identifier (e.g. `llama-3.1-8b-instant`) |
 | `ge-analyzer:llm-endpoint` | Custom endpoint URL (only used when provider is `custom`) |
 | `ge-analyzer:view-mode` | Market panel view mode (`list`, `tile`, or `hybrid`) |
 | `ge-analyzer:layout` | Interface layout mode (`tabbed` or `sidebar`) |
