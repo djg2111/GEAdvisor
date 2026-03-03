@@ -116,7 +116,7 @@ Weird Gloop API → IndexedDB Cache → Deterministic Filtering → LLM Synthesi
 
 | Layer | File(s) | Role |
 |-------|---------|------|
-| **Data ingestion** | `weirdGloopService.ts`, `wikiService.ts` | Fetch GE prices + Wiki structured data (buy limits, alch values) with rate-limit retry |
+| **Data ingestion** | `weirdGloopService.ts`, `wikiService.ts` | Fetch GE prices + Wiki structured data (buy limits, alch values via bulk GEHighAlchs endpoint) with rate-limit retry |
 | **Caching** | `cacheService.ts` | IndexedDB with 24h TTL, prices + price-history stores |
 | **Pipeline** | `initDataPipeline.ts` | Startup orchestrator: cache check → fetch → enrich → insert → health checks (adaptive backoff on empty batches) |
 | **Analysis** | `marketAnalyzerService.ts` | Score → filter → rank → format (pure math, no network) |

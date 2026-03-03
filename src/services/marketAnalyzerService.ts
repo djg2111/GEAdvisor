@@ -362,9 +362,9 @@ export class MarketAnalyzerService {
         ? this.formatGp(item.maxCapitalPer4H)
         : "?";
       const taxGap = this.formatGp(item.taxGap);
-      const alch = item.highAlch != null && item.highAlch > 0
+      const alch = typeof item.highAlch === "number" && item.highAlch > 0
         ? this.formatGp(item.highAlch)
-        : "?";
+        : item.highAlch === false ? "N/A" : "?";
       const velocity = item.tradeVelocity;
       const slope = item.linearSlope >= 0
         ? `+${item.linearSlope.toFixed(1)}`
@@ -422,9 +422,9 @@ export class MarketAnalyzerService {
       const slope = item.linearSlope >= 0 ? `+${item.linearSlope.toFixed(1)}` : item.linearSlope.toFixed(1);
       const vol = (item.volatility * 100).toFixed(1);
       const predicted = this.formatGp(Math.round(item.predictedNextPrice));
-      const alch = item.highAlch != null && item.highAlch > 0
+      const alch = typeof item.highAlch === "number" && item.highAlch > 0
         ? `High Alch: ${this.formatGp(item.highAlch)} gp`
-        : "High Alch: Unknown";
+        : item.highAlch === false ? "High Alch: Not Alchable" : "High Alch: Unknown";
       const velocity = item.tradeVelocity;
       const histLen = item.priceHistory.length;
       const histNote = histLen < 3 ? " [LIMITED DATA]" : "";
@@ -500,7 +500,7 @@ export class MarketAnalyzerService {
         Math.ceil(record.price * 1.03)
       );
       // High Alchemy floor: never recommend selling below the alch value.
-      recSellPrice = Math.max(recSellPrice, record.highAlch || 0);
+      recSellPrice = Math.max(recSellPrice, typeof record.highAlch === "number" ? record.highAlch : 0);
       // Estimated per-item flip profit: sell − buy − 2% GE tax on the sale.
       // Official RS3 wiki formula: floor(price * 2%), exempt at ≤ 50 gp.
       let expectedTax = Math.floor(recSellPrice * 0.02);

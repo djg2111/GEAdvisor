@@ -335,7 +335,7 @@ export async function initDataPipeline(): Promise<StoredPriceRecord[]> {
       const wiki = new WikiService();
       const itemNames = Array.from(prices.keys());
       let buyLimits: Map<string, number>;
-      let alchValues: Map<string, number>;
+      let alchValues: Map<string, number | false>;
       try {
         [buyLimits, alchValues] = await Promise.all([
           wiki.getBulkBuyLimits(itemNames),
@@ -408,7 +408,7 @@ export async function initDataPipeline(): Promise<StoredPriceRecord[]> {
           : Promise.resolve(new Map<string, number>()),
         missingAlch.length > records.length * 0.5
           ? wiki.getBulkHighAlchValues(namesToEnrich)
-          : Promise.resolve(new Map<string, number>()),
+          : Promise.resolve(new Map<string, number | false>()),
       ]);
 
       // Build a map for quick update of enriched records.

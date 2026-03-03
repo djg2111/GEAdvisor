@@ -20,8 +20,13 @@ export interface WeirdGloopPriceRecord {
   volume: number;
   /** GE buy limit per 4-hour window (fetched from the RS Wiki Cargo API). */
   buyLimit?: number;
-  /** High Alchemy value in gp (fetched from the RS Wiki Exchange module). */
-  highAlch?: number;
+  /**
+   * High Alchemy value in gp (fetched from the RS Wiki GEHighAlchs module).
+   * - `number` — alch value in gp.
+   * - `false`  — item is explicitly not alchable.
+   * - `undefined` — value not yet determined.
+   */
+  highAlch?: number | false;
 }
 
 /**
@@ -197,9 +202,12 @@ export interface RankedItem {
   predictedNextPrice: number;
   /**
    * High Alchemy value in gp.  Used as a sell-price floor in the
-   * recommended-sell calculation.  `undefined` when unknown.
+   * recommended-sell calculation.
+   * - `number` — alch value in gp.
+   * - `false`  — item is explicitly not alchable.
+   * - `undefined` — value not yet determined.
    */
-  highAlch?: number;
+  highAlch?: number | false;
 }
 
 /** Tuneable knobs for the {@link MarketAnalyzerService}. */

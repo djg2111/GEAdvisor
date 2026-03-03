@@ -4,7 +4,8 @@
  *
  * Responsibilities:
  *  - Fetch GE buy limits in bulk from `Module:Exchange/<Item>` Lua sources.
- *  - Fetch High Alchemy values in bulk from the same modules.
+ *  - Fetch High Alchemy values in bulk from `Module:GEHighAlchs/data.json`
+ *    (single request for all alchable items, with per-item fallback).
  *
  * Guide / article text fetching has been removed — the curated
  * `coreKnowledge.ts` rules provide better, flipping-focused context for
@@ -13,19 +14,33 @@
  * Uses only the native browser `fetch` API — no external dependencies.
  *
  * @see https://runescape.wiki/api.php (MediaWiki API sandbox)
+ * @see https://runescape.wiki/w/Module:GEHighAlchs/data.json?action=raw
  */
 
 /**
  * Service that retrieves structured item data (buy limits, high alch values)
- * from the official RuneScape 3 Wiki's `Module:Exchange` Lua sources.
+ * from the official RuneScape 3 Wiki.
+ *
+ * High Alch values are fetched from the `Module:GEHighAlchs/data.json` bulk
+ * endpoint in a single HTTP request. Items present in the response are
+ * alchable (value = number); items absent are explicitly not alchable
+ * (value = `false`). Falls back to per-item `Module:Exchange/<Item>` Lua
+ * source parsing when the bulk endpoint is unreachable.
  *
  * @example
  * ```ts
  * const wiki = new WikiService();
  * const limits = await wiki.getBulkBuyLimits(["Blood rune", "Elder logs"]);
+ * const alchs = await wiki.getBulkHighAlchValues(["Blood rune", "Elder logs"]);
  * ```
  */
 export class WikiService {
+  /**
+   * Bulk endpoint URL that returns all alchable items and their High Alch
+   * values as a flat `{ itemName: number }` JSON object.
+   */
+  private static readonly HIGH_ALCH_BULK_URL =
+    "https://runescape.wiki/w/Module:GEHighAlchs/data.json?action=raw";
   // ─── Bulk Buy Limits (Module:Exchange) ──────────────────────────────
 
   /**
@@ -158,27 +173,59 @@ export class WikiService {
   }
 
   /**
-   * Fetch High Alchemy values in bulk by reading `Module:Exchange/<Item>` pages.
-   * Each Lua module may contain an explicit `alchvalue` field; if absent, the
-   * value is computed from the base `value` field as `floor(value × 0.6)`.
-   * Items with `alchable = false` are skipped.
+   * Fetch High Alchemy values for the given items.
+   *
+   * **Primary source**: the `Module:GEHighAlchs/data.json` bulk endpoint
+   * (single HTTP request for every alchable item in the game).  Items
+   * present in the response are alchable (value = number); items absent
+   * are explicitly not alchable (value = `false`).
+   *
+   * **Fallback**: per-item `Module:Exchange/<Item>` Lua source parsing,
+   * used only when the bulk endpoint is unreachable.  In fallback mode,
+   * items that cannot be resolved remain absent from the map (no `false`).
    *
    * @param itemNames - Canonical RS3 item names.
-   * @returns A `Map<string, number>` keyed by item name → high alch value.
+   * @returns A `Map<string, number | false>` keyed by item name.
    */
-  async getBulkHighAlchValues(itemNames: string[]): Promise<Map<string, number>> {
+  async getBulkHighAlchValues(itemNames: string[]): Promise<Map<string, number | false>> {
     if (itemNames.length === 0) return new Map();
 
+    // ── Try the single-request bulk endpoint first ─────────────────────
+    try {
+      const bulkData = await this.fetchAllHighAlchValues();
+      const result = new Map<string, number | false>();
+      for (const name of itemNames) {
+        const val = bulkData.get(name);
+        if (val !== undefined) {
+          result.set(name, val);      // alchable — has a value
+        } else {
+          result.set(name, false);    // not in the bulk list → not alchable
+        }
+      }
+      console.log(
+        `[WikiService] Bulk alch endpoint: ${result.size} items resolved ` +
+        `(${[...result.values()].filter(v => typeof v === "number").length} alchable, ` +
+        `${[...result.values()].filter(v => v === false).length} not alchable).`
+      );
+      return result;
+    } catch (bulkErr) {
+      console.warn(
+        "[WikiService] Bulk alch endpoint failed — falling back to per-item Module:Exchange.",
+        bulkErr
+      );
+    }
+
+    // ── Fallback: per-item Module:Exchange parsing ─────────────────────
     const batches = this.chunkArray(itemNames, WikiService.EXCHANGE_BATCH_SIZE);
     console.log(
-      `[WikiService] Fetching alch values for ${itemNames.length} items in ${batches.length} batch(es)…`
+      `[WikiService] Fetching alch values for ${itemNames.length} items in ${batches.length} batch(es) (fallback)…`
     );
 
     const settled = await Promise.allSettled(
       batches.map((batch, idx) => this.fetchAlchValueBatch(batch, idx))
     );
 
-    const combined = new Map<string, number>();
+    const combined = new Map<string, number | false>();
     for (const result of settled) {
       if (result.status === "fulfilled") {
         for (const [name, val] of result.value) {
@@ -190,9 +237,49 @@ export class WikiService {
     }
 
     console.log(
-      `[WikiService] Resolved alch values for ${combined.size} / ${itemNames.length} items.`
+      `[WikiService] Resolved alch values for ${combined.size} / ${itemNames.length} items (fallback).`
     );
     return combined;
+  }
+
+  /**
+   * Fetch the complete `Module:GEHighAlchs/data.json` bulk endpoint.
+   * Returns a map of **every alchable item** in the game → its High Alch
+   * value in gp.  Items not present in this map are not alchable.
+   *
+   * The endpoint returns a flat JSON object with two metadata keys
+   * (`%LAST_UPDATE%`, `%LAST_UPDATE_F%`) that are stripped from the result.
+   *
+   * @returns Map of canonical item name → High Alch value (gp).
+   * @throws If the network request fails or the response is not valid JSON.
+   */
+  private async fetchAllHighAlchValues(): Promise<Map<string, number>> {
+    console.log("[WikiService] Fetching bulk High Alch data from GEHighAlchs module…");
+
+    const response = await fetch(WikiService.HIGH_ALCH_BULK_URL, {
+      method: "GET",
+      headers: { Accept: "application/json" },
+    });
+
+    if (!response.ok) {
+      throw new Error(
+        `[WikiService] GEHighAlchs HTTP ${response.status} ${response.statusText}`
+      );
+    }
+
+    const json = await response.json() as Record<string, unknown>;
+    const map = new Map<string, number>();
+
+    for (const [key, value] of Object.entries(json)) {
+      // Skip metadata keys (prefixed with %)
+      if (key.startsWith("%")) continue;
+      if (typeof value === "number" && value > 0) {
+        map.set(key, value);
+      }
+    }
+
+    console.log(`[WikiService] Bulk alch data: ${map.size} alchable items loaded.`);
+    return map;
   }
 
   /**

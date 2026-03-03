@@ -1,7 +1,7 @@
 /**
  * @module coreKnowledge
  * Static knowledge base of RS3 economic mechanics injected into every LLM
- * system prompt.  These rules are non-negotiable and supersede any outside
+ * system prompt. These rules are non-negotiable and supersede any outside
  * knowledge the model may have been trained on.
  */
 
@@ -9,17 +9,17 @@
 export const RS3_ECONOMIC_RULES = `\
 === RS3 ECONOMIC LAWS (STRICT ADHERENCE REQUIRED) ===
 
-1. GE TAX: All items sold on the Grand Exchange are subject to a 2% tax (floor(price × 0.02)) subtracted from the seller's proceeds. Items traded for ≤50 gp are exempt. You MUST deduct 2% from gross revenue before calculating profit or ROI.
+1. GE TAX: All items sold on the Grand Exchange (except items ≤50 gp each and bonds) are subject to a 2% tax (floor(sell price × 0.02)) subtracted from the seller's proceeds. The buyer always pays the full listed price. Tax is applied per item. You MUST deduct this 2% from gross revenue before calculating net profit, ROI, or margins. In the selling interface, the upper value is pre-tax and the lower value is after-tax proceeds.
 
-2. BUY LIMITS: Every item has a 4-hour buy limit — a hard cap on how many a player can purchase via the GE per 4-hour window. The limit resets exactly 4 hours after the first purchase of that window. A player has 6 buy-limit windows per 24 hours. Never recommend quantities exceeding an item's buy limit per window.
+2. BUY LIMITS: Every item has a 4-hour buy limit — a hard cap on how many a player can purchase via the GE per 4-hour window. The limit resets exactly 4 hours after the first purchase of that window. A player has 6 buy-limit windows per 24 hours. Buy limits are account-wide. A few items have connected limits (buying one reduces the limit for related items). Never recommend quantities exceeding an item's buy limit per window.
 
-3. MARGIN CHECKING: To find the current spread, a player:
-   a. Places an "insta-buy" at +5% above mid-price to discover the lowest active sell offer.
-   b. Places an "insta-sell" at −5% below mid-price to discover the highest active buy offer.
-   The margin = insta-buy price − insta-sell price − floor(insta-buy price × 0.02).
-   This is the true per-item profit AFTER tax.
+3. MARGIN CHECKING: To find the current real spread:
+   a. Place an "insta-buy" offer at ~+5% (or +10-20% for low-volume items) above mid-price → this fills against the lowest active sell offer (your instant-sell price / highest sellable price).
+   b. Place an "insta-sell" offer at ~-5% (or more) below mid-price → this fills against the highest active buy offer (your instant-buy price / lowest buyable price).
+   Margin = insta-buy price − insta-sell price − floor(insta-buy price × 0.02).
+   This is the true per-item net profit after tax if you buy at insta-sell price and sell at insta-buy price.
 
-4. HIGH ALCHEMY: High Alchemy converts an item to gold: floor(item base value × 0.6). This value acts as a hard price floor — if GE price < alch value, players buy and alch for guaranteed profit, pushing the price back up. Always mention alch value when relevant.
+4. HIGH ALCHEMY: The High Level Alchemy spell converts an item to coins at floor(item High Alch value × 0.6). This alch value serves as a strong price floor — if GE price drops significantly below alch value, players buy and alch for near-guaranteed profit (minus rune costs), usually pushing price back toward/above alch value. Always reference the item's High Alch value when the GE price is near or below it.
 
 5. ITEM CATEGORIES & TYPICAL BEHAVIOUR:
    - **Consumables** (food, potions, runes, divine charges): High volume, tight margins (1-5%), very fast trades. Best for high-capital, low-effort flipping.
@@ -43,11 +43,23 @@ export const RS3_ECONOMIC_RULES = `\
    - "Slow" = fills in 1-4 hours → assume 2-4 hours per cycle
    - "Very Slow" = may take a full 4-hour window or longer
 
-8. COMMON PITFALLS TO WARN ABOUT:
-   - Items with < 500 gp price are risky because the tax gap eats most of the margin.
+8. OFFER PRIORITY: When multiple offers exist at the same price, the oldest offer fills first (time priority). Editing or aborting an offer resets its position to newest. This means newly placed offers may wait behind existing ones at the same price.
+
+9. SAFE MARGIN GUIDELINES:
+   - High-volume/insta-flips: Aim for ≥ 3-5% gross margin (covers tax + minor risk).
+   - Mid-volume/active: ≥ 6-10% gross.
+   - Low-volume/slow: ≥ 12-20%+ gross to justify wait time and risk.
+   Net profit should be at least 2-3× the tax amount per item to be worthwhile.
+
+10. COMMON PITFALLS TO WARN ABOUT:
+   - Items with < 1,000 gp price are risky because the tax gap eats most of the margin.
    - A trend slope of ±0.0 with 0.0% volatility usually means insufficient price history data — do NOT call this "stable" or "risky"; instead note that historical data is limited.
    - Volume spikes can indicate merch clans manipulating the price — advise caution.
-   - DXP weekend announcements cause skilling supply prices to spike days/weeks before the event.`;
+   - DXP weekend announcements cause skilling supply prices to spike days/weeks before the event.
+   - Do NOT recommend flipping items priced under ~1,000 gp unless margin is exceptionally wide.
+   - Avoid holding downward-trending items overnight unless volatility is very low.
+   - Watch for "dead GE" items (0 volume for days) — margins may look good but fill time can be days/weeks.
+   - Upcoming updates/DXP/Boss drops/PvM changes can crash or spike prices unpredictably — cross-reference recent game news when possible.`;
 
 /**
  * Legend explaining each data field in the formatted market summary.
@@ -76,5 +88,9 @@ Each item line in the market data contains these fields:
   - 5-10% = moderate — normal for active items.
   - >10% = high volatility — risky, margins can shift rapidly.
 • Predicted 24h Price — next-day price estimate from linear trend extrapolation. Less reliable with sparse history.
-• ⚠ RISKY — flagged when item price is < 500 gp (tax gap erodes margins).
-• 🔥 N.Nx Vol Spike — today's volume is N.N× the 7-day average. May indicate a surge or manipulation.`;
+• ⚠ RISKY — flagged when item price is < 500-1,000 gp (tax gap erodes margins).
+• 🔥 N.Nx Vol Spike — today's volume is N.N× the 7-day average. May indicate a surge or manipulation.
+• Flags:
+  - ⚠ LOW-PRICE: Price <500-1000 gp (tax eats margin).
+  - 🔥 VOL SPIKE: Today's volume ≥1.5-2× 7-day avg (possible pump, dump, or event surge).
+  - LIMITED-DATA or 0.0% vol + 0.0 slope: Insufficient history — treat trend as unreliable.`;
