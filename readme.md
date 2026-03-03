@@ -70,7 +70,7 @@ Uses a **RAG (Retrieval-Augmented Generation) pipeline** to combine live GE mark
 - **Price alerts** — set buy/sell thresholds via the inline 🔔 bell on any card or in the analytics modal; triggers native browser notifications and in-app toasts when prices cross your targets
 - **Export / Import** — back up favourites, portfolio, flip history, and theme to a JSON file; restore from any previous backup
 - **Quick-add** — one-click add from any market card to the portfolio form
-- **Three CSS themes** — Classic Dark, OSRS Brown, and RS3 Modern Blue (all themed via CSS variables)
+- **Seven CSS themes** — Classic Dark, OSRS Brown, RS3 Modern Blue, Glassmorphism, Neumorphism, Minimalism (Light), and Skeuomorphism (all themed via CSS variables)
 - **Responsive desktop layout** — wider modals and expanded grids at ≥ 800 px
 - **Error recovery UI** — dismissible error banner with retry button for network/cache failures
 - **Persistent state** — all settings, chat history, favourites, sort preferences, compact-tiles preference, and portfolio data saved to localStorage
@@ -103,8 +103,11 @@ Open [http://localhost:8080](http://localhost:8080) in your browser.
 
 ### Development
 ```sh
-npm run watch    # auto-rebuild on file changes
+npm run watch    # recommended — auto-rebuild on every file save
+npx serve dist --listen 8080   # run in a separate terminal
 ```
+
+`npm run watch` is the preferred development workflow — it runs webpack in watch mode and rebuilds automatically on save. Use `npm run build` only when you need a clean one-shot build (e.g. final verification before a commit).
 
 ---
 

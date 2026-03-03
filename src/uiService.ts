@@ -81,7 +81,7 @@ const PORTFOLIO_TICK_MS = 30_000;
 type LayoutMode = "tabbed" | "sidebar";
 
 /** Available visual themes. */
-type ThemeMode = "classic" | "osrs" | "rs3-modern";
+type ThemeMode = "classic" | "osrs" | "rs3-modern" | "glass" | "neumorphism" | "minimalism" | "skeuomorphism";
 
 // ─── Detail-row label text & tooltip descriptions ───────────────────────────
 

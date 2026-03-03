@@ -82,7 +82,7 @@ alt1minimal/
     ├── icon.png               # App icon (asset/resource)
     ├── index.html             # Full UI: settings, tabbed layout (market / advisor / portfolio), search, favourites, filters
     ├── index.ts               # Lean entry point: alt1 detection → initDataPipeline() → initUI(), startup loading overlay
-    ├── style.css              # Three themes (Classic Dark, OSRS Brown, RS3 Modern Blue), flexbox, cards, unified analytics modal, toasts, inline alert popovers, data-mgmt, compact-tiles toggle, responsive desktop breakpoint (~3060 lines)
+    ├── style.css              # Seven themes (Classic Dark, OSRS Brown, RS3 Modern Blue, Glassmorphism, Neumorphism, Minimalism, Skeuomorphism), flexbox, cards, unified analytics modal, toasts, inline alert popovers, data-mgmt, compact-tiles toggle, responsive desktop breakpoint
     ├── uiService.ts           # All DOM logic: settings, market render, search, favourites, portfolio, chat RAG, error recovery, price alerts, data export/import, CSV export, sortable flips table, unified analytics modal (~4265 lines)
     └── services/
         ├── index.ts               # Barrel re-export of all services + types + constants
@@ -427,10 +427,14 @@ Lean orchestrator (~80 lines) with startup overlay management:
 
 ### 4.13 Stylesheet (`style.css`)
 
-- **Three themes** using CSS custom properties — switch via `body[data-theme]`:
+- **Seven themes** using CSS custom properties — switch via `body[data-theme]`:
   - **Classic Dark** (default `:root`) — `#1e1e1e` background, `#d4d4d4` text.
   - **OSRS Brown** (`body[data-theme="osrs"]`) — parchment tones, brown accents.
   - **RS3 Modern Blue** (`body[data-theme="rs3-modern"]`) — dark navy, blue accents.
+  - **Glassmorphism** (`body[data-theme="glass"]`) — frosted glass panels, `backdrop-filter: blur(16px)`, semi-transparent backgrounds on a gradient body.
+  - **Neumorphism** (`body[data-theme="neumorphism"]`) — soft UI with inset/outset `box-shadow`, transparent borders, Nord-inspired palette.
+  - **Minimalism** (`body[data-theme="minimalism"]`) — light theme, clean high-contrast, thin borders, subtle shadows.
+  - **Skeuomorphism** (`body[data-theme="skeuomorphism"]`) — textured gradients, embossed buttons, realistic drop shadows, warm leather tones.
 - Font stack: Segoe UI / Consolas.
 - `html` and `body` both `width: 100%; height: 100%`.
 - **`#app` uses `height: 95%`** (manually set to fix Alt1 zoom-level scaling issues — do NOT change).
@@ -479,7 +483,7 @@ Lean orchestrator (~80 lines) with startup overlay management:
 | `ge-analyzer:llm-endpoint` | Custom endpoint URL (only used when provider is `custom`) |
 | `ge-analyzer:view-mode` | Market panel view mode (`list`, `tile`, or `hybrid`) |
 | `ge-analyzer:layout` | Interface layout mode (`tabbed` or `sidebar`) |
-| `ge-analyzer:theme` | CSS theme (`classic`, `osrs`, or `rs3-modern`) |
+| `ge-analyzer:theme` | CSS theme (`classic`, `osrs`, `rs3-modern`, `glass`, `neumorphism`, `minimalism`, or `skeuomorphism`) |
 | `ge-analyzer:top20-sort` | Top 20 section sort key (`default`, `alpha`, `price-desc`, `profit-desc`) |
 | `ge-analyzer:search-sort` | Search results sort key |
 | `ge-analyzer:fav-sort` | Favourites section sort key |
@@ -537,14 +541,17 @@ All defined in `src/services/types.ts`:
 ## 7. Build & Serve
 
 ### Build
+
+The preferred development workflow is `npm run watch` in a dedicated terminal — it rebuilds automatically on every file save. Use `npm run build` only when a clean one-shot build is needed (e.g. final verification before a commit).
+
 ```bash
-npm run build        # runs webpack → outputs to dist/  (0 errors expected)
-npm run watch        # webpack --watch
+npm run watch        # recommended — webpack --watch, auto-rebuilds on save
+npm run build        # one-shot build → dist/ (0 errors expected) — use sparingly
 ```
 
 ### Serve locally
 ```bash
-npx serve dist --listen 8080       # serves at http://localhost:8080
+npx serve dist --listen 8080       # serves at http://localhost:8080 (separate terminal)
 ```
 
 ### TypeScript type-check
@@ -552,7 +559,7 @@ npx serve dist --listen 8080       # serves at http://localhost:8080
 npx tsc --noEmit
 ```
 
-**Known pre-existing `tsc` warnings**: `tsc --noEmit` may show ~11 errors in `index.ts` related to the `alt1` module and `window.alt1`. These are expected because `tsc` runs without webpack's module resolution — the `alt1` package types are resolved by webpack at build time. These errors do **NOT** affect the Webpack build. **Only `npm run build` is the true validation.**
+**Known pre-existing `tsc` warnings**: `tsc --noEmit` may show ~11 errors in `index.ts` related to the `alt1` module and `window.alt1`. These are expected because `tsc` runs without webpack's module resolution — the `alt1` package types are resolved by webpack at build time. These errors do **NOT** affect the Webpack build. **Only webpack output (watch or build) is the true validation.**
 
 ### Webpack config notes
 - `HtmlWebpackPlugin` handles `index.html` emission — do NOT add HTML to `asset/resource` rules.
@@ -619,7 +626,7 @@ Everything below is **complete and verified** (builds with 0 errors):
 - [x] Chat history persistence (localStorage, max 50 messages, clear button)
 - [x] Multi-turn LLM conversation with RAG context
 - [x] Full HTML UI (settings panel, tabbed/sidebar layout, market/advisor/portfolio sections)
-- [x] Dark-themed CSS (~2900 lines — three themes, cards, tiles, grids, unified analytics modal, filters, chat, portfolio, velocity badges, external links, toast notifications, alert inputs, inline alert popovers, responsive desktop breakpoint)
+- [x] Dark-themed CSS — seven themes, cards, tiles, grids, unified analytics modal, filters, chat, portfolio, velocity badges, external links, toast notifications, alert inputs, inline alert popovers, responsive desktop breakpoint)
 - [x] Error recovery UI (dismissible error banner with retry button, try/catch wrappers across pipeline and UI)
 - [x] Webpack build passes (`npm run build` — 0 errors, 0 warnings)
 - [x] CSS scaling fix (`#app` height 95% for Alt1 zoom compatibility)

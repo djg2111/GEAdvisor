@@ -19,12 +19,15 @@ RS3 Alt1 Toolkit plugin using a RAG pipeline: `Weird Gloop API → IndexedDB cac
 
 ## Build & Verify
 
+The developer runs `npm run watch` in a dedicated terminal for continuous rebuilds during development. **Prefer `watch` output to validate changes** — only run `npm run build` manually when a clean one-shot build is needed (e.g. final verification before commit).
+
 ```sh
-npm run build          # webpack → dist/ (use this to verify changes — 0 errors expected)
-npx serve dist --listen 8080   # local dev server
+npm run watch          # primary dev workflow — webpack --watch, rebuilds on save
+npm run build          # one-shot build → dist/ (0 errors expected) — use sparingly
+npx serve dist --listen 8080   # local dev server (run in a separate terminal)
 ```
 
-`npx tsc --noEmit` will show ~11 errors about the `alt1` module — these are **expected** (webpack resolves alt1 types at build time). Only `npm run build` is the true validation.
+`npx tsc --noEmit` will show ~11 errors about the `alt1` module — these are **expected** (webpack resolves alt1 types at build time). Only webpack output (watch or build) is the true validation.
 
 ## Key Patterns
 
@@ -44,7 +47,7 @@ npx serve dist --listen 8080   # local dev server
 - **Compact tiles toggle**: Checkbox next to the view-mode buttons; persisted in `ge-analyzer:compact-tiles`. When checked, `.predictive-badges` receive `.compact-hidden` (hidden) in tile/hybrid views only — list view remains detailed. UI state tracked via module-scoped `compactMode` boolean; toggling re-renders all three market panels.
 - **Completed flips table**: `renderCompletedFlips()` renders a `<table class="completed-flips-table">` with clickable sort headers. Module-scoped `completedFlipsSortCol`/`completedFlipsSortAsc` track state.
 - **CSV export**: `#export-csv-btn` in the portfolio history toolbar triggers `exportCompletedFlipsCsv()` — generates a data-URL CSV download of all `CompletedFlip` entries.
-- **Three CSS themes**: Classic Dark (`:root`), OSRS Brown (`body[data-theme="osrs"]`), RS3 Modern Blue (`body[data-theme="rs3-modern"]`) — all via CSS custom properties. New UI elements must use `var(--*)` tokens, never hard-coded colours.
+- **Seven CSS themes**: Classic Dark (`:root`), OSRS Brown (`body[data-theme="osrs"]`), RS3 Modern Blue (`body[data-theme="rs3-modern"]`), Glassmorphism (`body[data-theme="glass"]`), Neumorphism (`body[data-theme="neumorphism"]`), Minimalism (`body[data-theme="minimalism"]`), Skeuomorphism (`body[data-theme="skeuomorphism"]`) — all via CSS custom properties. Glassmorphism, Neumorphism, and Skeuomorphism include structural overrides (backdrop-filter, box-shadow, gradients). New UI elements must use `var(--*)` tokens, never hard-coded colours.
 - **Provider presets** in `LLM_PROVIDERS` array (`types.ts`) — each has `endpoint`, `defaultModel`, `keyPlaceholder`, curated `models[]` with `recommended` flags, `costTier` (free/free-tier/low-cost/paid/self-hosted), `costNote`, and optional `signupUrl`
 - **Provider cost badges**: `populateProviderDropdown()` appends a cost-tier emoji badge to each `<option>` label (e.g. "Groq  \u2705 FREE \u2B50 Recommended"). `applyProviderUI()` shows a colour-coded `#provider-cost-hint` span and toggles the `#setup-guide-btn` visibility.
 - **Setup guide modal**: `showSetupGuide()` opens a lazily-created singleton (`ensureSetupGuideModal()`) with provider-specific step-by-step instructions (from `SETUP_GUIDES` map), a cost-tier banner, a direct link to the provider\'s API-key page, and a comparison table of all providers. Closes on backdrop click or Escape.
@@ -70,7 +73,7 @@ npx serve dist --listen 8080   # local dev server
 | `services/portfolioService.ts` | Active flip tracker + completed flip history with P&L stats (localStorage) |
 | `services/weirdGloopService.ts` | Weird Gloop RS3 GE API client — batched sequential fetching with `fetchWithRetry()` exponential backoff (429 / network errors) |
 | `services/wikiService.ts` | RS Wiki structured-data API client — bulk buy-limit fetching from `Module:Exchange/<Item>` Lua sources + High Alch value fetching from `Module:GEHighAlchs/data.json` bulk endpoint (single HTTP request for all alchable items). Items not in the bulk list are stored as `highAlch: false` (not alchable). Falls back to per-item `Module:Exchange/<Item>` Lua parsing when bulk endpoint is unreachable. Guide/article text fetching removed (March 2026) — `coreKnowledge.ts` provides better flipping-focused LLM context |
-| `style.css` | Three themes, cards/tiles/grids, unified analytics modal (details + graph), velocity badges, slider theming, toast notifications, alert inputs, inline alert popovers, data-mgmt buttons, predictive badges, compact-tiles toggle, completed-flips table, CSV export button, provider cost hints, setup guide modal, provider comparison table, responsive `@media (min-width: 800px)` breakpoint (~3 300 lines) |
+| `style.css` | Seven themes, cards/tiles/grids, unified analytics modal (details + graph), velocity badges, slider theming, toast notifications, alert inputs, inline alert popovers, data-mgmt buttons, predictive badges, compact-tiles toggle, completed-flips table, CSV export button, provider cost hints, setup guide modal, provider comparison table, responsive `@media (min-width: 800px)` breakpoint |
 
 ## UI Layout (index.html, top → bottom)
 
