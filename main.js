@@ -4843,11 +4843,11 @@ __webpack_require__.r(__webpack_exports__);
  * (OpenAI, Together, Ollama, LM Studio, etc.) by overriding {@link LLMConfig}.
  */
 
-/** Sensible defaults — Groq free tier with `llama3-8b-8192`. */
+/** Sensible defaults — Groq free tier with `llama-3.1-8b-instant`. */
 const DEFAULTS = {
     apiKey: "",
     endpoint: "https://api.groq.com/openai/v1/chat/completions",
-    model: "llama3-8b-8192",
+    model: "llama-3.1-8b-instant",
     temperature: 0.4,
     maxTokens: 1024,
 };
@@ -4944,7 +4944,7 @@ class LLMService {
             model: this.model,
             messages: [...this._messages],
             temperature: this.temperature,
-            max_tokens: this.maxTokens,
+            max_completion_tokens: this.maxTokens,
         };
         const headers = {
             "Content-Type": "application/json",
@@ -5088,7 +5088,9 @@ class LLMService {
             default:
                 hint = status >= 500
                     ? "Server error on the LLM provider side. Try again later."
-                    : `Unexpected HTTP ${status}.`;
+                    : status === 400
+                        ? "Bad request — the model may be deprecated or the request body is invalid. Try a different model."
+                        : `Unexpected HTTP ${status}.`;
         }
         throw new LLMRequestError(`[LLMService] ${hint} (HTTP ${status} ${response.statusText})`, status, bodyText);
     }
@@ -5973,15 +5975,15 @@ const LLM_PROVIDERS = [
         id: "groq",
         label: "Groq",
         endpoint: "https://api.groq.com/openai/v1/chat/completions",
-        defaultModel: "llama3-8b-8192",
+        defaultModel: "llama-3.1-8b-instant",
         keyPlaceholder: "gsk_…",
         models: [
-            { id: "llama3-8b-8192", label: "Llama 3 8B", recommended: true },
-            { id: "llama3-70b-8192", label: "Llama 3 70B" },
-            { id: "llama-3.1-8b-instant", label: "Llama 3.1 8B Instant" },
-            { id: "llama-3.1-70b-versatile", label: "Llama 3.1 70B Versatile" },
-            { id: "gemma2-9b-it", label: "Gemma 2 9B" },
-            { id: "mixtral-8x7b-32768", label: "Mixtral 8×7B" },
+            { id: "llama-3.1-8b-instant", label: "Llama 3.1 8B Instant", recommended: true },
+            { id: "llama-3.3-70b-versatile", label: "Llama 3.3 70B Versatile" },
+            { id: "openai/gpt-oss-20b", label: "GPT-OSS 20B" },
+            { id: "openai/gpt-oss-120b", label: "GPT-OSS 120B" },
+            { id: "meta-llama/llama-4-scout-17b-16e-instruct", label: "Llama 4 Scout 17B (Preview)" },
+            { id: "qwen/qwen3-32b", label: "Qwen3 32B (Preview)" },
         ],
         costTier: "free",
         costNote: "Generous free tier — no credit card required",
@@ -7149,7 +7151,7 @@ const SETUP_GUIDES = {
             'Once logged in, navigate to <strong>API Keys</strong> in the left sidebar (or visit <a href="https://console.groq.com/keys" target="_blank" rel="noopener">console.groq.com/keys</a>).',
             'Click <strong>Create API Key</strong>, give it a name (e.g. "GE Analyzer"), and copy the key.',
             "Paste the key into the <em>API Key</em> field above and click <strong>Save</strong>.",
-            "Select a model (the default <strong>Llama 3 8B</strong> works great) and you\u2019re ready to go!",
+            "Select a model (the default <strong>Llama 3.1 8B Instant</strong> works great) and you\u2019re ready to go!",
         ],
         note: "Groq\u2019s free tier allows thousands of requests per day with fast inference \u2014 perfect for this plugin. Rate limits reset daily.",
     },
