@@ -4931,6 +4931,12 @@ const MAX_HISTORY_PAIRS = 8;
  */
 const DATA_BLOCK_RE = /=== GRAND EXCHANGE DATA ===[\s\S]*?(?==== PLAYER QUESTION ===)/;
 /**
+ * Maximum JSON body size (in bytes) we allow before truncating the market
+ * data.  Groq's gateway returns HTTP 413 above ~100 KB.  We stay well
+ * under at 95 KB so there's headroom for JSON escaping overhead.
+ */
+const MAX_BODY_BYTES = 95000;
+/**
  * Service that synthesises GE market data and RS3 Wiki text into
  * actionable money-making advice via an LLM chat-completion API.
  *
@@ -5027,12 +5033,32 @@ class LLMService {
         // exchanges to bound payload size.
         const trimmed = this.buildTrimmedHistory();
         console.log(`[LLMService] Sending ${trimmed.length} messages (${this._messages.length} in full history) to ${this.model} at ${this.endpoint}…`);
-        const body = {
+        let body = {
             model: this.model,
             messages: trimmed,
             temperature: this.temperature,
             max_completion_tokens: this.maxTokens,
         };
+        // Guard against oversized payloads (Groq returns 413 above ~100 KB).
+        // If too large, progressively halve the market-data lines in the most
+        // recent user message until the body fits.
+        let jsonBody = JSON.stringify(body);
+        const encoder = new TextEncoder();
+        let byteLen = encoder.encode(jsonBody).length;
+        if (byteLen > MAX_BODY_BYTES) {
+            console.warn(`[LLMService] Payload too large (${(byteLen / 1024).toFixed(1)} KB). Truncating market data…`);
+            const lastUserIdx = this.findLastUserIdx(trimmed);
+            if (lastUserIdx >= 0) {
+                let truncated = trimmed;
+                for (let attempt = 0; attempt < 4 && byteLen > MAX_BODY_BYTES; attempt++) {
+                    truncated = this.halveMarketData(truncated, lastUserIdx);
+                    body = { ...body, messages: truncated };
+                    jsonBody = JSON.stringify(body);
+                    byteLen = encoder.encode(jsonBody).length;
+                    console.log(`[LLMService]   Attempt ${attempt + 1}: ${(byteLen / 1024).toFixed(1)} KB`);
+                }
+            }
+        }
         const headers = {
             "Content-Type": "application/json",
         };
@@ -5042,7 +5068,7 @@ class LLMService {
         const response = await fetch(this.endpoint, {
             method: "POST",
             headers,
-            body: JSON.stringify(body),
+            body: jsonBody,
         });
         if (!response.ok) {
             // Remove the user message we just pushed so the history stays clean.
@@ -5192,6 +5218,41 @@ class LLMService {
             }
         }
         return trimmed;
+    }
+    /**
+     * Find the index of the last user message in a `ChatMessage[]`.
+     * @returns Index, or -1 if none.
+     */
+    findLastUserIdx(messages) {
+        for (let i = messages.length - 1; i >= 0; i--) {
+            if (messages[i].role === "user")
+                return i;
+        }
+        return -1;
+    }
+    /**
+     * Halve the market-data section of the user message at `idx`.
+     *
+     * Locates the `=== GRAND EXCHANGE DATA ===` block and keeps only the
+     * first half of its lines (i.e. the top-ranked half of items).  Returns
+     * a shallow copy of the array with the modified user message.
+     */
+    halveMarketData(messages, idx) {
+        const msg = messages[idx];
+        const dataStart = msg.content.indexOf("=== GRAND EXCHANGE DATA ===");
+        const dataEnd = msg.content.indexOf("\n=== WIKI GUIDE TEXT ===");
+        if (dataStart < 0 || dataEnd < 0)
+            return messages; // safety
+        const dataBlock = msg.content.slice(dataStart + "=== GRAND EXCHANGE DATA ===".length + 1, dataEnd);
+        const lines = dataBlock.split("\n");
+        const half = lines.slice(0, Math.max(Math.ceil(lines.length / 2), 5));
+        const newContent = msg.content.slice(0, dataStart + "=== GRAND EXCHANGE DATA ===".length + 1) +
+            half.join("\n") +
+            `\n[Truncated to ${half.length} items to fit request limits]\n` +
+            msg.content.slice(dataEnd);
+        const copy = [...messages];
+        copy[idx] = { ...msg, content: newContent };
+        return copy;
     }
     // ─── Private: Error Handling ──────────────────────────────────────────
     /**
@@ -5377,10 +5438,10 @@ const DEFAULTS = {
 };
 /**
  * Number of top items (by traded value, no filters) included in the LLM
- * chat context.  200 items ≈ 15K tokens — fits comfortably in all
- * supported provider context windows.
+ * chat context.  100 items ≈ 20–30 KB of text — fits within Groq's
+ * request body size limit alongside the system prompt and wiki text.
  */
-const LLM_CONTEXT_TOP_N = 200;
+const LLM_CONTEXT_TOP_N = 100;
 /**
  * Stateless service that reads cached GE price data and produces a ranked,
  * LLM-consumable summary of the most actively-traded items.
@@ -5531,7 +5592,10 @@ class MarketAnalyzerService {
      * **no volume or price filters**, giving the LLM a much wider view of
      * the market than the UI's filtered top-20 panel.
      *
-     * @returns A formatted string with up to 200 items for LLM context injection.
+     * Uses a compact line format (no repeated field labels) to minimise
+     * payload size while preserving all analytical data.
+     *
+     * @returns A formatted string with up to 100 items for LLM context injection.
      */
     async getFormattedForLLM() {
         const items = await this.getTopItems({
@@ -5540,7 +5604,61 @@ class MarketAnalyzerService {
             maxVolume: 0,
             maxPrice: 0,
         });
-        return this.formatForLLM(items);
+        return this.formatForLLMCompact(items);
+    }
+    /**
+     * Compact LLM serialisation — same data as {@link formatForLLM} but with
+     * abbreviated field labels to reduce payload size.
+     *
+     * Header line explains the field order so each data line stays short:
+     * ```
+     * # Fields: Name | Price | Buy | Sell | Profit | Limit | EffVol | 4HCap | TaxGap | Alch | Velocity | Slope | Vol% | Pred
+     * 1. Blood rune | 618 | 612 | 637 | 12 | 25K | 150K | 15.45M | 13 | 480 | Insta-Flip | +0.5 | 2.3% | 620
+     * ```
+     *
+     * @param items - Pre-ranked items.
+     * @returns Multi-line string optimised for minimal payload size.
+     */
+    formatForLLMCompact(items) {
+        if (items.length === 0) {
+            return "[No liquid items available — cache may be empty.]";
+        }
+        const header = `=== RS3 Grand Exchange — Top ${items.length} by Traded Value (unfiltered) ===`;
+        const legend = "# Fields: Name | Price | Buy | Sell | Profit | Limit | EffVol | 4HCap | TaxGap | Alch | Velocity | Slope | Vol% | Pred | Flags";
+        const lines = items.map((item, idx) => {
+            const rank = String(idx + 1).padStart(2, " ");
+            const price = this.formatGp(item.price);
+            const buy = this.formatGp(item.recBuyPrice);
+            const sell = this.formatGp(item.recSellPrice);
+            const profit = this.formatGp(item.estFlipProfit);
+            const limit = item.buyLimit != null
+                ? this.formatGp(item.buyLimit)
+                : "?";
+            const effVol = this.formatGp(item.effectivePlayerVolume);
+            const cap4h = item.maxCapitalPer4H > 0
+                ? this.formatGp(item.maxCapitalPer4H)
+                : "?";
+            const taxGap = this.formatGp(item.taxGap);
+            const alch = item.highAlch != null && item.highAlch > 0
+                ? this.formatGp(item.highAlch)
+                : "?";
+            const velocity = item.tradeVelocity;
+            const slope = item.linearSlope >= 0
+                ? `+${item.linearSlope.toFixed(1)}`
+                : item.linearSlope.toFixed(1);
+            const vol = `${(item.volatility * 100).toFixed(1)}%`;
+            const pred = this.formatGp(Math.round(item.predictedNextPrice));
+            const flags = [];
+            if (item.isRisky)
+                flags.push("⚠RISKY");
+            if (item.priceHistory.length < 3)
+                flags.push("LIMITED-DATA");
+            if (item.volumeSpikeMultiplier > 0)
+                flags.push(`🔥${item.volumeSpikeMultiplier}x`);
+            const flagStr = flags.length > 0 ? " " + flags.join(" ") : "";
+            return `${rank}. ${item.name} | ${price} | ${buy} | ${sell} | ${profit} | ${limit} | ${effVol} | ${cap4h} | ${taxGap} | ${alch} | ${velocity} | ${slope} | ${vol} | ${pred}${flagStr}`;
+        });
+        return [header, legend, ...lines].join("\n");
     }
     /**
      * Serialise a list of {@link RankedItem} objects into a compact,
