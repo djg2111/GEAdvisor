@@ -2,7 +2,7 @@
 
 An intelligent **Grand Exchange market analyzer and money-making advisor** for RuneScape 3, built as an [Alt1 Toolkit](https://runeapps.org/alt1) overlay plugin.
 
-Uses a **RAG (Retrieval-Augmented Generation) pipeline** to combine live GE market data, RS3 Wiki guides, and LLM-powered advice into a single interface.
+Uses a **RAG (Retrieval-Augmented Generation) pipeline** to combine live GE market data, curated RS3 economic knowledge, and LLM-powered advice into a single interface.
 
 ![TypeScript](https://img.shields.io/badge/TypeScript-ES2020-blue)
 ![Webpack](https://img.shields.io/badge/Webpack-5-blue)
@@ -38,7 +38,7 @@ Uses a **RAG (Retrieval-Augmented Generation) pipeline** to combine live GE mark
 - **Trade velocity** — Insta-Flip / Active / Slow / Very Slow badges with explanatory tooltips
 - **Hype detection** — volume spike badges when today's volume exceeds the 7-day average by 1.5×
 - **Unified analytics modal** — ↗ button on every card opens a single scrollable overlay combining item details (badges, recommendations, price alerts, actions) with an interactive gradient area chart, trend stats, high/low, and volatility — with a **history-range selector** (7 / 30 / 90 days) inside the modal and in the market filter bar. Detail rows include High Alch value, always-visible Volume Spike indicator, and a dedicated "Predictive Analytics" section (30d EMA, Daily Volatility σ%, LR Slope, Predicted Price). Item sprite tooltip shows the item ID. Uses **on-demand cache-first history loading**: checks IndexedDB first, fetches from the Weird Gloop API only when data is sparse, and persists results for future use
-- **Manual history refresh** — analytics modal shows a “Refresh” button when price history is insufficient (< 7 days), letting users manually fetch missing data\n- **Startup loading overlay** — spinner with step counter (Step 1 of 5) and status text keeps users informed during data pipeline and market analysis bootstrap; TTL-cached scoring maps avoid redundant IndexedDB reads on UI refresh
+- **Manual history refresh** — analytics modal shows a “Refresh” button when price history is insufficient (< 7 days), letting users manually fetch missing data\n- **Startup loading overlay** — spinner with step counter (Step 1 of 4) and status text keeps users informed during data pipeline and market analysis bootstrap; TTL-cached scoring maps avoid redundant IndexedDB reads on UI refresh
 - **Predictive analytics badges** — EMA trend (↑/↓ vs 30-day EMA), predicted 24h price change (linear regression), and daily volatility % shown directly on every market card (hidden in tile/hybrid view when compact mode is enabled)
 - **Price momentum badges** — "⚠️ Crashing" / "📈 Rising" warnings when 7-day trend exceeds ±5 %
 - **Three view modes** — List, Tile, and Hybrid layouts with an optional **Compact Tiles** toggle that hides predictive badges for cleaner scanning
@@ -51,7 +51,7 @@ Uses a **RAG (Retrieval-Augmented Generation) pipeline** to combine live GE mark
 - **External links** — quick Wiki and GE Database links on every card and in the analytics modal
 
 ### AI Advisor
-- **Multi-turn RAG chat** — ask questions about items, flipping strategies, or money-making methods; the advisor sees the top 100 items by traded value (not just the filtered top 20) for broader recommendations; conversation history is automatically trimmed to stay within provider size limits
+- **Multi-turn RAG chat** — ask questions about items, flipping strategies, or money-making methods; the advisor sees the top 50 items by traded value (not just the filtered top 20) for broader recommendations; conversation history is automatically trimmed to stay within provider size limits
 - **6 LLM providers** — Groq (default/free), OpenAI, OpenRouter, Together AI, Mistral AI, or any custom OpenAI-compatible endpoint (Ollama, LM Studio, etc.)
 - **Cost tier indicators** — every provider in the dropdown shows a badge (✅ FREE, 🆓 Free Tier, 💲 Low Cost, 💳 Paid) so you can pick at a glance; Groq is starred as the recommended free option
 - **Interactive setup guide** — "How to get an API key" button opens a step-by-step walkthrough for the selected provider, plus a full provider comparison table
@@ -116,7 +116,7 @@ Weird Gloop API → IndexedDB Cache → Deterministic Filtering → LLM Synthesi
 
 | Layer | File(s) | Role |
 |-------|---------|------|
-| **Data ingestion** | `weirdGloopService.ts`, `wikiService.ts` | Fetch GE prices + Wiki guides (rate-limit retry with exponential backoff) |
+| **Data ingestion** | `weirdGloopService.ts`, `wikiService.ts` | Fetch GE prices + Wiki structured data (buy limits, alch values) with rate-limit retry |
 | **Caching** | `cacheService.ts` | IndexedDB with 24h TTL, prices + price-history stores |
 | **Pipeline** | `initDataPipeline.ts` | Startup orchestrator: cache check → fetch → enrich → insert → health checks (adaptive backoff on empty batches) |
 | **Analysis** | `marketAnalyzerService.ts` | Score → filter → rank → format (pure math, no network) |

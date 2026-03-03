@@ -116,10 +116,11 @@ const DEFAULTS: MarketAnalyzerConfig = {
 
 /**
  * Number of top items (by traded value, no filters) included in the LLM
- * chat context.  100 items ≈ 20–30 KB of text — fits within Groq's
- * request body size limit alongside the system prompt and wiki text.
+ * chat context.  50 items in compact format ≈ 6–8 KB — comfortably fits
+ * alongside the system prompt and truncated wiki text within a 50 KB
+ * payload budget.
  */
-const LLM_CONTEXT_TOP_N = 100;
+const LLM_CONTEXT_TOP_N = 50;
 
 /**
  * Stateless service that reads cached GE price data and produces a ranked,

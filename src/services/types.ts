@@ -241,62 +241,6 @@ export interface CacheServiceConfig {
   ttlMs: number;
 }
 
-// ─── Wiki Service Types ─────────────────────────────────────────────────────
-
-/**
- * Subset of the MediaWiki `action=query&prop=extracts` response we care about.
- * Each key under `pages` is a string page-ID (or `"-1"` for missing pages).
- */
-export interface WikiQueryResponse {
-  query: {
-    pages: {
-      [pageId: string]: WikiPage;
-    };
-  };
-}
-
-/** A single page record inside a MediaWiki query response. */
-export interface WikiPage {
-  /** Numeric page ID (`-1` when the page does not exist). */
-  pageid: number;
-  /** Namespace number (typically `0` for mainspace articles). */
-  ns: number;
-  /** Page title as stored in the wiki. */
-  title: string;
-  /**
-   * Plain-text extract of the article body.
-   * Only present when the page exists and `explaintext=1` was requested.
-   */
-  extract?: string;
-  /** Present (and set to `""`) when the page does not exist. */
-  missing?: string;
-}
-
-/**
- * Subset of the MediaWiki `action=query&list=search` response.
- * Used by the two-step guide search to resolve the real page title.
- */
-export interface WikiSearchResponse {
-  query: {
-    search: Array<{
-      /** Full page title as stored in the wiki. */
-      title: string;
-      /** Numeric page ID. */
-      pageid: number;
-    }>;
-  };
-}
-
-/** Result returned by {@link WikiService.getMoneyMakingGuide}. */
-export interface WikiGuideResult {
-  /** The wiki page title that was queried. */
-  title: string;
-  /** `true` if the wiki page actually exists. */
-  found: boolean;
-  /** Plain-text extract, or a fallback message when the page is missing. */
-  text: string;
-}
-
 // ─── LLM Provider Presets ───────────────────────────────────────────────────
 
 /** A single model option within a provider's suggested model list. */

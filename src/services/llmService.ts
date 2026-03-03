@@ -37,19 +37,18 @@ const DEFAULTS: LLMConfig = {
 const MAX_HISTORY_PAIRS = 8;
 
 /**
- * Regex that matches the `=== GRAND EXCHANGE DATA ===` and
- * `=== WIKI GUIDE TEXT ===` blocks inside a user message, leaving only
- * the `=== PLAYER QUESTION ===` section.
+ * Regex that matches the `=== GRAND EXCHANGE DATA ===` block inside a
+ * user message, leaving only the `=== PLAYER QUESTION ===` section.
  */
 const DATA_BLOCK_RE =
   /=== GRAND EXCHANGE DATA ===[\s\S]*?(?==== PLAYER QUESTION ===)/;
 
 /**
- * Maximum JSON body size (in bytes) we allow before truncating the market
- * data.  Groq's gateway returns HTTP 413 above ~100 KB.  We stay well
- * under at 95 KB so there's headroom for JSON escaping overhead.
+ * Maximum JSON body size (in bytes) we allow before truncating context.
+ * Groq's gateway returns HTTP 413 above ~100 KB, but free-tier limits
+ * vary by model.  50 KB provides a safe margin for all models.
  */
-const MAX_BODY_BYTES = 95_000;
+const MAX_BODY_BYTES = 50_000;
 
 /**
  * Service that synthesises GE market data and RS3 Wiki text into
@@ -61,7 +60,6 @@ const MAX_BODY_BYTES = 95_000;
  * const advice = await llm.generateAdvice(
  *   "What should I flip right now?",
  *   formattedMarketData,
- *   wikiGuideText,
  * );
  * console.log(advice);
  * ```
@@ -143,17 +141,14 @@ export class LLMService {
    *                     (e.g. "What should I flip right now?").
    * @param marketData - Pre-formatted top-N market summary string produced
    *                     by {@link MarketAnalyzerService.formatForLLM}.
-   * @param wikiText   - Concatenated plain-text wiki guide extracts
-   *                     (may be empty if no guides were found).
    * @returns The assistant's generated advice text.
    * @throws {LLMRequestError} On HTTP-level failures (401, 429, 5xx, etc.).
    */
   async generateAdvice(
     query: string,
     marketData: string,
-    wikiText: string
   ): Promise<string> {
-    const userMsg = this.buildUserMessage(query, marketData, wikiText);
+    const userMsg = this.buildUserMessage(query, marketData);
     this._messages.push({ role: "user", content: userMsg });
 
     // Build a trimmed copy of the history for the API payload.
@@ -165,10 +160,6 @@ export class LLMService {
     // exchanges to bound payload size.
     const trimmed = this.buildTrimmedHistory();
 
-    console.log(
-      `[LLMService] Sending ${trimmed.length} messages (${this._messages.length} in full history) to ${this.model} at ${this.endpoint}…`
-    );
-
     let body: ChatCompletionRequest = {
       model: this.model,
       messages: trimmed,
@@ -176,29 +167,42 @@ export class LLMService {
       max_completion_tokens: this.maxTokens,
     };
 
-    // Guard against oversized payloads (Groq returns 413 above ~100 KB).
-    // If too large, progressively halve the market-data lines in the most
-    // recent user message until the body fits.
+    // Measure initial payload size.
     let jsonBody = JSON.stringify(body);
     const encoder = new TextEncoder();
     let byteLen = encoder.encode(jsonBody).length;
 
+    console.log(
+      `[LLMService] Sending ${trimmed.length} messages ` +
+        `(${this._messages.length} in full history) — ` +
+        `${(byteLen / 1024).toFixed(1)} KB payload — ` +
+        `model: ${this.model}`
+    );
+
+    // Guard against oversized payloads.
+    // Strategy: first halve market-data lines (up to 4×), then halve wiki
+    // text (up to 4×).  This two-phase approach trims the two largest
+    // variable-size sections progressively.
     if (byteLen > MAX_BODY_BYTES) {
       console.warn(
-        `[LLMService] Payload too large (${(byteLen / 1024).toFixed(1)} KB). Truncating market data…`
+        `[LLMService] Payload too large (${(byteLen / 1024).toFixed(1)} KB > ` +
+          `${(MAX_BODY_BYTES / 1024).toFixed(0)} KB limit). Truncating…`
       );
       const lastUserIdx = this.findLastUserIdx(trimmed);
       if (lastUserIdx >= 0) {
         let truncated = trimmed;
+
+        // Phase 1: halve market data.
         for (let attempt = 0; attempt < 4 && byteLen > MAX_BODY_BYTES; attempt++) {
           truncated = this.halveMarketData(truncated, lastUserIdx);
           body = { ...body, messages: truncated };
           jsonBody = JSON.stringify(body);
           byteLen = encoder.encode(jsonBody).length;
           console.log(
-            `[LLMService]   Attempt ${attempt + 1}: ${(byteLen / 1024).toFixed(1)} KB`
+            `[LLMService]   Market-data trim ${attempt + 1}: ${(byteLen / 1024).toFixed(1)} KB`
           );
         }
+
       }
     }
 
@@ -255,8 +259,8 @@ export class LLMService {
    * explicitly forbids hallucination.
    *
    * The prompt:
-   *  - Defines the persona (RS3 Grand Exchange instructor).
-   *  - Mandates exclusive use of the provided data and wiki text.
+   *  - Defines the persona (RS3 Grand Exchange flipping specialist).
+   *  - Mandates exclusive use of the provided market data.
    *  - Forbids inventing prices, volumes, or game mechanics.
    *  - Instructs clear, concise formatting suitable for an Alt1 overlay.
    *
@@ -264,31 +268,29 @@ export class LLMService {
    */
   private buildSystemMessage(): string {
     return [
-      "You are a RuneScape 3 Grand Exchange specialist and money-making instructor.",
+      "You are a RuneScape 3 Grand Exchange flipping specialist.",
       "",
       "STRICT RULES — you MUST follow all of these:",
-      "1. ONLY use the Grand Exchange market data and RS Wiki text provided in the user message. Never reference outside pricing or game knowledge.",
+      "1. ONLY use the Grand Exchange market data provided in the user message. Never reference outside pricing or game knowledge.",
       "2. NEVER invent, guess, or hallucinate prices, trade volumes, profit margins, or game mechanics.",
       "3. If the provided data is insufficient to answer a question, say so explicitly — do NOT fill gaps with assumptions.",
       "4. When recommending items, ALWAYS cite the exact numbers from the data (price, profit, buy limit, volume, trend slope, volatility).",
-      "5. When referencing a money-making method, quote or paraphrase the wiki text — do not add steps not in the source.",
-      "6. Keep responses concise and actionable. Use bullet points or numbered lists. No filler or generic advice.",
-      "7. Format gold values with standard RS3 abbreviations: K (thousands), M (millions), B (billions).",
-      "8. If no wiki guide exists for a queried item, only discuss it from the market-data perspective.",
+      "5. Keep responses concise and actionable. Use bullet points or numbered lists. No filler or generic advice.",
+      "6. Format gold values with standard RS3 abbreviations: K (thousands), M (millions), B (billions).",
       "",
       "ANALYTICAL REASONING — follow this framework when recommending items:",
-      "9. For EVERY item you recommend or discuss, state:",
+      "7. For EVERY item you recommend or discuss, state:",
       "   a. The per-item profit AFTER tax (use the 'Profit' field, or compute it).",
       "   b. The 4-hour profit potential: profit × buy limit.",
       "   c. The estimated gp/hr based on trade velocity (see economic rules for fill-time estimates).",
       "   d. The 30d trend: quote the slope value and explain what it means (rising, falling, or flat).",
       "   e. The volatility %: quote it and classify as low (<5%), moderate (5-10%), or high (>10%).",
       "",
-      "10. CRITICAL: When trend slope is near zero (+0.0 or −0.0) AND volatility is 0.0%, this usually means INSUFFICIENT PRICE HISTORY DATA — do NOT interpret it as 'stable' or 'low risk'. Instead, say historical data is limited and recommend the player margin-check the item first.",
+      "8. CRITICAL: When trend slope is near zero (+0.0 or −0.0) AND volatility is 0.0%, this usually means INSUFFICIENT PRICE HISTORY DATA — do NOT interpret it as 'stable' or 'low risk'. Instead, say historical data is limited and recommend the player margin-check the item first.",
       "",
-      "11. When the player asks 'what should I flip', rank your top 3-5 picks by estimated gp/hr and explain why each is good. Include at least one high-volume fast flip and one higher-margin slower flip if available.",
+      "9. When the player asks 'what should I flip', rank your top 3-5 picks by estimated gp/hr and explain why each is good. Include at least one high-volume fast flip and one higher-margin slower flip if available.",
       "",
-      "12. Always include actionable next steps: what price to set buy offers at, estimated wait time, and what to sell at.",
+      "10. Always include actionable next steps: what price to set buy offers at, estimated wait time, and what to sell at.",
       "",
       "The following RS3 economic laws are ABSOLUTE. They supersede any conflicting outside knowledge. Apply them to every calculation.",
       "",
@@ -296,7 +298,7 @@ export class LLMService {
       "",
       DATA_FIELD_LEGEND,
       "",
-      "Your audience is an experienced RS3 player viewing this inside the Alt1 Toolkit overlay. Be direct, specific, and data-driven. Never pad responses with generic advice like 'do your own research' — the data is right there.",
+      "Your audience is an experienced RS3 player viewing this inside the Alt1 Toolkit overlay who is focused on flipping items for profit. Be direct, specific, and data-driven. Never pad responses with generic advice like 'do your own research' — the data is right there.",
     ].join("\n");
   }
 
@@ -309,34 +311,21 @@ export class LLMService {
    * === GRAND EXCHANGE DATA ===
    * …market summary…
    *
-   * === WIKI GUIDE TEXT ===
-   * …extracted guides (or "[none available]")…
-   *
    * === PLAYER QUESTION ===
    * …free-form query…
    * ```
    *
    * @param query      - Player's question.
    * @param marketData - Formatted market data block.
-   * @param wikiText   - Wiki guide text (may be empty).
    * @returns The composed user prompt string.
    */
   private buildUserMessage(
     query: string,
     marketData: string,
-    wikiText: string
   ): string {
-    const wikiSection =
-      wikiText.trim().length > 0
-        ? wikiText.trim()
-        : "[No wiki guide text available for the queried items.]";
-
     return [
       "=== GRAND EXCHANGE DATA ===",
       marketData,
-      "",
-      "=== WIKI GUIDE TEXT ===",
-      wikiSection,
       "",
       "=== PLAYER QUESTION ===",
       query,
@@ -415,13 +404,13 @@ export class LLMService {
   ): ChatMessage[] {
     const msg = messages[idx];
     const dataStart = msg.content.indexOf("=== GRAND EXCHANGE DATA ===");
-    const dataEnd = msg.content.indexOf("\n=== WIKI GUIDE TEXT ===");
+    const questionStart = msg.content.indexOf("\n=== PLAYER QUESTION ===");
 
-    if (dataStart < 0 || dataEnd < 0) return messages; // safety
+    if (dataStart < 0 || questionStart < 0) return messages; // safety
 
     const dataBlock = msg.content.slice(
       dataStart + "=== GRAND EXCHANGE DATA ===".length + 1,
-      dataEnd
+      questionStart
     );
     const lines = dataBlock.split("\n");
     const half = lines.slice(0, Math.max(Math.ceil(lines.length / 2), 5));
@@ -430,7 +419,7 @@ export class LLMService {
       msg.content.slice(0, dataStart + "=== GRAND EXCHANGE DATA ===".length + 1) +
       half.join("\n") +
       `\n[Truncated to ${half.length} items to fit request limits]\n` +
-      msg.content.slice(dataEnd);
+      msg.content.slice(questionStart);
 
     const copy = [...messages];
     copy[idx] = { ...msg, content: newContent };

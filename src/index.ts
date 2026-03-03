@@ -60,7 +60,7 @@ function dismissOverlay(): void {
 (async () => {
   try {
     // Step 1 — Populate the IndexedDB cache with fresh GE data.
-    setStartupStatus("Loading market data\u2026", "Step 1 of 5");
+    setStartupStatus("Loading market data\u2026", "Step 1 of 4");
     await initDataPipeline();
 
     // Step 2 — Wire services → DOM and render the interface.

@@ -40,9 +40,6 @@ const LS_MODEL = "ge-analyzer:llm-model";
 /** `localStorage` key for the custom endpoint URL. */
 const LS_ENDPOINT = "ge-analyzer:llm-endpoint";
 
-/** Number of top items whose wiki guides are fetched for the RAG context. */
-const WIKI_GUIDE_COUNT = 5;
-
 /** RS3 item sprite base URL (official Jagex endpoint). */
 const SPRITE_BASE = "https://secure.runescape.com/m=itemdb_rs/obj_sprite.gif?id=";
 
@@ -351,9 +348,7 @@ let latestMarketSummary = "";
  * Falls back to `latestMarketSummary` until the first build completes.
  */
 let latestLLMContext = "";
-/** Most recent wiki text block — reused across chat messages. */
-let latestWikiText = "";
-/** The top items array, cached for wiki lookups per chat message. */
+/** The top items array, cached for re-sorting without re-fetching. */
 let latestTopItems: RankedItem[] = [];
 /** The latest search results, cached for re-sorting without re-fetching. */
 let latestSearchResults: RankedItem[] = [];
@@ -420,7 +415,7 @@ export async function initUI(onStatus?: (msg: string, step: string) => void): Pr
   portfolio = new PortfolioService();
 
   // Run the initial market analysis and render.
-  onStatus?.("Ranking top items\u2026", "Step 2 of 5");
+  onStatus?.("Ranking top items\u2026", "Step 2 of 4");
   try {
     await refreshMarketPanel();
   } catch (err) {
@@ -430,7 +425,7 @@ export async function initUI(onStatus?: (msg: string, step: string) => void): Pr
   }
 
   // Render the favourites section (if any favourites exist).
-  onStatus?.("Loading favourites\u2026", "Step 3 of 5");
+  onStatus?.("Loading favourites\u2026", "Step 3 of 4");
   restoreFavSort();
   bindFavSort();
   await renderFavorites();
@@ -441,18 +436,13 @@ export async function initUI(onStatus?: (msg: string, step: string) => void): Pr
   await loadItemCatalogue();
 
   // Fetch the full GE catalogue (~7 000 items) for market search.
-  onStatus?.("Fetching item catalogue\u2026", "Step 4 of 5");
+  onStatus?.("Fetching item catalogue\u2026", "Step 4 of 4");
   try {
     geCatalogue = await fetchGECatalogue();
   } catch (err) {
     console.warn("[UIService] GE catalogue fetch failed:", err);
     geCatalogue = [];
   }
-
-  // Pre-fetch wiki text for the first batch of items so that the first
-  // chat message doesn't have to wait for wiki I/O.
-  onStatus?.("Pre-fetching wiki data\u2026", "Step 5 of 5");
-  await prefetchWikiText();
 
   // Restore any persisted LLM chat conversation.
   restoreChatHistory();
@@ -816,7 +806,6 @@ function bindForceReload(): void {
       analyzer = new MarketAnalyzerService(cache);
 
       await refreshMarketPanel();
-      await prefetchWikiText();
 
       els.reloadStatus.textContent = "Data reloaded ✓";
     } catch (err) {
@@ -1406,8 +1395,6 @@ function bindMarketFilters(): void {
     isSearchActive = false;
     latestSearchResults = [];
     await refreshMarketPanel();
-    // Re-fetch wiki text for the new filtered set so the LLM context stays in sync.
-    await prefetchWikiText();
   });
 
   // ── Market search input (debounced) ───────────────────────────────────
@@ -3452,16 +3439,10 @@ async function handleSend(): Promise<void> {
   const thinkingEl = appendMessage("thinking", "Thinking");
 
   try {
-    // Ensure wiki text is available (may already be cached from prefetch).
-    if (!latestWikiText) {
-      await prefetchWikiText();
-    }
-
     const service = ensureLLMService();
     const advice = await service.generateAdvice(
       query,
       latestLLMContext || latestMarketSummary,
-      latestWikiText
     );
     removeMessage(thinkingEl);
     appendMessage("assistant", advice);
@@ -4325,27 +4306,6 @@ function resolvedLLMConfig(): { endpoint: string; model: string } {
   const model = modelOverride || provider.defaultModel;
 
   return { endpoint, model };
-}
-
-// ─── Wiki pre-fetch ─────────────────────────────────────────────────────────
-
-/**
- * Fetch wiki guide text for the top items and cache it in module scope.
- */
-async function prefetchWikiText(): Promise<void> {
-  if (latestTopItems.length === 0) return;
-
-  try {
-    const names = latestTopItems.slice(0, WIKI_GUIDE_COUNT).map((i) => i.name);
-    const guides = await wiki.getGuidesForItems(names);
-    latestWikiText = guides
-      .filter((g) => g.found)
-      .map((g) => `--- ${g.title} ---\n${g.text}`)
-      .join("\n\n");
-  } catch (err) {
-    console.warn("[UIService] Wiki prefetch failed:", err);
-    latestWikiText = "";
-  }
 }
 
 // ─── Item catalogue (for autocomplete) ──────────────────────────────────────

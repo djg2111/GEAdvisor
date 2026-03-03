@@ -20,7 +20,6 @@ export type {
   StoredPriceRecord,
   HistoricalPriceRecord,
   RankedItem,
-  WikiGuideResult,
   LLMConfig,
   LLMProvider,
   ModelOption,

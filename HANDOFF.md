@@ -61,8 +61,8 @@ These rules were established across all prior prompts and **must be followed in 
 5. **Do not modify the existing cache or API service files unless absolutely necessary.**
 6. **Include descriptive JSDoc comments** on all public methods and interfaces.
 7. **Ensure all methods are strongly typed using TypeScript interfaces.**
-8. The LLM system prompt must **explicitly forbid hallucinating prices, volumes, or game mechanics** and **must only use the provided Wiki text and GE data**.
-9. Wiki guide fetching uses a **two-step search → extract** strategy (no longer naive string concatenation). See §4.5.
+8. The LLM system prompt must **explicitly forbid hallucinating prices, volumes, or game mechanics** and **must only use the provided GE data and curated economic rules**.
+9. ~~Wiki guide fetching uses a **two-step search → extract** strategy.~~ Removed (March 2026) — `coreKnowledge.ts` provides curated, flipping-focused context that outperforms raw wiki prose. WikiService now only fetches structured data (buy limits, alch values).
 10. The LLM system prompt must include the **RS3 economic rules** from `coreKnowledge.ts` with a supremacy clause — these rules override any outside knowledge the model may have.
 11. **Barrel imports**: Always import services/types from `./services` (the barrel), not from individual files like `./services/types`.
 12. **All DOM manipulation lives in `uiService.ts`** — no other file should touch the DOM. Services remain UI-agnostic.
@@ -173,20 +173,14 @@ Pipeline:
 - `getOrBuildMaps(days)` — returns cached `avgVolumeMap` + `priceHistoryMap` if within 10-min TTL, otherwise rebuilds from IndexedDB.
 - `invalidateMapCache()` — clears cached maps (auto-reset when a new instance is constructed).
 - `formatForLLM(items)` — produces a numbered multi-line string with K/M/B/T abbreviations for LLM context injection. Now includes High Alch value, Trade Velocity tier, and `[LIMITED DATA]` tag when < 3 history points.
-- `getFormattedForLLM()` — returns the top 100 items by traded value with **no volume or price filters** (`LLM_CONTEXT_TOP_N = 100`), using a compact label-free format (`formatForLLMCompact`) to minimise payload size. Used by the chat advisor to get a much broader market view than the UI's filtered top-20 panel. ≈ 20–30 KB of text.
+- `getFormattedForLLM()` — returns the top 50 items by traded value with **no volume or price filters** (`LLM_CONTEXT_TOP_N = 50`), using a compact label-free format (`formatForLLMCompact`) to minimise payload size. Used by the chat advisor to get a broader market view than the UI's filtered top-20 panel. ≈ 6–8 KB of text.
 
 ### 4.5 Wiki Service (`wikiService.ts`)
 
-**Two-step guide fetching** (search → extract → fallback):
-1. **Step 1 — Search**: Queries the MediaWiki search API: `action=query&list=search&srsearch=Money making guide {itemName}`. Validates the top result's title contains a guide-related keyword ("money making guide", "smithing", "crafting", "mining", etc.) to filter out unrelated pages.
-2. **Step 2 — Extract**: Fetches `action=query&prop=extracts&explaintext=1` using the exact resolved title from step 1.
-3. **Fallback**: If no guide is found (search returns nothing or the top result is irrelevant), fetches the base `{itemName}` article itself so the LLM at least gets item mechanics / creation info.
-4. **Error handling**: The method never throws. On total failure it returns `{ found: false, text: "" }` so the LLM pipeline continues safely.
+**Structured data APIs only** (guide/article text fetching removed March 2026 — `coreKnowledge.ts` replaces wiki prose for LLM context):
 
-- Private helpers: `searchForGuideTitle(itemName)` → `string | null`, `fetchExtract(title)` → `WikiGuideResult`.
-- Static `GUIDE_KEYWORDS` array for search result validation.
 - **Buy limit fetching**: `getBulkBuyLimits(names)` reads `Module:Exchange/<Item>` Lua source via the revisions API, extracts `limit = <n>`. Batched ≤ 50 titles per request, concurrent via `Promise.allSettled`.
-- `getGuidesForItems(names)` fetches in parallel via `Promise.allSettled`.
+- **High Alch value fetching**: `getBulkHighAlchValues(names)` same batched approach. Prefers explicit `alchvalue`, falls back to `floor(value × 0.6)`, skips `alchable = false`.
 
 ### 4.6 Core Knowledge Base (`coreKnowledge.ts`)
 
@@ -213,11 +207,11 @@ Both constants have a **supremacy clause** in the system prompt — they overrid
 - Constructor: `Partial<LLMConfig>` — all fields optional (defaults to Groq free tier). API key may be omitted for self-hosted models.
 - Authorization header is **conditionally included** only when `apiKey` is non-empty (supports keyless self-hosted models like Ollama / LM Studio).
 - **Multi-turn chat**: Maintains conversation history across sends. History is persisted to localStorage (`ge-analyzer:chat-history`, max 50 messages). Clear button resets history.
-- `generateAdvice(query, marketData, wikiText)` builds:
-  - **System prompt**: RS3 GE specialist persona + 12 numbered rules (anti-hallucination, analytical reasoning framework, data interpretation) + `RS3_ECONOMIC_RULES` (8 economic laws) + `DATA_FIELD_LEGEND` (field-by-field explanation of market data format) from `coreKnowledge.ts` with supremacy clause. Instructs the LLM to rank recommendations by gp/hr, include actionable buy/sell prices, and correctly handle insufficient-data cases (slope ±0.0 + volatility 0%).
-  - **User message**: Three delimited sections: `=== GRAND EXCHANGE DATA ===`, `=== WIKI GUIDE TEXT ===`, `=== PLAYER QUESTION ===`.
-- **Conversation trimming** (`buildTrimmedHistory()`): Before each API call, builds a size-efficient copy of the message history. Strips the bulky `=== GRAND EXCHANGE DATA ===` and `=== WIKI GUIDE TEXT ===` blocks from **all user messages except the most recent one**, retaining only the `=== PLAYER QUESTION ===` section. Also caps the conversation to `MAX_HISTORY_PAIRS` (8) user+assistant exchanges on top of the system prompt. This prevents HTTP 413 (Content Too Large) errors that previously occurred after 3–4 multi-turn exchanges with Groq.
-- **Payload size guard**: After building the JSON body, `generateAdvice()` checks the byte length against `MAX_BODY_BYTES` (95 KB). If exceeded, it progressively halves the market-data lines in the most recent user message (up to 4 attempts) until the payload fits. Groq's gateway returns 413 above ~100 KB.
+- `generateAdvice(query, marketData)` builds:
+  - **System prompt**: RS3 GE flipping specialist persona + 10 numbered rules (anti-hallucination, analytical reasoning framework, data interpretation) + `RS3_ECONOMIC_RULES` (8 economic laws) + `DATA_FIELD_LEGEND` (field-by-field explanation of market data format) from `coreKnowledge.ts` with supremacy clause. Instructs the LLM to rank recommendations by gp/hr, include actionable buy/sell prices, and correctly handle insufficient-data cases (slope ±0.0 + volatility 0%).
+  - **User message**: Two delimited sections: `=== GRAND EXCHANGE DATA ===`, `=== PLAYER QUESTION ===`.
+- **Conversation trimming** (`buildTrimmedHistory()`): Before each API call, builds a size-efficient copy of the message history. Strips the bulky `=== GRAND EXCHANGE DATA ===` block from **all user messages except the most recent one**, retaining only the `=== PLAYER QUESTION ===` section. Also caps the conversation to `MAX_HISTORY_PAIRS` (8) user+assistant exchanges on top of the system prompt. This prevents HTTP 413 (Content Too Large) errors that previously occurred after 3–4 multi-turn exchanges with Groq.
+- **Payload size guard**: After building the JSON body, `generateAdvice()` checks the byte length against `MAX_BODY_BYTES` (50 KB). Progressive trimming halves market-data lines in the most recent user message (up to 4 attempts). Always-on payload byte logging on every request. Groq's gateway returns 413 above ~100 KB.
 - Error handling: `LLMRequestError` class with `status` and `responseBody`. Descriptive messages for 401/403/413/429/5xx.
 
 ### 4.8 LLM Provider System (`types.ts`)
@@ -286,9 +280,8 @@ All DOM manipulation isolated here — services remain UI-agnostic. ~2480 lines.
 7. Renders the favourites panel (if any favourites exist).
 8. Builds the full item catalogue for portfolio autocomplete.
 9. Fetches the full GE catalogue (~7,000 items) for market search.
-10. Pre-fetches wiki text for top 5 items so first chat is fast.
-11. Restores any persisted LLM chat conversation.
-12. Renders any persisted portfolio flips and starts the countdown timer.
+10. Restores any persisted LLM chat conversation.
+11. Renders any persisted portfolio flips and starts the countdown timer.
 
 **Layout modes**: Tabbed (default) or Sidebar — toggled via buttons, persisted in localStorage (`ge-analyzer:layout`).
 - **Tabbed**: Three tabs — Market Data, Ask Advisor, Portfolio. One visible at a time.
@@ -383,23 +376,23 @@ All DOM manipulation isolated here — services remain UI-agnostic. ~2480 lines.
 2. Appends user message bubble → clears input → locks input.
 3. Shows "Thinking" animated indicator.
 4. Creates `LLMService` via `resolvedLLMConfig()` which reads current provider/model/endpoint/key from localStorage.
-5. Calls `generateAdvice(query, latestMarketSummary, latestWikiText)`.
+5. Calls `generateAdvice(query, latestLLMContext || latestMarketSummary)`.
 6. Removes thinking indicator → appends assistant response bubble.
 7. Catches `LLMRequestError` with user-friendly messages per status code.
 8. Unlocks input, scrolls chat to bottom.
 
 **Force reload**: Button in settings that clears IndexedDB cache, re-runs the full data pipeline, and refreshes the market panel. Shows status indicator.
 
-**Module-scoped state**: `latestMarketSummary`, `latestWikiText`, `latestTopItems`, `latestSearchResults`, `allCachedItems`, `geCatalogue`, `currentView`, `llm`, `portfolio`, `favoritesCollapsed`, `top20Collapsed`, `isSearchActive`, `suppressAutocomplete`, `firedAlerts`, `toastContainer`.
+**Module-scoped state**: `latestMarketSummary`, `latestLLMContext`, `latestTopItems`, `latestSearchResults`, `allCachedItems`, `geCatalogue`, `currentView`, `llm`, `portfolio`, `favoritesCollapsed`, `top20Collapsed`, `isSearchActive`, `suppressAutocomplete`, `firedAlerts`, `toastContainer`.
 
 ### 4.11 Entry Point (`index.ts`)
 
 Lean orchestrator (~80 lines) with startup overlay management:
 1. Imports `alt1`, static assets (`appconfig.json`, `icon.png`), `style.css`.
 2. Detects `window.alt1` — if present, calls `alt1.identifyAppUrl()`; if absent, shows "add app" link.
-3. Shows `#startup-overlay` and calls `setStartupStatus(msg, step?)` to update status + step counter (e.g. "Step 1 of 5").
-4. Calls `await initDataPipeline()` (Step 1/5: "Loading market data…").
-5. Calls `await initUI(onStatus)` — `onStatus` callback drives Steps 2–5 (Ranking → Favourites → Catalogue → Wiki).
+3. Shows `#startup-overlay` and calls `setStartupStatus(msg, step?)` to update status + step counter (e.g. "Step 1 of 4").
+4. Calls `await initDataPipeline()` (Step 1/4: "Loading market data…").
+5. Calls `await initUI(onStatus)` — `onStatus` callback drives Steps 2–4 (Ranking → Favourites → Catalogue).
 6. `dismissOverlay()` fades and removes the overlay after boot completes.
 
 ### 4.12 HTML Structure (`index.html`)
@@ -518,10 +511,10 @@ All defined in `src/services/types.ts`:
 | `ActiveFlip` | `id`, `itemName`, `buyPrice`, `quantity`, `targetSellPrice`, `timestamp` |
 | `CompletedFlip` | Extends `ActiveFlip` + `actualSellPrice`, `completedAt`, `realizedProfit` |
 | `PortfolioStats` | `totalProfit`, `totalFlips`, `avgProfit`, `avgRoi` |
-| `WikiSearchResponse` | MediaWiki `action=query&list=search` response: `query.search[].{title, pageid}` |
-| `WikiQueryResponse` | MediaWiki `action=query` response subset |
-| `WikiPage` | `pageid`, `ns`, `title`, `extract?`, `missing?` |
-| `WikiGuideResult` | `title`, `found`, `text` |
+| `WikiSearchResponse` | *Removed (March 2026)* — wiki guide text fetching removed |
+| `WikiQueryResponse` | *Removed (March 2026)* |
+| `WikiPage` | *Removed (March 2026)* |
+| `WikiGuideResult` | *Removed (March 2026)* |
 | `ModelOption` | `id`, `label`, `recommended?` — single model entry in a provider |
 | `ProviderCostTier` | `"free"` \| `"free-tier"` \| `"low-cost"` \| `"paid"` \| `"self-hosted"` — pricing tier badge |
 | `LLMProvider` | `id`, `label`, `endpoint`, `defaultModel`, `keyPlaceholder`, `models`, `costTier`, `costNote`, `signupUrl?` |
@@ -536,6 +529,8 @@ All defined in `src/services/types.ts`:
 |----------|---------|
 | `LLM_PROVIDERS` | `readonly LLMProvider[]` — 6 built-in provider presets |
 | `RS3_ECONOMIC_RULES` | String constant — RS3 economic laws injected into LLM system prompt |
+| `MAX_BODY_BYTES` | `50_000` (in `llmService.ts`) — payload size ceiling for LLM API requests |
+| `LLM_CONTEXT_TOP_N` | `50` (in `marketAnalyzerService.ts`) — number of unfiltered top items sent to the LLM advisor |
 
 ---
 
@@ -586,9 +581,9 @@ Everything below is **complete and verified** (builds with 0 errors):
 - [x] Price momentum / trend classification (Uptrend / Downtrend / Stable based on 7-day % change, with falling-knife warning badges)
 - [x] Unified analytics modal (↗ button on cards → combined item details + interactive price chart + momentum stats + alert inputs + action buttons) — replaces old separate detail & graph modals (March 2026)
 - [x] Manual history refresh fallback — analytics modal shows "Insufficient history • Refresh" button when < 7 data points (March 2026)
-- [x] Startup loading overlay — spinner + step counter ("Step 1 of 5") + status text covers `#app` until boot completes, fades out on success (March 2026)
+- [x] Startup loading overlay — spinner + step counter ("Step 1 of 4") + status text covers `#app` until boot completes, fades out on success (March 2026)
 - [x] TTL-cached scoring maps — `getOrBuildMaps()` caches `avgVolumeMap` and `priceHistoryMap` in memory with 10-minute TTL; avoids rebuilding from IndexedDB on UI refresh (March 2026)
-- [x] Wiki service (two-step search → extract guide fetching + fallback to base item page + Cargo buy-limit API)
+- [x] Wiki service — structured data only: bulk buy-limit + high alch value fetching from `Module:Exchange/<Item>` Lua sources. Guide/article text fetching removed (March 2026) — `coreKnowledge.ts` provides better flipping-focused LLM context
 - [x] LLM service (multi-provider, multi-turn chat, strict anti-hallucination + economic rules prompt)
 - [x] Core knowledge base (RS3 economic rules: GE tax, buy limits, margin checking, high alch)
 - [x] LLM provider selection UI (6 providers: Groq, OpenAI, OpenRouter, Together AI, Mistral AI, Custom)
@@ -658,7 +653,8 @@ Everything below is **complete and verified** (builds with 0 errors):
 | CORS failures on Firefox but not Chrome | `fetchWithRetry()` in `weirdGloopService.ts` and `fetchBuyLimitBatch`/`fetchAlchValueBatch` in `wikiService.ts` set a custom `User-Agent` header. Firefox sends it (non-safelisted → triggers CORS preflight), but the APIs only allow `accept` in `Access-Control-Allow-Headers`. Chrome silently strips `User-Agent` so no preflight occurs | Removed the custom `User-Agent` header from all browser `fetch()` calls in both services — browser sends its own `User-Agent` automatically. Never set non-safelisted headers in browser `fetch()` (March 2026) |
 | High Alch values showing "Unknown" for all items | `getBulkHighAlchValues` regex matched only `alchvalue = <number>`, but most `Module:Exchange/<Item>` Lua sources only have a `value` field (base item value); `alchvalue` is rarely present | Added fallback: if no explicit `alchvalue`, compute High Alch as `floor(value × 0.6)` from the base `value` field. Also skip items with `alchable = false`. Added `VALUE_RE` and `ALCHABLE_FALSE_RE` regexes (March 2026) |
 | Two separate modals (item detail + graph) with duplicated data and disjointed UX | `showItemModal` and `showGraphModal` were independent singletons — users had to open two modals to see all item info, and features like alerts/actions were only in one | Consolidated into `showAnalyticsModal(item)` — a single scrollable overlay combining badges, action buttons, detail rows, alert inputs, interactive price chart with range selector, and stats grid. Old functions deprecated but retained. Single ↗ button per card (March 2026) |
-| HTTP 413 Content Too Large on multi-turn chat | `buildUserMessage()` embedded full market data + wiki text in every user message; `generateAdvice()` sent the entire `_messages` array to the API. By message 4 the payload exceeded Groq's request size limit | Added `buildTrimmedHistory()`: strips data blocks from all user messages except the most recent, caps history to `MAX_HISTORY_PAIRS` (8) exchanges. Added specific 413 error hint in `handleHttpError()` (March 2026) |
+| HTTP 413 Content Too Large on multi-turn chat | `buildUserMessage()` embedded full market data in every user message; `generateAdvice()` sent the entire `_messages` array to the API. By message 4 the payload exceeded Groq's request size limit | Added `buildTrimmedHistory()`: strips data blocks from all user messages except the most recent, caps history to `MAX_HISTORY_PAIRS` (8) exchanges. Added specific 413 error hint in `handleHttpError()` (March 2026) |
+| HTTP 413 recurring even on first message | Wiki text from MediaWiki API was completely unbounded — no `exchars`/`exintro` limit. A single RS3 wiki article can be 10–30 KB; with 5 guides, wiki text alone could be 50–150 KB, blowing past any body size limit. `LLM_CONTEXT_TOP_N` was also 100 items (unnecessarily large) | **Resolved permanently**: wiki guide text removed entirely (March 2026) — `coreKnowledge.ts` provides better, curated context. `MAX_BODY_BYTES` set to 50 KB with progressive market-data trimming. `LLM_CONTEXT_TOP_N` reduced from 100 → 50. Payload now ~6–8 KB on first message |
 | LLM giving contradictory/spotty advice (e.g. "high volatility (0.0%)", "negative slope (+0.0)") | Core knowledge was only 4 rules; system prompt had no data interpretation guidance; `formatForLLM` omitted trade velocity, high alch, and data-sufficiency markers | Expanded `RS3_ECONOMIC_RULES` to 8 laws (item categories, flipping strategy, gp/hr formulas, common pitfalls). Added `DATA_FIELD_LEGEND` explaining every metric. System prompt now has 12 analytical reasoning rules including the "slope ±0.0 + volatility 0% = insufficient data" case. `formatForLLM` now includes High Alch, Velocity tier, and `[LIMITED DATA]` tag when < 3 history points (March 2026) |
 
 ---
@@ -667,7 +663,7 @@ Everything below is **complete and verified** (builds with 0 errors):
 
 These were discussed or implied but never started:
 
-- ~~**Improved wiki title mapping**~~: ✅ Implemented — two-step MediaWiki search → extract strategy with fallback (see §4.5).
+- ~~**Improved wiki title mapping**~~: ✅ Implemented then removed — two-step MediaWiki search → extract strategy was replaced by curated `coreKnowledge.ts` (March 2026). WikiService now only fetches structured data (buy limits, alch values).
 - ~~**Error recovery UI**~~: ✅ Implemented — dismissible error banner with retry button, try/catch wrappers across pipeline and UI.
 - ~~**Item detail links**~~: ✅ Implemented — Wiki and GE Database links on every card and in the detail modal.
 - ~~**Responsive mobile layout**~~: ✅ Implemented — `@media (min-width: 800px)` desktop breakpoint with wider modals, expanded grids.
