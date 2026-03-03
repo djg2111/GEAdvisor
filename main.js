@@ -4137,6 +4137,7 @@ class CacheService {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   DATA_FIELD_LEGEND: () => (/* binding */ DATA_FIELD_LEGEND),
 /* harmony export */   RS3_ECONOMIC_RULES: () => (/* binding */ RS3_ECONOMIC_RULES)
 /* harmony export */ });
 /**
@@ -4148,10 +4149,75 @@ __webpack_require__.r(__webpack_exports__);
 /** Foundational RS3 economic rules the LLM must internalise before answering. */
 const RS3_ECONOMIC_RULES = `\
 === RS3 ECONOMIC LAWS (STRICT ADHERENCE REQUIRED) ===
-1. GE TAX: All items sold on the Grand Exchange are subject to a 2% tax (0.02) subtracted from the final sale price. You MUST deduct 2% from the gross revenue before calculating profit or Return on Investment (ROI). Items traded for 50 gp or less are exempt.
-2. BUY LIMITS: Every item has a 4-hour buy limit. A player cannot physically buy more than this number within a 4-hour window. Your volume recommendations must never exceed an item's realistic buy limit.
-3. MARGIN CHECKING: To find a margin, a player "insta-buys" an item (+20% price) to find the current lowest sell offer, then "insta-sells" (-20% price) to find the current highest buy offer. The gap between these, MINUS the 2% tax on the higher number, is the true profit margin.
-4. HIGH ALCHEMY: The High Alchemy value of an item often acts as its absolute price floor. GP enters the game primarily through High Alchemy and monster drops.`;
+
+1. GE TAX: All items sold on the Grand Exchange are subject to a 2% tax (floor(price × 0.02)) subtracted from the seller's proceeds. Items traded for ≤50 gp are exempt. You MUST deduct 2% from gross revenue before calculating profit or ROI.
+
+2. BUY LIMITS: Every item has a 4-hour buy limit — a hard cap on how many a player can purchase via the GE per 4-hour window. The limit resets exactly 4 hours after the first purchase of that window. A player has 6 buy-limit windows per 24 hours. Never recommend quantities exceeding an item's buy limit per window.
+
+3. MARGIN CHECKING: To find the current spread, a player:
+   a. Places an "insta-buy" at +5% above mid-price to discover the lowest active sell offer.
+   b. Places an "insta-sell" at −5% below mid-price to discover the highest active buy offer.
+   The margin = insta-buy price − insta-sell price − floor(insta-buy price × 0.02).
+   This is the true per-item profit AFTER tax.
+
+4. HIGH ALCHEMY: High Alchemy converts an item to gold: floor(item base value × 0.6). This value acts as a hard price floor — if GE price < alch value, players buy and alch for guaranteed profit, pushing the price back up. Always mention alch value when relevant.
+
+5. ITEM CATEGORIES & TYPICAL BEHAVIOUR:
+   - **Consumables** (food, potions, runes, divine charges): High volume, tight margins (1-5%), very fast trades. Best for high-capital, low-effort flipping.
+   - **Skilling supplies** (logs, ores, herbs, hides): Moderate volume, moderate margins. Prices correlate with DXP (Double XP) events and new content.
+   - **Equipment** (weapons, armour, components): Low volume, wide margins (5-20%+). Slower to trade but much higher per-item profit.
+   - **Rare/discontinued items** (partyhats, dyes, etc.): Very low volume, massive margins, but extremely slow and can take hours or days to flip. High risk due to price manipulation.
+   - **Salvage/alchables**: Prices tightly anchored to High Alchemy value. Very stable but nearly no margin.
+
+6. WHAT MAKES A GOOD FLIP:
+   - Profit per item × buy limit per 4 hours = maximum 4-hour profit potential.
+   - Fast trade velocity means offers fill quickly — less capital tied up waiting.
+   - A healthy margin must exceed the 2% tax gap comfortably (at least 2-3× the tax cost).
+   - Stable/slight uptrend items are safer; high volatility means the margin can vanish while you wait.
+   - Volume spike (>1.5× 7-day average) may indicate a temporary surge — good for quick flips but risky to hold.
+
+7. GP/HR CALCULATION: When recommending items, estimate profit per hour:
+   gp/hr = (profit per item after tax) × (buy limit ÷ estimated fill time in hours)
+   Where fill time depends on trade velocity:
+   - "Insta-Flip" = fills in minutes → assume 0.25 hours per cycle
+   - "Active" = fills in 30-60 min → assume 1 hour per cycle
+   - "Slow" = fills in 1-4 hours → assume 2-4 hours per cycle
+   - "Very Slow" = may take a full 4-hour window or longer
+
+8. COMMON PITFALLS TO WARN ABOUT:
+   - Items with < 500 gp price are risky because the tax gap eats most of the margin.
+   - A trend slope of ±0.0 with 0.0% volatility usually means insufficient price history data — do NOT call this "stable" or "risky"; instead note that historical data is limited.
+   - Volume spikes can indicate merch clans manipulating the price — advise caution.
+   - DXP weekend announcements cause skilling supply prices to spike days/weeks before the event.`;
+/**
+ * Legend explaining each data field in the formatted market summary.
+ * Included in the system prompt so the LLM can correctly interpret the data.
+ */
+const DATA_FIELD_LEGEND = `\
+=== DATA FIELD LEGEND (use this to interpret the market data) ===
+
+Each item line in the market data contains these fields:
+
+• GE Price — current Grand Exchange mid-price in gp.
+• Buy ≤ — recommended maximum buy offer (~1% below mid-price).
+• Sell ≥ — recommended minimum sell offer (~3% above mid-price, floored at High Alch value).
+• Profit — estimated per-item flip profit AFTER 2% GE tax: Sell − Buy − floor(Sell × 0.02).
+• Limit — 4-hour GE buy limit. "Unknown" = data unavailable (be cautious).
+• Eff. Vol — effective daily player volume = min(global daily volume, buy limit × 6). Reflects what one player can realistically trade.
+• Max 4H Capital — price × buy limit. How much gold you need to max out one 4-hour window.
+• Tax Gap — minimum spread (in gp) required to break even after the 2% GE tax.
+• 30d Trend Slope — linear regression slope over available price history:
+  - Positive (+N.N) = prices trending upward → good for buying.
+  - Negative (−N.N) = prices trending downward → good for selling / risky to hold.
+  - Near zero (+0.0 / −0.0) with 0% volatility = likely insufficient data, NOT confirmation of stability.
+• Volatility — daily price standard deviation as a percentage:
+  - 0% = no variation in available data (or insufficient data).
+  - <5% = low volatility, stable — safer.
+  - 5-10% = moderate — normal for active items.
+  - >10% = high volatility — risky, margins can shift rapidly.
+• Predicted 24h Price — next-day price estimate from linear trend extrapolation. Less reliable with sparse history.
+• ⚠ RISKY — flagged when item price is < 500 gp (tax gap erodes margins).
+• 🔥 N.Nx Vol Spike — today's volume is N.N× the 7-day average. May indicate a surge or manipulation.`;
 
 
 /***/ },
@@ -4165,6 +4231,7 @@ const RS3_ECONOMIC_RULES = `\
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   CacheService: () => (/* reexport safe */ _cacheService__WEBPACK_IMPORTED_MODULE_1__.CacheService),
+/* harmony export */   DATA_FIELD_LEGEND: () => (/* reexport safe */ _coreKnowledge__WEBPACK_IMPORTED_MODULE_6__.DATA_FIELD_LEGEND),
 /* harmony export */   LLMRequestError: () => (/* reexport safe */ _llmService__WEBPACK_IMPORTED_MODULE_4__.LLMRequestError),
 /* harmony export */   LLMService: () => (/* reexport safe */ _llmService__WEBPACK_IMPORTED_MODULE_4__.LLMService),
 /* harmony export */   LLM_PROVIDERS: () => (/* reexport safe */ _types__WEBPACK_IMPORTED_MODULE_8__.LLM_PROVIDERS),
@@ -4852,6 +4919,18 @@ const DEFAULTS = {
     maxTokens: 1024,
 };
 /**
+ * Maximum number of user+assistant exchange pairs retained in the API
+ * payload (on top of the system prompt). Older exchanges are dropped to
+ * keep the request within provider size limits.
+ */
+const MAX_HISTORY_PAIRS = 8;
+/**
+ * Regex that matches the `=== GRAND EXCHANGE DATA ===` and
+ * `=== WIKI GUIDE TEXT ===` blocks inside a user message, leaving only
+ * the `=== PLAYER QUESTION ===` section.
+ */
+const DATA_BLOCK_RE = /=== GRAND EXCHANGE DATA ===[\s\S]*?(?==== PLAYER QUESTION ===)/;
+/**
  * Service that synthesises GE market data and RS3 Wiki text into
  * actionable money-making advice via an LLM chat-completion API.
  *
@@ -4939,10 +5018,18 @@ class LLMService {
     async generateAdvice(query, marketData, wikiText) {
         const userMsg = this.buildUserMessage(query, marketData, wikiText);
         this._messages.push({ role: "user", content: userMsg });
-        console.log(`[LLMService] Sending ${this._messages.length} messages to ${this.model} at ${this.endpoint}…`);
+        // Build a trimmed copy of the history for the API payload.
+        // - System prompt: kept as-is.
+        // - Older user messages: data blocks stripped, only the player question retained.
+        // - Most recent user message (the one we just pushed): full context kept.
+        // - Assistant messages: kept as-is.
+        // Additionally, cap conversation to the system prompt + last MAX_HISTORY_PAIRS
+        // exchanges to bound payload size.
+        const trimmed = this.buildTrimmedHistory();
+        console.log(`[LLMService] Sending ${trimmed.length} messages (${this._messages.length} in full history) to ${this.model} at ${this.endpoint}…`);
         const body = {
             model: this.model,
-            messages: [...this._messages],
+            messages: trimmed,
             temperature: this.temperature,
             max_completion_tokens: this.maxTokens,
         };
@@ -4995,22 +5082,36 @@ class LLMService {
             "You are a RuneScape 3 Grand Exchange specialist and money-making instructor.",
             "",
             "STRICT RULES — you MUST follow all of these:",
-            "1. ONLY use the Grand Exchange market data and RS Wiki text provided in the user message.",
+            "1. ONLY use the Grand Exchange market data and RS Wiki text provided in the user message. Never reference outside pricing or game knowledge.",
             "2. NEVER invent, guess, or hallucinate prices, trade volumes, profit margins, or game mechanics.",
             "3. If the provided data is insufficient to answer a question, say so explicitly — do NOT fill gaps with assumptions.",
-            "4. When recommending items to buy or sell, cite the exact price and volume numbers from the provided data.",
-            "5. When referencing a money-making method, quote or paraphrase the wiki text — do not add steps that are not in the source.",
-            "6. Keep responses concise and actionable. Use bullet points or numbered lists.",
-            "7. Format gold values with standard RS3 abbreviations (K, M, B).",
-            "8. If no wiki guide exists for an item, only discuss it from the market-data perspective.",
-            "9. Analyze the '30d Trend Slope' and 'Volatility' metrics provided for each item. A positive slope indicates an upward price trend; a negative slope signals decline. Volatility above 10% signals high risk.",
-            "10. When recommending or discussing an item, explicitly mention whether its linear slope is positive or negative and whether its volatility is high (>10%) or low. Use these to justify your buy/sell/hold advice.",
+            "4. When recommending items, ALWAYS cite the exact numbers from the data (price, profit, buy limit, volume, trend slope, volatility).",
+            "5. When referencing a money-making method, quote or paraphrase the wiki text — do not add steps not in the source.",
+            "6. Keep responses concise and actionable. Use bullet points or numbered lists. No filler or generic advice.",
+            "7. Format gold values with standard RS3 abbreviations: K (thousands), M (millions), B (billions).",
+            "8. If no wiki guide exists for a queried item, only discuss it from the market-data perspective.",
             "",
-            "The following RS3 economic laws are ABSOLUTE. They supersede any conflicting outside knowledge you may have. Apply them to every calculation.",
+            "ANALYTICAL REASONING — follow this framework when recommending items:",
+            "9. For EVERY item you recommend or discuss, state:",
+            "   a. The per-item profit AFTER tax (use the 'Profit' field, or compute it).",
+            "   b. The 4-hour profit potential: profit × buy limit.",
+            "   c. The estimated gp/hr based on trade velocity (see economic rules for fill-time estimates).",
+            "   d. The 30d trend: quote the slope value and explain what it means (rising, falling, or flat).",
+            "   e. The volatility %: quote it and classify as low (<5%), moderate (5-10%), or high (>10%).",
+            "",
+            "10. CRITICAL: When trend slope is near zero (+0.0 or −0.0) AND volatility is 0.0%, this usually means INSUFFICIENT PRICE HISTORY DATA — do NOT interpret it as 'stable' or 'low risk'. Instead, say historical data is limited and recommend the player margin-check the item first.",
+            "",
+            "11. When the player asks 'what should I flip', rank your top 3-5 picks by estimated gp/hr and explain why each is good. Include at least one high-volume fast flip and one higher-margin slower flip if available.",
+            "",
+            "12. Always include actionable next steps: what price to set buy offers at, estimated wait time, and what to sell at.",
+            "",
+            "The following RS3 economic laws are ABSOLUTE. They supersede any conflicting outside knowledge. Apply them to every calculation.",
             "",
             _coreKnowledge__WEBPACK_IMPORTED_MODULE_0__.RS3_ECONOMIC_RULES,
             "",
-            "Your audience is an experienced RS3 player viewing this inside the Alt1 Toolkit overlay. Be direct and efficient.",
+            _coreKnowledge__WEBPACK_IMPORTED_MODULE_0__.DATA_FIELD_LEGEND,
+            "",
+            "Your audience is an experienced RS3 player viewing this inside the Alt1 Toolkit overlay. Be direct, specific, and data-driven. Never pad responses with generic advice like 'do your own research' — the data is right there.",
         ].join("\n");
     }
     /**
@@ -5049,6 +5150,49 @@ class LLMService {
             query,
         ].join("\n");
     }
+    /**
+     * Build a size-efficient copy of `_messages` for the API payload.
+     *
+     * 1. Keeps the system prompt verbatim.
+     * 2. Caps non-system messages to the last `MAX_HISTORY_PAIRS * 2` entries
+     *    (each pair = one user + one assistant message).
+     * 3. Strips the bulky `=== GRAND EXCHANGE DATA ===` and
+     *    `=== WIKI GUIDE TEXT ===` blocks from **all user messages except the
+     *    most recent one**, retaining only the `=== PLAYER QUESTION ===`
+     *    section so the LLM still sees the conversational context.
+     *
+     * @returns A new `ChatMessage[]` safe to serialise and send.
+     */
+    buildTrimmedHistory() {
+        const system = this._messages[0]; // always the system prompt
+        let rest = this._messages.slice(1);
+        // Cap to the most recent exchanges.
+        const maxNonSystem = MAX_HISTORY_PAIRS * 2;
+        if (rest.length > maxNonSystem) {
+            rest = rest.slice(rest.length - maxNonSystem);
+        }
+        // Find the index of the last user message (relative to `rest`).
+        let lastUserIdx = -1;
+        for (let i = rest.length - 1; i >= 0; i--) {
+            if (rest[i].role === "user") {
+                lastUserIdx = i;
+                break;
+            }
+        }
+        const trimmed = [system];
+        for (let i = 0; i < rest.length; i++) {
+            const msg = rest[i];
+            if (msg.role === "user" && i !== lastUserIdx) {
+                // Strip data blocks, keep only the question portion.
+                const stripped = msg.content.replace(DATA_BLOCK_RE, "").trim();
+                trimmed.push({ role: "user", content: stripped });
+            }
+            else {
+                trimmed.push(msg);
+            }
+        }
+        return trimmed;
+    }
     // ─── Private: Error Handling ──────────────────────────────────────────
     /**
      * Inspect a non-OK HTTP response and throw a descriptive
@@ -5081,6 +5225,9 @@ class LLMService {
                 break;
             case 403:
                 hint = "Forbidden — the API key may lack the required permissions.";
+                break;
+            case 413:
+                hint = "Request too large — conversation history exceeded the provider's size limit. Try clearing the chat and starting a new conversation.";
                 break;
             case 429:
                 hint = "Rate limited — you have exceeded the API quota. Wait and retry.";
@@ -5229,6 +5376,12 @@ const DEFAULTS = {
     minVolume: 0,
 };
 /**
+ * Number of top items (by traded value, no filters) included in the LLM
+ * chat context.  200 items ≈ 15K tokens — fits comfortably in all
+ * supported provider context windows.
+ */
+const LLM_CONTEXT_TOP_N = 200;
+/**
  * Stateless service that reads cached GE price data and produces a ranked,
  * LLM-consumable summary of the most actively-traded items.
  *
@@ -5372,6 +5525,24 @@ class MarketAnalyzerService {
         return this.formatForLLM(items);
     }
     /**
+     * Build a broader dataset specifically for LLM chat context.
+     *
+     * Returns the top {@link LLM_CONTEXT_TOP_N} items by traded value with
+     * **no volume or price filters**, giving the LLM a much wider view of
+     * the market than the UI's filtered top-20 panel.
+     *
+     * @returns A formatted string with up to 200 items for LLM context injection.
+     */
+    async getFormattedForLLM() {
+        const items = await this.getTopItems({
+            topN: LLM_CONTEXT_TOP_N,
+            minVolume: 0,
+            maxVolume: 0,
+            maxPrice: 0,
+        });
+        return this.formatForLLM(items);
+    }
+    /**
      * Serialise a list of {@link RankedItem} objects into a compact,
      * human-readable (and LLM-friendly) string block.
      *
@@ -5409,7 +5580,13 @@ class MarketAnalyzerService {
             const slope = item.linearSlope >= 0 ? `+${item.linearSlope.toFixed(1)}` : item.linearSlope.toFixed(1);
             const vol = (item.volatility * 100).toFixed(1);
             const predicted = this.formatGp(Math.round(item.predictedNextPrice));
-            return `${rank}. ${item.name} | GE Price: ${price} gp | Buy ≤ ${recBuy} | Sell ≥ ${recSell} | Profit: ${flipPft} gp/ea | Limit: ${limit} | Eff. Vol: ${effVol} | Max 4H Capital: ${cap4h} | Tax Gap: ${this.formatGp(item.taxGap)} gp | 30d Trend Slope: ${slope} | Volatility: ${vol}% | Predicted 24h Price: ${predicted} gp${risk}${hype}`;
+            const alch = item.highAlch != null && item.highAlch > 0
+                ? `High Alch: ${this.formatGp(item.highAlch)} gp`
+                : "High Alch: Unknown";
+            const velocity = item.tradeVelocity;
+            const histLen = item.priceHistory.length;
+            const histNote = histLen < 3 ? " [LIMITED DATA]" : "";
+            return `${rank}. ${item.name} | GE Price: ${price} gp | Buy ≤ ${recBuy} | Sell ≥ ${recSell} | Profit: ${flipPft} gp/ea | Limit: ${limit} | Eff. Vol: ${effVol} | Max 4H Capital: ${cap4h} | Tax Gap: ${this.formatGp(item.taxGap)} gp | ${alch} | Velocity: ${velocity} | 30d Trend Slope: ${slope} | Volatility: ${vol}%${histNote} | Predicted 24h Price: ${predicted} gp${risk}${hype}`;
         });
         return [header, ...lines, divider].join("\n");
     }
@@ -6950,6 +7127,13 @@ let analyzer;
 let wiki;
 /** Most recent formatted market summary — reused across chat messages. */
 let latestMarketSummary = "";
+/**
+ * Broader LLM context (top 200 items by traded value, no filters).
+ * Built alongside the UI panel but with relaxed constraints so the chat
+ * advisor has a much wider market view than the filtered top-20 panel.
+ * Falls back to `latestMarketSummary` until the first build completes.
+ */
+let latestLLMContext = "";
 /** Most recent wiki text block — reused across chat messages. */
 let latestWikiText = "";
 /** The top items array, cached for wiki lookups per chat message. */
@@ -7789,6 +7973,10 @@ async function refreshMarketPanel() {
         latestMarketSummary = analyzer.formatForLLM(latestTopItems);
         applySortOrder(latestTopItems, els.top20SortSelect.value);
         renderMarketItems(latestTopItems);
+        // Build broader LLM context asynchronously (top 200, no filters).
+        // Non-blocking — chat uses whatever is ready; falls back to the
+        // narrow summary until this completes.
+        analyzer.getFormattedForLLM().then(ctx => { latestLLMContext = ctx; }).catch(() => { });
         // Check price alerts against ALL cached items (not just filtered top 20).
         try {
             const allItems = await analyzer.getTopItems({ topN: 99999, minVolume: 0 });
@@ -9733,7 +9921,7 @@ async function handleSend() {
             await prefetchWikiText();
         }
         const service = ensureLLMService();
-        const advice = await service.generateAdvice(query, latestMarketSummary, latestWikiText);
+        const advice = await service.generateAdvice(query, latestLLMContext || latestMarketSummary, latestWikiText);
         removeMessage(thinkingEl);
         appendMessage("assistant", advice);
         // Persist conversation after a successful exchange.
