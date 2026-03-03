@@ -4143,24 +4143,24 @@ __webpack_require__.r(__webpack_exports__);
 /**
  * @module coreKnowledge
  * Static knowledge base of RS3 economic mechanics injected into every LLM
- * system prompt.  These rules are non-negotiable and supersede any outside
+ * system prompt. These rules are non-negotiable and supersede any outside
  * knowledge the model may have been trained on.
  */
 /** Foundational RS3 economic rules the LLM must internalise before answering. */
 const RS3_ECONOMIC_RULES = `\
 === RS3 ECONOMIC LAWS (STRICT ADHERENCE REQUIRED) ===
 
-1. GE TAX: All items sold on the Grand Exchange are subject to a 2% tax (floor(price × 0.02)) subtracted from the seller's proceeds. Items traded for ≤50 gp are exempt. You MUST deduct 2% from gross revenue before calculating profit or ROI.
+1. GE TAX: All items sold on the Grand Exchange (except items ≤50 gp each and bonds) are subject to a 2% tax (floor(sell price × 0.02)) subtracted from the seller's proceeds. The buyer always pays the full listed price. Tax is applied per item. You MUST deduct this 2% from gross revenue before calculating net profit, ROI, or margins. In the selling interface, the upper value is pre-tax and the lower value is after-tax proceeds.
 
-2. BUY LIMITS: Every item has a 4-hour buy limit — a hard cap on how many a player can purchase via the GE per 4-hour window. The limit resets exactly 4 hours after the first purchase of that window. A player has 6 buy-limit windows per 24 hours. Never recommend quantities exceeding an item's buy limit per window.
+2. BUY LIMITS: Every item has a 4-hour buy limit — a hard cap on how many a player can purchase via the GE per 4-hour window. The limit resets exactly 4 hours after the first purchase of that window. A player has 6 buy-limit windows per 24 hours. Buy limits are account-wide. A few items have connected limits (buying one reduces the limit for related items). Never recommend quantities exceeding an item's buy limit per window.
 
-3. MARGIN CHECKING: To find the current spread, a player:
-   a. Places an "insta-buy" at +5% above mid-price to discover the lowest active sell offer.
-   b. Places an "insta-sell" at −5% below mid-price to discover the highest active buy offer.
-   The margin = insta-buy price − insta-sell price − floor(insta-buy price × 0.02).
-   This is the true per-item profit AFTER tax.
+3. MARGIN CHECKING: To find the current real spread:
+   a. Place an "insta-buy" offer at ~+5% (or +10-20% for low-volume items) above mid-price → this fills against the lowest active sell offer (your instant-sell price / highest sellable price).
+   b. Place an "insta-sell" offer at ~-5% (or more) below mid-price → this fills against the highest active buy offer (your instant-buy price / lowest buyable price).
+   Margin = insta-buy price − insta-sell price − floor(insta-buy price × 0.02).
+   This is the true per-item net profit after tax if you buy at insta-sell price and sell at insta-buy price.
 
-4. HIGH ALCHEMY: High Alchemy converts an item to gold: floor(item base value × 0.6). This value acts as a hard price floor — if GE price < alch value, players buy and alch for guaranteed profit, pushing the price back up. Always mention alch value when relevant.
+4. HIGH ALCHEMY: The High Level Alchemy spell converts an item to coins at floor(item High Alch value × 0.6). This alch value serves as a strong price floor — if GE price drops significantly below alch value, players buy and alch for near-guaranteed profit (minus rune costs), usually pushing price back toward/above alch value. Always reference the item's High Alch value when the GE price is near or below it.
 
 5. ITEM CATEGORIES & TYPICAL BEHAVIOUR:
    - **Consumables** (food, potions, runes, divine charges): High volume, tight margins (1-5%), very fast trades. Best for high-capital, low-effort flipping.
@@ -4184,11 +4184,23 @@ const RS3_ECONOMIC_RULES = `\
    - "Slow" = fills in 1-4 hours → assume 2-4 hours per cycle
    - "Very Slow" = may take a full 4-hour window or longer
 
-8. COMMON PITFALLS TO WARN ABOUT:
-   - Items with < 500 gp price are risky because the tax gap eats most of the margin.
+8. OFFER PRIORITY: When multiple offers exist at the same price, the oldest offer fills first (time priority). Editing or aborting an offer resets its position to newest. This means newly placed offers may wait behind existing ones at the same price.
+
+9. SAFE MARGIN GUIDELINES:
+   - High-volume/insta-flips: Aim for ≥ 3-5% gross margin (covers tax + minor risk).
+   - Mid-volume/active: ≥ 6-10% gross.
+   - Low-volume/slow: ≥ 12-20%+ gross to justify wait time and risk.
+   Net profit should be at least 2-3× the tax amount per item to be worthwhile.
+
+10. COMMON PITFALLS TO WARN ABOUT:
+   - Items with < 1,000 gp price are risky because the tax gap eats most of the margin.
    - A trend slope of ±0.0 with 0.0% volatility usually means insufficient price history data — do NOT call this "stable" or "risky"; instead note that historical data is limited.
    - Volume spikes can indicate merch clans manipulating the price — advise caution.
-   - DXP weekend announcements cause skilling supply prices to spike days/weeks before the event.`;
+   - DXP weekend announcements cause skilling supply prices to spike days/weeks before the event.
+   - Do NOT recommend flipping items priced under ~1,000 gp unless margin is exceptionally wide.
+   - Avoid holding downward-trending items overnight unless volatility is very low.
+   - Watch for "dead GE" items (0 volume for days) — margins may look good but fill time can be days/weeks.
+   - Upcoming updates/DXP/Boss drops/PvM changes can crash or spike prices unpredictably — cross-reference recent game news when possible.`;
 /**
  * Legend explaining each data field in the formatted market summary.
  * Included in the system prompt so the LLM can correctly interpret the data.
@@ -4216,8 +4228,12 @@ Each item line in the market data contains these fields:
   - 5-10% = moderate — normal for active items.
   - >10% = high volatility — risky, margins can shift rapidly.
 • Predicted 24h Price — next-day price estimate from linear trend extrapolation. Less reliable with sparse history.
-• ⚠ RISKY — flagged when item price is < 500 gp (tax gap erodes margins).
-• 🔥 N.Nx Vol Spike — today's volume is N.N× the 7-day average. May indicate a surge or manipulation.`;
+• ⚠ RISKY — flagged when item price is < 500-1,000 gp (tax gap erodes margins).
+• 🔥 N.Nx Vol Spike — today's volume is N.N× the 7-day average. May indicate a surge or manipulation.
+• Flags:
+  - ⚠ LOW-PRICE: Price <500-1000 gp (tax eats margin).
+  - 🔥 VOL SPIKE: Today's volume ≥1.5-2× 7-day avg (possible pump, dump, or event surge).
+  - LIMITED-DATA or 0.0% vol + 0.0 slope: Insufficient history — treat trend as unreliable.`;
 
 
 /***/ },
@@ -5631,9 +5647,9 @@ class MarketAnalyzerService {
                 ? this.formatGp(item.maxCapitalPer4H)
                 : "?";
             const taxGap = this.formatGp(item.taxGap);
-            const alch = item.highAlch != null && item.highAlch > 0
+            const alch = typeof item.highAlch === "number" && item.highAlch > 0
                 ? this.formatGp(item.highAlch)
-                : "?";
+                : item.highAlch === false ? "N/A" : "?";
             const velocity = item.tradeVelocity;
             const slope = item.linearSlope >= 0
                 ? `+${item.linearSlope.toFixed(1)}`
@@ -5690,9 +5706,9 @@ class MarketAnalyzerService {
             const slope = item.linearSlope >= 0 ? `+${item.linearSlope.toFixed(1)}` : item.linearSlope.toFixed(1);
             const vol = (item.volatility * 100).toFixed(1);
             const predicted = this.formatGp(Math.round(item.predictedNextPrice));
-            const alch = item.highAlch != null && item.highAlch > 0
+            const alch = typeof item.highAlch === "number" && item.highAlch > 0
                 ? `High Alch: ${this.formatGp(item.highAlch)} gp`
-                : "High Alch: Unknown";
+                : item.highAlch === false ? "High Alch: Not Alchable" : "High Alch: Unknown";
             const velocity = item.tradeVelocity;
             const histLen = item.priceHistory.length;
             const histNote = histLen < 3 ? " [LIMITED DATA]" : "";
@@ -5749,7 +5765,7 @@ class MarketAnalyzerService {
             // Target: sell at ~3% above mid-price → ~2% spread after tax.
             let recSellPrice = Math.max(recBuyPrice + 1, Math.ceil(record.price * 1.03));
             // High Alchemy floor: never recommend selling below the alch value.
-            recSellPrice = Math.max(recSellPrice, record.highAlch || 0);
+            recSellPrice = Math.max(recSellPrice, typeof record.highAlch === "number" ? record.highAlch : 0);
             // Estimated per-item flip profit: sell − buy − 2% GE tax on the sale.
             // Official RS3 wiki formula: floor(price * 2%), exempt at ≤ 50 gp.
             let expectedTax = Math.floor(recSellPrice * 0.02);
@@ -6615,7 +6631,8 @@ __webpack_require__.r(__webpack_exports__);
  *
  * Responsibilities:
  *  - Fetch GE buy limits in bulk from `Module:Exchange/<Item>` Lua sources.
- *  - Fetch High Alchemy values in bulk from the same modules.
+ *  - Fetch High Alchemy values in bulk from `Module:GEHighAlchs/data.json`
+ *    (single request for all alchable items, with per-item fallback).
  *
  * Guide / article text fetching has been removed — the curated
  * `coreKnowledge.ts` rules provide better, flipping-focused context for
@@ -6624,15 +6641,23 @@ __webpack_require__.r(__webpack_exports__);
  * Uses only the native browser `fetch` API — no external dependencies.
  *
  * @see https://runescape.wiki/api.php (MediaWiki API sandbox)
+ * @see https://runescape.wiki/w/Module:GEHighAlchs/data.json?action=raw
  */
 /**
  * Service that retrieves structured item data (buy limits, high alch values)
- * from the official RuneScape 3 Wiki's `Module:Exchange` Lua sources.
+ * from the official RuneScape 3 Wiki.
+ *
+ * High Alch values are fetched from the `Module:GEHighAlchs/data.json` bulk
+ * endpoint in a single HTTP request. Items present in the response are
+ * alchable (value = number); items absent are explicitly not alchable
+ * (value = `false`). Falls back to per-item `Module:Exchange/<Item>` Lua
+ * source parsing when the bulk endpoint is unreachable.
  *
  * @example
  * ```ts
  * const wiki = new WikiService();
  * const limits = await wiki.getBulkBuyLimits(["Blood rune", "Elder logs"]);
+ * const alchs = await wiki.getBulkHighAlchValues(["Blood rune", "Elder logs"]);
  * ```
  */
 class WikiService {
@@ -6716,19 +6741,47 @@ class WikiService {
         return map;
     }
     /**
-     * Fetch High Alchemy values in bulk by reading `Module:Exchange/<Item>` pages.
-     * Each Lua module may contain an explicit `alchvalue` field; if absent, the
-     * value is computed from the base `value` field as `floor(value × 0.6)`.
-     * Items with `alchable = false` are skipped.
+     * Fetch High Alchemy values for the given items.
+     *
+     * **Primary source**: the `Module:GEHighAlchs/data.json` bulk endpoint
+     * (single HTTP request for every alchable item in the game).  Items
+     * present in the response are alchable (value = number); items absent
+     * are explicitly not alchable (value = `false`).
+     *
+     * **Fallback**: per-item `Module:Exchange/<Item>` Lua source parsing,
+     * used only when the bulk endpoint is unreachable.  In fallback mode,
+     * items that cannot be resolved remain absent from the map (no `false`).
      *
      * @param itemNames - Canonical RS3 item names.
-     * @returns A `Map<string, number>` keyed by item name → high alch value.
+     * @returns A `Map<string, number | false>` keyed by item name.
      */
     async getBulkHighAlchValues(itemNames) {
         if (itemNames.length === 0)
             return new Map();
+        // ── Try the single-request bulk endpoint first ─────────────────────
+        try {
+            const bulkData = await this.fetchAllHighAlchValues();
+            const result = new Map();
+            for (const name of itemNames) {
+                const val = bulkData.get(name);
+                if (val !== undefined) {
+                    result.set(name, val); // alchable — has a value
+                }
+                else {
+                    result.set(name, false); // not in the bulk list → not alchable
+                }
+            }
+            console.log(`[WikiService] Bulk alch endpoint: ${result.size} items resolved ` +
+                `(${[...result.values()].filter(v => typeof v === "number").length} alchable, ` +
+                `${[...result.values()].filter(v => v === false).length} not alchable).`);
+            return result;
+        }
+        catch (bulkErr) {
+            console.warn("[WikiService] Bulk alch endpoint failed — falling back to per-item Module:Exchange.", bulkErr);
+        }
+        // ── Fallback: per-item Module:Exchange parsing ─────────────────────
         const batches = this.chunkArray(itemNames, WikiService.EXCHANGE_BATCH_SIZE);
-        console.log(`[WikiService] Fetching alch values for ${itemNames.length} items in ${batches.length} batch(es)…`);
+        console.log(`[WikiService] Fetching alch values for ${itemNames.length} items in ${batches.length} batch(es) (fallback)…`);
         const settled = await Promise.allSettled(batches.map((batch, idx) => this.fetchAlchValueBatch(batch, idx)));
         const combined = new Map();
         for (const result of settled) {
@@ -6741,8 +6794,41 @@ class WikiService {
                 console.warn("[WikiService] Alch-value batch failed:", result.reason);
             }
         }
-        console.log(`[WikiService] Resolved alch values for ${combined.size} / ${itemNames.length} items.`);
+        console.log(`[WikiService] Resolved alch values for ${combined.size} / ${itemNames.length} items (fallback).`);
         return combined;
+    }
+    /**
+     * Fetch the complete `Module:GEHighAlchs/data.json` bulk endpoint.
+     * Returns a map of **every alchable item** in the game → its High Alch
+     * value in gp.  Items not present in this map are not alchable.
+     *
+     * The endpoint returns a flat JSON object with two metadata keys
+     * (`%LAST_UPDATE%`, `%LAST_UPDATE_F%`) that are stripped from the result.
+     *
+     * @returns Map of canonical item name → High Alch value (gp).
+     * @throws If the network request fails or the response is not valid JSON.
+     */
+    async fetchAllHighAlchValues() {
+        console.log("[WikiService] Fetching bulk High Alch data from GEHighAlchs module…");
+        const response = await fetch(WikiService.HIGH_ALCH_BULK_URL, {
+            method: "GET",
+            headers: { Accept: "application/json" },
+        });
+        if (!response.ok) {
+            throw new Error(`[WikiService] GEHighAlchs HTTP ${response.status} ${response.statusText}`);
+        }
+        const json = await response.json();
+        const map = new Map();
+        for (const [key, value] of Object.entries(json)) {
+            // Skip metadata keys (prefixed with %)
+            if (key.startsWith("%"))
+                continue;
+            if (typeof value === "number" && value > 0) {
+                map.set(key, value);
+            }
+        }
+        console.log(`[WikiService] Bulk alch data: ${map.size} alchable items loaded.`);
+        return map;
     }
     /**
      * Fetch a single batch of high alchemy values from `Module:Exchange/<Item>` Lua sources.
@@ -6807,6 +6893,11 @@ class WikiService {
         return chunks;
     }
 }
+/**
+ * Bulk endpoint URL that returns all alchable items and their High Alch
+ * values as a flat `{ itemName: number }` JSON object.
+ */
+WikiService.HIGH_ALCH_BULK_URL = "https://runescape.wiki/w/Module:GEHighAlchs/data.json?action=raw";
 // ─── Bulk Buy Limits (Module:Exchange) ──────────────────────────────
 /**
  * Maximum titles per MediaWiki `action=query` request.
@@ -9442,7 +9533,7 @@ async function showAnalyticsModal(item) {
         `<div class="detail-row"><span class="detail-label" title="${DETAIL_TIPS["Rec. Buy Price"]}">${DETAIL_LABELS["Rec. Buy Price"]}</span><span class="detail-value buy-highlight">${item.recBuyPrice.toLocaleString("en-US")} gp</span></div>`,
         `<div class="detail-row"><span class="detail-label" title="${DETAIL_TIPS["Rec. Sell Price"]}">${DETAIL_LABELS["Rec. Sell Price"]}</span><span class="detail-value sell-highlight">${item.recSellPrice.toLocaleString("en-US")} gp</span></div>`,
         `<div class="detail-row"><span class="detail-label" title="${DETAIL_TIPS["Est. Flip Profit"]}">${DETAIL_LABELS["Est. Flip Profit"]}</span><span class="detail-value${item.estFlipProfit <= 0 ? " risky-text" : " profit-highlight"}">${item.estFlipProfit > 0 ? "+" : ""}${item.estFlipProfit.toLocaleString("en-US")} gp/ea</span></div>`,
-        `<div class="detail-row"><span class="detail-label" title="${DETAIL_TIPS["High Alch"]}">${DETAIL_LABELS["High Alch"]}</span><span class="detail-value">${item.highAlch != null ? item.highAlch.toLocaleString("en-US") + " gp" : "Unknown"}</span></div>`,
+        `<div class="detail-row"><span class="detail-label" title="${DETAIL_TIPS["High Alch"]}">${DETAIL_LABELS["High Alch"]}</span><span class="detail-value">${typeof item.highAlch === "number" ? item.highAlch.toLocaleString("en-US") + " gp" : item.highAlch === false ? "Not Alchable" : "Unknown"}</span></div>`,
         `<div class="detail-row"><span class="detail-label" title="${DETAIL_TIPS["Tax Gap"]}">${DETAIL_LABELS["Tax Gap"]}</span><span class="detail-value${item.isRisky ? " risky-text" : ""}">${formatGpShort(item.taxGap)} gp${item.isRisky ? " \u26a0 risky" : ""}</span></div>`,
         `<div class="detail-row"><span class="detail-label" title="${DETAIL_TIPS["Est. Margin (2% tax)"]}">${DETAIL_LABELS["Est. Margin (2% tax)"]}</span><span class="detail-value">${formatGpShort(Math.round(item.price * 0.02))} gp</span></div>`,
         `<div class="detail-row"><span class="detail-label" title="${DETAIL_TIPS["24h Global Vol"]}">${DETAIL_LABELS["24h Global Vol"]}</span><span class="detail-value">${formatVolume(item.volume)}</span></div>`,
