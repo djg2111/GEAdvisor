@@ -4925,17 +4925,16 @@ const DEFAULTS = {
  */
 const MAX_HISTORY_PAIRS = 8;
 /**
- * Regex that matches the `=== GRAND EXCHANGE DATA ===` and
- * `=== WIKI GUIDE TEXT ===` blocks inside a user message, leaving only
- * the `=== PLAYER QUESTION ===` section.
+ * Regex that matches the `=== GRAND EXCHANGE DATA ===` block inside a
+ * user message, leaving only the `=== PLAYER QUESTION ===` section.
  */
 const DATA_BLOCK_RE = /=== GRAND EXCHANGE DATA ===[\s\S]*?(?==== PLAYER QUESTION ===)/;
 /**
- * Maximum JSON body size (in bytes) we allow before truncating the market
- * data.  Groq's gateway returns HTTP 413 above ~100 KB.  We stay well
- * under at 95 KB so there's headroom for JSON escaping overhead.
+ * Maximum JSON body size (in bytes) we allow before truncating context.
+ * Groq's gateway returns HTTP 413 above ~100 KB, but free-tier limits
+ * vary by model.  50 KB provides a safe margin for all models.
  */
-const MAX_BODY_BYTES = 95000;
+const MAX_BODY_BYTES = 50000;
 /**
  * Service that synthesises GE market data and RS3 Wiki text into
  * actionable money-making advice via an LLM chat-completion API.
@@ -4946,7 +4945,6 @@ const MAX_BODY_BYTES = 95000;
  * const advice = await llm.generateAdvice(
  *   "What should I flip right now?",
  *   formattedMarketData,
- *   wikiGuideText,
  * );
  * console.log(advice);
  * ```
@@ -5016,13 +5014,11 @@ class LLMService {
      *                     (e.g. "What should I flip right now?").
      * @param marketData - Pre-formatted top-N market summary string produced
      *                     by {@link MarketAnalyzerService.formatForLLM}.
-     * @param wikiText   - Concatenated plain-text wiki guide extracts
-     *                     (may be empty if no guides were found).
      * @returns The assistant's generated advice text.
      * @throws {LLMRequestError} On HTTP-level failures (401, 429, 5xx, etc.).
      */
-    async generateAdvice(query, marketData, wikiText) {
-        const userMsg = this.buildUserMessage(query, marketData, wikiText);
+    async generateAdvice(query, marketData) {
+        const userMsg = this.buildUserMessage(query, marketData);
         this._messages.push({ role: "user", content: userMsg });
         // Build a trimmed copy of the history for the API payload.
         // - System prompt: kept as-is.
@@ -5032,30 +5028,37 @@ class LLMService {
         // Additionally, cap conversation to the system prompt + last MAX_HISTORY_PAIRS
         // exchanges to bound payload size.
         const trimmed = this.buildTrimmedHistory();
-        console.log(`[LLMService] Sending ${trimmed.length} messages (${this._messages.length} in full history) to ${this.model} at ${this.endpoint}…`);
         let body = {
             model: this.model,
             messages: trimmed,
             temperature: this.temperature,
             max_completion_tokens: this.maxTokens,
         };
-        // Guard against oversized payloads (Groq returns 413 above ~100 KB).
-        // If too large, progressively halve the market-data lines in the most
-        // recent user message until the body fits.
+        // Measure initial payload size.
         let jsonBody = JSON.stringify(body);
         const encoder = new TextEncoder();
         let byteLen = encoder.encode(jsonBody).length;
+        console.log(`[LLMService] Sending ${trimmed.length} messages ` +
+            `(${this._messages.length} in full history) — ` +
+            `${(byteLen / 1024).toFixed(1)} KB payload — ` +
+            `model: ${this.model}`);
+        // Guard against oversized payloads.
+        // Strategy: first halve market-data lines (up to 4×), then halve wiki
+        // text (up to 4×).  This two-phase approach trims the two largest
+        // variable-size sections progressively.
         if (byteLen > MAX_BODY_BYTES) {
-            console.warn(`[LLMService] Payload too large (${(byteLen / 1024).toFixed(1)} KB). Truncating market data…`);
+            console.warn(`[LLMService] Payload too large (${(byteLen / 1024).toFixed(1)} KB > ` +
+                `${(MAX_BODY_BYTES / 1024).toFixed(0)} KB limit). Truncating…`);
             const lastUserIdx = this.findLastUserIdx(trimmed);
             if (lastUserIdx >= 0) {
                 let truncated = trimmed;
+                // Phase 1: halve market data.
                 for (let attempt = 0; attempt < 4 && byteLen > MAX_BODY_BYTES; attempt++) {
                     truncated = this.halveMarketData(truncated, lastUserIdx);
                     body = { ...body, messages: truncated };
                     jsonBody = JSON.stringify(body);
                     byteLen = encoder.encode(jsonBody).length;
-                    console.log(`[LLMService]   Attempt ${attempt + 1}: ${(byteLen / 1024).toFixed(1)} KB`);
+                    console.log(`[LLMService]   Market-data trim ${attempt + 1}: ${(byteLen / 1024).toFixed(1)} KB`);
                 }
             }
         }
@@ -5096,8 +5099,8 @@ class LLMService {
      * explicitly forbids hallucination.
      *
      * The prompt:
-     *  - Defines the persona (RS3 Grand Exchange instructor).
-     *  - Mandates exclusive use of the provided data and wiki text.
+     *  - Defines the persona (RS3 Grand Exchange flipping specialist).
+     *  - Mandates exclusive use of the provided market data.
      *  - Forbids inventing prices, volumes, or game mechanics.
      *  - Instructs clear, concise formatting suitable for an Alt1 overlay.
      *
@@ -5105,31 +5108,29 @@ class LLMService {
      */
     buildSystemMessage() {
         return [
-            "You are a RuneScape 3 Grand Exchange specialist and money-making instructor.",
+            "You are a RuneScape 3 Grand Exchange flipping specialist.",
             "",
             "STRICT RULES — you MUST follow all of these:",
-            "1. ONLY use the Grand Exchange market data and RS Wiki text provided in the user message. Never reference outside pricing or game knowledge.",
+            "1. ONLY use the Grand Exchange market data provided in the user message. Never reference outside pricing or game knowledge.",
             "2. NEVER invent, guess, or hallucinate prices, trade volumes, profit margins, or game mechanics.",
             "3. If the provided data is insufficient to answer a question, say so explicitly — do NOT fill gaps with assumptions.",
             "4. When recommending items, ALWAYS cite the exact numbers from the data (price, profit, buy limit, volume, trend slope, volatility).",
-            "5. When referencing a money-making method, quote or paraphrase the wiki text — do not add steps not in the source.",
-            "6. Keep responses concise and actionable. Use bullet points or numbered lists. No filler or generic advice.",
-            "7. Format gold values with standard RS3 abbreviations: K (thousands), M (millions), B (billions).",
-            "8. If no wiki guide exists for a queried item, only discuss it from the market-data perspective.",
+            "5. Keep responses concise and actionable. Use bullet points or numbered lists. No filler or generic advice.",
+            "6. Format gold values with standard RS3 abbreviations: K (thousands), M (millions), B (billions).",
             "",
             "ANALYTICAL REASONING — follow this framework when recommending items:",
-            "9. For EVERY item you recommend or discuss, state:",
+            "7. For EVERY item you recommend or discuss, state:",
             "   a. The per-item profit AFTER tax (use the 'Profit' field, or compute it).",
             "   b. The 4-hour profit potential: profit × buy limit.",
             "   c. The estimated gp/hr based on trade velocity (see economic rules for fill-time estimates).",
             "   d. The 30d trend: quote the slope value and explain what it means (rising, falling, or flat).",
             "   e. The volatility %: quote it and classify as low (<5%), moderate (5-10%), or high (>10%).",
             "",
-            "10. CRITICAL: When trend slope is near zero (+0.0 or −0.0) AND volatility is 0.0%, this usually means INSUFFICIENT PRICE HISTORY DATA — do NOT interpret it as 'stable' or 'low risk'. Instead, say historical data is limited and recommend the player margin-check the item first.",
+            "8. CRITICAL: When trend slope is near zero (+0.0 or −0.0) AND volatility is 0.0%, this usually means INSUFFICIENT PRICE HISTORY DATA — do NOT interpret it as 'stable' or 'low risk'. Instead, say historical data is limited and recommend the player margin-check the item first.",
             "",
-            "11. When the player asks 'what should I flip', rank your top 3-5 picks by estimated gp/hr and explain why each is good. Include at least one high-volume fast flip and one higher-margin slower flip if available.",
+            "9. When the player asks 'what should I flip', rank your top 3-5 picks by estimated gp/hr and explain why each is good. Include at least one high-volume fast flip and one higher-margin slower flip if available.",
             "",
-            "12. Always include actionable next steps: what price to set buy offers at, estimated wait time, and what to sell at.",
+            "10. Always include actionable next steps: what price to set buy offers at, estimated wait time, and what to sell at.",
             "",
             "The following RS3 economic laws are ABSOLUTE. They supersede any conflicting outside knowledge. Apply them to every calculation.",
             "",
@@ -5137,7 +5138,7 @@ class LLMService {
             "",
             _coreKnowledge__WEBPACK_IMPORTED_MODULE_0__.DATA_FIELD_LEGEND,
             "",
-            "Your audience is an experienced RS3 player viewing this inside the Alt1 Toolkit overlay. Be direct, specific, and data-driven. Never pad responses with generic advice like 'do your own research' — the data is right there.",
+            "Your audience is an experienced RS3 player viewing this inside the Alt1 Toolkit overlay who is focused on flipping items for profit. Be direct, specific, and data-driven. Never pad responses with generic advice like 'do your own research' — the data is right there.",
         ].join("\n");
     }
     /**
@@ -5149,28 +5150,18 @@ class LLMService {
      * === GRAND EXCHANGE DATA ===
      * …market summary…
      *
-     * === WIKI GUIDE TEXT ===
-     * …extracted guides (or "[none available]")…
-     *
      * === PLAYER QUESTION ===
      * …free-form query…
      * ```
      *
      * @param query      - Player's question.
      * @param marketData - Formatted market data block.
-     * @param wikiText   - Wiki guide text (may be empty).
      * @returns The composed user prompt string.
      */
-    buildUserMessage(query, marketData, wikiText) {
-        const wikiSection = wikiText.trim().length > 0
-            ? wikiText.trim()
-            : "[No wiki guide text available for the queried items.]";
+    buildUserMessage(query, marketData) {
         return [
             "=== GRAND EXCHANGE DATA ===",
             marketData,
-            "",
-            "=== WIKI GUIDE TEXT ===",
-            wikiSection,
             "",
             "=== PLAYER QUESTION ===",
             query,
@@ -5240,16 +5231,16 @@ class LLMService {
     halveMarketData(messages, idx) {
         const msg = messages[idx];
         const dataStart = msg.content.indexOf("=== GRAND EXCHANGE DATA ===");
-        const dataEnd = msg.content.indexOf("\n=== WIKI GUIDE TEXT ===");
-        if (dataStart < 0 || dataEnd < 0)
+        const questionStart = msg.content.indexOf("\n=== PLAYER QUESTION ===");
+        if (dataStart < 0 || questionStart < 0)
             return messages; // safety
-        const dataBlock = msg.content.slice(dataStart + "=== GRAND EXCHANGE DATA ===".length + 1, dataEnd);
+        const dataBlock = msg.content.slice(dataStart + "=== GRAND EXCHANGE DATA ===".length + 1, questionStart);
         const lines = dataBlock.split("\n");
         const half = lines.slice(0, Math.max(Math.ceil(lines.length / 2), 5));
         const newContent = msg.content.slice(0, dataStart + "=== GRAND EXCHANGE DATA ===".length + 1) +
             half.join("\n") +
             `\n[Truncated to ${half.length} items to fit request limits]\n` +
-            msg.content.slice(dataEnd);
+            msg.content.slice(questionStart);
         const copy = [...messages];
         copy[idx] = { ...msg, content: newContent };
         return copy;
@@ -5438,10 +5429,11 @@ const DEFAULTS = {
 };
 /**
  * Number of top items (by traded value, no filters) included in the LLM
- * chat context.  100 items ≈ 20–30 KB of text — fits within Groq's
- * request body size limit alongside the system prompt and wiki text.
+ * chat context.  50 items in compact format ≈ 6–8 KB — comfortably fits
+ * alongside the system prompt and truncated wiki text within a 50 KB
+ * payload budget.
  */
-const LLM_CONTEXT_TOP_N = 100;
+const LLM_CONTEXT_TOP_N = 50;
 /**
  * Stateless service that reads cached GE price data and produces a ranked,
  * LLM-consumable summary of the most actively-traded items.
@@ -6619,165 +6611,31 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ });
 /**
  * @module WikiService
- * Client for the official RuneScape 3 Wiki MediaWiki API.
+ * Client for the official RuneScape 3 Wiki structured-data APIs.
  *
  * Responsibilities:
- *  - Fetch plain-text article extracts via the `action=query&prop=extracts`
- *    endpoint with `explaintext=1` (no HTML).
- *  - Map item names to `Money_making_guide/…` page titles.
- *  - Gracefully handle missing pages (page ID `-1`).
+ *  - Fetch GE buy limits in bulk from `Module:Exchange/<Item>` Lua sources.
+ *  - Fetch High Alchemy values in bulk from the same modules.
+ *
+ * Guide / article text fetching has been removed — the curated
+ * `coreKnowledge.ts` rules provide better, flipping-focused context for
+ * the LLM than raw wiki prose.
  *
  * Uses only the native browser `fetch` API — no external dependencies.
  *
  * @see https://runescape.wiki/api.php (MediaWiki API sandbox)
  */
 /**
- * Base URL for the RS3 Wiki `action=query` extracts endpoint.
- * `origin=*` enables CORS from any origin (required for Alt1 / browser context).
- */
-const WIKI_EXTRACT_BASE = "https://runescape.wiki/api.php?action=query&prop=extracts&explaintext=1&format=json&origin=*&titles=";
-/**
- * Base URL for the RS3 Wiki `action=query&list=search` endpoint.
- * Used to dynamically resolve guide page titles before fetching extracts.
- */
-const WIKI_SEARCH_BASE = "https://runescape.wiki/api.php?action=query&list=search&utf8=&format=json&origin=*&srsearch=";
-/**
- * Service that retrieves plain-text money-making guide content from the
- * official RuneScape 3 Wiki.
+ * Service that retrieves structured item data (buy limits, high alch values)
+ * from the official RuneScape 3 Wiki's `Module:Exchange` Lua sources.
  *
  * @example
  * ```ts
  * const wiki = new WikiService();
- * const guide = await wiki.getMoneyMakingGuide("Elder logs");
- * if (guide.found) {
- *   console.log(guide.text);
- * }
+ * const limits = await wiki.getBulkBuyLimits(["Blood rune", "Elder logs"]);
  * ```
  */
 class WikiService {
-    /**
-     * Fetch the money-making guide article associated with {@link itemName}
-     * using a **two-step** search → extract strategy.
-     *
-     * 1. **Search**: Query the MediaWiki search API for
-     *    `"Money making guide {itemName}"`. If the top result's title
-     *    contains a relevant guide keyword, accept it.
-     * 2. **Extract**: Fetch the plain-text extract for that resolved title.
-     * 3. **Fallback**: If no guide is found, fetch the base `{itemName}`
-     *    article so the LLM at least gets item mechanics / creation info.
-     *
-     * All network errors are caught — the method never throws. On total
-     * failure it returns `{ found: false, text: "" }`.
-     *
-     * @param itemName - Canonical RS3 item name.
-     * @returns A {@link WikiGuideResult} indicating whether the page exists and
-     *          containing the extracted text (or an empty string on failure).
-     */
-    async getMoneyMakingGuide(itemName) {
-        const naiveTitle = this.buildGuideTitle(itemName);
-        try {
-            // ── Step 1: Search for a guide page ──
-            const resolvedTitle = await this.searchForGuideTitle(itemName);
-            if (resolvedTitle) {
-                // ── Step 2: Fetch extract using the resolved title ──
-                console.debug(`[WikiService] Resolved guide title: "${resolvedTitle}"`);
-                const result = await this.fetchExtract(resolvedTitle);
-                if (result.found)
-                    return result;
-            }
-            // ── Fallback: fetch the base item page itself ──
-            console.debug(`[WikiService] No guide found — falling back to base item page "${itemName}".`);
-            const fallback = await this.fetchExtract(itemName);
-            if (fallback.found) {
-                return { ...fallback, title: itemName };
-            }
-            return { title: naiveTitle, found: false, text: "" };
-        }
-        catch (err) {
-            console.warn(`[WikiService] getMoneyMakingGuide failed for "${itemName}":`, err);
-            return { title: naiveTitle, found: false, text: "" };
-        }
-    }
-    /**
-     * Fetch guide text for **multiple** items concurrently.
-     *
-     * All requests are dispatched via `Promise.allSettled` so individual
-     * failures do not abort the batch.
-     *
-     * @param itemNames - Array of canonical RS3 item names.
-     * @returns An array of {@link WikiGuideResult} objects in the same order
-     *          as the input.  Failed requests return `found: false` with the
-     *          error message as `text`.
-     */
-    async getGuidesForItems(itemNames) {
-        if (itemNames.length === 0)
-            return [];
-        console.log(`[WikiService] Fetching guides for ${itemNames.length} items…`);
-        const settled = await Promise.allSettled(itemNames.map((name) => this.getMoneyMakingGuide(name)));
-        return settled.map((result, idx) => {
-            if (result.status === "fulfilled") {
-                return result.value;
-            }
-            console.warn(`[WikiService] Guide fetch failed for "${itemNames[idx]}":`, result.reason);
-            return {
-                title: this.buildGuideTitle(itemNames[idx]),
-                found: false,
-                text: `[Error fetching guide: ${result.reason}]`,
-            };
-        });
-    }
-    // ─── Private: Two-Step Search Helpers ────────────────────────────────
-    /**
-     * Query the MediaWiki search API for a money-making guide matching
-     * {@link itemName}.  Returns the resolved title if a relevant guide page
-     * is found, or `null` if no suitable result exists.
-     */
-    async searchForGuideTitle(itemName) {
-        const searchTerm = `Money making guide ${itemName}`;
-        const url = `${WIKI_SEARCH_BASE}${encodeURIComponent(searchTerm)}`;
-        console.debug(`[WikiService] Searching wiki for "${searchTerm}"…`);
-        const response = await fetch(url, {
-            method: "GET",
-            headers: { Accept: "application/json" },
-        });
-        if (!response.ok) {
-            console.warn(`[WikiService] Search HTTP ${response.status} for "${searchTerm}".`);
-            return null;
-        }
-        const json = await response.json();
-        const results = json?.query?.search;
-        if (!results || results.length === 0)
-            return null;
-        const topTitle = results[0].title;
-        const lower = topTitle.toLowerCase();
-        // Validate the result contains a guide-related keyword.
-        const isRelevant = WikiService.GUIDE_KEYWORDS.some((kw) => lower.includes(kw));
-        if (!isRelevant) {
-            console.debug(`[WikiService] Top search result "${topTitle}" is not a guide — skipping.`);
-            return null;
-        }
-        return topTitle;
-    }
-    /**
-     * Fetch the plain-text extract for a single wiki page title.
-     * Returns a {@link WikiGuideResult} — `found: false` for missing pages.
-     */
-    async fetchExtract(title) {
-        const url = `${WIKI_EXTRACT_BASE}${encodeURIComponent(title)}`;
-        const response = await fetch(url, {
-            method: "GET",
-            headers: { Accept: "application/json" },
-        });
-        if (!response.ok) {
-            return {
-                title,
-                found: false,
-                text: `[HTTP ${response.status} fetching "${title}".]`,
-            };
-        }
-        const json = await response.json();
-        return this.parseExtract(json, title);
-    }
     /**
      * Fetch GE buy limits in bulk by reading `Module:Exchange/<Item>` pages
      * from the RS3 Wiki.  Each module contains a Lua table with a `limit`
@@ -6948,74 +6806,7 @@ class WikiService {
         }
         return chunks;
     }
-    // ─── Private Helpers ──────────────────────────────────────────────────
-    /**
-     * Convert a canonical item name into a `Money_making_guide/…` wiki title.
-     *
-     * @param itemName - e.g. `"Elder logs"`
-     * @returns e.g. `"Money_making_guide/Elder_logs"`
-     */
-    buildGuideTitle(itemName) {
-        return `Money_making_guide/${itemName.replace(/ /g, "_")}`;
-    }
-    /**
-     * Extract the plain-text body from a MediaWiki query response.
-     *
-     * The `pages` object is keyed by the numeric page ID (as a string).
-     * A page ID of `"-1"` (or presence of the `missing` key) signals that the
-     * article does not exist.
-     *
-     * @param json      - Raw parsed API response.
-     * @param wikiTitle - Title used for logging / result metadata.
-     * @returns A normalised {@link WikiGuideResult}.
-     */
-    parseExtract(json, wikiTitle) {
-        const pages = json?.query?.pages;
-        if (!pages) {
-            console.warn(`[WikiService] Unexpected response shape for "${wikiTitle}".`);
-            return { title: wikiTitle, found: false, text: "[Unexpected API response shape.]" };
-        }
-        // There will be exactly one key since we queried a single title.
-        const pageId = Object.keys(pages)[0];
-        const page = pages[pageId];
-        if (!page || pageId === "-1" || page.missing !== undefined) {
-            console.debug(`[WikiService] No wiki page found for "${wikiTitle}".`);
-            return {
-                title: wikiTitle,
-                found: false,
-                text: `[No money-making guide found for "${wikiTitle}".]`,
-            };
-        }
-        const extract = (page.extract ?? "").trim();
-        if (extract.length === 0) {
-            return {
-                title: wikiTitle,
-                found: true,
-                text: `[Guide page exists but has no extractable text: "${wikiTitle}".]`,
-            };
-        }
-        console.debug(`[WikiService] Retrieved ${extract.length} chars for "${wikiTitle}".`);
-        return { title: wikiTitle, found: true, text: extract };
-    }
 }
-// ─── Public API ───────────────────────────────────────────────────────
-/** Keywords that indicate a search result is a relevant guide page. */
-WikiService.GUIDE_KEYWORDS = [
-    "money making guide",
-    "smithing",
-    "crafting",
-    "mining",
-    "cooking",
-    "herblore",
-    "fletching",
-    "runecrafting",
-    "fishing",
-    "woodcutting",
-    "farming",
-    "hunter",
-    "divination",
-    "archaeology",
-];
 // ─── Bulk Buy Limits (Module:Exchange) ──────────────────────────────
 /**
  * Maximum titles per MediaWiki `action=query` request.
@@ -7067,8 +6858,6 @@ const LS_PROVIDER = "ge-analyzer:llm-provider";
 const LS_MODEL = "ge-analyzer:llm-model";
 /** `localStorage` key for the custom endpoint URL. */
 const LS_ENDPOINT = "ge-analyzer:llm-endpoint";
-/** Number of top items whose wiki guides are fetched for the RAG context. */
-const WIKI_GUIDE_COUNT = 5;
 /** RS3 item sprite base URL (official Jagex endpoint). */
 const SPRITE_BASE = "https://secure.runescape.com/m=itemdb_rs/obj_sprite.gif?id=";
 /** `localStorage` key for persisted view mode preference. */
@@ -7252,9 +7041,7 @@ let latestMarketSummary = "";
  * Falls back to `latestMarketSummary` until the first build completes.
  */
 let latestLLMContext = "";
-/** Most recent wiki text block — reused across chat messages. */
-let latestWikiText = "";
-/** The top items array, cached for wiki lookups per chat message. */
+/** The top items array, cached for re-sorting without re-fetching. */
 let latestTopItems = [];
 /** The latest search results, cached for re-sorting without re-fetching. */
 let latestSearchResults = [];
@@ -7310,7 +7097,7 @@ async function initUI(onStatus) {
     wiki = new _services__WEBPACK_IMPORTED_MODULE_0__.WikiService();
     portfolio = new _services__WEBPACK_IMPORTED_MODULE_0__.PortfolioService();
     // Run the initial market analysis and render.
-    onStatus?.("Ranking top items\u2026", "Step 2 of 5");
+    onStatus?.("Ranking top items\u2026", "Step 2 of 4");
     try {
         await refreshMarketPanel();
     }
@@ -7320,7 +7107,7 @@ async function initUI(onStatus) {
         showError(msg);
     }
     // Render the favourites section (if any favourites exist).
-    onStatus?.("Loading favourites\u2026", "Step 3 of 5");
+    onStatus?.("Loading favourites\u2026", "Step 3 of 4");
     restoreFavSort();
     bindFavSort();
     await renderFavorites();
@@ -7329,7 +7116,7 @@ async function initUI(onStatus) {
     // Build the full item catalogue for portfolio autocomplete.
     await loadItemCatalogue();
     // Fetch the full GE catalogue (~7 000 items) for market search.
-    onStatus?.("Fetching item catalogue\u2026", "Step 4 of 5");
+    onStatus?.("Fetching item catalogue\u2026", "Step 4 of 4");
     try {
         geCatalogue = await (0,_services__WEBPACK_IMPORTED_MODULE_0__.fetchGECatalogue)();
     }
@@ -7337,10 +7124,6 @@ async function initUI(onStatus) {
         console.warn("[UIService] GE catalogue fetch failed:", err);
         geCatalogue = [];
     }
-    // Pre-fetch wiki text for the first batch of items so that the first
-    // chat message doesn't have to wait for wiki I/O.
-    onStatus?.("Pre-fetching wiki data\u2026", "Step 5 of 5");
-    await prefetchWikiText();
     // Restore any persisted LLM chat conversation.
     restoreChatHistory();
     // Render any persisted portfolio flips and start the countdown timer.
@@ -7662,7 +7445,6 @@ function bindForceReload() {
             await cache.open();
             analyzer = new _services__WEBPACK_IMPORTED_MODULE_0__.MarketAnalyzerService(cache);
             await refreshMarketPanel();
-            await prefetchWikiText();
             els.reloadStatus.textContent = "Data reloaded ✓";
         }
         catch (err) {
@@ -8190,8 +7972,6 @@ function bindMarketFilters() {
         isSearchActive = false;
         latestSearchResults = [];
         await refreshMarketPanel();
-        // Re-fetch wiki text for the new filtered set so the LLM context stays in sync.
-        await prefetchWikiText();
     });
     // ── Market search input (debounced) ───────────────────────────────────
     els.marketSearchInput.addEventListener("input", debounce(async () => {
@@ -10034,12 +9814,8 @@ async function handleSend() {
     setInputLock(true);
     const thinkingEl = appendMessage("thinking", "Thinking");
     try {
-        // Ensure wiki text is available (may already be cached from prefetch).
-        if (!latestWikiText) {
-            await prefetchWikiText();
-        }
         const service = ensureLLMService();
-        const advice = await service.generateAdvice(query, latestLLMContext || latestMarketSummary, latestWikiText);
+        const advice = await service.generateAdvice(query, latestLLMContext || latestMarketSummary);
         removeMessage(thinkingEl);
         appendMessage("assistant", advice);
         // Persist conversation after a successful exchange.
@@ -10804,26 +10580,6 @@ function resolvedLLMConfig() {
     const model = modelOverride || provider.defaultModel;
     return { endpoint, model };
 }
-// ─── Wiki pre-fetch ─────────────────────────────────────────────────────────
-/**
- * Fetch wiki guide text for the top items and cache it in module scope.
- */
-async function prefetchWikiText() {
-    if (latestTopItems.length === 0)
-        return;
-    try {
-        const names = latestTopItems.slice(0, WIKI_GUIDE_COUNT).map((i) => i.name);
-        const guides = await wiki.getGuidesForItems(names);
-        latestWikiText = guides
-            .filter((g) => g.found)
-            .map((g) => `--- ${g.title} ---\n${g.text}`)
-            .join("\n\n");
-    }
-    catch (err) {
-        console.warn("[UIService] Wiki prefetch failed:", err);
-        latestWikiText = "";
-    }
-}
 // ─── Item catalogue (for autocomplete) ──────────────────────────────────────
 /**
  * Read every item from IndexedDB and store a lightweight name+price list
@@ -11111,7 +10867,7 @@ function dismissOverlay() {
 (async () => {
     try {
         // Step 1 — Populate the IndexedDB cache with fresh GE data.
-        setStartupStatus("Loading market data\u2026", "Step 1 of 5");
+        setStartupStatus("Loading market data\u2026", "Step 1 of 4");
         await (0,_services__WEBPACK_IMPORTED_MODULE_0__.initDataPipeline)();
         // Step 2 — Wire services → DOM and render the interface.
         await (0,_uiService__WEBPACK_IMPORTED_MODULE_1__.initUI)((msg, step) => setStartupStatus(msg, step));
