@@ -172,7 +172,8 @@ Pipeline:
 - `getItemsByNames(names: Set<string>)` — looks up specific items by exact name set, used by the favourites panel.
 - `getOrBuildMaps(days)` — returns cached `avgVolumeMap` + `priceHistoryMap` if within 10-min TTL, otherwise rebuilds from IndexedDB.
 - `invalidateMapCache()` — clears cached maps (auto-reset when a new instance is constructed).
-- `formatForLLM(items)` — produces a numbered multi-line string with K/M/B/T abbreviations for LLM context injection.
+- `formatForLLM(items)` — produces a numbered multi-line string with K/M/B/T abbreviations for LLM context injection. Now includes High Alch value, Trade Velocity tier, and `[LIMITED DATA]` tag when < 3 history points.
+- `getFormattedForLLM()` — returns the top 200 items by traded value with **no volume or price filters** (`LLM_CONTEXT_TOP_N = 200`). Used by the chat advisor to get a much broader market view than the UI's filtered top-20 panel. ≈ 15K tokens — fits comfortably in all supported provider context windows.
 
 ### 4.5 Wiki Service (`wikiService.ts`)
 
@@ -189,15 +190,21 @@ Pipeline:
 
 ### 4.6 Core Knowledge Base (`coreKnowledge.ts`)
 
-Static RS3 economic rules injected into every LLM system prompt. Exported as `RS3_ECONOMIC_RULES` string constant.
+Static RS3 economic rules and data interpretation guidance injected into every LLM system prompt. Exported as `RS3_ECONOMIC_RULES` and `DATA_FIELD_LEGEND` string constants.
 
-**Rules covered**:
-1. **GE Tax**: 2% tax on all sales (exempt at ≤50 gp). Must deduct before calculating profit/ROI.
-2. **Buy Limits**: 4-hour buy limits per item. Volume recommendations must respect these.
-3. **Margin Checking**: Insta-buy (+20%) / insta-sell (−20%) method. True margin = gap minus 2% tax.
-4. **High Alchemy**: High Alch value acts as an item's price floor.
+**`RS3_ECONOMIC_RULES`** (8 rules):
+1. **GE Tax**: 2% tax formula with floor rounding, exempt at ≤50 gp.
+2. **Buy Limits**: 4-hour windows, 6 per day, hard cap on purchases.
+3. **Margin Checking**: Insta-buy (+5%) / insta-sell (−5%) method with tax-adjusted margin formula.
+4. **High Alchemy**: `floor(value × 0.6)` acts as price floor; explains economic anchor.
+5. **Item Categories**: Consumables, skilling supplies, equipment, rares, alchables — typical behaviour and margins for each.
+6. **What Makes a Good Flip**: Profit × buy limit, trade velocity, margin vs tax gap, trend safety, volume spike interpretation.
+7. **GP/HR Calculation**: Formula and fill-time estimates by trade velocity tier (Insta-Flip, Active, Slow, Very Slow).
+8. **Common Pitfalls**: Low-price tax erosion, insufficient-data misinterpretation (slope ±0.0 + volatility 0%), merch clan spikes, DXP timing.
 
-These rules have a **supremacy clause** in the system prompt — they override any outside knowledge the model may have.
+**`DATA_FIELD_LEGEND`**: Explains every field in the `formatForLLM` output (GE Price, Buy/Sell targets, Profit, Limit, Eff. Vol, Max 4H Capital, Tax Gap, High Alch, Velocity, 30d Trend Slope, Volatility, Predicted 24h Price, RISKY flag, Vol Spike). Included in the system prompt so the LLM correctly interprets metrics — especially the "slope ±0.0 + volatility 0% = insufficient data" case that previously caused contradictory advice.
+
+Both constants have a **supremacy clause** in the system prompt — they override any outside knowledge the model may have.
 
 ### 4.7 LLM Service (`llmService.ts`)
 
@@ -207,9 +214,10 @@ These rules have a **supremacy clause** in the system prompt — they override a
 - Authorization header is **conditionally included** only when `apiKey` is non-empty (supports keyless self-hosted models like Ollama / LM Studio).
 - **Multi-turn chat**: Maintains conversation history across sends. History is persisted to localStorage (`ge-analyzer:chat-history`, max 50 messages). Clear button resets history.
 - `generateAdvice(query, marketData, wikiText)` builds:
-  - **System prompt**: RS3 GE specialist persona + strict anti-hallucination rules (8 numbered rules) + RS3 economic rules from `coreKnowledge.ts` with supremacy clause. Must only use provided data. Must cite exact numbers.
+  - **System prompt**: RS3 GE specialist persona + 12 numbered rules (anti-hallucination, analytical reasoning framework, data interpretation) + `RS3_ECONOMIC_RULES` (8 economic laws) + `DATA_FIELD_LEGEND` (field-by-field explanation of market data format) from `coreKnowledge.ts` with supremacy clause. Instructs the LLM to rank recommendations by gp/hr, include actionable buy/sell prices, and correctly handle insufficient-data cases (slope ±0.0 + volatility 0%).
   - **User message**: Three delimited sections: `=== GRAND EXCHANGE DATA ===`, `=== WIKI GUIDE TEXT ===`, `=== PLAYER QUESTION ===`.
-- Error handling: `LLMRequestError` class with `status` and `responseBody`. Descriptive messages for 401/403/429/5xx.
+- **Conversation trimming** (`buildTrimmedHistory()`): Before each API call, builds a size-efficient copy of the message history. Strips the bulky `=== GRAND EXCHANGE DATA ===` and `=== WIKI GUIDE TEXT ===` blocks from **all user messages except the most recent one**, retaining only the `=== PLAYER QUESTION ===` section. Also caps the conversation to `MAX_HISTORY_PAIRS` (8) user+assistant exchanges on top of the system prompt. This prevents HTTP 413 (Content Too Large) errors that previously occurred after 3–4 multi-turn exchanges with Groq.
+- Error handling: `LLMRequestError` class with `status` and `responseBody`. Descriptive messages for 401/403/413/429/5xx.
 
 ### 4.8 LLM Provider System (`types.ts`)
 
@@ -649,6 +657,8 @@ Everything below is **complete and verified** (builds with 0 errors):
 | CORS failures on Firefox but not Chrome | `fetchWithRetry()` in `weirdGloopService.ts` and `fetchBuyLimitBatch`/`fetchAlchValueBatch` in `wikiService.ts` set a custom `User-Agent` header. Firefox sends it (non-safelisted → triggers CORS preflight), but the APIs only allow `accept` in `Access-Control-Allow-Headers`. Chrome silently strips `User-Agent` so no preflight occurs | Removed the custom `User-Agent` header from all browser `fetch()` calls in both services — browser sends its own `User-Agent` automatically. Never set non-safelisted headers in browser `fetch()` (March 2026) |
 | High Alch values showing "Unknown" for all items | `getBulkHighAlchValues` regex matched only `alchvalue = <number>`, but most `Module:Exchange/<Item>` Lua sources only have a `value` field (base item value); `alchvalue` is rarely present | Added fallback: if no explicit `alchvalue`, compute High Alch as `floor(value × 0.6)` from the base `value` field. Also skip items with `alchable = false`. Added `VALUE_RE` and `ALCHABLE_FALSE_RE` regexes (March 2026) |
 | Two separate modals (item detail + graph) with duplicated data and disjointed UX | `showItemModal` and `showGraphModal` were independent singletons — users had to open two modals to see all item info, and features like alerts/actions were only in one | Consolidated into `showAnalyticsModal(item)` — a single scrollable overlay combining badges, action buttons, detail rows, alert inputs, interactive price chart with range selector, and stats grid. Old functions deprecated but retained. Single ↗ button per card (March 2026) |
+| HTTP 413 Content Too Large on multi-turn chat | `buildUserMessage()` embedded full market data + wiki text in every user message; `generateAdvice()` sent the entire `_messages` array to the API. By message 4 the payload exceeded Groq's request size limit | Added `buildTrimmedHistory()`: strips data blocks from all user messages except the most recent, caps history to `MAX_HISTORY_PAIRS` (8) exchanges. Added specific 413 error hint in `handleHttpError()` (March 2026) |
+| LLM giving contradictory/spotty advice (e.g. "high volatility (0.0%)", "negative slope (+0.0)") | Core knowledge was only 4 rules; system prompt had no data interpretation guidance; `formatForLLM` omitted trade velocity, high alch, and data-sufficiency markers | Expanded `RS3_ECONOMIC_RULES` to 8 laws (item categories, flipping strategy, gp/hr formulas, common pitfalls). Added `DATA_FIELD_LEGEND` explaining every metric. System prompt now has 12 analytical reasoning rules including the "slope ±0.0 + volatility 0% = insufficient data" case. `formatForLLM` now includes High Alch, Velocity tier, and `[LIMITED DATA]` tag when < 3 history points (March 2026) |
 
 ---
 

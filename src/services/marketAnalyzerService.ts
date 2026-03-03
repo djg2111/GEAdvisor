@@ -115,6 +115,13 @@ const DEFAULTS: MarketAnalyzerConfig = {
 };
 
 /**
+ * Number of top items (by traded value, no filters) included in the LLM
+ * chat context.  200 items ≈ 15K tokens — fits comfortably in all
+ * supported provider context windows.
+ */
+const LLM_CONTEXT_TOP_N = 200;
+
+/**
  * Stateless service that reads cached GE price data and produces a ranked,
  * LLM-consumable summary of the most actively-traded items.
  *
@@ -298,6 +305,25 @@ export class MarketAnalyzerService {
   }
 
   /**
+   * Build a broader dataset specifically for LLM chat context.
+   *
+   * Returns the top {@link LLM_CONTEXT_TOP_N} items by traded value with
+   * **no volume or price filters**, giving the LLM a much wider view of
+   * the market than the UI's filtered top-20 panel.
+   *
+   * @returns A formatted string with up to 200 items for LLM context injection.
+   */
+  async getFormattedForLLM(): Promise<string> {
+    const items = await this.getTopItems({
+      topN: LLM_CONTEXT_TOP_N,
+      minVolume: 0,
+      maxVolume: 0,
+      maxPrice: 0,
+    });
+    return this.formatForLLM(items);
+  }
+
+  /**
    * Serialise a list of {@link RankedItem} objects into a compact,
    * human-readable (and LLM-friendly) string block.
    *
@@ -337,7 +363,13 @@ export class MarketAnalyzerService {
       const slope = item.linearSlope >= 0 ? `+${item.linearSlope.toFixed(1)}` : item.linearSlope.toFixed(1);
       const vol = (item.volatility * 100).toFixed(1);
       const predicted = this.formatGp(Math.round(item.predictedNextPrice));
-      return `${rank}. ${item.name} | GE Price: ${price} gp | Buy ≤ ${recBuy} | Sell ≥ ${recSell} | Profit: ${flipPft} gp/ea | Limit: ${limit} | Eff. Vol: ${effVol} | Max 4H Capital: ${cap4h} | Tax Gap: ${this.formatGp(item.taxGap)} gp | 30d Trend Slope: ${slope} | Volatility: ${vol}% | Predicted 24h Price: ${predicted} gp${risk}${hype}`;
+      const alch = item.highAlch != null && item.highAlch > 0
+        ? `High Alch: ${this.formatGp(item.highAlch)} gp`
+        : "High Alch: Unknown";
+      const velocity = item.tradeVelocity;
+      const histLen = item.priceHistory.length;
+      const histNote = histLen < 3 ? " [LIMITED DATA]" : "";
+      return `${rank}. ${item.name} | GE Price: ${price} gp | Buy ≤ ${recBuy} | Sell ≥ ${recSell} | Profit: ${flipPft} gp/ea | Limit: ${limit} | Eff. Vol: ${effVol} | Max 4H Capital: ${cap4h} | Tax Gap: ${this.formatGp(item.taxGap)} gp | ${alch} | Velocity: ${velocity} | 30d Trend Slope: ${slope} | Volatility: ${vol}%${histNote} | Predicted 24h Price: ${predicted} gp${risk}${hype}`;
     });
 
     return [header, ...lines, divider].join("\n");

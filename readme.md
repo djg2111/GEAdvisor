@@ -51,12 +51,12 @@ Uses a **RAG (Retrieval-Augmented Generation) pipeline** to combine live GE mark
 - **External links** — quick Wiki and GE Database links on every card and in the analytics modal
 
 ### AI Advisor
-- **Multi-turn RAG chat** — ask questions about items, flipping strategies, or money-making methods
+- **Multi-turn RAG chat** — ask questions about items, flipping strategies, or money-making methods; the advisor sees the top 200 items by traded value (not just the filtered top 20) for broader recommendations; conversation history is automatically trimmed to stay within provider size limits
 - **6 LLM providers** — Groq (default/free), OpenAI, OpenRouter, Together AI, Mistral AI, or any custom OpenAI-compatible endpoint (Ollama, LM Studio, etc.)
 - **Cost tier indicators** — every provider in the dropdown shows a badge (✅ FREE, 🆓 Free Tier, 💲 Low Cost, 💳 Paid) so you can pick at a glance; Groq is starred as the recommended free option
 - **Interactive setup guide** — "How to get an API key" button opens a step-by-step walkthrough for the selected provider, plus a full provider comparison table
 - **Anti-hallucination guardrails** — the LLM can only reference data explicitly provided in context
-- **RS3 economic rules** — GE tax, buy limits, margin checking, and high alch rules are injected into every prompt
+- **Deep RS3 economic knowledge** — 8 economic laws (GE tax, buy limits, margin checking, high alch, item categories, flipping strategy, gp/hr formulas, common pitfalls) + a data field legend are injected into every prompt so the LLM reasons accurately about margins, trade velocity, and risk
 
 ### Portfolio Tracker
 - **Active flip tracking** — log buy price, quantity, and target sell price with buy-limit countdown timers

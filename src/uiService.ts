@@ -344,6 +344,13 @@ let wiki: WikiService;
 
 /** Most recent formatted market summary — reused across chat messages. */
 let latestMarketSummary = "";
+/**
+ * Broader LLM context (top 200 items by traded value, no filters).
+ * Built alongside the UI panel but with relaxed constraints so the chat
+ * advisor has a much wider market view than the filtered top-20 panel.
+ * Falls back to `latestMarketSummary` until the first build completes.
+ */
+let latestLLMContext = "";
 /** Most recent wiki text block — reused across chat messages. */
 let latestWikiText = "";
 /** The top items array, cached for wiki lookups per chat message. */
@@ -1293,6 +1300,11 @@ async function refreshMarketPanel(): Promise<void> {
     latestMarketSummary = analyzer.formatForLLM(latestTopItems);
     applySortOrder(latestTopItems, els.top20SortSelect.value);
     renderMarketItems(latestTopItems);
+
+    // Build broader LLM context asynchronously (top 200, no filters).
+    // Non-blocking — chat uses whatever is ready; falls back to the
+    // narrow summary until this completes.
+    analyzer.getFormattedForLLM().then(ctx => { latestLLMContext = ctx; }).catch(() => {});
 
     // Check price alerts against ALL cached items (not just filtered top 20).
     try {
@@ -3446,7 +3458,11 @@ async function handleSend(): Promise<void> {
     }
 
     const service = ensureLLMService();
-    const advice = await service.generateAdvice(query, latestMarketSummary, latestWikiText);
+    const advice = await service.generateAdvice(
+      query,
+      latestLLMContext || latestMarketSummary,
+      latestWikiText
+    );
     removeMessage(thinkingEl);
     appendMessage("assistant", advice);
 

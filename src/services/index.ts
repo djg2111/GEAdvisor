@@ -8,7 +8,7 @@ export { MarketAnalyzerService } from "./marketAnalyzerService";
 export { WikiService } from "./wikiService";
 export { LLMService, LLMRequestError } from "./llmService";
 export { PortfolioService } from "./portfolioService";
-export { RS3_ECONOMIC_RULES } from "./coreKnowledge";
+export { RS3_ECONOMIC_RULES, DATA_FIELD_LEGEND } from "./coreKnowledge";
 export { initDataPipeline, fetchGECatalogue, runFullMarketScan } from "./initDataPipeline";
 export type { ScanProgressCallback } from "./initDataPipeline";
 export { LLM_PROVIDERS } from "./types";

@@ -10,7 +10,7 @@ RS3 Alt1 Toolkit plugin using a RAG pipeline: `Weird Gloop API → IndexedDB cac
 - **Do not modify `cacheService.ts` or `weirdGloopService.ts`** unless absolutely necessary
 - All shared interfaces and the `LLM_PROVIDERS` constant live in `src/services/types.ts` — add new types there, not in service files
 - JSDoc on all public methods and exported interfaces
-- LLM system prompt must include `RS3_ECONOMIC_RULES` from `coreKnowledge.ts` with supremacy clause — these rules override any model training data
+- LLM system prompt must include `RS3_ECONOMIC_RULES` and `DATA_FIELD_LEGEND` from `coreKnowledge.ts` with supremacy clause — these rules override any model training data
 - LLM prompts must forbid hallucinating prices/volumes/game mechanics; only use data passed in the user message
 - **Keep docs in sync**: After completing any feature, bug fix, or refactor, update **all three** documentation files before considering the task done:
   1. `.github/copilot-instructions.md` — update File Roles, UI Layout, Key Patterns, or Gotchas if the change affects architecture, DOM structure, conventions, or known pitfalls.
@@ -49,6 +49,7 @@ npx serve dist --listen 8080   # local dev server
 - **Provider cost badges**: `populateProviderDropdown()` appends a cost-tier emoji badge to each `<option>` label (e.g. "Groq  \u2705 FREE \u2B50 Recommended"). `applyProviderUI()` shows a colour-coded `#provider-cost-hint` span and toggles the `#setup-guide-btn` visibility.
 - **Setup guide modal**: `showSetupGuide()` opens a lazily-created singleton (`ensureSetupGuideModal()`) with provider-specific step-by-step instructions (from `SETUP_GUIDES` map), a cost-tier banner, a direct link to the provider\'s API-key page, and a comparison table of all providers. Closes on backdrop click or Escape.
 - **Barrel imports**: Always import services/types from `./services` (the barrel), not from individual files like `./services/types`
+- **Conversation trimming**: `buildTrimmedHistory()` in `LLMService` strips `=== GRAND EXCHANGE DATA ===` and `=== WIKI GUIDE TEXT ===` blocks from all user messages except the most recent before sending to the API. Also caps conversation to `MAX_HISTORY_PAIRS` (8) exchanges + system prompt. Prevents HTTP 413 errors on multi-turn chat.
 - **`HistoricalPriceRecord`** is re-exported from the barrel (`services/index.ts`) — use it in uiService for typed cache reads
 - **Deep-history scan checkbox**: `#deep-history-checkbox` next to the scan button; persisted in `ge-analyzer:deep-history`. When checked, `runFullMarketScan(..., deepHistory=true)` fetches 90-day history instead of 30-day per batch (~3–5× slower). One-time warning toast on enable.
 - **TTL-cached scoring maps**: `MarketAnalyzerService.getOrBuildMaps(days)` caches `avgVolumeMap` and `priceHistoryMap` in memory with a 10-minute TTL. All three public methods (`getTopItems`, `searchItems`, `getItemsByNames`) use this cache — maps are only rebuilt from IndexedDB when stale. `invalidateMapCache()` exists for manual reset, but is rarely needed since data-update paths (scan, reload, retry) construct a new service instance.
@@ -61,9 +62,9 @@ npx serve dist --listen 8080   # local dev server
 |------|---------------|
 | `uiService.ts` | **All** DOM manipulation, event binding, localStorage, rendering (~4 400 lines) |
 | `services/types.ts` | Every shared interface + `LLM_PROVIDERS` constant |
-| `services/coreKnowledge.ts` | Static RS3 economic rules (GE tax, buy limits, margin checking, high alch) |
-| `services/llmService.ts` | OpenAI-compatible chat-completion client; builds system + user prompt |
-| `services/marketAnalyzerService.ts` | Score → filter → rank → format. Includes trade velocity scoring, 7-day price momentum classification, and sparse-history fallback to Weird Gloop `last90d` API for chart data. Sparse fallback delegates to `WeirdGloopService.fetchHistoricalPrices` (batched, pipe-delimited) and is capped at 500 items. TTL-cached `avgVolumeMap`/`priceHistoryMap` (10-min) avoids redundant IndexedDB reads on UI refresh. |
+| `services/coreKnowledge.ts` | Static RS3 economic rules (GE tax, buy limits, margin checking, high alch, item categories, flipping strategy, gp/hr formulas, common pitfalls) + data field legend for LLM interpretation |
+| `services/llmService.ts` | OpenAI-compatible chat-completion client; builds system + user prompt; conversation trimming via `buildTrimmedHistory()` (strips data blocks from older messages, caps at 8 exchanges) |
+| `services/marketAnalyzerService.ts` | Score → filter → rank → format. Includes trade velocity scoring, 7-day price momentum classification, and sparse-history fallback to Weird Gloop `last90d` API for chart data. Sparse fallback delegates to `WeirdGloopService.fetchHistoricalPrices` (batched, pipe-delimited) and is capped at 500 items. TTL-cached `avgVolumeMap`/`priceHistoryMap` (10-min) avoids redundant IndexedDB reads on UI refresh. `getFormattedForLLM()` builds a broader top-200 unfiltered dataset (~15K tokens) for the chat advisor. |
 | `services/initDataPipeline.ts` | Startup orchestrator + `SEED_ITEMS` list (~100 RS3 items). Runs two health checks on every startup: re-enriches missing `highAlch`/`buyLimit` (>50% threshold) and re-seeds sparse history (<30% coverage). `runFullMarketScan` uses adaptive inter-batch backoff (1.5 s baseline, 30 s ceiling) |
 | `services/portfolioService.ts` | Active flip tracker + completed flip history with P&L stats (localStorage) |
 | `services/weirdGloopService.ts` | Weird Gloop RS3 GE API client — batched sequential fetching with `fetchWithRetry()` exponential backoff (429 / network errors) |

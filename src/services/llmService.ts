@@ -18,7 +18,7 @@ import type {
   ChatMessage,
   LLMConfig,
 } from "./types";
-import { RS3_ECONOMIC_RULES } from "./coreKnowledge";
+import { RS3_ECONOMIC_RULES, DATA_FIELD_LEGEND } from "./coreKnowledge";
 
 /** Sensible defaults — Groq free tier with `llama-3.1-8b-instant`. */
 const DEFAULTS: LLMConfig = {
@@ -28,6 +28,21 @@ const DEFAULTS: LLMConfig = {
   temperature: 0.4,
   maxTokens: 1024,
 };
+
+/**
+ * Maximum number of user+assistant exchange pairs retained in the API
+ * payload (on top of the system prompt). Older exchanges are dropped to
+ * keep the request within provider size limits.
+ */
+const MAX_HISTORY_PAIRS = 8;
+
+/**
+ * Regex that matches the `=== GRAND EXCHANGE DATA ===` and
+ * `=== WIKI GUIDE TEXT ===` blocks inside a user message, leaving only
+ * the `=== PLAYER QUESTION ===` section.
+ */
+const DATA_BLOCK_RE =
+  /=== GRAND EXCHANGE DATA ===[\s\S]*?(?==== PLAYER QUESTION ===)/;
 
 /**
  * Service that synthesises GE market data and RS3 Wiki text into
@@ -134,13 +149,22 @@ export class LLMService {
     const userMsg = this.buildUserMessage(query, marketData, wikiText);
     this._messages.push({ role: "user", content: userMsg });
 
+    // Build a trimmed copy of the history for the API payload.
+    // - System prompt: kept as-is.
+    // - Older user messages: data blocks stripped, only the player question retained.
+    // - Most recent user message (the one we just pushed): full context kept.
+    // - Assistant messages: kept as-is.
+    // Additionally, cap conversation to the system prompt + last MAX_HISTORY_PAIRS
+    // exchanges to bound payload size.
+    const trimmed = this.buildTrimmedHistory();
+
     console.log(
-      `[LLMService] Sending ${this._messages.length} messages to ${this.model} at ${this.endpoint}…`
+      `[LLMService] Sending ${trimmed.length} messages (${this._messages.length} in full history) to ${this.model} at ${this.endpoint}…`
     );
 
     const body: ChatCompletionRequest = {
       model: this.model,
-      messages: [...this._messages],
+      messages: trimmed,
       temperature: this.temperature,
       max_completion_tokens: this.maxTokens,
     };
@@ -210,22 +234,36 @@ export class LLMService {
       "You are a RuneScape 3 Grand Exchange specialist and money-making instructor.",
       "",
       "STRICT RULES — you MUST follow all of these:",
-      "1. ONLY use the Grand Exchange market data and RS Wiki text provided in the user message.",
+      "1. ONLY use the Grand Exchange market data and RS Wiki text provided in the user message. Never reference outside pricing or game knowledge.",
       "2. NEVER invent, guess, or hallucinate prices, trade volumes, profit margins, or game mechanics.",
       "3. If the provided data is insufficient to answer a question, say so explicitly — do NOT fill gaps with assumptions.",
-      "4. When recommending items to buy or sell, cite the exact price and volume numbers from the provided data.",
-      "5. When referencing a money-making method, quote or paraphrase the wiki text — do not add steps that are not in the source.",
-      "6. Keep responses concise and actionable. Use bullet points or numbered lists.",
-      "7. Format gold values with standard RS3 abbreviations (K, M, B).",
-      "8. If no wiki guide exists for an item, only discuss it from the market-data perspective.",
-      "9. Analyze the '30d Trend Slope' and 'Volatility' metrics provided for each item. A positive slope indicates an upward price trend; a negative slope signals decline. Volatility above 10% signals high risk.",
-      "10. When recommending or discussing an item, explicitly mention whether its linear slope is positive or negative and whether its volatility is high (>10%) or low. Use these to justify your buy/sell/hold advice.",
+      "4. When recommending items, ALWAYS cite the exact numbers from the data (price, profit, buy limit, volume, trend slope, volatility).",
+      "5. When referencing a money-making method, quote or paraphrase the wiki text — do not add steps not in the source.",
+      "6. Keep responses concise and actionable. Use bullet points or numbered lists. No filler or generic advice.",
+      "7. Format gold values with standard RS3 abbreviations: K (thousands), M (millions), B (billions).",
+      "8. If no wiki guide exists for a queried item, only discuss it from the market-data perspective.",
       "",
-      "The following RS3 economic laws are ABSOLUTE. They supersede any conflicting outside knowledge you may have. Apply them to every calculation.",
+      "ANALYTICAL REASONING — follow this framework when recommending items:",
+      "9. For EVERY item you recommend or discuss, state:",
+      "   a. The per-item profit AFTER tax (use the 'Profit' field, or compute it).",
+      "   b. The 4-hour profit potential: profit × buy limit.",
+      "   c. The estimated gp/hr based on trade velocity (see economic rules for fill-time estimates).",
+      "   d. The 30d trend: quote the slope value and explain what it means (rising, falling, or flat).",
+      "   e. The volatility %: quote it and classify as low (<5%), moderate (5-10%), or high (>10%).",
+      "",
+      "10. CRITICAL: When trend slope is near zero (+0.0 or −0.0) AND volatility is 0.0%, this usually means INSUFFICIENT PRICE HISTORY DATA — do NOT interpret it as 'stable' or 'low risk'. Instead, say historical data is limited and recommend the player margin-check the item first.",
+      "",
+      "11. When the player asks 'what should I flip', rank your top 3-5 picks by estimated gp/hr and explain why each is good. Include at least one high-volume fast flip and one higher-margin slower flip if available.",
+      "",
+      "12. Always include actionable next steps: what price to set buy offers at, estimated wait time, and what to sell at.",
+      "",
+      "The following RS3 economic laws are ABSOLUTE. They supersede any conflicting outside knowledge. Apply them to every calculation.",
       "",
       RS3_ECONOMIC_RULES,
       "",
-      "Your audience is an experienced RS3 player viewing this inside the Alt1 Toolkit overlay. Be direct and efficient.",
+      DATA_FIELD_LEGEND,
+      "",
+      "Your audience is an experienced RS3 player viewing this inside the Alt1 Toolkit overlay. Be direct, specific, and data-driven. Never pad responses with generic advice like 'do your own research' — the data is right there.",
     ].join("\n");
   }
 
@@ -272,6 +310,54 @@ export class LLMService {
     ].join("\n");
   }
 
+  /**
+   * Build a size-efficient copy of `_messages` for the API payload.
+   *
+   * 1. Keeps the system prompt verbatim.
+   * 2. Caps non-system messages to the last `MAX_HISTORY_PAIRS * 2` entries
+   *    (each pair = one user + one assistant message).
+   * 3. Strips the bulky `=== GRAND EXCHANGE DATA ===` and
+   *    `=== WIKI GUIDE TEXT ===` blocks from **all user messages except the
+   *    most recent one**, retaining only the `=== PLAYER QUESTION ===`
+   *    section so the LLM still sees the conversational context.
+   *
+   * @returns A new `ChatMessage[]` safe to serialise and send.
+   */
+  private buildTrimmedHistory(): ChatMessage[] {
+    const system = this._messages[0]; // always the system prompt
+    let rest = this._messages.slice(1);
+
+    // Cap to the most recent exchanges.
+    const maxNonSystem = MAX_HISTORY_PAIRS * 2;
+    if (rest.length > maxNonSystem) {
+      rest = rest.slice(rest.length - maxNonSystem);
+    }
+
+    // Find the index of the last user message (relative to `rest`).
+    let lastUserIdx = -1;
+    for (let i = rest.length - 1; i >= 0; i--) {
+      if (rest[i].role === "user") {
+        lastUserIdx = i;
+        break;
+      }
+    }
+
+    const trimmed: ChatMessage[] = [system];
+
+    for (let i = 0; i < rest.length; i++) {
+      const msg = rest[i];
+      if (msg.role === "user" && i !== lastUserIdx) {
+        // Strip data blocks, keep only the question portion.
+        const stripped = msg.content.replace(DATA_BLOCK_RE, "").trim();
+        trimmed.push({ role: "user", content: stripped });
+      } else {
+        trimmed.push(msg);
+      }
+    }
+
+    return trimmed;
+  }
+
   // ─── Private: Error Handling ──────────────────────────────────────────
 
   /**
@@ -306,6 +392,9 @@ export class LLMService {
         break;
       case 403:
         hint = "Forbidden — the API key may lack the required permissions.";
+        break;
+      case 413:
+        hint = "Request too large — conversation history exceeded the provider's size limit. Try clearing the chat and starting a new conversation.";
         break;
       case 429:
         hint = "Rate limited — you have exceeded the API quota. Wait and retry.";
