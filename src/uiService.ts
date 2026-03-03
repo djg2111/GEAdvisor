@@ -59,6 +59,12 @@ const LS_LAYOUT = "ge-analyzer:layout";
 /** `localStorage` key for persisted theme preference. */
 const LS_THEME = "ge-analyzer:theme";
 
+/** `localStorage` key for persisted style preference (basic/glass/neumorphism/skeuomorphism). */
+const LS_STYLE = "ge-analyzer:style";
+
+/** `localStorage` key for persisted colorway preference (classic/osrs/rs3-modern/light). */
+const LS_COLORWAY = "ge-analyzer:colorway";
+
 /** `localStorage` key for serialised LLM chat history. */
 const LS_CHAT_HISTORY = "ge-analyzer:chat-history";
 
@@ -80,8 +86,11 @@ const PORTFOLIO_TICK_MS = 30_000;
 /** Available interface layout modes. */
 type LayoutMode = "tabbed" | "sidebar";
 
-/** Available visual themes. */
-type ThemeMode = "classic" | "osrs" | "rs3-modern" | "glass" | "neumorphism" | "minimalism" | "skeuomorphism";
+/** Available visual styles (structural effects). */
+type StyleMode = "basic" | "glass" | "neumorphism" | "skeuomorphism";
+
+/** Available colorways (colour palettes). */
+type ColorwayMode = "classic" | "osrs" | "rs3-modern" | "light" | "sol-dark" | "sol-light";
 
 // ─── Detail-row label text & tooltip descriptions ───────────────────────────
 
@@ -297,7 +306,8 @@ let els: {
   reloadStatus: HTMLElement;
   layoutTabbedBtn: HTMLButtonElement;
   layoutSidebarBtn: HTMLButtonElement;
-  themeSelect: HTMLSelectElement;
+  styleSelect: HTMLSelectElement;
+  colorwaySelect: HTMLSelectElement;
   tabMarketBtn: HTMLButtonElement;
   tabAdvisorBtn: HTMLButtonElement;
   viewTabs: HTMLElement;
@@ -940,27 +950,69 @@ function bindLayoutToggle(): void {
   els.layoutSidebarBtn.addEventListener("click", () => applyLayout("sidebar"));
 }
 
-// ─── Theme ──────────────────────────────────────────────────────────────────
+// ─── Theme (Style × Colorway) ───────────────────────────────────────────────
 
 /**
- * Restore persisted theme preference and bind the theme dropdown.
- * Sets `document.body.dataset.theme` which activates the matching
- * CSS variable override block.
+ * Restore persisted theme preferences and bind both dropdowns.
+ * Migrates from the legacy single `ge-analyzer:theme` key if present.
+ * Sets `document.body.dataset.style` and `document.body.dataset.colorway`
+ * which activate the matching CSS override blocks.
  */
 function bindTheme(): void {
-  const saved = (localStorage.getItem(LS_THEME) as ThemeMode | null) ?? "classic";
-  applyTheme(saved);
+  migrateThemeKey();
 
-  els.themeSelect.addEventListener("change", () => {
-    applyTheme(els.themeSelect.value as ThemeMode);
+  const savedStyle = (localStorage.getItem(LS_STYLE) as StyleMode | null) ?? "basic";
+  const savedColorway = (localStorage.getItem(LS_COLORWAY) as ColorwayMode | null) ?? "classic";
+  applyStyle(savedStyle);
+  applyColorway(savedColorway);
+
+  els.styleSelect.addEventListener("change", () => {
+    applyStyle(els.styleSelect.value as StyleMode);
+  });
+  els.colorwaySelect.addEventListener("change", () => {
+    applyColorway(els.colorwaySelect.value as ColorwayMode);
   });
 }
 
-/** Apply a theme to the document and persist the choice. */
-function applyTheme(theme: ThemeMode): void {
-  document.body.dataset.theme = theme;
-  localStorage.setItem(LS_THEME, theme);
-  els.themeSelect.value = theme;
+/**
+ * Migrate from the legacy single `ge-analyzer:theme` key to the new
+ * two-axis `ge-analyzer:style` + `ge-analyzer:colorway` keys.
+ * Runs once — removes the old key after migration.
+ */
+function migrateThemeKey(): void {
+  const legacy = localStorage.getItem(LS_THEME);
+  if (!legacy) return;
+
+  const COLORWAY_MAP: Record<string, ColorwayMode> = {
+    classic: "classic", osrs: "osrs", "rs3-modern": "rs3-modern",
+    glass: "classic", neumorphism: "classic", minimalism: "light", skeuomorphism: "classic",
+  };
+  const STYLE_MAP: Record<string, StyleMode> = {
+    classic: "basic", osrs: "basic", "rs3-modern": "basic",
+    glass: "glass", neumorphism: "neumorphism", minimalism: "basic", skeuomorphism: "skeuomorphism",
+  };
+
+  if (!localStorage.getItem(LS_STYLE)) {
+    localStorage.setItem(LS_STYLE, STYLE_MAP[legacy] ?? "basic");
+  }
+  if (!localStorage.getItem(LS_COLORWAY)) {
+    localStorage.setItem(LS_COLORWAY, COLORWAY_MAP[legacy] ?? "classic");
+  }
+  localStorage.removeItem(LS_THEME);
+}
+
+/** Apply a style to the document and persist the choice. */
+function applyStyle(style: StyleMode): void {
+  document.body.dataset.style = style;
+  localStorage.setItem(LS_STYLE, style);
+  els.styleSelect.value = style;
+}
+
+/** Apply a colorway to the document and persist the choice. */
+function applyColorway(colorway: ColorwayMode): void {
+  document.body.dataset.colorway = colorway;
+  localStorage.setItem(LS_COLORWAY, colorway);
+  els.colorwaySelect.value = colorway;
 }
 
 /** Apply a layout mode to the document and persist the choice. */
@@ -1174,7 +1226,8 @@ const EXPORT_KEYS = [
   "ge-analyzer:favorites",
   "ge-analyzer:portfolio",
   "ge-analyzer:portfolio-history",
-  "ge-analyzer:theme",
+  "ge-analyzer:style",
+  "ge-analyzer:colorway",
 ] as const;
 
 /**
@@ -2862,6 +2915,7 @@ function ensureAnalyticsModal(): HTMLElement {
   // Trap focus inside modal for accessibility.
   modal.setAttribute("role", "dialog");
   modal.setAttribute("aria-modal", "true");
+  modal.setAttribute("aria-labelledby", "analytics-modal-title");
 
   backdrop.appendChild(modal);
   document.body.appendChild(backdrop);
@@ -2916,6 +2970,7 @@ async function showAnalyticsModal(item: RankedItem): Promise<void> {
 
   const nameEl = document.createElement("span");
   nameEl.className = "analytics-modal-name";
+  nameEl.id = "analytics-modal-title";
   nameEl.textContent = item.name;
 
   const priceEl = document.createElement("span");
@@ -3069,7 +3124,9 @@ async function showAnalyticsModal(item: RankedItem): Promise<void> {
 
   const predGrid = document.createElement("div");
   predGrid.className = "analytics-details-grid";
-  predGrid.innerHTML = predRows;
+  predGrid.innerHTML =
+    `<div class="analytics-section-divider">Predictive Analytics</div>` +
+    `<div class="predictive-section">${predRows}</div>`;
   content.appendChild(predGrid);
 
   // ── Price alerts ────────────────────────────────────────────────────────
@@ -4007,7 +4064,8 @@ function renderCompletedFlips(): void {
 
     const profitCell = document.createElement("td");
     profitCell.className = `profit-cell ${flip.realizedProfit > 0 ? "win" : "loss"}`;
-    profitCell.textContent = `${formatGpShort(flip.realizedProfit)} gp`;
+    const profitPrefix = flip.realizedProfit > 0 ? "▲ " : "▼ ";
+    profitCell.textContent = `${profitPrefix}${formatGpShort(flip.realizedProfit)} gp`;
 
     const roi = flip.buyPrice * flip.quantity > 0
       ? (flip.realizedProfit / (flip.buyPrice * flip.quantity)) * 100
@@ -4033,13 +4091,15 @@ function renderPortfolioStats(): void {
   const stats = portfolio.getPortfolioStats();
 
   const profitEl = els.statTotalProfit;
-  profitEl.textContent = `${formatGpShort(stats.totalProfit)} gp`;
+  const profitPrefix = stats.totalProfit >= 0 ? "▲ " : "▼ ";
+  profitEl.textContent = `${profitPrefix}${formatGpShort(stats.totalProfit)} gp`;
   profitEl.className = `stat-value ${stats.totalProfit >= 0 ? "profit" : "loss"}`;
 
   els.statTotalFlips.textContent = String(stats.totalFlips);
 
   const avgProfitEl = els.statAvgProfit;
-  avgProfitEl.textContent = `${formatGpShort(stats.avgProfit)} gp`;
+  const avgPrefix = stats.avgProfit >= 0 ? "▲ " : "▼ ";
+  avgProfitEl.textContent = `${avgPrefix}${formatGpShort(stats.avgProfit)} gp`;
   avgProfitEl.className = `stat-value ${stats.avgProfit >= 0 ? "profit" : "loss"}`;
 
   els.statAvgRoi.textContent = `${(stats.avgRoi * 100).toFixed(1)}%`;
@@ -4397,7 +4457,8 @@ function resolveElements(): void {
     reloadStatus: q("reload-status"),
     layoutTabbedBtn: q<HTMLButtonElement>("layout-tabbed-btn"),
     layoutSidebarBtn: q<HTMLButtonElement>("layout-sidebar-btn"),
-    themeSelect: q<HTMLSelectElement>("theme-select"),
+    styleSelect: q<HTMLSelectElement>("style-select"),
+    colorwaySelect: q<HTMLSelectElement>("colorway-select"),
     tabMarketBtn: q<HTMLButtonElement>("tab-market-btn"),
     tabAdvisorBtn: q<HTMLButtonElement>("tab-advisor-btn"),
     viewTabs: q("view-tabs"),

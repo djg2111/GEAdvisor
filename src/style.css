@@ -7,9 +7,19 @@
  * ───────────────────────────────────────────────────────────────────────────── */
 
 /* ═══════════════════════════════════════════════════════════════════════════
- *  THEME VARIABLES — CSS Custom Properties
- *  Default: "Classic Dark".  Switch via body[data-theme="osrs"|"rs3-modern"|"glass"|"neumorphism"|"minimalism"|"skeuomorphism"].
+ *  THEME SYSTEM — Two-axis: Colorway × Style
+ *
+ *  Colorways (body[data-colorway]):  classic | osrs | rs3-modern | light | sol-dark | sol-light
+ *  Styles   (body[data-style]):     basic | glass | neumorphism | skeuomorphism
+ *
+ *  Colorways set ALL colour variables + per-style helper vars.
+ *  Styles apply structural overrides (shadows, filters, gradients)
+ *  using the helper vars so every combination works automatically.
  * ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ─────────────────────────────────────────────────────────────────────────────
+ *  COLORWAY: Classic Dark (default)
+ * ───────────────────────────────────────────────────────────────────────────── */
 
 :root {
   /* ── Backgrounds ─────────────────────── */
@@ -17,6 +27,8 @@
   --bg-panel: #252526;
   --bg-elevated: #2d2d30;
   --bg-hover: #2a2d2e;
+  --dropdown-bg: #2d2d30;
+  --dropdown-hover-bg: #2a2d2e;
   --bg-input: #3c3c3c;
   --bg-muted: #333;
   --bg-filter: #1e1e24;
@@ -28,7 +40,7 @@
   --text-accent: #9cdcfe;
   --text-heading: #dcdcaa;
   --text-price: #b5cea8;
-  --text-muted: #888;
+  --text-muted: #94a3b8;
   --text-soft: #aaa;
   --text-dimmed: #666;
 
@@ -49,12 +61,13 @@
 
   /* ── Semantic accents ────────────────── */
   --accent-blue-text: #569cd6;
-  --accent-green: #6a9955;
+  --accent-green: #5ece6b;
   --accent-green-bright: #27ae60;
   --accent-teal: #4ec9b0;
   --accent-gold: #f0c040;
   --accent-gold-hype: #f5c542;
-  --accent-red: #f44747;
+  --accent-hype: #ffab40;
+  --accent-red: #ff6b6b;
   --accent-red-dark: #c0392b;
   --accent-red-bg: #3a1d1d;
   --accent-red-border: #6b3030;
@@ -77,19 +90,66 @@
   --scrollbar-thumb: #555;
   --scrollbar-thumb-hover: #777;
 
+  /* ── Badge sizing tokens ──────────────── */
+  --badge-font-sm: 10px;
+  --badge-font-md: 11px;
+  --badge-padding-sm: 1px 5px;
+  --badge-padding-md: 2px 6px;
+  --badge-radius: 3px;
+  --badge-font-weight: 600;
+
   /* ── Misc ─────────────────────────────── */
   --link-color: #6cb4ee;
   --add-flip-bg: #1b6b2a;
   --limit-ready-bg: #1a2e1a;
+
+  /* ── Style helper vars (Glass) ───────── */
+  --glass-body-from: #0a0a1e;
+  --glass-body-via: #1a1040;
+  --glass-body-to: #0a2040;
+  --glass-panel: rgba(255, 255, 255, 0.06);
+  --glass-elevated: rgba(255, 255, 255, 0.10);
+  --glass-hover: rgba(255, 255, 255, 0.12);
+  --glass-input: rgba(255, 255, 255, 0.08);
+  --glass-muted: rgba(255, 255, 255, 0.05);
+  --glass-border-card: rgba(255, 255, 255, 0.18);
+  --glass-border-main: rgba(255, 255, 255, 0.10);
+  --glass-border-section: rgba(255, 255, 255, 0.12);
+  --glass-border-input: rgba(255, 255, 255, 0.20);
+  --glass-scrollbar: rgba(255, 255, 255, 0.15);
+
+  /* ── Style helper vars (Neumorphism) ─── */
+  --neu-shadow-dark: #151518;
+  --neu-shadow-light: #383840;
+  --neu-accent-shadow: #094771;
+
+  /* ── Style helper vars (Skeuomorphism) ── */
+  --skeu-body-from: #151518;
+  --skeu-body-to: #1e1e1e;
+  --skeu-card-from: #353538;
+  --skeu-card-mid: #252526;
+  --skeu-card-to: #1e1e20;
+  --skeu-card-highlight: #444;
+  --skeu-card-shadow-edge: #151518;
+  --skeu-header-from: #353538;
+  --skeu-header-to: #2a2a2e;
+  --skeu-btn-from: #3a3a3e;
+  --skeu-btn-to: #2a2a2e;
+  --skeu-btn-active-from: #0e639c;
+  --skeu-btn-active-to: #094771;
 }
 
-/* ── OSRS Brown Theme ─────────────────────────────────────────────────────── */
+/* ─────────────────────────────────────────────────────────────────────────────
+ *  COLORWAY: OSRS Brown
+ * ───────────────────────────────────────────────────────────────────────────── */
 
-body[data-theme="osrs"] {
+body[data-colorway="osrs"] {
   --bg-main: #382b1f;
   --bg-panel: #4a3a2a;
   --bg-elevated: #56452f;
   --bg-hover: #5c4b35;
+  --dropdown-bg: #56452f;
+  --dropdown-hover-bg: #5c4b35;
   --bg-input: #3e2e1e;
   --bg-muted: #4a3a2a;
   --bg-filter: #322418;
@@ -127,6 +187,7 @@ body[data-theme="osrs"] {
   --accent-red-bg: #3a1a0a;
   --accent-red-border: #8b3030;
   --accent-red-border-hover: #a04040;
+  --accent-hype: #e89830;
 
   --chat-user-bg: #5a3a18;
   --chat-error-bg: #3a1a0a;
@@ -141,15 +202,54 @@ body[data-theme="osrs"] {
   --link-color: #cd853f;
   --add-flip-bg: #4a6b1a;
   --limit-ready-bg: #2a3a1a;
+
+  /* Glass helpers */
+  --glass-body-from: #1a1008;
+  --glass-body-via: #2a1e10;
+  --glass-body-to: #1a1508;
+  --glass-panel: rgba(255, 220, 150, 0.06);
+  --glass-elevated: rgba(255, 220, 150, 0.10);
+  --glass-hover: rgba(255, 220, 150, 0.12);
+  --glass-input: rgba(255, 220, 150, 0.08);
+  --glass-muted: rgba(255, 220, 150, 0.05);
+  --glass-border-card: rgba(255, 200, 100, 0.20);
+  --glass-border-main: rgba(255, 200, 100, 0.10);
+  --glass-border-section: rgba(255, 200, 100, 0.12);
+  --glass-border-input: rgba(255, 200, 100, 0.22);
+  --glass-scrollbar: rgba(255, 200, 100, 0.15);
+
+  /* Neumorphism helpers */
+  --neu-shadow-dark: #2a1e14;
+  --neu-shadow-light: #5c4a38;
+  --neu-accent-shadow: #6b3410;
+
+  /* Skeuomorphism helpers */
+  --skeu-body-from: #2a2018;
+  --skeu-body-to: #382b1f;
+  --skeu-card-from: #584838;
+  --skeu-card-mid: #4a3a2a;
+  --skeu-card-to: #403020;
+  --skeu-card-highlight: #6a5840;
+  --skeu-card-shadow-edge: #1f160e;
+  --skeu-header-from: #584838;
+  --skeu-header-to: #4a4038;
+  --skeu-btn-from: #5a4830;
+  --skeu-btn-to: #4a3820;
+  --skeu-btn-active-from: #8b4513;
+  --skeu-btn-active-to: #6b3410;
 }
 
-/* ── RS3 Modern Theme ─────────────────────────────────────────────────────── */
+/* ─────────────────────────────────────────────────────────────────────────────
+ *  COLORWAY: RS3 Modern Blue
+ * ───────────────────────────────────────────────────────────────────────────── */
 
-body[data-theme="rs3-modern"] {
+body[data-colorway="rs3-modern"] {
   --bg-main: #0f1722;
   --bg-panel: #1c2836;
   --bg-elevated: #1e2d3e;
   --bg-hover: #243548;
+  --dropdown-bg: #1e2d3e;
+  --dropdown-hover-bg: #243548;
   --bg-input: #1a2a3a;
   --bg-muted: #1c2836;
   --bg-filter: #141f2d;
@@ -187,6 +287,7 @@ body[data-theme="rs3-modern"] {
   --accent-red-bg: #2a1515;
   --accent-red-border: #7f1d1d;
   --accent-red-border-hover: #991b1b;
+  --accent-hype: #ffab40;
 
   --chat-user-bg: #0c3a6e;
   --chat-error-bg: #2a1515;
@@ -201,184 +302,54 @@ body[data-theme="rs3-modern"] {
   --link-color: #7dd3fc;
   --add-flip-bg: #0d5a2a;
   --limit-ready-bg: #0d2a1a;
+
+  /* Glass helpers */
+  --glass-body-from: #060e18;
+  --glass-body-via: #0a1828;
+  --glass-body-to: #0a1020;
+  --glass-panel: rgba(120, 180, 255, 0.06);
+  --glass-elevated: rgba(120, 180, 255, 0.10);
+  --glass-hover: rgba(120, 180, 255, 0.12);
+  --glass-input: rgba(120, 180, 255, 0.08);
+  --glass-muted: rgba(120, 180, 255, 0.05);
+  --glass-border-card: rgba(100, 180, 255, 0.20);
+  --glass-border-main: rgba(100, 180, 255, 0.10);
+  --glass-border-section: rgba(100, 180, 255, 0.12);
+  --glass-border-input: rgba(100, 180, 255, 0.22);
+  --glass-scrollbar: rgba(100, 180, 255, 0.15);
+
+  /* Neumorphism helpers */
+  --neu-shadow-dark: #080e18;
+  --neu-shadow-light: #2a3a4e;
+  --neu-accent-shadow: #0080cc;
+
+  /* Skeuomorphism helpers */
+  --skeu-body-from: #080e18;
+  --skeu-body-to: #0f1722;
+  --skeu-card-from: #243040;
+  --skeu-card-mid: #1c2836;
+  --skeu-card-to: #141e2c;
+  --skeu-card-highlight: #3a5068;
+  --skeu-card-shadow-edge: #080e18;
+  --skeu-header-from: #243040;
+  --skeu-header-to: #1c2836;
+  --skeu-btn-from: #243548;
+  --skeu-btn-to: #1a2a3a;
+  --skeu-btn-active-from: #00a8ff;
+  --skeu-btn-active-to: #0080cc;
 }
 
-/* ── Glassmorphism Theme ──────────────────────────────────────────────────── */
+/* ─────────────────────────────────────────────────────────────────────────────
+ *  COLORWAY: Light
+ * ───────────────────────────────────────────────────────────────────────────── */
 
-body[data-theme="glass"] {
-  --bg-main: rgba(15, 15, 30, 0.85);
-  --bg-panel: rgba(255, 255, 255, 0.06);
-  --bg-elevated: rgba(255, 255, 255, 0.10);
-  --bg-hover: rgba(255, 255, 255, 0.12);
-  --bg-input: rgba(255, 255, 255, 0.08);
-  --bg-muted: rgba(255, 255, 255, 0.05);
-  --bg-filter: rgba(10, 10, 25, 0.90);
-  --bg-number-input: rgba(255, 255, 255, 0.06);
-
-  --text-main: #e8e8f0;
-  --text-bright: #ffffff;
-  --text-accent: #a0d4ff;
-  --text-heading: #c8e0ff;
-  --text-price: #a0f0c0;
-  --text-muted: #9090b0;
-  --text-soft: #a8a8c8;
-  --text-dimmed: #606080;
-
-  --border-main: rgba(255, 255, 255, 0.10);
-  --border-section: rgba(255, 255, 255, 0.12);
-  --border-card: rgba(255, 255, 255, 0.18);
-  --border-input: rgba(255, 255, 255, 0.20);
-  --border-subtle: rgba(255, 255, 255, 0.08);
-  --border-hype: rgba(240, 200, 60, 0.35);
-  --border-hype-hover: rgba(240, 200, 60, 0.55);
-
-  --accent-primary: #3a8fd4;
-  --accent-primary-hover: #5aa4e0;
-  --accent-primary-active: #2670b0;
-  --accent-focus: #4a9fe4;
-  --accent-blue-text: #80c0f0;
-  --accent-green: #50b880;
-  --accent-green-bright: #40d080;
-  --accent-teal: #40d0b8;
-  --accent-gold: #f0c848;
-  --accent-gold-hype: #e8b030;
-  --accent-red: #f06060;
-  --accent-red-dark: #d04040;
-  --accent-red-bg: rgba(200, 50, 50, 0.15);
-  --accent-red-border: rgba(200, 50, 50, 0.35);
-  --accent-red-border-hover: rgba(200, 50, 50, 0.55);
-
-  --chat-user-bg: rgba(40, 80, 140, 0.35);
-  --chat-error-bg: rgba(140, 30, 30, 0.25);
-  --badge-buy-bg: rgba(30, 80, 140, 0.30);
-  --badge-sell-bg: rgba(30, 120, 50, 0.30);
-  --badge-hype-bg: rgba(180, 140, 20, 0.20);
-
-  --modal-backdrop: rgba(0, 0, 0, 0.50);
-  --modal-shadow: rgba(0, 0, 0, 0.60);
-  --scrollbar-thumb: rgba(255, 255, 255, 0.15);
-  --scrollbar-thumb-hover: rgba(255, 255, 255, 0.25);
-  --link-color: #80c0f0;
-  --add-flip-bg: rgba(30, 120, 50, 0.35);
-  --limit-ready-bg: rgba(20, 80, 40, 0.30);
-}
-
-/* Glassmorphism structural overrides — frosted panels & cards */
-body[data-theme="glass"] {
-  background: linear-gradient(135deg, #0a0a1e 0%, #1a1040 50%, #0a2040 100%);
-}
-body[data-theme="glass"] #app {
-  background: transparent;
-}
-body[data-theme="glass"] .market-card,
-body[data-theme="glass"] .top20-section,
-body[data-theme="glass"] .favorites-section,
-body[data-theme="glass"] #settings-panel,
-body[data-theme="glass"] #market-view,
-body[data-theme="glass"] .analytics-modal-content,
-body[data-theme="glass"] .setup-guide-content {
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-}
-
-/* ── Neumorphism Theme ────────────────────────────────────────────────────── */
-
-body[data-theme="neumorphism"] {
-  --bg-main: #2e3440;
-  --bg-panel: #353b48;
-  --bg-elevated: #3b4252;
-  --bg-hover: #434c5e;
-  --bg-input: #3b4252;
-  --bg-muted: #353b48;
-  --bg-filter: #2a303c;
-  --bg-number-input: #323844;
-
-  --text-main: #d8dee9;
-  --text-bright: #eceff4;
-  --text-accent: #88c0d0;
-  --text-heading: #81a1c1;
-  --text-price: #a3be8c;
-  --text-muted: #7b88a0;
-  --text-soft: #949bb0;
-  --text-dimmed: #5a6378;
-
-  --border-main: transparent;
-  --border-section: transparent;
-  --border-card: transparent;
-  --border-input: transparent;
-  --border-subtle: transparent;
-  --border-hype: #c8a84060;
-  --border-hype-hover: #c8a84090;
-
-  --accent-primary: #5e81ac;
-  --accent-primary-hover: #6e91bc;
-  --accent-primary-active: #4e7198;
-  --accent-focus: #81a1c1;
-  --accent-blue-text: #88c0d0;
-  --accent-green: #a3be8c;
-  --accent-green-bright: #8fbf65;
-  --accent-teal: #8fbcbb;
-  --accent-gold: #ebcb8b;
-  --accent-gold-hype: #d4a54a;
-  --accent-red: #bf616a;
-  --accent-red-dark: #a5404a;
-  --accent-red-bg: #3b2a2e;
-  --accent-red-border: transparent;
-  --accent-red-border-hover: #bf616a40;
-
-  --chat-user-bg: #3a4560;
-  --chat-error-bg: #3b2a2e;
-  --badge-buy-bg: #2e3a50;
-  --badge-sell-bg: #2e3f2e;
-  --badge-hype-bg: #3a3520;
-
-  --modal-backdrop: rgba(0, 0, 0, 0.50);
-  --modal-shadow: none;
-  --scrollbar-thumb: #4c566a;
-  --scrollbar-thumb-hover: #636e83;
-  --link-color: #88c0d0;
-  --add-flip-bg: #3a5030;
-  --limit-ready-bg: #2a3a2a;
-}
-
-/* Neumorphism structural overrides — soft inset/outset shadows, no borders */
-body[data-theme="neumorphism"] .market-card {
-  border: none;
-  box-shadow: 6px 6px 12px #252a34, -6px -6px 12px #454d60;
-}
-body[data-theme="neumorphism"] .market-card:hover {
-  box-shadow: 4px 4px 8px #252a34, -4px -4px 8px #454d60;
-}
-body[data-theme="neumorphism"] .top20-section {
-  border: none;
-  box-shadow: 6px 6px 14px #252a34, -6px -6px 14px #454d60;
-}
-body[data-theme="neumorphism"] .favorites-section {
-  border: none;
-  box-shadow: 4px 4px 10px #252a34, -4px -4px 10px #454d60;
-}
-body[data-theme="neumorphism"] .view-btn,
-body[data-theme="neumorphism"] .section-sort-select,
-body[data-theme="neumorphism"] #market-search-input {
-  border: none;
-  box-shadow: inset 3px 3px 6px #252a34, inset -3px -3px 6px #454d60;
-}
-body[data-theme="neumorphism"] .view-btn.active {
-  box-shadow: inset 2px 2px 4px #252a34, inset -2px -2px 4px #4e7198;
-}
-body[data-theme="neumorphism"] .scan-btn,
-body[data-theme="neumorphism"] .analytics-modal-content,
-body[data-theme="neumorphism"] .setup-guide-content {
-  box-shadow: 6px 6px 14px #252a34, -6px -6px 14px #454d60;
-}
-
-/* ── Minimalism Theme (Light) ─────────────────────────────────────────────── */
-
-body[data-theme="minimalism"] {
+body[data-colorway="light"] {
   --bg-main: #f5f5f5;
   --bg-panel: #ffffff;
   --bg-elevated: #fafafa;
   --bg-hover: #f0f0f0;
+  --dropdown-bg: #fafafa;
+  --dropdown-hover-bg: #f0f0f0;
   --bg-input: #f0f0f0;
   --bg-muted: #e8e8e8;
   --bg-filter: #f0f0f0;
@@ -416,6 +387,7 @@ body[data-theme="minimalism"] {
   --accent-red-bg: #fff0f0;
   --accent-red-border: #e0a0a0;
   --accent-red-border-hover: #d08080;
+  --accent-hype: #e68a00;
 
   --chat-user-bg: #e6f0ff;
   --chat-error-bg: #fff0f0;
@@ -430,113 +402,413 @@ body[data-theme="minimalism"] {
   --link-color: #0066cc;
   --add-flip-bg: #d0f0d0;
   --limit-ready-bg: #e0f8e0;
+
+  /* Glass helpers */
+  --glass-body-from: #d0d8e0;
+  --glass-body-via: #e0e4ea;
+  --glass-body-to: #c8d4e0;
+  --glass-panel: rgba(255, 255, 255, 0.50);
+  --glass-elevated: rgba(255, 255, 255, 0.60);
+  --glass-hover: rgba(255, 255, 255, 0.65);
+  --glass-input: rgba(255, 255, 255, 0.45);
+  --glass-muted: rgba(255, 255, 255, 0.35);
+  --glass-border-card: rgba(0, 0, 0, 0.12);
+  --glass-border-main: rgba(0, 0, 0, 0.08);
+  --glass-border-section: rgba(0, 0, 0, 0.10);
+  --glass-border-input: rgba(0, 0, 0, 0.15);
+  --glass-scrollbar: rgba(0, 0, 0, 0.12);
+
+  /* Neumorphism helpers */
+  --neu-shadow-dark: #d0d0d0;
+  --neu-shadow-light: #ffffff;
+  --neu-accent-shadow: #0055aa;
+
+  /* Skeuomorphism helpers */
+  --skeu-body-from: #e8e8e8;
+  --skeu-body-to: #f5f5f5;
+  --skeu-card-from: #ffffff;
+  --skeu-card-mid: #f8f8f8;
+  --skeu-card-to: #f0f0f0;
+  --skeu-card-highlight: #ffffff;
+  --skeu-card-shadow-edge: #cccccc;
+  --skeu-header-from: #fafafa;
+  --skeu-header-to: #f0f0f0;
+  --skeu-btn-from: #f5f5f5;
+  --skeu-btn-to: #e8e8e8;
+  --skeu-btn-active-from: #0066cc;
+  --skeu-btn-active-to: #0055aa;
 }
 
-/* Minimalism structural overrides — clean, airy, thin borders */
-body[data-theme="minimalism"] {
+/* Light colorway — force light body background for basic style */
+body[data-colorway="light"] {
   background: #f5f5f5;
 }
-body[data-theme="minimalism"] .market-card {
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
-}
-body[data-theme="minimalism"] .market-card:hover {
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.10);
-}
-body[data-theme="minimalism"] .view-btn.active {
+body[data-colorway="light"] .view-btn.active {
   color: #ffffff;
 }
 
-/* ── Skeuomorphism Theme ──────────────────────────────────────────────────── */
+/* ─────────────────────────────────────────────────────────────────────────────
+ *  COLORWAY: Solarized Dark
+ * ───────────────────────────────────────────────────────────────────────────── */
 
-body[data-theme="skeuomorphism"] {
-  --bg-main: #3c3528;
-  --bg-panel: #4a4238;
-  --bg-elevated: #544c40;
-  --bg-hover: #5a5248;
-  --bg-input: #3a3228;
-  --bg-muted: #4a4238;
-  --bg-filter: #342e22;
-  --bg-number-input: #3a3228;
+body[data-colorway="sol-dark"] {
+  --bg-main: #002b36;
+  --bg-panel: #073642;
+  --bg-elevated: #0a3f4c;
+  --bg-hover: #0e4756;
+  --dropdown-bg: #0a3f4c;
+  --dropdown-hover-bg: #0e4756;
+  --bg-input: #0a3f4c;
+  --bg-muted: #06313b;
+  --bg-filter: #002830;
+  --bg-number-input: #0a3a48;
 
-  --text-main: #e8d8c0;
-  --text-bright: #fff5e0;
-  --text-accent: #f0c860;
-  --text-heading: #f0d080;
-  --text-price: #c8d8a0;
-  --text-muted: #a09078;
-  --text-soft: #b8a890;
-  --text-dimmed: #786858;
+  --text-main: #93a1a1;
+  --text-bright: #fdf6e3;
+  --text-accent: #268bd2;
+  --text-heading: #b58900;
+  --text-price: #859900;
+  --text-muted: #839496;
+  --text-soft: #78909a;
+  --text-dimmed: #586e75;
 
-  --border-main: #2a2418;
-  --border-section: #2a2418;
-  --border-card: #605040;
-  --border-input: #605040;
-  --border-subtle: #4a3e30;
-  --border-hype: #8a7020;
-  --border-hype-hover: #a89030;
+  --border-main: #0a4050;
+  --border-section: #0d4a58;
+  --border-card: #11546a;
+  --border-input: #175468;
+  --border-subtle: #0a4050;
+  --border-hype: #6b5a1e;
+  --border-hype-hover: #a08830;
 
-  --accent-primary: #8b6914;
-  --accent-primary-hover: #a07a1a;
-  --accent-primary-active: #705510;
-  --accent-focus: #c8a030;
-  --accent-blue-text: #c8a040;
-  --accent-green: #6a8a30;
-  --accent-green-bright: #5a9a20;
-  --accent-teal: #70a898;
-  --accent-gold: #f0c030;
-  --accent-gold-hype: #e0a820;
-  --accent-red: #c04030;
-  --accent-red-dark: #8b2020;
-  --accent-red-bg: #3a2218;
-  --accent-red-border: #6b3828;
-  --accent-red-border-hover: #904838;
+  --accent-primary: #268bd2;
+  --accent-primary-hover: #2e9ce6;
+  --accent-primary-active: #1a6daa;
+  --accent-focus: #268bd2;
+  --accent-blue-text: #268bd2;
+  --accent-green: #859900;
+  --accent-green-bright: #a0b800;
+  --accent-teal: #2aa198;
+  --accent-gold: #b58900;
+  --accent-gold-hype: #cb9a00;
+  --accent-red: #dc322f;
+  --accent-red-dark: #b02828;
+  --accent-red-bg: #2a1516;
+  --accent-red-border: #5a2020;
+  --accent-red-border-hover: #8a3030;
+  --accent-hype: #cb8b16;
 
-  --chat-user-bg: #4a3a20;
-  --chat-error-bg: #3a2018;
-  --badge-buy-bg: #3a3018;
-  --badge-sell-bg: #303a18;
-  --badge-hype-bg: #3a3418;
+  --chat-user-bg: #0a3a50;
+  --chat-error-bg: #2a1012;
+  --badge-buy-bg: #073a42;
+  --badge-sell-bg: #0a3a18;
+  --badge-hype-bg: #3a3010;
 
-  --modal-backdrop: rgba(0, 0, 0, 0.65);
-  --modal-shadow: rgba(0, 0, 0, 0.80);
-  --scrollbar-thumb: #605040;
-  --scrollbar-thumb-hover: #7a6850;
-  --link-color: #d0a840;
-  --add-flip-bg: #4a5a20;
-  --limit-ready-bg: #2a3a18;
+  --modal-backdrop: rgba(0, 0, 0, 0.6);
+  --modal-shadow: rgba(0, 0, 0, 0.8);
+  --scrollbar-thumb: #1a5868;
+  --scrollbar-thumb-hover: #268090;
+  --link-color: #268bd2;
+  --add-flip-bg: #1a4a10;
+  --limit-ready-bg: #0a2a10;
+
+  /* Glass helpers */
+  --glass-body-from: #001820;
+  --glass-body-via: #002030;
+  --glass-body-to: #00182a;
+  --glass-panel: rgba(7, 54, 66, 0.60);
+  --glass-elevated: rgba(7, 54, 66, 0.70);
+  --glass-hover: rgba(14, 71, 86, 0.70);
+  --glass-input: rgba(7, 54, 66, 0.50);
+  --glass-muted: rgba(7, 54, 66, 0.40);
+  --glass-border-card: rgba(38, 139, 210, 0.20);
+  --glass-border-main: rgba(38, 139, 210, 0.10);
+  --glass-border-section: rgba(38, 139, 210, 0.14);
+  --glass-border-input: rgba(38, 139, 210, 0.22);
+  --glass-scrollbar: rgba(38, 139, 210, 0.18);
+
+  /* Neumorphism helpers */
+  --neu-shadow-dark: #001a22;
+  --neu-shadow-light: #0d4a58;
+  --neu-accent-shadow: #1a6daa;
+
+  /* Skeuomorphism helpers */
+  --skeu-body-from: #001a22;
+  --skeu-body-to: #002b36;
+  --skeu-card-from: #0a4050;
+  --skeu-card-mid: #073642;
+  --skeu-card-to: #053038;
+  --skeu-card-highlight: #0e4756;
+  --skeu-card-shadow-edge: #001a22;
+  --skeu-header-from: #0a4050;
+  --skeu-header-to: #073642;
+  --skeu-btn-from: #0d4a58;
+  --skeu-btn-to: #073642;
+  --skeu-btn-active-from: #268bd2;
+  --skeu-btn-active-to: #1a6daa;
 }
 
-/* Skeuomorphism structural overrides — textured, embossed, realistic */
-body[data-theme="skeuomorphism"] {
-  background: linear-gradient(180deg, #2a2418 0%, #3c3528 100%);
+/* ─────────────────────────────────────────────────────────────────────────────
+ *  COLORWAY: Solarized Light
+ * ───────────────────────────────────────────────────────────────────────────── */
+
+body[data-colorway="sol-light"] {
+  --bg-main: #e6dec8;
+  --bg-panel: #f0e9d6;
+  --bg-elevated: #f5efdc;
+  --bg-hover: #e4dbc4;
+  --dropdown-bg: #f5efdc;
+  --dropdown-hover-bg: #e4dbc4;
+  --bg-input: #e8e0cc;
+  --bg-muted: #ddd4b8;
+  --bg-filter: #e4dcc8;
+  --bg-number-input: #e8e0cc;
+
+  --text-main: #586e75;
+  --text-bright: #073642;
+  --text-accent: #268bd2;
+  --text-heading: #946e00;
+  --text-price: #637100;
+  --text-muted: #6e8088;
+  --text-soft: #78888c;
+  --text-dimmed: #93a1a1;
+
+  --border-main: #d6ccb0;
+  --border-section: #cfc4a8;
+  --border-card: #c8bc9e;
+  --border-input: #c0b498;
+  --border-subtle: #ddd4ba;
+  --border-hype: #d4a520;
+  --border-hype-hover: #b8920a;
+
+  --accent-primary: #268bd2;
+  --accent-primary-hover: #2e9ce6;
+  --accent-primary-active: #1a6daa;
+  --accent-focus: #268bd2;
+  --accent-blue-text: #268bd2;
+  --accent-green: #859900;
+  --accent-green-bright: #6c8000;
+  --accent-teal: #2aa198;
+  --accent-gold: #b58900;
+  --accent-gold-hype: #9a7400;
+  --accent-red: #dc322f;
+  --accent-red-dark: #b02828;
+  --accent-red-bg: #fdf0ef;
+  --accent-red-border: #e0a0a0;
+  --accent-red-border-hover: #d08080;
+  --accent-hype: #b58900;
+
+  --chat-user-bg: #ddeef8;
+  --chat-error-bg: #fdf0ef;
+  --badge-buy-bg: #dde8f0;
+  --badge-sell-bg: #e0f0d0;
+  --badge-hype-bg: #f5ecc8;
+
+  --modal-backdrop: rgba(0, 0, 0, 0.25);
+  --modal-shadow: rgba(0, 0, 0, 0.15);
+  --scrollbar-thumb: #c0b498;
+  --scrollbar-thumb-hover: #a89a80;
+  --link-color: #268bd2;
+  --add-flip-bg: #d0e8c0;
+  --limit-ready-bg: #daf0d0;
+
+  /* Glass helpers */
+  --glass-body-from: #e0d8c0;
+  --glass-body-via: #eee4cc;
+  --glass-body-to: #ddd4b8;
+  --glass-panel: rgba(238, 232, 213, 0.55);
+  --glass-elevated: rgba(238, 232, 213, 0.65);
+  --glass-hover: rgba(238, 232, 213, 0.70);
+  --glass-input: rgba(238, 232, 213, 0.50);
+  --glass-muted: rgba(238, 232, 213, 0.40);
+  --glass-border-card: rgba(0, 0, 0, 0.12);
+  --glass-border-main: rgba(0, 0, 0, 0.08);
+  --glass-border-section: rgba(0, 0, 0, 0.10);
+  --glass-border-input: rgba(0, 0, 0, 0.15);
+  --glass-scrollbar: rgba(0, 0, 0, 0.10);
+
+  /* Neumorphism helpers */
+  --neu-shadow-dark: #c8bc9e;
+  --neu-shadow-light: #fdf6e3;
+  --neu-accent-shadow: #1a6daa;
+
+  /* Skeuomorphism helpers */
+  --skeu-body-from: #c8bc9e;
+  --skeu-body-to: #ddd4b8;
+  --skeu-card-from: #f5efdc;
+  --skeu-card-mid: #eee8d5;
+  --skeu-card-to: #e6dfc8;
+  --skeu-card-highlight: #fdf6e3;
+  --skeu-card-shadow-edge: #b0a488;
+  --skeu-header-from: #ede6d0;
+  --skeu-header-to: #e4dcc6;
+  --skeu-btn-from: #eee8d5;
+  --skeu-btn-to: #ddd4b8;
+  --skeu-btn-active-from: #268bd2;
+  --skeu-btn-active-to: #1a6daa;
 }
-body[data-theme="skeuomorphism"] .market-card {
-  background: linear-gradient(180deg, #504838 0%, #4a4238 40%, #443c30 100%);
-  border-top: 1px solid #6a604e;
-  border-bottom: 1px solid #2a2418;
+
+/* Solarized Light — force warm body background for basic style */
+body[data-colorway="sol-light"] {
+  background: #e6dec8;
+}
+body[data-colorway="sol-light"] .view-btn.active {
+  color: #ffffff;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+ *  STYLE: Glassmorphism  (body[data-style="glass"])
+ *  Frosted panels, backdrop-filter, semi-transparent backgrounds
+ * ═══════════════════════════════════════════════════════════════════════════ */
+
+body[data-style="glass"] {
+  background: linear-gradient(135deg, var(--glass-body-from) 0%, var(--glass-body-via) 50%, var(--glass-body-to) 100%);
+  --bg-main: var(--glass-panel);
+  --bg-panel: var(--glass-panel);
+  --bg-elevated: var(--glass-elevated);
+  --bg-hover: var(--glass-hover);
+  --bg-input: var(--glass-input);
+  --bg-muted: var(--glass-muted);
+  --bg-number-input: var(--glass-panel);
+  --bg-filter: var(--glass-muted);
+  --border-card: var(--glass-border-card);
+  --border-main: var(--glass-border-main);
+  --border-section: var(--glass-border-section);
+  --border-input: var(--glass-border-input);
+  --border-subtle: var(--glass-border-main);
+  --scrollbar-thumb: var(--glass-scrollbar);
+  --modal-backdrop: rgba(0, 0, 0, 0.45);
+}
+body[data-style="glass"] #app {
+  background: transparent;
+}
+body[data-style="glass"] .market-card,
+body[data-style="glass"] .top20-section,
+body[data-style="glass"] .favorites-section,
+body[data-style="glass"] #settings-panel,
+body[data-style="glass"] #market-view,
+body[data-style="glass"] #view-tabs,
+body[data-style="glass"] .analytics-modal-content,
+body[data-style="glass"] .analytics-modal,
+body[data-style="glass"] .setup-guide-content,
+body[data-style="glass"] .setup-guide-modal,
+body[data-style="glass"] .item-modal,
+body[data-style="glass"] .graph-modal {
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+ *  STYLE: Neumorphism  (body[data-style="neumorphism"])
+ *  Soft inset/outset shadows, no visible borders
+ * ═══════════════════════════════════════════════════════════════════════════ */
+
+body[data-style="neumorphism"] {
+  --border-main: transparent;
+  --border-section: transparent;
+  --border-card: transparent;
+  --border-input: transparent;
+  --border-subtle: transparent;
+  --border-hype: transparent;
+  --border-hype-hover: transparent;
+  --border-red-border: transparent;
+  --modal-shadow: none;
+}
+body[data-style="neumorphism"] .market-card {
+  border: none;
+  border-radius: 8px;
+  box-shadow: 5px 5px 10px var(--neu-shadow-dark), -5px -5px 10px var(--neu-shadow-light);
+  margin: 2px;
+}
+body[data-style="neumorphism"] .market-card:hover {
+  box-shadow: 3px 3px 8px var(--neu-shadow-dark), -3px -3px 8px var(--neu-shadow-light);
+}
+body[data-style="neumorphism"] .top20-section {
+  border: none;
+  border-radius: 10px;
+  box-shadow: 6px 6px 14px var(--neu-shadow-dark), -6px -6px 14px var(--neu-shadow-light);
+}
+body[data-style="neumorphism"] .favorites-section {
+  border: none;
+  border-radius: 10px;
+  box-shadow: 5px 5px 12px var(--neu-shadow-dark), -5px -5px 12px var(--neu-shadow-light);
+}
+body[data-style="neumorphism"] .view-btn,
+body[data-style="neumorphism"] .section-sort-select,
+body[data-style="neumorphism"] #market-search-input {
+  border: none;
+  box-shadow: inset 2px 2px 5px var(--neu-shadow-dark), inset -2px -2px 5px var(--neu-shadow-light);
+}
+body[data-style="neumorphism"] .view-btn.active {
+  box-shadow: inset 2px 2px 4px var(--neu-shadow-dark), inset -2px -2px 4px var(--neu-accent-shadow);
+}
+body[data-style="neumorphism"] .scan-btn,
+body[data-style="neumorphism"] .analytics-modal-content,
+body[data-style="neumorphism"] .setup-guide-content {
+  box-shadow: 6px 6px 14px var(--neu-shadow-dark), -6px -6px 14px var(--neu-shadow-light);
+}
+/* Neumorphism spacing — shadows need breathing room */
+body[data-style="neumorphism"] .market-items.tile {
+  gap: 14px;
+  padding: 12px 14px;
+}
+body[data-style="neumorphism"] .market-items.hybrid {
+  gap: 12px;
+  padding: 10px 12px;
+}
+body[data-style="neumorphism"] .market-items.list {
+  gap: 10px;
+  padding: 8px 10px;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+ *  STYLE: Skeuomorphism  (body[data-style="skeuomorphism"])
+ *  Textured gradients, embossed borders, realistic shadows
+ * ═══════════════════════════════════════════════════════════════════════════ */
+
+body[data-style="skeuomorphism"] {
+  background: linear-gradient(180deg, var(--skeu-body-from) 0%, var(--skeu-body-to) 100%);
+}
+body[data-style="skeuomorphism"] .market-card {
+  background: linear-gradient(180deg, var(--skeu-card-from) 0%, var(--skeu-card-mid) 40%, var(--skeu-card-to) 100%);
+  border-top: 1px solid var(--skeu-card-highlight);
+  border-bottom: 1px solid var(--skeu-card-shadow-edge);
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.40), inset 0 1px 0 rgba(255, 255, 255, 0.06);
 }
-body[data-theme="skeuomorphism"] .market-card:hover {
+body[data-style="skeuomorphism"] .market-card:hover {
   box-shadow: 0 3px 8px rgba(0, 0, 0, 0.50), inset 0 1px 0 rgba(255, 255, 255, 0.08);
 }
-body[data-theme="skeuomorphism"] .top20-section {
-  background: linear-gradient(180deg, #444038 0%, #3c3528 100%);
+body[data-style="skeuomorphism"] .top20-section {
+  background: linear-gradient(180deg, var(--skeu-card-from) 0%, var(--skeu-body-to) 100%);
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.50), inset 0 1px 0 rgba(255, 255, 255, 0.05);
 }
-body[data-theme="skeuomorphism"] .top20-section #market-header {
-  background: linear-gradient(180deg, #504838 0%, #4a4038 100%);
-  border-bottom: 1px solid #2a2418;
+body[data-style="skeuomorphism"] .top20-section #market-header {
+  background: linear-gradient(180deg, var(--skeu-header-from) 0%, var(--skeu-header-to) 100%);
+  border-bottom: 1px solid var(--skeu-card-shadow-edge);
 }
-body[data-theme="skeuomorphism"] .view-btn,
-body[data-theme="skeuomorphism"] .scan-btn {
-  background: linear-gradient(180deg, #5a5240 0%, #4a4230 100%);
-  border-top: 1px solid #6a604e;
-  border-bottom: 1px solid #2a2418;
+body[data-style="skeuomorphism"] .view-btn,
+body[data-style="skeuomorphism"] .scan-btn {
+  background: linear-gradient(180deg, var(--skeu-btn-from) 0%, var(--skeu-btn-to) 100%);
+  border-top: 1px solid var(--skeu-card-highlight);
+  border-bottom: 1px solid var(--skeu-card-shadow-edge);
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.30);
 }
-body[data-theme="skeuomorphism"] .view-btn.active {
-  background: linear-gradient(180deg, #8b6914 0%, #705510 100%);
+body[data-style="skeuomorphism"] .view-btn.active {
+  background: linear-gradient(180deg, var(--skeu-btn-active-from) 0%, var(--skeu-btn-active-to) 100%);
   box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.30);
+  color: var(--text-bright);
+}
+/* Skeuomorphism — softer shadows on light colorways */
+body[data-colorway="light"][data-style="skeuomorphism"] .market-card,
+body[data-colorway="sol-light"][data-style="skeuomorphism"] .market-card {
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.40);
+}
+body[data-colorway="light"][data-style="skeuomorphism"] .market-card:hover,
+body[data-colorway="sol-light"][data-style="skeuomorphism"] .market-card:hover {
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.20), inset 0 1px 0 rgba(255, 255, 255, 0.50);
+}
+body[data-colorway="light"][data-style="skeuomorphism"] .top20-section,
+body[data-colorway="sol-light"][data-style="skeuomorphism"] .top20-section {
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.30);
 }
 
 /* ── Reset & base ─────────────────────────────────────────────────────────── */
@@ -679,7 +951,7 @@ body {
   padding: 5px 8px;
   background: var(--bg-input);
   border: 1px solid var(--border-input);
-  color: var(--text-primary);
+  color: var(--text-main);
   border-radius: 3px;
   cursor: pointer;
   transition: background 0.15s, border-color 0.15s;
@@ -720,7 +992,7 @@ body {
   color: var(--accent-green);
 }
 .provider-cost-hint.tier-free-tier {
-  color: #4ecdc4;
+  color: var(--accent-teal);
 }
 .provider-cost-hint.tier-low-cost {
   color: var(--accent-blue-text);
@@ -832,7 +1104,7 @@ body {
 .setup-guide-tier.tier-free-tier {
   background: rgba(78, 205, 196, 0.12);
   border: 1px solid rgba(78, 205, 196, 0.3);
-  color: #4ecdc4;
+  color: var(--accent-teal);
 }
 .setup-guide-tier.tier-low-cost {
   background: rgba(100, 149, 237, 0.12);
@@ -860,7 +1132,7 @@ body {
   padding-left: 1.4rem;
   font-size: 12px;
   line-height: 1.7;
-  color: var(--text-primary);
+  color: var(--text-main);
 }
 .setup-guide-steps li {
   margin-bottom: 6px;
@@ -879,7 +1151,7 @@ body {
   background: rgba(255, 215, 0, 0.08);
   border: 1px solid rgba(255, 215, 0, 0.2);
   font-size: 11px;
-  color: #f0d060;
+  color: var(--accent-gold);
   margin-bottom: 0.75rem;
   line-height: 1.5;
 }
@@ -927,7 +1199,7 @@ body {
 .provider-comparison-table td {
   padding: 6px 8px;
   border-bottom: 1px solid var(--border-input);
-  color: var(--text-primary);
+  color: var(--text-main);
 }
 .provider-comparison-table tr.active-row td {
   background: rgba(100, 149, 237, 0.08);
@@ -952,7 +1224,7 @@ body {
 }
 .tier-badge-sm.tier-free-tier {
   background: rgba(78, 205, 196, 0.15);
-  color: #4ecdc4;
+  color: var(--accent-teal);
 }
 .tier-badge-sm.tier-low-cost {
   background: rgba(100, 149, 237, 0.15);
@@ -974,6 +1246,17 @@ select {
   outline: none;
   transition: border-color 0.15s;
   appearance: auto;
+}
+
+select option {
+  background: var(--dropdown-bg);
+  color: var(--text-main);
+}
+
+select option:hover,
+select option:checked {
+  background: var(--dropdown-hover-bg);
+  color: var(--text-bright);
 }
 
 select:focus {
@@ -1586,12 +1869,21 @@ button:disabled {
   flex-shrink: 1;
 }
 
+/* Shared badge base — sizing tokens */
 .buy-badge,
 .sell-badge,
-.profit-badge {
-  font-size: 10px;
-  padding: 1px 6px;
-  border-radius: 3px;
+.profit-badge,
+.velocity-badge,
+.hype-badge,
+.predicted-badge,
+.ema-badge,
+.vol-badge {
+  display: inline-block;
+  font-size: var(--badge-font-md);
+  padding: var(--badge-padding-md);
+  border-radius: var(--badge-radius);
+  font-weight: var(--badge-font-weight);
+  line-height: 1.3;
   white-space: nowrap;
 }
 
@@ -1615,35 +1907,32 @@ button:disabled {
 .sell-badge.risky {
   background: var(--accent-red-bg);
   color: var(--accent-red);
-  font-weight: 600;
 }
 
 .profit-badge {
   background: var(--badge-sell-bg);
   color: var(--accent-teal);
-  font-weight: 600;
+  font-weight: 700;
+  padding: 2px 7px;
+  letter-spacing: 0.02em;
 }
 
 .profit-badge.negative {
   background: var(--accent-red-bg);
   color: var(--accent-red);
+  font-weight: 700;
 }
 
 .hype-badge {
   background: var(--badge-hype-bg);
-  color: var(--accent-gold-hype);
-  font-weight: 600;
+  color: var(--accent-hype, var(--accent-gold-hype));
   animation: hype-pulse 2s ease-in-out infinite;
 }
 
 /* ── Trade velocity badges ────────────────────────────────────────────── */
 
 .velocity-badge {
-  font-size: 10px;
-  padding: 1px 6px;
-  border-radius: 3px;
-  white-space: nowrap;
-  font-weight: 600;
+  /* inherits sizing from shared badge base above */
 }
 
 .velocity-insta {
@@ -1665,8 +1954,6 @@ button:disabled {
   background: rgba(136, 136, 136, 0.18);
   color: var(--text-muted);
 }
-
-/* \u2500\u2500 Price trend (momentum) badges \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */
 
 .trend-badge {
   font-size: 10px;
@@ -1746,8 +2033,8 @@ button:disabled {
 }
 
 #search-section #market-search-input {
-  flex: 1 1 0;
-  min-width: 0;
+  flex: 1 1 140px;
+  min-width: 140px;
 }
 
 #search-section .view-toggle {
@@ -1837,13 +2124,14 @@ button:disabled {
   transition: max-height 0.2s ease, padding 0.2s ease;
   padding: 0 8px;
   background: var(--bg-main);
-  border-top: 0px solid var(--border-main);
+  border-top: 1px solid transparent;
 }
 
 .market-card.expanded .market-card-detail {
   max-height: 400px;
   padding: 6px 8px;
-  border-top-width: 1px;
+  border-top-color: var(--border-main);
+  background: rgba(0, 0, 0, 0.08);
   overflow-y: auto;
 }
 
@@ -1989,7 +2277,7 @@ button:disabled {
   font-size: 10px;
   background: var(--bg-input);
   border: 1px solid var(--border-input);
-  color: var(--text-primary);
+  color: var(--text-main);
   border-radius: 3px;
 }
 
@@ -2382,12 +2670,17 @@ button:disabled {
 .analytics-details-grid {
   display: grid;
   grid-template-columns: 1fr;
-  gap: 0;
+  gap: 2px 16px;
 }
 
 .analytics-details-grid .detail-row {
-  padding: 3px 0;
+  padding: 4px 0;
   font-size: 12px;
+  border-bottom: 1px solid var(--border-main);
+}
+
+.analytics-details-grid .detail-row:last-child {
+  border-bottom: none;
 }
 
 /* Section dividers */
@@ -2462,10 +2755,10 @@ button:disabled {
 
 /* ── Analytics modal: responsive adjustments ────────────────────────────────── */
 
-@media (min-width: 600px) {
+@media (min-width: 480px) {
   .analytics-details-grid {
     grid-template-columns: 1fr 1fr;
-    gap: 0 1.5rem;
+    gap: 2px 1.5rem;
   }
 
   .analytics-modal-header .item-sprite {
@@ -2538,12 +2831,25 @@ button:disabled {
 .detail-row {
   display: flex;
   justify-content: space-between;
-  padding: 2px 0;
+  align-items: baseline;
+  padding: 4px 0;
   font-size: 11px;
+  border-bottom: 1px solid var(--border-main);
+  gap: 8px;
+}
+
+.detail-row:last-child {
+  border-bottom: none;
 }
 
 .detail-label {
+  font-size: 10px;
+  font-weight: 500;
   color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  flex-shrink: 0;
+  white-space: nowrap;
 }
 
 .detail-label[title] {
@@ -2552,8 +2858,11 @@ button:disabled {
 }
 
 .detail-value {
-  color: var(--text-main);
+  font-size: 11px;
   font-weight: 600;
+  color: var(--text-bright);
+  text-align: right;
+  word-break: break-word;
 }
 
 /* ── List view ────────────────────────────────────────────────────────────── */
@@ -2561,7 +2870,7 @@ button:disabled {
 .market-items.list {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 6px;
   padding: 6px 8px;
 }
 
@@ -2622,8 +2931,8 @@ button:disabled {
 .market-items.tile .buy-badge,
 .market-items.tile .sell-badge,
 .market-items.tile .profit-badge {
-  font-size: 9px;
-  padding: 1px 4px;
+  font-size: var(--badge-font-sm);
+  padding: var(--badge-padding-sm);
 }
 
 /* (tile sparkline rules removed — chart now in dedicated graph modal) */
@@ -2656,8 +2965,8 @@ button:disabled {
 .market-items.hybrid .buy-badge,
 .market-items.hybrid .sell-badge,
 .market-items.hybrid .profit-badge {
-  font-size: 9px;
-  padding: 1px 4px;
+  font-size: var(--badge-font-sm);
+  padding: var(--badge-padding-sm);
 }
 
 /* ── Chat / Advisor panel ──────────────────────────────────────────────────── */
@@ -3179,10 +3488,7 @@ button:disabled {
 .ema-badge,
 .predicted-badge,
 .vol-badge {
-  font-size: 10px;
-  padding: 1px 6px;
-  border-radius: 3px;
-  white-space: nowrap;
+  /* inherits sizing from shared badge base — only color overrides here */
   cursor: help;
 }
 
@@ -3221,8 +3527,8 @@ button:disabled {
 }
 
 .vol-badge {
-  background: rgba(240, 192, 64, 0.15);
-  color: var(--accent-gold);
+  background: rgba(255, 171, 64, 0.15);
+  color: var(--accent-hype, var(--accent-gold));
 }
 
 /* ── Completed flips table ─────────────────────────────────────────────────── */
@@ -3517,7 +3823,7 @@ body[data-layout="sidebar"] #portfolio-view {
   border-radius: 4px;
   font-size: 11px;
   line-height: 1.4;
-  color: var(--text-primary);
+  color: var(--text-main);
   background: var(--bg-panel);
   border-left: 3px solid var(--accent-primary);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
@@ -3533,11 +3839,11 @@ body[data-layout="sidebar"] #portfolio-view {
 }
 
 .toast-buy {
-  border-left-color: #4ec9b0;
+  border-left-color: var(--accent-teal);
 }
 
 .toast-sell {
-  border-left-color: #f0c040;
+  border-left-color: var(--accent-gold);
 }
 
 /* ══════════════════════════════════════════════════════════════════════════════
@@ -3583,13 +3889,79 @@ body[data-layout="sidebar"] #portfolio-view {
   font-size: 10px;
   background: var(--bg-input);
   border: 1px solid var(--border-input);
-  color: var(--text-primary);
+  color: var(--text-main);
   border-radius: 3px;
 }
 
 .alert-row input[type="number"]::placeholder {
   color: var(--text-muted);
   opacity: 0.6;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   Global keyboard focus ring (accessibility)
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+:focus-visible {
+  outline: 2px solid var(--accent-primary);
+  outline-offset: 2px;
+}
+
+:focus:not(:focus-visible) {
+  outline: none;
+}
+
+.card-actions button:focus-visible,
+.analytics-modal-close:focus-visible,
+.tab-btn:focus-visible {
+  outline-offset: 1px;
+  border-radius: 3px;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   Settings group fieldsets
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+.settings-group {
+  border: 1px solid var(--border-main);
+  border-radius: 6px;
+  padding: 8px 10px 10px;
+  margin-bottom: 8px;
+}
+
+.settings-group-title {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-accent);
+  padding: 0 4px;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   Analytics modal: section divider & predictive section accent
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+.analytics-section-divider {
+  grid-column: 1 / -1;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-accent);
+  padding: 8px 0 4px;
+  margin-top: 4px;
+  border-top: 1px solid var(--border-main);
+}
+
+.predictive-section {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: inherit;
+  gap: inherit;
+  border-left: 3px solid var(--accent-primary);
+  padding-left: 8px;
+  margin-top: 4px;
 }
 
 /* ══════════════════════════════════════════════════════════════════════════════

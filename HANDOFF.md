@@ -82,7 +82,7 @@ alt1minimal/
     ├── icon.png               # App icon (asset/resource)
     ├── index.html             # Full UI: settings, tabbed layout (market / advisor / portfolio), search, favourites, filters
     ├── index.ts               # Lean entry point: alt1 detection → initDataPipeline() → initUI(), startup loading overlay
-    ├── style.css              # Seven themes (Classic Dark, OSRS Brown, RS3 Modern Blue, Glassmorphism, Neumorphism, Minimalism, Skeuomorphism), flexbox, cards, unified analytics modal, toasts, inline alert popovers, data-mgmt, compact-tiles toggle, responsive desktop breakpoint
+    ├── style.css              # Two-axis theme system (4 styles × 6 colorways), flexbox, cards, unified analytics modal, toasts, inline alert popovers, data-mgmt, compact-tiles toggle, responsive desktop breakpoint
     ├── uiService.ts           # All DOM logic: settings, market render, search, favourites, portfolio, chat RAG, error recovery, price alerts, data export/import, CSV export, sortable flips table, unified analytics modal (~4265 lines)
     └── services/
         ├── index.ts               # Barrel re-export of all services + types + constants
@@ -427,14 +427,20 @@ Lean orchestrator (~80 lines) with startup overlay management:
 
 ### 4.13 Stylesheet (`style.css`)
 
-- **Seven themes** using CSS custom properties — switch via `body[data-theme]`:
-  - **Classic Dark** (default `:root`) — `#1e1e1e` background, `#d4d4d4` text.
-  - **OSRS Brown** (`body[data-theme="osrs"]`) — parchment tones, brown accents.
-  - **RS3 Modern Blue** (`body[data-theme="rs3-modern"]`) — dark navy, blue accents.
-  - **Glassmorphism** (`body[data-theme="glass"]`) — frosted glass panels, `backdrop-filter: blur(16px)`, semi-transparent backgrounds on a gradient body.
-  - **Neumorphism** (`body[data-theme="neumorphism"]`) — soft UI with inset/outset `box-shadow`, transparent borders, Nord-inspired palette.
-  - **Minimalism** (`body[data-theme="minimalism"]`) — light theme, clean high-contrast, thin borders, subtle shadows.
-  - **Skeuomorphism** (`body[data-theme="skeuomorphism"]`) — textured gradients, embossed buttons, realistic drop shadows, warm leather tones.
+- **Two-axis theme system** (Style × Colorway) using CSS custom properties — 4 styles × 6 colorways = 24 combinations:
+  - **Styles** (`body[data-style]`) define structural effects:
+    - **Basic** (default — no `data-style` attribute) — standard flat UI.
+    - **Glassmorphism** (`body[data-style="glass"]`) — frosted glass panels, `backdrop-filter: blur(16px)`, semi-transparent backgrounds on a gradient body.
+    - **Neumorphism** (`body[data-style="neumorphism"]`) — soft UI with inset/outset `box-shadow`, transparent borders, extra tile spacing.
+    - **Skeuomorphism** (`body[data-style="skeuomorphism"]`) — textured gradients, embossed buttons, realistic drop shadows.
+  - **Colorways** (`body[data-colorway]`) define colour palettes + style helper vars (`--glass-*`, `--neu-*`, `--skeu-*`):
+    - **Classic Dark** (default `:root`) — `#1e1e1e` background, `#d4d4d4` text.
+    - **OSRS Brown** (`body[data-colorway="osrs"]`) — parchment tones, brown accents.
+    - **RS3 Modern Blue** (`body[data-colorway="rs3-modern"]`) — dark navy, blue accents.
+    - **Light** (`body[data-colorway="light"]`) — light backgrounds, dark text, clean high-contrast.
+    - **Solarized Dark** (`body[data-colorway="sol-dark"]`) — Ethan Schoonover’s dark palette (#002b36 base), teal/blue accents.
+    - **Solarized Light** (`body[data-colorway="sol-light"]`) — warm cream (#fdf6e3 base), same accent family as Solarized Dark.
+  - Legacy `ge-analyzer:theme` key auto-migrates to `ge-analyzer:style` + `ge-analyzer:colorway` on first load.
 - Font stack: Segoe UI / Consolas.
 - `html` and `body` both `width: 100%; height: 100%`.
 - **`#app` uses `height: 95%`** (manually set to fix Alt1 zoom-level scaling issues — do NOT change).
@@ -449,10 +455,10 @@ Lean orchestrator (~80 lines) with startup overlay management:
 - **Quick-add button**: `.quick-add-btn` teal on hover (`#4ec9b0`).
 - **Favourites section**: `.favorites-section` with border, rounded corners, dark header (`#252526`), gold ★ title.
 - **Top 20 section**: `.top20-section` with matching border/rounded styling. `#market-header` gets dark header background when inside the section.
-- **Unified analytics modal** (March 2026): `.analytics-modal-backdrop` with centred `.analytics-modal` (90vw, max 920px, min 320px). Header with sprite (48×42, title tooltip with item ID), name (h2), current price, close button (✕). Scrollable `.analytics-content` body contains: `.analytics-badges` (velocity, hype, trend), `.analytics-actions` (favourite, quick-add, Wiki, GE), `.analytics-details-grid` (1fr, becomes 2-col at ≥ 600px; detail rows reordered: flip/profit first, then volume/liquidity; includes High Alch, always-visible Volume Spike, and "Predictive Analytics" sub-section with 30d EMA, Daily Volatility σ%, LR Slope, Predicted Price), alert inputs section, `.analytics-graph-section` with `.analytics-range-row` (7/30/90 days select), large `<canvas>` (480×140) via `drawGraphChart()`, `.analytics-stats-grid` (auto-fit minmax 140px) of `.analytics-stat-card` elements (trend, change, high, low, volatility, data points), and `.graph-history-status` strip with manual refresh button for sparse data. Lazy singleton (`ensureAnalyticsModal()`). Closes on backdrop click, ✕, or Escape. Responsive: reduced padding/font at ≤ 600px.
+- **Unified analytics modal** (March 2026): `.analytics-modal-backdrop` with centred `.analytics-modal` (90vw, max 920px, min 320px). Header with sprite (48×42, title tooltip with item ID), name (h2, `id="analytics-modal-title"`, referenced by `aria-labelledby`), current price, close button (✕). Scrollable `.analytics-content` body contains: `.analytics-badges` (velocity, hype, trend), `.analytics-actions` (favourite, quick-add, Wiki, GE), `.analytics-details-grid` (1fr, becomes 2-col at ≥ 480px; detail rows reordered: flip/profit first, then volume/liquidity; includes High Alch, always-visible Volume Spike, and "Predictive Analytics" sub-section wrapped in `.predictive-section` with `.analytics-section-divider` header, containing 30d EMA, Daily Volatility σ%, LR Slope, Predicted Price), alert inputs section, `.analytics-graph-section` with `.analytics-range-row` (7/30/90 days select), large `<canvas>` (480×140) via `drawGraphChart()`, `.analytics-stats-grid` (auto-fit minmax 140px) of `.analytics-stat-card` elements (trend, change, high, low, volatility, data points), and `.graph-history-status` strip with manual refresh button for sparse data. Lazy singleton (`ensureAnalyticsModal()`). Closes on backdrop click, ✕, or Escape. Responsive: reduced padding/font at ≤ 600px.
 - **Floating modal** _(deprecated)_: `.item-modal-backdrop` / `.item-modal` — retained in CSS for backwards compat but no longer created by any active code path.
 - **Graph modal** _(deprecated)_: `.graph-modal-backdrop` / `.graph-modal` — retained in CSS for backwards compat but no longer created by any active code path.
-- **Flip badges**: `.flip-badges` with flex-wrap. `.buy-badge`, `.sell-badge`, `.profit-badge`, `.hype-badge`. Responsive wrapping with `min-width: 60px` on `.item-name`.
+- **Flip badges**: `.flip-badges` with flex-wrap. `.buy-badge`, `.sell-badge`, `.profit-badge`, `.hype-badge`. Shared badge base class sets sizing via CSS custom-property tokens (`--badge-font-sm`, `--badge-font-md`, `--badge-padding-sm`, `--badge-padding-md`, `--badge-radius`, `--badge-font-weight`). Profit badge visually promoted with `font-weight: 700` and `letter-spacing: 0.02em`. Tile/hybrid views use `--badge-font-sm` / `--badge-padding-sm` instead of hard-coded 9 px. `--accent-hype` separates hype/volume-spike colour from `--accent-gold`.
 - **Portfolio**: `.portfolio-form`, `.autocomplete-wrap`, `.flip-card` with countdown timer styling, `.flip-card-actions` horizontal button group (✓ + ✕).
 - **Portfolio sub-nav**: `.portfolio-sub-nav` / `.portfolio-sub-btn` tab-style toggle with blue active border.
 - **Portfolio stats dashboard**: `.portfolio-stats` flex row of `.stat-card` elements. `.stat-value.profit` (green) / `.stat-value.loss` (red).
@@ -470,6 +476,17 @@ Lean orchestrator (~80 lines) with startup overlay management:
 - **Layout modes**: `body[data-layout="tabbed"]` hides non-active tabs, `body[data-layout="sidebar"]` shows all sections side-by-side.
 - Chat bubbles: user (blue `#264f78`), assistant (dark `#333`), system (italic gray), error (red `#3b1a1a`), thinking (animated dots via CSS `@keyframes`).
 - Thin dark webkit scrollbar styling.
+- **Accessibility enhancements** (March 2026):
+  - `:focus-visible` global keyboard focus ring (`outline: 2px solid var(--accent-primary)`) on all interactive elements.
+  - `--text-muted` raised to `#94a3b8` (Classic Dark) / `#839496` (Sol-dark) for WCAG AA 4.5:1 contrast compliance.
+  - Badge minimum font size raised to 10 px (`--badge-font-sm`).
+  - Analytics modal has `aria-labelledby="analytics-modal-title"` pointing to the item name heading.
+  - Profit/loss indicators use ▲/▼ shape prefixes in addition to colour for colour-blind accessibility.
+  - Detail rows have scanline dividers (`border-bottom: 1px solid var(--border-main)`) and uppercase labels for rapid scan readability.
+  - Expanded card detail panels have a visible top border and subtle inset background.
+  - Predictive Analytics section wrapped in `.predictive-section` with accent left border + `.analytics-section-divider` header.
+  - Settings panel organised into three `<fieldset class="settings-group">` groups (Appearance, AI Provider, Data).
+  - Search input has `min-width: 140px` for graceful wrapping on narrow Alt1 windows.
 
 ---
 
@@ -483,7 +500,8 @@ Lean orchestrator (~80 lines) with startup overlay management:
 | `ge-analyzer:llm-endpoint` | Custom endpoint URL (only used when provider is `custom`) |
 | `ge-analyzer:view-mode` | Market panel view mode (`list`, `tile`, or `hybrid`) |
 | `ge-analyzer:layout` | Interface layout mode (`tabbed` or `sidebar`) |
-| `ge-analyzer:theme` | CSS theme (`classic`, `osrs`, `rs3-modern`, `glass`, `neumorphism`, `minimalism`, or `skeuomorphism`) |
+| `ge-analyzer:style` | Visual style (`basic`, `glass`, `neumorphism`, or `skeuomorphism`) — migrated from legacy `ge-analyzer:theme` |
+| `ge-analyzer:colorway` | Colour palette (`classic`, `osrs`, `rs3-modern`, `light`, `sol-dark`, or `sol-light`) — migrated from legacy `ge-analyzer:theme` |
 | `ge-analyzer:top20-sort` | Top 20 section sort key (`default`, `alpha`, `price-desc`, `profit-desc`) |
 | `ge-analyzer:search-sort` | Search results sort key |
 | `ge-analyzer:fav-sort` | Favourites section sort key |
@@ -603,7 +621,7 @@ Everything below is **complete and verified** (builds with 0 errors):
 - [x] Market item cards with Jagex sprites, flip badges, expandable detail panels
 - [x] Unified analytics modal (centred overlay combining item details, chart, and actions)
 - [x] Dynamic market filters: Trading Volume (Any/High/Low/Custom), Max Price (Unlimited/10M/100M/500M/Custom)
-- [x] Custom volume/budget slider controls with synced text inputs (themed per CSS theme)
+- [x] Custom volume/budget slider controls with synced text inputs (themed per style/colorway)
 - [x] Market refresh button (re-runs filtering pipeline with current filter config)
 - [x] Per-section sort controls (Top 20, Search Results, Favourites each have independent sort dropdowns persisted to localStorage)
 - [x] Force Reload Data button (clears cache, re-fetches, re-enriches)
@@ -626,7 +644,8 @@ Everything below is **complete and verified** (builds with 0 errors):
 - [x] Chat history persistence (localStorage, max 50 messages, clear button)
 - [x] Multi-turn LLM conversation with RAG context
 - [x] Full HTML UI (settings panel, tabbed/sidebar layout, market/advisor/portfolio sections)
-- [x] Dark-themed CSS — seven themes, cards, tiles, grids, unified analytics modal, filters, chat, portfolio, velocity badges, external links, toast notifications, alert inputs, inline alert popovers, responsive desktop breakpoint)
+- [x] Two-axis theme system — 4 styles × 6 colorways (24 combinations), cards, tiles, grids, unified analytics modal, filters, chat, portfolio, velocity badges, external links, toast notifications, alert inputs, inline alert popovers, responsive desktop breakpoint)
+- [x] Accessibility — WCAG AA muted-text contrast, `:focus-visible` keyboard ring, `aria-labelledby` on analytics modal, ▲/▼ shape profit/loss indicators, 10 px badge font floor, settings fieldset groups
 - [x] Error recovery UI (dismissible error banner with retry button, try/catch wrappers across pipeline and UI)
 - [x] Webpack build passes (`npm run build` — 0 errors, 0 warnings)
 - [x] CSS scaling fix (`#app` height 95% for Alt1 zoom compatibility)

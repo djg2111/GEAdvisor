@@ -68,10 +68,11 @@ Uses a **RAG (Retrieval-Augmented Generation) pipeline** to combine live GE mark
 ### Extras
 - **Favourites** — star any item for quick access in a dedicated collapsible panel with its own sort control
 - **Price alerts** — set buy/sell thresholds via the inline 🔔 bell on any card or in the analytics modal; triggers native browser notifications and in-app toasts when prices cross your targets
-- **Export / Import** — back up favourites, portfolio, flip history, and theme to a JSON file; restore from any previous backup
+- **Export / Import** — back up favourites, portfolio, flip history, and style/colorway preferences to a JSON file; restore from any previous backup
 - **Quick-add** — one-click add from any market card to the portfolio form
-- **Seven CSS themes** — Classic Dark, OSRS Brown, RS3 Modern Blue, Glassmorphism, Neumorphism, Minimalism (Light), and Skeuomorphism (all themed via CSS variables)
+- **Two-axis theme system** — 4 Styles (Basic, Glassmorphism, Neumorphism, Skeuomorphism) × 6 Colorways (Classic Dark, OSRS Brown, RS3 Modern Blue, Light, Solarized Dark, Solarized Light) = 24 combinations, all via CSS custom properties
 - **Responsive desktop layout** — wider modals and expanded grids at ≥ 800 px
+- **Accessibility** — WCAG AA contrast-compliant muted text, `:focus-visible` keyboard focus ring on all interactive elements, `aria-labelledby` on analytics modal, ▲/▼ shape prefixes on profit/loss indicators for colour-blind users, 10 px minimum badge font size
 - **Error recovery UI** — dismissible error banner with retry button for network/cache failures
 - **Persistent state** — all settings, chat history, favourites, sort preferences, compact-tiles preference, and portfolio data saved to localStorage
 - **Tabbed & sidebar layouts** — switch between compact tabbed view or full sidebar mode

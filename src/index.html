@@ -23,88 +23,110 @@
 			<summary>⚙ Settings</summary>
 			<div class="settings-body">
 
-				<!-- Interface layout -->
-				<label>Interface Layout</label>
-				<div class="layout-toggle">
-					<button id="layout-tabbed-btn" class="layout-btn active" type="button">Tabbed</button>
-					<button id="layout-sidebar-btn" class="layout-btn" type="button">Sidebar</button>
-				</div>
+				<!-- ═══ Appearance group ═══ -->
+				<fieldset class="settings-group">
+					<legend class="settings-group-title">Appearance</legend>
 
-				<!-- Theme selector -->
-				<label for="theme-select">Theme</label>
-				<select id="theme-select">
-					<option value="classic">Classic Dark</option>
-					<option value="osrs">Old School (Brown)</option>
-					<option value="rs3-modern">RS3 Modern (Blue)</option>
-					<option value="glass">Glassmorphism</option>
-					<option value="neumorphism">Neumorphism</option>
-					<option value="minimalism">Minimalism (Light)</option>
-					<option value="skeuomorphism">Skeuomorphism</option>
-				</select>
-
-				<!-- Provider selector -->
-				<label for="provider-select">LLM Provider</label>
-				<select id="provider-select">
-					<!-- Options populated dynamically from LLM_PROVIDERS -->
-				</select>
-				<span id="provider-cost-hint" class="provider-cost-hint"></span>
-				<button id="setup-guide-btn" class="setup-guide-btn" type="button">? How to get an API key</button>
-
-				<!-- Custom endpoint (shown only when provider === "custom") -->
-				<div id="custom-endpoint-group" class="settings-field hidden">
-					<label for="custom-endpoint-input">Endpoint URL</label>
-					<input
-						id="custom-endpoint-input"
-						type="text"
-						placeholder="http://localhost:1234/v1/chat/completions"
-						autocomplete="off"
-						spellcheck="false"
-					/>
-				</div>
-
-				<!-- Model selector (searchable datalist) -->
-				<label for="model-input">Model</label>
-				<input
-					id="model-input"
-					type="text"
-					list="model-options"
-					placeholder="(use provider default)"
-					autocomplete="off"
-					spellcheck="false"
-				/>
-				<datalist id="model-options">
-					<!-- Options populated dynamically per provider -->
-				</datalist>
-
-				<!-- API key -->
-				<label for="api-key-input">API Key</label>
-				<div class="settings-row">
-					<input
-						id="api-key-input"
-						type="password"
-						placeholder="gsk_…"
-						autocomplete="off"
-						spellcheck="false"
-					/>
-					<button id="save-key-btn" type="button">Save</button>
-				</div>
-				<span id="key-status" class="status-hint"></span>
-
-				<!-- Force reload cache -->
-				<div class="settings-field" style="margin-top:8px">
-					<button id="force-reload-btn" class="danger-btn" type="button">⟳ Force Reload Data</button>
-					<span id="reload-status" class="status-hint"></span>
-				</div>
-
-				<!-- Data Management (export / import) -->
-				<div class="settings-field data-mgmt" style="margin-top:10px">
-					<label>Data Management</label>
-					<div class="settings-row">
-						<button id="export-data-btn" type="button">⬇ Export Data</button>
-						<button id="import-data-btn" type="button">⬆ Import Data</button>
+					<!-- Interface layout -->
+					<label>Interface Layout</label>
+					<div class="layout-toggle">
+						<button id="layout-tabbed-btn" class="layout-btn active" type="button">Tabbed</button>
+						<button id="layout-sidebar-btn" class="layout-btn" type="button">Sidebar</button>
 					</div>
-					<input id="import-file-input" type="file" accept=".json" style="display:none" />
-				</div>
+
+					<!-- Theme selectors (Style × Colorway) -->
+					<label for="style-select">Style</label>
+					<select id="style-select">
+						<option value="basic">Basic</option>
+						<option value="glass">Glassmorphism</option>
+						<option value="neumorphism">Neumorphism</option>
+						<option value="skeuomorphism">Skeuomorphism</option>
+					</select>
+
+					<label for="colorway-select">Colorway</label>
+					<select id="colorway-select">
+						<option value="classic">Classic Dark</option>
+						<option value="osrs">OSRS Brown</option>
+						<option value="rs3-modern">RS3 Modern Blue</option>
+						<option value="light">Light</option>
+						<option value="sol-dark">Solarized Dark</option>
+						<option value="sol-light">Solarized Light</option>
+					</select>
+				</fieldset>
+
+				<!-- ═══ AI Provider group ═══ -->
+				<fieldset class="settings-group">
+					<legend class="settings-group-title">AI Provider</legend>
+
+					<!-- Provider selector -->
+					<label for="provider-select">LLM Provider</label>
+					<select id="provider-select">
+						<!-- Options populated dynamically from LLM_PROVIDERS -->
+					</select>
+					<span id="provider-cost-hint" class="provider-cost-hint"></span>
+					<button id="setup-guide-btn" class="setup-guide-btn" type="button">? How to get an API key</button>
+
+					<!-- Custom endpoint (shown only when provider === "custom") -->
+					<div id="custom-endpoint-group" class="settings-field hidden">
+						<label for="custom-endpoint-input">Endpoint URL</label>
+						<input
+							id="custom-endpoint-input"
+							type="text"
+							placeholder="http://localhost:1234/v1/chat/completions"
+							autocomplete="off"
+							spellcheck="false"
+						/>
+					</div>
+
+					<!-- Model selector (searchable datalist) -->
+					<label for="model-input">Model</label>
+					<input
+						id="model-input"
+						type="text"
+						list="model-options"
+						placeholder="(use provider default)"
+						autocomplete="off"
+						spellcheck="false"
+					/>
+					<datalist id="model-options">
+						<!-- Options populated dynamically per provider -->
+					</datalist>
+
+					<!-- API key -->
+					<label for="api-key-input">API Key</label>
+					<div class="settings-row">
+						<input
+							id="api-key-input"
+							type="password"
+							placeholder="gsk_…"
+							autocomplete="off"
+							spellcheck="false"
+						/>
+						<button id="save-key-btn" type="button">Save</button>
+					</div>
+					<span id="key-status" class="status-hint"></span>
+				</fieldset>
+
+				<!-- ═══ Data group ═══ -->
+				<fieldset class="settings-group">
+					<legend class="settings-group-title">Data</legend>
+
+					<!-- Force reload cache -->
+					<div class="settings-field" style="margin-top:4px">
+						<button id="force-reload-btn" class="danger-btn" type="button">⟳ Force Reload Data</button>
+						<span id="reload-status" class="status-hint"></span>
+					</div>
+
+					<!-- Data Management (export / import) -->
+					<div class="settings-field data-mgmt" style="margin-top:10px">
+						<label>Data Management</label>
+						<div class="settings-row">
+							<button id="export-data-btn" type="button">⬇ Export Data</button>
+							<button id="import-data-btn" type="button">⬆ Import Data</button>
+						</div>
+						<input id="import-file-input" type="file" accept=".json" style="display:none" />
+					</div>
+				</fieldset>
 			</div>
 		</details>
 
