@@ -19,7 +19,9 @@ export const RS3_ECONOMIC_RULES = `\
    Margin = insta-buy price − insta-sell price − floor(insta-buy price × 0.02).
    This is the true per-item net profit after tax if you buy at insta-sell price and sell at insta-buy price.
 
-4. HIGH ALCHEMY: The High Level Alchemy spell converts an item to coins at floor(item High Alch value × 0.6). This alch value serves as a strong price floor — if GE price drops significantly below alch value, players buy and alch for near-guaranteed profit (minus rune costs), usually pushing price back toward/above alch value. Always reference the item's High Alch value when the GE price is near or below it.
+4. HIGH ALCHEMY & OTHER PRICE FLOORS: 
+   - High Level Alchemy converts an item to coins at floor(item High Alch value × 0.6). This alch value serves as a strong price floor — if GE price drops significantly below alch value, players buy and alch for near-guaranteed profit (minus rune costs), usually pushing price back toward/above alch value.
+   - Invention Disassembly Sink: Many low- or mid-tier items (weapons, armour, jewellery, pouches, etc.) act as bulk sources for Invention components. Demand for specific materials creates a secondary price floor — prices rarely stay far below profitable disassembly value for long, as players buy to disassemble. Always consider disassembly component value when GE price is low on such items.
 
 5. ITEM CATEGORIES & TYPICAL BEHAVIOUR:
    - **Consumables** (food, potions, runes, divine charges): High volume, tight margins (1-5%), very fast trades. Best for high-capital, low-effort flipping.
@@ -42,6 +44,7 @@ export const RS3_ECONOMIC_RULES = `\
    - "Active" = fills in 30-60 min → assume 1 hour per cycle
    - "Slow" = fills in 1-4 hours → assume 2-4 hours per cycle
    - "Very Slow" = may take a full 4-hour window or longer
+   Trade velocity is highest during peak player hours (European/US evenings, roughly 16:00–00:00 UTC) and around daily game reset (00:00 game time). Adjust fill time estimates upward (slower) during off-peak if item volume is low.
 
 8. OFFER PRIORITY: When multiple offers exist at the same price, the oldest offer fills first (time priority). Editing or aborting an offer resets its position to newest. This means newly placed offers may wait behind existing ones at the same price.
 
@@ -55,11 +58,18 @@ export const RS3_ECONOMIC_RULES = `\
    - Items with < 1,000 gp price are risky because the tax gap eats most of the margin.
    - A trend slope of ±0.0 with 0.0% volatility usually means insufficient price history data — do NOT call this "stable" or "risky"; instead note that historical data is limited.
    - Volume spikes can indicate merch clans manipulating the price — advise caution.
-   - DXP weekend announcements cause skilling supply prices to spike days/weeks before the event.
+   - DXP weekend announcements cause skilling supply prices to spike days/weeks before the event. Golden rule: Buy months in advance during quiet periods, sell during pre-event hype/announcement spikes. NEVER hold inventory through the actual DXP weekend — prices usually crash as hoarders dump supplies.
    - Do NOT recommend flipping items priced under ~1,000 gp unless margin is exceptionally wide.
    - Avoid holding downward-trending items overnight unless volatility is very low.
    - Watch for "dead GE" items (0 volume for days) — margins may look good but fill time can be days/weeks.
-   - Upcoming updates/DXP/Boss drops/PvM changes can crash or spike prices unpredictably — cross-reference recent game news when possible.`;
+   - Upcoming updates/DXP/Boss drops/PvM changes can crash or spike prices unpredictably — cross-reference recent game news when possible.
+
+11. GE MID-PRICE LAG & STALENESS: The displayed GE mid-price updates daily based on recent trades, but for low-volume or suddenly volatile items (new releases, boss drops, nerfs), it can lag significantly (days or weeks). During these periods, the mid-price becomes unreliable or "fictional." Always rely on real-time margin checking (insta-buy/sell offers) rather than the listed mid-price for high-volatility events or low-trade items.
+
+=== LLM OUTPUT CONSTRAINTS (MANDATORY) ===
+- When recommending any flip or calculating profit/gp/hr, you MUST explicitly show the math: e.g., "Gross margin = Sell price - Buy price = X gp; Tax = floor(Sell price × 0.02) = Y gp; Net profit per item = X - Y = Z gp; gp/hr = Z × (Limit / fill hours) = W gp/hr."
+- Never describe any flip as "guaranteed profit" or use the word "guaranteed" — all GE prices are player-driven and can change.
+- If Buy Limit is "Unknown", assume conservative defaults for worst-case estimates: 10 for equipment/rares, 1,000 for consumables/skilling items. State this assumption clearly in the response.`;
 
 /**
  * Legend explaining each data field in the formatted market summary.
