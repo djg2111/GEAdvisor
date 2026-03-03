@@ -445,12 +445,14 @@ export class MarketAnalyzerService {
    *  - `maxCapitalPer4H = price × buyLimit` (0 when unknown)
    *  - `tradedValue = price × effectivePlayerVolume` (player-constrained)
    *
-   * Volume filters (`minVolume` / `maxVolume`) are applied against
-   * `effectivePlayerVolume` so they reflect a single player’s throughput.
+   * Volume filters (`minVolume` / `maxVolume`) are applied against the
+   * **global daily GE volume** so that preset filters (High / Low)
+   * reflect actual market liquidity rather than a single player's
+   * buy-limit-constrained throughput.
    *
    * @param records      - Raw records from the cache.
-   * @param minVolume    - Minimum effective player volume (inclusive lower bound).
-   * @param maxVolume    - Maximum effective player volume (0 = no cap).
+   * @param minVolume    - Minimum global daily volume (inclusive lower bound).
+   * @param maxVolume    - Maximum global daily volume (0 = no cap).
    * @param maxPrice     - Maximum item price in gp (0 = no cap).
    * @returns Scored items that pass all filters.
    */
@@ -474,9 +476,10 @@ export class MarketAnalyzerService {
       const dailyPlayerLimit = limit != null ? limit * 6 : globalVol;
       const effectivePlayerVolume = Math.min(globalVol, dailyPlayerLimit);
 
-      // Apply filters against the effective (player) volume.
-      if (effectivePlayerVolume <= minVolume) continue;
-      if (maxVolume > 0 && effectivePlayerVolume > maxVolume) continue;
+      // Apply filters against raw global daily volume so that High / Low
+      // presets meaningfully distinguish market liquidity tiers.
+      if (globalVol <= minVolume) continue;
+      if (maxVolume > 0 && globalVol > maxVolume) continue;
       if (maxPrice > 0 && record.price > maxPrice) continue;
 
       const maxCapitalPer4H = limit != null ? record.price * limit : 0;

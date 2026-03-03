@@ -1323,7 +1323,7 @@ function readFilterConfig(): Partial<MarketAnalyzerConfig> {
   if (volPreset === "high") {
     config.minVolume = 50_000;
   } else if (volPreset === "low") {
-    config.maxVolume = 1_000;
+    config.maxVolume = 5_000;
   } else if (volPreset === "custom") {
     const minVol = Number(els.volumeMinInput.value) || 0;
     const maxVol = Number(els.volumeMaxInput.value) || 0;

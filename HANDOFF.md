@@ -162,7 +162,7 @@ Pipeline:
    - `tradeVelocity` — categorical speed label based on volume × buy-limit throughput: `"Insta-Flip"` (>50 K), `"Active"` (>5 K), `"Slow"` (>500), `"Very Slow"` (≤500)
    - `priceTrend` — 7-day price momentum: `"Downtrend"` (dropped >5 %), `"Uptrend"` (risen >5 %), `"Stable"` (within ±5 %). Empty/short history defaults to Stable.
    - `isRisky = price < 500` — low-price items where tax eats most spreads
-4. Filters items by `minVolume`, `maxVolume`, `maxPrice`.
+4. Filters items by `minVolume`, `maxVolume` (against **global daily GE volume**), `maxPrice`.
 5. Sorts descending by `tradedValue`.
 6. Slices to top-N (default 20).
 
@@ -366,7 +366,7 @@ All DOM manipulation isolated here — services remain UI-agnostic. ~2480 lines.
 
 **Dynamic market filters**:
 - `readFilterConfig()` — translates dropdown values into `{ minVolume, maxVolume, maxPrice }` overrides.
-- Volume filter options: Any Volume, High Volume (>50K), Low Volume (<1K), Custom (slider controls).
+- Volume filter options: Any Volume, High Volume (>50K), Low Volume (<5K), Custom (slider controls). Volume presets filter on **global GE daily volume** (not effectivePlayerVolume) so Low/High meaningfully distinguish market liquidity tiers.
 - Price filter options: Unlimited, Under 10M, Under 100M, Under 500M, Custom (slider control).
 - Custom volume: Min/max sliders with synced text inputs.
 - Custom budget: Max price slider with synced text input.
@@ -658,9 +658,9 @@ Everything below is **complete and verified** (builds with 0 errors):
 | HTTP 413 recurring even on first message | Wiki text from MediaWiki API was completely unbounded — no `exchars`/`exintro` limit. A single RS3 wiki article can be 10–30 KB; with 5 guides, wiki text alone could be 50–150 KB, blowing past any body size limit. `LLM_CONTEXT_TOP_N` was also 100 items (unnecessarily large) | **Resolved permanently**: wiki guide text removed entirely (March 2026) — `coreKnowledge.ts` provides better, curated context. `MAX_BODY_BYTES` set to 50 KB with progressive market-data trimming. `LLM_CONTEXT_TOP_N` reduced from 100 → 50. Payload now ~6–8 KB on first message |
 | LLM giving contradictory/spotty advice (e.g. "high volatility (0.0%)", "negative slope (+0.0)") | Core knowledge was only 4 rules; system prompt had no data interpretation guidance; `formatForLLM` omitted trade velocity, high alch, and data-sufficiency markers | Expanded `RS3_ECONOMIC_RULES` to 8 laws (item categories, flipping strategy, gp/hr formulas, common pitfalls). Added `DATA_FIELD_LEGEND` explaining every metric. System prompt now has 12 analytical reasoning rules including the "slope ±0.0 + volatility 0% = insufficient data" case. `formatForLLM` now includes High Alch, Velocity tier, and `[LIMITED DATA]` tag when < 3 history points (March 2026) |
 
----
+| Volume preset filter (Low / High) barely changing Top 20 results | `minVolume` / `maxVolume` filters applied against `effectivePlayerVolume` (clamped by buy limits), not raw GE volume. Most expensive items have small buy limits (2–10), giving effectivePlayerVolume of 12–60 — well below the "Low" cap of 1 000. So virtually the same items appeared in both "Any" and "Low" | Changed `scoreAndFilter` to filter `minVolume`/`maxVolume` against **global daily GE volume** (`globalVol`) instead of `effectivePlayerVolume`. Bumped "Low" threshold from 1 000 → 5 000. `effectivePlayerVolume` still used for **scoring** (`tradedValue`), just not for filtering (March 2026) |
 
-## 10. Potential Next Steps (Not Started)
+---
 
 These were discussed or implied but never started:
 

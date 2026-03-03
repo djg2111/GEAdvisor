@@ -218,13 +218,15 @@ export interface MarketAnalyzerConfig {
    */
   topN: number;
   /**
-   * Minimum daily volume an item must have to be included.
+   * Minimum **global** daily GE volume an item must have to be included.
    * Items at or below this threshold are discarded as illiquid.
+   * Applied against the raw GE volume, not the player-constrained value.
    * @default 0
    */
   minVolume: number;
   /**
-   * Maximum daily volume. Items above this threshold are excluded.
+   * Maximum **global** daily GE volume. Items above this threshold are excluded.
+   * Applied against the raw GE volume, not the player-constrained value.
    * `undefined` or `0` means no upper-bound.
    */
   maxVolume?: number;
