@@ -8903,6 +8903,8 @@ function bindMarketFilters() {
         els.marketSearchInput.value = "";
         isSearchActive = false;
         latestSearchResults = [];
+        els.searchResults.innerHTML = "";
+        els.searchLoading.style.display = "none";
         await refreshMarketPanel();
     });
     // ── Market search input (debounced) ───────────────────────────────────
