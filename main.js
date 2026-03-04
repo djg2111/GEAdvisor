@@ -42,11 +42,14 @@ ___CSS_LOADER_EXPORT___.push([module.id, `/* ───────────�
 /* ═══════════════════════════════════════════════════════════════════════════
  *  THEME SYSTEM — Two-axis: Colorway × Style
  *
- *  Colorways (body[data-colorway]):  classic | osrs | rs3-modern | light | sol-dark | sol-light
- *  Styles   (body[data-style]):     basic | glass | neumorphism | skeuomorphism
+ *  Mode     (body[data-mode]):       dark | light
+ *  Colorway (body[data-colorway]):   classic | osrs | rs3-modern | solarized
+ *  Contrast (body[data-contrast]):   default | soft | hard
+ *  Style    (body[data-style]):      basic | glass | neumorphism | skeuomorphism
  *
- *  Colorways set ALL colour variables + per-style helper vars.
- *  Styles apply structural overrides (shadows, filters, gradients)
+ *  Mode × Colorway sets ALL colour variables + per-style helper vars.
+ *  Contrast applies brightness adjustments on top.
+ *  Style applies structural overrides (shadows, filters, gradients)
  *  using the helper vars so every combination works automatically.
  * ═══════════════════════════════════════════════════════════════════════════ */
 
@@ -176,7 +179,7 @@ ___CSS_LOADER_EXPORT___.push([module.id, `/* ───────────�
  *  COLORWAY: OSRS Brown
  * ───────────────────────────────────────────────────────────────────────────── */
 
-body[data-colorway="osrs"] {
+body[data-mode="dark"][data-colorway="osrs"] {
   --bg-main: #382b1f;
   --bg-panel: #4a3a2a;
   --bg-elevated: #56452f;
@@ -273,10 +276,10 @@ body[data-colorway="osrs"] {
 }
 
 /* ─────────────────────────────────────────────────────────────────────────────
- *  COLORWAY: RS3 Modern Blue
+ *  COLORWAY: RS3 Modern — Dark
  * ───────────────────────────────────────────────────────────────────────────── */
 
-body[data-colorway="rs3-modern"] {
+body[data-mode="dark"][data-colorway="rs3-modern"] {
   --bg-main: #0f1722;
   --bg-panel: #1c2836;
   --bg-elevated: #1e2d3e;
@@ -373,10 +376,10 @@ body[data-colorway="rs3-modern"] {
 }
 
 /* ─────────────────────────────────────────────────────────────────────────────
- *  COLORWAY: Light
+ *  COLORWAY: Classic — Light
  * ───────────────────────────────────────────────────────────────────────────── */
 
-body[data-colorway="light"] {
+body[data-mode="light"][data-colorway="classic"] {
   --bg-main: #f5f5f5;
   --bg-panel: #ffffff;
   --bg-elevated: #fafafa;
@@ -472,19 +475,19 @@ body[data-colorway="light"] {
   --skeu-btn-active-to: #0055aa;
 }
 
-/* Light colorway — force light body background for basic style */
-body[data-colorway="light"] {
+/* Classic Light — force light body background for basic style */
+body[data-mode="light"][data-colorway="classic"] {
   background: #f5f5f5;
 }
-body[data-colorway="light"] .view-btn.active {
+body[data-mode="light"][data-colorway="classic"] .view-btn.active {
   color: #ffffff;
 }
 
 /* ─────────────────────────────────────────────────────────────────────────────
- *  COLORWAY: Solarized Dark
+ *  COLORWAY: Solarized — Dark
  * ───────────────────────────────────────────────────────────────────────────── */
 
-body[data-colorway="sol-dark"] {
+body[data-mode="dark"][data-colorway="solarized"] {
   --bg-main: #002b36;
   --bg-panel: #073642;
   --bg-elevated: #0a3f4c;
@@ -581,10 +584,10 @@ body[data-colorway="sol-dark"] {
 }
 
 /* ─────────────────────────────────────────────────────────────────────────────
- *  COLORWAY: Solarized Light
+ *  COLORWAY: Solarized — Light
  * ───────────────────────────────────────────────────────────────────────────── */
 
-body[data-colorway="sol-light"] {
+body[data-mode="light"][data-colorway="solarized"] {
   --bg-main: #e6dec8;
   --bg-panel: #f0e9d6;
   --bg-elevated: #f5efdc;
@@ -681,11 +684,272 @@ body[data-colorway="sol-light"] {
 }
 
 /* Solarized Light — force warm body background for basic style */
-body[data-colorway="sol-light"] {
+body[data-mode="light"][data-colorway="solarized"] {
   background: #e6dec8;
 }
-body[data-colorway="sol-light"] .view-btn.active {
+body[data-mode="light"][data-colorway="solarized"] .view-btn.active {
   color: #ffffff;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+ *  COLORWAY: OSRS — Light
+ * ───────────────────────────────────────────────────────────────────────────── */
+
+body[data-mode="light"][data-colorway="osrs"] {
+  --bg-main: #f5ead4;
+  --bg-panel: #fff6e6;
+  --bg-elevated: #fdf2dc;
+  --bg-hover: #f0e2c8;
+  --dropdown-bg: #fdf2dc;
+  --dropdown-hover-bg: #f0e2c8;
+  --bg-input: #f0e4cc;
+  --bg-muted: #e8dcc0;
+  --bg-filter: #f0e8d0;
+  --bg-number-input: #f0e4cc;
+
+  --text-main: #4a3520;
+  --text-bright: #2c1a08;
+  --text-accent: #8b4513;
+  --text-heading: #a05a14;
+  --text-price: #3a6e1e;
+  --text-muted: #8a7560;
+  --text-soft: #a08a70;
+  --text-dimmed: #c0aa88;
+
+  --border-main: #e0d0b0;
+  --border-section: #d8c8a4;
+  --border-card: #d0c098;
+  --border-input: #c8b890;
+  --border-subtle: #e0d4b8;
+  --border-hype: #d4a520;
+  --border-hype-hover: #b8920a;
+
+  --accent-primary: #8b4513;
+  --accent-primary-hover: #a0522d;
+  --accent-primary-active: #6b3410;
+  --accent-focus: #cd853f;
+  --accent-blue-text: #8b5e3c;
+  --accent-green: #5a8a1e;
+  --accent-green-bright: #3a7a10;
+  --accent-teal: #6b8e6b;
+  --accent-gold: #c8960a;
+  --accent-gold-hype: #b07808;
+  --accent-red: #cc3333;
+  --accent-red-dark: #8b0000;
+  --accent-red-bg: #fff0e8;
+  --accent-red-border: #e0a090;
+  --accent-red-border-hover: #d08070;
+  --accent-hype: #c87e10;
+
+  --chat-user-bg: #f5e8d0;
+  --chat-error-bg: #fff0e8;
+  --badge-buy-bg: #e8e0c8;
+  --badge-sell-bg: #e0f0d0;
+  --badge-hype-bg: #f8f0c8;
+
+  --modal-backdrop: rgba(0, 0, 0, 0.25);
+  --modal-shadow: rgba(0, 0, 0, 0.15);
+  --scrollbar-thumb: #c8b890;
+  --scrollbar-thumb-hover: #a89a78;
+  --link-color: #8b4513;
+  --add-flip-bg: #d8eac0;
+  --limit-ready-bg: #e0f0d0;
+
+  /* Glass helpers */
+  --glass-body-from: #e8dcc0;
+  --glass-body-via: #f0e4cc;
+  --glass-body-to: #e0d4b0;
+  --glass-panel: rgba(255, 240, 210, 0.55);
+  --glass-elevated: rgba(255, 240, 210, 0.65);
+  --glass-hover: rgba(255, 240, 210, 0.70);
+  --glass-input: rgba(255, 240, 210, 0.50);
+  --glass-muted: rgba(255, 240, 210, 0.40);
+  --glass-border-card: rgba(139, 69, 19, 0.15);
+  --glass-border-main: rgba(139, 69, 19, 0.08);
+  --glass-border-section: rgba(139, 69, 19, 0.10);
+  --glass-border-input: rgba(139, 69, 19, 0.18);
+  --glass-scrollbar: rgba(139, 69, 19, 0.12);
+
+  /* Neumorphism helpers */
+  --neu-shadow-dark: #d0c098;
+  --neu-shadow-light: #fff8ea;
+  --neu-accent-shadow: #6b3410;
+
+  /* Skeuomorphism helpers */
+  --skeu-body-from: #e0d4b0;
+  --skeu-body-to: #f5ead4;
+  --skeu-card-from: #fff6e6;
+  --skeu-card-mid: #faf0da;
+  --skeu-card-to: #f0e4cc;
+  --skeu-card-highlight: #fff8ea;
+  --skeu-card-shadow-edge: #c8b890;
+  --skeu-header-from: #faf0da;
+  --skeu-header-to: #f0e8d0;
+  --skeu-btn-from: #f5ead4;
+  --skeu-btn-to: #e8dcc0;
+  --skeu-btn-active-from: #8b4513;
+  --skeu-btn-active-to: #6b3410;
+}
+
+/* OSRS Light — force warm background for basic style */
+body[data-mode="light"][data-colorway="osrs"] {
+  background: #f5ead4;
+}
+body[data-mode="light"][data-colorway="osrs"] .view-btn.active {
+  color: #ffffff;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+ *  COLORWAY: RS3 Modern — Light
+ * ───────────────────────────────────────────────────────────────────────────── */
+
+body[data-mode="light"][data-colorway="rs3-modern"] {
+  --bg-main: #eef4fa;
+  --bg-panel: #f8fbff;
+  --bg-elevated: #f4f8fd;
+  --bg-hover: #e6eef6;
+  --dropdown-bg: #f4f8fd;
+  --dropdown-hover-bg: #e6eef6;
+  --bg-input: #e8f0f8;
+  --bg-muted: #dce8f2;
+  --bg-filter: #eaf2fa;
+  --bg-number-input: #e8f0f8;
+
+  --text-main: #1a2a3a;
+  --text-bright: #0a1420;
+  --text-accent: #0078d4;
+  --text-heading: #0060b0;
+  --text-price: #248a3d;
+  --text-muted: #5a7a94;
+  --text-soft: #7a94aa;
+  --text-dimmed: #a0b4c4;
+
+  --border-main: #d0dce8;
+  --border-section: #c8d8e8;
+  --border-card: #c0d0e0;
+  --border-input: #b8cad8;
+  --border-subtle: #dce8f2;
+  --border-hype: #d4a520;
+  --border-hype-hover: #b8920a;
+
+  --accent-primary: #0078d4;
+  --accent-primary-hover: #1888e0;
+  --accent-primary-active: #0060b0;
+  --accent-focus: #0078d4;
+  --accent-blue-text: #0078d4;
+  --accent-green: #248a3d;
+  --accent-green-bright: #1a7a2e;
+  --accent-teal: #1a8a7a;
+  --accent-gold: #d4a520;
+  --accent-gold-hype: #c09010;
+  --accent-red: #d13438;
+  --accent-red-dark: #a4262c;
+  --accent-red-bg: #fff0f0;
+  --accent-red-border: #e0a0a0;
+  --accent-red-border-hover: #d08080;
+  --accent-hype: #e08a00;
+
+  --chat-user-bg: #dcecff;
+  --chat-error-bg: #fff0f0;
+  --badge-buy-bg: #dceaff;
+  --badge-sell-bg: #dcf4dc;
+  --badge-hype-bg: #fff8e0;
+
+  --modal-backdrop: rgba(0, 0, 0, 0.25);
+  --modal-shadow: rgba(0, 0, 0, 0.15);
+  --scrollbar-thumb: #b8cad8;
+  --scrollbar-thumb-hover: #98aec0;
+  --link-color: #0078d4;
+  --add-flip-bg: #d0f0d0;
+  --limit-ready-bg: #daf4da;
+
+  /* Glass helpers */
+  --glass-body-from: #d8e4f0;
+  --glass-body-via: #e4eef6;
+  --glass-body-to: #d0dce8;
+  --glass-panel: rgba(240, 248, 255, 0.55);
+  --glass-elevated: rgba(240, 248, 255, 0.65);
+  --glass-hover: rgba(240, 248, 255, 0.70);
+  --glass-input: rgba(240, 248, 255, 0.50);
+  --glass-muted: rgba(240, 248, 255, 0.40);
+  --glass-border-card: rgba(0, 120, 212, 0.12);
+  --glass-border-main: rgba(0, 120, 212, 0.08);
+  --glass-border-section: rgba(0, 120, 212, 0.10);
+  --glass-border-input: rgba(0, 120, 212, 0.15);
+  --glass-scrollbar: rgba(0, 120, 212, 0.10);
+
+  /* Neumorphism helpers */
+  --neu-shadow-dark: #c0d0e0;
+  --neu-shadow-light: #ffffff;
+  --neu-accent-shadow: #0060b0;
+
+  /* Skeuomorphism helpers */
+  --skeu-body-from: #dce8f2;
+  --skeu-body-to: #eef4fa;
+  --skeu-card-from: #f8fbff;
+  --skeu-card-mid: #f4f8fd;
+  --skeu-card-to: #eaf2fa;
+  --skeu-card-highlight: #ffffff;
+  --skeu-card-shadow-edge: #b8cad8;
+  --skeu-header-from: #f4f8fd;
+  --skeu-header-to: #eaf2fa;
+  --skeu-btn-from: #eef4fa;
+  --skeu-btn-to: #dce8f2;
+  --skeu-btn-active-from: #0078d4;
+  --skeu-btn-active-to: #0060b0;
+}
+
+/* RS3 Modern Light — force light background for basic style */
+body[data-mode="light"][data-colorway="rs3-modern"] {
+  background: #eef4fa;
+}
+body[data-mode="light"][data-colorway="rs3-modern"] .view-btn.active {
+  color: #ffffff;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+ *  CONTRAST MODIFIERS (body[data-contrast])
+ *
+ *  Layered on top of any Mode × Colorway combination.
+ *  "soft"  — reduced contrast (lighter darks, softer lights)
+ *  "hard"  — maximum contrast (deeper darks, brighter lights)
+ * ───────────────────────────────────────────────────────────────────────────── */
+
+/* ── Soft contrast — dark modes ─────────────────────── */
+body[data-mode="dark"][data-contrast="soft"] {
+  --bg-main: color-mix(in srgb, var(--bg-panel) 70%, var(--bg-main));
+  --border-main: color-mix(in srgb, var(--border-main) 60%, var(--bg-panel));
+  --text-main: color-mix(in srgb, var(--text-main) 80%, var(--text-muted));
+  --text-bright: color-mix(in srgb, var(--text-bright) 85%, var(--text-main));
+}
+
+/* ── Hard contrast — dark modes ─────────────────────── */
+body[data-mode="dark"][data-contrast="hard"] {
+  --bg-main: color-mix(in srgb, var(--bg-main) 80%, black);
+  --bg-panel: color-mix(in srgb, var(--bg-panel) 85%, black);
+  --bg-muted: color-mix(in srgb, var(--bg-muted) 80%, black);
+  --text-main: color-mix(in srgb, var(--text-main) 80%, white);
+  --text-bright: #ffffff;
+  --border-main: color-mix(in srgb, var(--border-main) 65%, black);
+}
+
+/* ── Soft contrast — light modes ────────────────────── */
+body[data-mode="light"][data-contrast="soft"] {
+  --bg-main: color-mix(in srgb, var(--bg-main) 70%, white);
+  --bg-panel: color-mix(in srgb, var(--bg-panel) 80%, white);
+  --border-main: color-mix(in srgb, var(--border-main) 50%, white);
+  --text-main: color-mix(in srgb, var(--text-main) 70%, var(--text-muted));
+  --text-bright: color-mix(in srgb, var(--text-bright) 75%, var(--text-main));
+}
+
+/* ── Hard contrast — light modes ────────────────────── */
+body[data-mode="light"][data-contrast="hard"] {
+  --bg-main: color-mix(in srgb, var(--bg-main) 85%, white);
+  --bg-panel: #ffffff;
+  --bg-muted: color-mix(in srgb, var(--bg-muted) 80%, white);
+  --text-main: color-mix(in srgb, var(--text-main) 85%, black);
+  --text-bright: #000000;
+  --border-main: color-mix(in srgb, var(--border-main) 80%, var(--text-dimmed));
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
@@ -830,17 +1094,23 @@ body[data-style="skeuomorphism"] .view-btn.active {
   box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.30);
   color: var(--text-bright);
 }
-/* Skeuomorphism — softer shadows on light colorways */
-body[data-colorway="light"][data-style="skeuomorphism"] .market-card,
-body[data-colorway="sol-light"][data-style="skeuomorphism"] .market-card {
+/* Skeuomorphism — softer shadows on light modes */
+body[data-mode="light"][data-colorway="classic"][data-style="skeuomorphism"] .market-card,
+body[data-mode="light"][data-colorway="solarized"][data-style="skeuomorphism"] .market-card,
+body[data-mode="light"][data-colorway="osrs"][data-style="skeuomorphism"] .market-card,
+body[data-mode="light"][data-colorway="rs3-modern"][data-style="skeuomorphism"] .market-card {
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.40);
 }
-body[data-colorway="light"][data-style="skeuomorphism"] .market-card:hover,
-body[data-colorway="sol-light"][data-style="skeuomorphism"] .market-card:hover {
+body[data-mode="light"][data-colorway="classic"][data-style="skeuomorphism"] .market-card:hover,
+body[data-mode="light"][data-colorway="solarized"][data-style="skeuomorphism"] .market-card:hover,
+body[data-mode="light"][data-colorway="osrs"][data-style="skeuomorphism"] .market-card:hover,
+body[data-mode="light"][data-colorway="rs3-modern"][data-style="skeuomorphism"] .market-card:hover {
   box-shadow: 0 3px 8px rgba(0, 0, 0, 0.20), inset 0 1px 0 rgba(255, 255, 255, 0.50);
 }
-body[data-colorway="light"][data-style="skeuomorphism"] .top20-section,
-body[data-colorway="sol-light"][data-style="skeuomorphism"] .top20-section {
+body[data-mode="light"][data-colorway="classic"][data-style="skeuomorphism"] .top20-section,
+body[data-mode="light"][data-colorway="solarized"][data-style="skeuomorphism"] .top20-section,
+body[data-mode="light"][data-colorway="osrs"][data-style="skeuomorphism"] .top20-section,
+body[data-mode="light"][data-colorway="rs3-modern"][data-style="skeuomorphism"] .top20-section {
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.30);
 }
 
@@ -7760,8 +8030,12 @@ const LS_LAYOUT = "ge-analyzer:layout";
 const LS_THEME = "ge-analyzer:theme";
 /** `localStorage` key for persisted style preference (basic/glass/neumorphism/skeuomorphism). */
 const LS_STYLE = "ge-analyzer:style";
-/** `localStorage` key for persisted colorway preference (classic/osrs/rs3-modern/light). */
+/** `localStorage` key for persisted colorway preference (classic/osrs/rs3-modern/solarized). */
 const LS_COLORWAY = "ge-analyzer:colorway";
+/** `localStorage` key for persisted mode preference (dark/light). */
+const LS_MODE = "ge-analyzer:mode";
+/** `localStorage` key for persisted contrast preference (default/soft/hard). */
+const LS_CONTRAST = "ge-analyzer:contrast";
 /** `localStorage` key for serialised LLM chat history. */
 const LS_CHAT_HISTORY = "ge-analyzer:chat-history";
 /** `localStorage` key for the user's favourited item names (JSON array). */
@@ -7774,6 +8048,18 @@ const MAX_SAVED_MESSAGES = 50;
 const BUY_LIMIT_WINDOW_MS = 4 * 60 * 60 * 1000;
 /** Portfolio countdown refresh interval in milliseconds (every 30 s). */
 const PORTFOLIO_TICK_MS = 30000;
+/**
+ * Legacy colorway values mapped to the new mode+colorway system.
+ * Used for one-time migration of persisted settings.
+ */
+const LEGACY_COLORWAY_MAP = {
+    classic: { mode: "dark", colorway: "classic" },
+    osrs: { mode: "dark", colorway: "osrs" },
+    "rs3-modern": { mode: "dark", colorway: "rs3-modern" },
+    light: { mode: "light", colorway: "classic" },
+    "sol-dark": { mode: "dark", colorway: "solarized" },
+    "sol-light": { mode: "light", colorway: "solarized" },
+};
 // ─── Detail-row label text & tooltip descriptions ───────────────────────────
 /**
  * Canonical display text for each detail-row label.
@@ -8450,39 +8736,45 @@ function bindLayoutToggle() {
     els.layoutTabbedBtn.addEventListener("click", () => applyLayout("tabbed"));
     els.layoutSidebarBtn.addEventListener("click", () => applyLayout("sidebar"));
 }
-// ─── Theme (Style × Colorway) ───────────────────────────────────────────────
+// ─── Theme (Mode × Style × Colorway × Contrast) ────────────────────────────
 /**
- * Restore persisted theme preferences and bind both dropdowns.
- * Migrates from the legacy single `ge-analyzer:theme` key if present.
- * Sets `document.body.dataset.style` and `document.body.dataset.colorway`
+ * Restore persisted theme preferences and bind all appearance controls.
+ * Migrates from legacy keys if present.
+ * Sets `document.body.dataset.mode`, `.style`, `.colorway`, `.contrast`
  * which activate the matching CSS override blocks.
  */
 function bindTheme() {
     migrateThemeKey();
+    migrateColorwayToMode();
+    const savedMode = localStorage.getItem(LS_MODE) ?? "dark";
     const savedStyle = localStorage.getItem(LS_STYLE) ?? "basic";
     const savedColorway = localStorage.getItem(LS_COLORWAY) ?? "classic";
+    const savedContrast = localStorage.getItem(LS_CONTRAST) ?? "default";
+    applyMode(savedMode);
     applyStyle(savedStyle);
     applyColorway(savedColorway);
+    applyContrast(savedContrast);
+    // Mode toggle buttons
+    els.modeDarkBtn.addEventListener("click", () => applyMode("dark"));
+    els.modeLightBtn.addEventListener("click", () => applyMode("light"));
     els.styleSelect.addEventListener("change", () => {
         applyStyle(els.styleSelect.value);
     });
     els.colorwaySelect.addEventListener("change", () => {
         applyColorway(els.colorwaySelect.value);
     });
+    els.contrastSelect.addEventListener("change", () => {
+        applyContrast(els.contrastSelect.value);
+    });
 }
 /**
  * Migrate from the legacy single `ge-analyzer:theme` key to the new
- * two-axis `ge-analyzer:style` + `ge-analyzer:colorway` keys.
- * Runs once — removes the old key after migration.
+ * multi-axis keys. Runs once — removes the old key after migration.
  */
 function migrateThemeKey() {
     const legacy = localStorage.getItem(LS_THEME);
     if (!legacy)
         return;
-    const COLORWAY_MAP = {
-        classic: "classic", osrs: "osrs", "rs3-modern": "rs3-modern",
-        glass: "classic", neumorphism: "classic", minimalism: "light", skeuomorphism: "classic",
-    };
     const STYLE_MAP = {
         classic: "basic", osrs: "basic", "rs3-modern": "basic",
         glass: "glass", neumorphism: "neumorphism", minimalism: "basic", skeuomorphism: "skeuomorphism",
@@ -8490,10 +8782,42 @@ function migrateThemeKey() {
     if (!localStorage.getItem(LS_STYLE)) {
         localStorage.setItem(LS_STYLE, STYLE_MAP[legacy] ?? "basic");
     }
+    // Map legacy theme → mode + colorway (handled by migrateColorwayToMode next)
     if (!localStorage.getItem(LS_COLORWAY)) {
-        localStorage.setItem(LS_COLORWAY, COLORWAY_MAP[legacy] ?? "classic");
+        const COLORWAY_TMP = {
+            classic: "classic", osrs: "osrs", "rs3-modern": "rs3-modern",
+            glass: "classic", neumorphism: "classic", minimalism: "light", skeuomorphism: "classic",
+        };
+        localStorage.setItem(LS_COLORWAY, COLORWAY_TMP[legacy] ?? "classic");
     }
     localStorage.removeItem(LS_THEME);
+}
+/**
+ * Migrate old colorway values ("light", "sol-dark", "sol-light") to the
+ * new mode + colorway system. E.g. "sol-light" → mode=light, colorway=solarized.
+ * Runs once — only acts if no `LS_MODE` key is set yet.
+ */
+function migrateColorwayToMode() {
+    if (localStorage.getItem(LS_MODE))
+        return; // already migrated
+    const oldColorway = localStorage.getItem(LS_COLORWAY);
+    if (!oldColorway)
+        return;
+    const mapping = LEGACY_COLORWAY_MAP[oldColorway];
+    if (mapping) {
+        localStorage.setItem(LS_MODE, mapping.mode);
+        localStorage.setItem(LS_COLORWAY, mapping.colorway);
+    }
+    else {
+        localStorage.setItem(LS_MODE, "dark");
+    }
+}
+/** Apply an appearance mode (dark/light) and persist the choice. */
+function applyMode(mode) {
+    document.body.dataset.mode = mode;
+    localStorage.setItem(LS_MODE, mode);
+    els.modeDarkBtn.classList.toggle("active", mode === "dark");
+    els.modeLightBtn.classList.toggle("active", mode === "light");
 }
 /** Apply a style to the document and persist the choice. */
 function applyStyle(style) {
@@ -8506,6 +8830,12 @@ function applyColorway(colorway) {
     document.body.dataset.colorway = colorway;
     localStorage.setItem(LS_COLORWAY, colorway);
     els.colorwaySelect.value = colorway;
+}
+/** Apply a contrast level to the document and persist the choice. */
+function applyContrast(contrast) {
+    document.body.dataset.contrast = contrast;
+    localStorage.setItem(LS_CONTRAST, contrast);
+    els.contrastSelect.value = contrast;
 }
 /** Apply a layout mode to the document and persist the choice. */
 function applyLayout(mode) {
@@ -11610,6 +11940,9 @@ function resolveElements() {
         layoutSidebarBtn: q("layout-sidebar-btn"),
         styleSelect: q("style-select"),
         colorwaySelect: q("colorway-select"),
+        modeDarkBtn: q("mode-dark-btn"),
+        modeLightBtn: q("mode-light-btn"),
+        contrastSelect: q("contrast-select"),
         tabMarketBtn: q("tab-market-btn"),
         tabAdvisorBtn: q("tab-advisor-btn"),
         viewTabs: q("view-tabs"),
@@ -11774,13 +12107,17 @@ __webpack_require__.r(__webpack_exports__);
 // ── Stylesheet (Webpack style-loader injects into <head>) ───────────────────
 
 // ── Early theme restoration ─────────────────────────────────────────────────
-// Apply persisted style/colorway before any content renders so the startup
-// overlay matches the user's chosen appearance settings.
+// Apply all four persisted theme axes before any content renders so the
+// startup overlay matches the user's chosen appearance settings.
 (() => {
+    const mode = localStorage.getItem("ge-analyzer:mode") ?? "dark";
     const style = localStorage.getItem("ge-analyzer:style") ?? "basic";
     const colorway = localStorage.getItem("ge-analyzer:colorway") ?? "classic";
+    const contrast = localStorage.getItem("ge-analyzer:contrast") ?? "default";
+    document.body.dataset.mode = mode;
     document.body.dataset.style = style;
     document.body.dataset.colorway = colorway;
+    document.body.dataset.contrast = contrast;
 })();
 // ── Alt1 environment detection ──────────────────────────────────────────────
 const alt1Status = document.getElementById("alt1-status");

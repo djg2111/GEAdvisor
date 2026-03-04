@@ -34,7 +34,14 @@
 						<button id="layout-sidebar-btn" class="layout-btn" type="button">Sidebar</button>
 					</div>
 
-					<!-- Theme selectors (Style × Colorway) -->
+					<!-- Mode (dark / light) -->
+					<label>Mode</label>
+					<div class="layout-toggle">
+						<button id="mode-dark-btn" class="layout-btn active" type="button">🌙 Dark</button>
+						<button id="mode-light-btn" class="layout-btn" type="button">☀️ Light</button>
+					</div>
+
+					<!-- Theme selectors (Style × Colorway × Contrast) -->
 					<label for="style-select">Style</label>
 					<select id="style-select">
 						<option value="basic">Basic</option>
@@ -45,12 +52,17 @@
 
 					<label for="colorway-select">Colorway</label>
 					<select id="colorway-select">
-						<option value="classic">Classic Dark</option>
-						<option value="osrs">OSRS Brown</option>
-						<option value="rs3-modern">RS3 Modern Blue</option>
-						<option value="light">Light</option>
-						<option value="sol-dark">Solarized Dark</option>
-						<option value="sol-light">Solarized Light</option>
+						<option value="classic">Classic</option>
+						<option value="osrs">OSRS</option>
+						<option value="rs3-modern">RS3 Modern</option>
+						<option value="solarized">Solarized</option>
+					</select>
+
+					<label for="contrast-select">Contrast</label>
+					<select id="contrast-select">
+						<option value="default">Default</option>
+						<option value="soft">Soft</option>
+						<option value="hard">Hard</option>
 					</select>
 				</fieldset>
 
