@@ -7498,21 +7498,40 @@ class MarketAnalyzerService {
                 map.set(name, entries.map((e) => e.price));
             }
             // ── Sparse-data fallback: fetch from Weird Gloop API ──────────────
-            // If most items have ≤ 1 day of local history, pull from the API so
+            // If very few items have multi-day history, pull from the API so
             // sparklines can render immediately after install / cache clear.
+            //
+            // Why an absolute threshold (not a ratio): `bulkInsert` writes a
+            // today-snapshot for every price record, so after a full market scan
+            // *all* ~7 000 items have ≥1 history row — but only items with
+            // dedicated history fetches (seeds + prior fallback runs) have ≥2.
+            // A percentage-based check against 7 000 items would never be
+            // satisfied and the fallback would re-fetch on every startup.
+            //
+            // Threshold of 400 means: after seeds (~230 items) + one fallback
+            // round (200 items) the condition is met and subsequent startups
+            // skip the ~40 s API call.
             // Capped at 200 items since the API only accepts 1 item per request.
-            const allItems = await this.cache.getAll();
-            const itemNames = allItems.map((r) => r.name);
-            const sparse = itemNames.length > 0 &&
-                itemNames.filter((n) => (map.get(n)?.length ?? 0) >= 2).length < itemNames.length * 0.3;
-            if (sparse && itemNames.length > 0) {
+            const itemsWithSufficient = [...grouped.values()] // items with ≥2 non-today rows
+                .filter((entries) => entries.length >= 2).length;
+            const sparse = itemsWithSufficient < 400;
+            if (!sparse) {
+                console.log(`[MarketAnalyzer] History coverage OK: ${itemsWithSufficient} items have ≥ 2 days — skipping API fallback.`);
+            }
+            if (sparse) {
                 // The /last90d API only supports 1 item per request, so cap the
                 // fallback to keep UI responsive (~40 s at 200 ms/item).
+                // Fetch items that are in the price cache but have no/sparse history.
+                const allItems = await this.cache.getAll();
+                const allNames = allItems.map((r) => r.name);
+                // Prioritise items with 0–1 history rows.
+                const needsHistory = allNames.filter((n) => (map.get(n)?.length ?? 0) < 2);
                 const SPARSE_CAP = 200;
-                const namesToFetch = itemNames.length > SPARSE_CAP
-                    ? itemNames.slice(0, SPARSE_CAP)
-                    : itemNames;
-                console.log(`[MarketAnalyzer] Local price history is sparse — fetching ${namesToFetch.length} items from Weird Gloop API…`);
+                const namesToFetch = needsHistory.length > SPARSE_CAP
+                    ? needsHistory.slice(0, SPARSE_CAP)
+                    : needsHistory;
+                console.log(`[MarketAnalyzer] Local price history is sparse (only ${itemsWithSufficient} items have ≥ 2 days, need 400) ` +
+                    `— fetching ${namesToFetch.length} items from Weird Gloop API…`);
                 const apiMap = await this.fetchAPIHistory(namesToFetch, days);
                 // Merge: API data fills in gaps; local data takes precedence when present.
                 for (const [name, prices] of apiMap) {
