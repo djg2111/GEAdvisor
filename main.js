@@ -1782,7 +1782,7 @@ button:disabled {
   align-items: center;
   justify-content: center;
   gap: 14px;
-  background: var(--bg, #1e1e1e);
+  background: var(--bg-main, #1e1e1e);
   transition: opacity 0.4s ease;
 }
 .startup-overlay.fade-out {
@@ -1793,8 +1793,8 @@ button:disabled {
 .startup-spinner {
   width: 36px;
   height: 36px;
-  border: 3px solid var(--border, #333);
-  border-top-color: var(--accent-blue, #569cd6);
+  border: 3px solid var(--border-main, #333);
+  border-top-color: var(--accent-primary, #569cd6);
   border-radius: 50%;
   animation: startup-spin 0.8s linear infinite;
 }
@@ -11771,6 +11771,15 @@ __webpack_require__.r(__webpack_exports__);
 
 // ── Stylesheet (Webpack style-loader injects into <head>) ───────────────────
 
+// ── Early theme restoration ─────────────────────────────────────────────────
+// Apply persisted style/colorway before any content renders so the startup
+// overlay matches the user's chosen appearance settings.
+(() => {
+    const style = localStorage.getItem("ge-analyzer:style") ?? "basic";
+    const colorway = localStorage.getItem("ge-analyzer:colorway") ?? "classic";
+    document.body.dataset.style = style;
+    document.body.dataset.colorway = colorway;
+})();
 // ── Alt1 environment detection ──────────────────────────────────────────────
 const alt1Status = document.getElementById("alt1-status");
 if (window.alt1) {
