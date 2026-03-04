@@ -12,1549 +12,67 @@ return /******/ (() => { // webpackBootstrap
 /******/ 	"use strict";
 /******/ 	var __webpack_modules__ = ({
 
-/***/ "../node_modules/css-loader/dist/cjs.js!./style.css"
-/*!**********************************************************!*\
-  !*** ../node_modules/css-loader/dist/cjs.js!./style.css ***!
-  \**********************************************************/
+/***/ "../node_modules/css-loader/dist/cjs.js!./css/base/alt1-status.css"
+/*!*************************************************************************!*\
+  !*** ../node_modules/css-loader/dist/cjs.js!./css/base/alt1-status.css ***!
+  \*************************************************************************/
 (module, __webpack_exports__, __webpack_require__) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
 /* harmony export */ });
-/* harmony import */ var _node_modules_css_loader_dist_runtime_noSourceMaps_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../node_modules/css-loader/dist/runtime/noSourceMaps.js */ "../node_modules/css-loader/dist/runtime/noSourceMaps.js");
+/* harmony import */ var _node_modules_css_loader_dist_runtime_noSourceMaps_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../../node_modules/css-loader/dist/runtime/noSourceMaps.js */ "../node_modules/css-loader/dist/runtime/noSourceMaps.js");
 /* harmony import */ var _node_modules_css_loader_dist_runtime_noSourceMaps_js__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_node_modules_css_loader_dist_runtime_noSourceMaps_js__WEBPACK_IMPORTED_MODULE_0__);
-/* harmony import */ var _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../node_modules/css-loader/dist/runtime/api.js */ "../node_modules/css-loader/dist/runtime/api.js");
+/* harmony import */ var _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../../node_modules/css-loader/dist/runtime/api.js */ "../node_modules/css-loader/dist/runtime/api.js");
 /* harmony import */ var _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(_node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1__);
 // Imports
 
 
 var ___CSS_LOADER_EXPORT___ = _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1___default()((_node_modules_css_loader_dist_runtime_noSourceMaps_js__WEBPACK_IMPORTED_MODULE_0___default()));
 // Module
-___CSS_LOADER_EXPORT___.push([module.id, `/* ─────────────────────────────────────────────────────────────────────────────
- * GE Market Analyzer — Alt1 Overlay Stylesheet
- *
- * Dark palette optimised for readability on top of the RS3 game client.
- * All measurements use px/rem so the overlay renders consistently regardless
- * of the host page's base font-size.
- * ───────────────────────────────────────────────────────────────────────────── */
+___CSS_LOADER_EXPORT___.push([module.id, `/* ── Alt1 status banner ───────────────────────────────────────────────────── */
 
-/* ═══════════════════════════════════════════════════════════════════════════
- *  THEME SYSTEM — Two-axis: Colorway × Style
- *
- *  Mode     (body[data-mode]):       dark | light
- *  Colorway (body[data-colorway]):   classic | osrs | rs3-modern | solarized
- *  Contrast (body[data-contrast]):   default | soft | hard
- *  Style    (body[data-style]):      basic | glass | neumorphism | skeuomorphism
- *
- *  Mode × Colorway sets ALL colour variables + per-style helper vars.
- *  Contrast applies brightness adjustments on top.
- *  Style applies structural overrides (shadows, filters, gradients)
- *  using the helper vars so every combination works automatically.
- * ═══════════════════════════════════════════════════════════════════════════ */
-
-/* ─────────────────────────────────────────────────────────────────────────────
- *  COLORWAY: Classic Dark (default)
- * ───────────────────────────────────────────────────────────────────────────── */
-
-:root {
-  /* ── Backgrounds ─────────────────────── */
-  --bg-main: #1e1e1e;
-  --bg-panel: #252526;
-  --bg-elevated: #2d2d30;
-  --bg-hover: #2a2d2e;
-  --dropdown-bg: #2d2d30;
-  --dropdown-hover-bg: #2a2d2e;
-  --bg-input: #3c3c3c;
-  --bg-muted: #333;
-  --bg-filter: #1e1e24;
-  --bg-number-input: #2a2a2e;
-
-  /* ── Text ────────────────────────────── */
-  --text-main: #d4d4d4;
-  --text-bright: #fff;
-  --text-accent: #9cdcfe;
-  --text-heading: #dcdcaa;
-  --text-price: #b5cea8;
-  --text-muted: #94a3b8;
-  --text-soft: #aaa;
-  --text-dimmed: #666;
-
-  /* ── Borders ─────────────────────────── */
-  --border-main: #333;
-  --border-section: #3a3d40;
-  --border-card: #4a4d50;
-  --border-input: #555;
-  --border-subtle: #444;
-  --border-hype: #6b5a1e;
-  --border-hype-hover: #a08830;
-
-  /* ── Primary action ──────────────────── */
-  --accent-primary: #0e639c;
-  --accent-primary-hover: #1177bb;
-  --accent-primary-active: #094771;
-  --accent-focus: #007acc;
-
-  /* ── Semantic accents ────────────────── */
-  --accent-blue-text: #569cd6;
-  --accent-green: #5ece6b;
-  --accent-green-bright: #27ae60;
-  --accent-teal: #4ec9b0;
-  --accent-gold: #f0c040;
-  --accent-gold-hype: #f5c542;
-  --accent-hype: #ffab40;
-  --accent-red: #ff6b6b;
-  --accent-red-dark: #c0392b;
-  --accent-red-bg: #3a1d1d;
-  --accent-red-border: #6b3030;
-  --accent-red-border-hover: #a04040;
-
-  /* ── Chat ─────────────────────────────── */
-  --chat-user-bg: #264f78;
-  --chat-error-bg: #3b1a1a;
-
-  /* ── Badges ──────────────────────────── */
-  --badge-buy-bg: #1e2d3a;
-  --badge-sell-bg: #1e3a1e;
-  --badge-hype-bg: #3a2e10;
-
-  /* ── Modal ───────────────────────────── */
-  --modal-backdrop: rgba(0, 0, 0, 0.6);
-  --modal-shadow: rgba(0, 0, 0, 0.8);
-
-  /* ── Scrollbar ───────────────────────── */
-  --scrollbar-thumb: #555;
-  --scrollbar-thumb-hover: #777;
-
-  /* ── Badge sizing tokens ──────────────── */
-  --badge-font-sm: 10px;
-  --badge-font-md: 11px;
-  --badge-padding-sm: 1px 5px;
-  --badge-padding-md: 2px 6px;
-  --badge-radius: 3px;
-  --badge-font-weight: 600;
-
-  /* ── Alias tokens (consumed by components that use short names) ── */
-  --border: var(--border-main);
-  --text: var(--text-main);
-
-  /* ── Semantic badge-bg tokens (theme-aware, replaces hard-coded rgba) ── */
-  --badge-velocity-insta-bg: rgba(39, 174, 96, 0.18);
-  --badge-velocity-active-bg: rgba(86, 156, 214, 0.18);
-  --badge-velocity-slow-bg: rgba(240, 192, 64, 0.18);
-  --badge-velocity-muted-bg: rgba(136, 136, 136, 0.18);
-  --badge-trend-up-bg: rgba(39, 174, 96, 0.18);
-  --badge-trend-down-bg: rgba(244, 71, 71, 0.18);
-  --badge-neutral-bg: rgba(136, 136, 136, 0.15);
-  --badge-hype-vol-bg: rgba(255, 171, 64, 0.15);
-  --badge-tier-free-bg: rgba(76, 175, 80, 0.12);
-  --badge-tier-free-border: rgba(76, 175, 80, 0.3);
-  --badge-tier-freetier-bg: rgba(78, 205, 196, 0.12);
-  --badge-tier-freetier-border: rgba(78, 205, 196, 0.3);
-  --badge-tier-lowcost-bg: rgba(100, 149, 237, 0.12);
-  --badge-tier-lowcost-border: rgba(100, 149, 237, 0.3);
-  --badge-tier-neutral-bg: rgba(180, 180, 180, 0.08);
-  --badge-tier-neutral-border: rgba(180, 180, 180, 0.2);
-  --table-active-row-bg: rgba(100, 149, 237, 0.08);
-  --table-hover-row-bg: rgba(255, 255, 255, 0.03);
-  --setup-note-bg: rgba(255, 215, 0, 0.08);
-  --setup-note-border: rgba(255, 215, 0, 0.2);
-  --detail-expanded-bg: rgba(0, 0, 0, 0.08);
-
-  /* ── Misc ─────────────────────────────── */
-  --link-color: #6cb4ee;
-  --add-flip-bg: #1b6b2a;
-  --limit-ready-bg: #1a2e1a;
-
-  /* ── Style helper vars (Glass) ───────── */
-  --glass-body-from: #0a0a1e;
-  --glass-body-via: #1a1040;
-  --glass-body-to: #0a2040;
-  --glass-panel: rgba(255, 255, 255, 0.06);
-  --glass-elevated: rgba(255, 255, 255, 0.10);
-  --glass-hover: rgba(255, 255, 255, 0.12);
-  --glass-input: rgba(255, 255, 255, 0.08);
-  --glass-muted: rgba(255, 255, 255, 0.05);
-  --glass-border-card: rgba(255, 255, 255, 0.18);
-  --glass-border-main: rgba(255, 255, 255, 0.10);
-  --glass-border-section: rgba(255, 255, 255, 0.12);
-  --glass-border-input: rgba(255, 255, 255, 0.20);
-  --glass-scrollbar: rgba(255, 255, 255, 0.15);
-
-  /* ── Style helper vars (Neumorphism) ─── */
-  --neu-shadow-dark: #151518;
-  --neu-shadow-light: #383840;
-  --neu-accent-shadow: #094771;
-
-  /* ── Style helper vars (Skeuomorphism) ── */
-  --skeu-body-from: #151518;
-  --skeu-body-to: #1e1e1e;
-  --skeu-card-from: #353538;
-  --skeu-card-mid: #252526;
-  --skeu-card-to: #1e1e20;
-  --skeu-card-highlight: #444;
-  --skeu-card-shadow-edge: #151518;
-  --skeu-header-from: #353538;
-  --skeu-header-to: #2a2a2e;
-  --skeu-btn-from: #3a3a3e;
-  --skeu-btn-to: #2a2a2e;
-  --skeu-btn-active-from: #0e639c;
-  --skeu-btn-active-to: #094771;
+#alt1-status {
+  padding: 4px 10px;
+  font-size: 11px;
+  text-align: center;
 }
 
-/* ─────────────────────────────────────────────────────────────────────────────
- *  COLORWAY: OSRS Brown
- * ───────────────────────────────────────────────────────────────────────────── */
-
-body[data-mode="dark"][data-colorway="osrs"] {
-  --bg-main: #382b1f;
-  --bg-panel: #4a3a2a;
-  --bg-elevated: #56452f;
-  --bg-hover: #5c4b35;
-  --dropdown-bg: #56452f;
-  --dropdown-hover-bg: #5c4b35;
-  --bg-input: #3e2e1e;
-  --bg-muted: #4a3a2a;
-  --bg-filter: #322418;
-  --bg-number-input: #3a2c1e;
-
-  --text-main: #ffdf8f;
-  --text-bright: #fff5d0;
-  --text-accent: #ffd666;
-  --text-heading: #ff9900;
-  --text-price: #d4a843;
-  --text-muted: #b89860;
-  --text-soft: #c8a060;
-  --text-dimmed: #8a6d40;
-
-  --border-main: #1f160e;
-  --border-section: #2a1e12;
-  --border-card: #5a4428;
-  --border-input: #6b5030;
-  --border-subtle: #5a4020;
-  --border-hype: #806020;
-  --border-hype-hover: #a08030;
-
-  --accent-primary: #8b4513;
-  --accent-primary-hover: #a0522d;
-  --accent-primary-active: #6b3410;
-  --accent-focus: #cd853f;
-  --accent-blue-text: #cd853f;
-  --accent-green: #6b8e23;
-  --accent-green-bright: #228b22;
-  --accent-teal: #8fbc8f;
-  --accent-gold: #ffd700;
-  --accent-gold-hype: #ffa500;
-  --accent-red: #dc143c;
-  --accent-red-dark: #8b0000;
-  --accent-red-bg: #3a1a0a;
-  --accent-red-border: #8b3030;
-  --accent-red-border-hover: #a04040;
-  --accent-hype: #e89830;
-
-  --chat-user-bg: #5a3a18;
-  --chat-error-bg: #3a1a0a;
-  --badge-buy-bg: #3a2810;
-  --badge-sell-bg: #283a10;
-  --badge-hype-bg: #3a3010;
-
-  --modal-backdrop: rgba(0, 0, 0, 0.7);
-  --modal-shadow: rgba(0, 0, 0, 0.9);
-  --scrollbar-thumb: #6b5030;
-  --scrollbar-thumb-hover: #8a6d40;
-  --link-color: #cd853f;
-  --add-flip-bg: #4a6b1a;
-  --limit-ready-bg: #2a3a1a;
-
-  /* Glass helpers */
-  --glass-body-from: #1a1008;
-  --glass-body-via: #2a1e10;
-  --glass-body-to: #1a1508;
-  --glass-panel: rgba(255, 220, 150, 0.06);
-  --glass-elevated: rgba(255, 220, 150, 0.10);
-  --glass-hover: rgba(255, 220, 150, 0.12);
-  --glass-input: rgba(255, 220, 150, 0.08);
-  --glass-muted: rgba(255, 220, 150, 0.05);
-  --glass-border-card: rgba(255, 200, 100, 0.20);
-  --glass-border-main: rgba(255, 200, 100, 0.10);
-  --glass-border-section: rgba(255, 200, 100, 0.12);
-  --glass-border-input: rgba(255, 200, 100, 0.22);
-  --glass-scrollbar: rgba(255, 200, 100, 0.15);
-
-  /* Neumorphism helpers */
-  --neu-shadow-dark: #2a1e14;
-  --neu-shadow-light: #5c4a38;
-  --neu-accent-shadow: #6b3410;
-
-  /* Skeuomorphism helpers */
-  --skeu-body-from: #2a2018;
-  --skeu-body-to: #382b1f;
-  --skeu-card-from: #584838;
-  --skeu-card-mid: #4a3a2a;
-  --skeu-card-to: #403020;
-  --skeu-card-highlight: #6a5840;
-  --skeu-card-shadow-edge: #1f160e;
-  --skeu-header-from: #584838;
-  --skeu-header-to: #4a4038;
-  --skeu-btn-from: #5a4830;
-  --skeu-btn-to: #4a3820;
-  --skeu-btn-active-from: #8b4513;
-  --skeu-btn-active-to: #6b3410;
+#alt1-status:empty {
+  display: none;
 }
 
-/* ─────────────────────────────────────────────────────────────────────────────
- *  COLORWAY: RS3 Modern — Dark
- * ───────────────────────────────────────────────────────────────────────────── */
-
-body[data-mode="dark"][data-colorway="rs3-modern"] {
-  --bg-main: #0f1722;
-  --bg-panel: #1c2836;
-  --bg-elevated: #1e2d3e;
-  --bg-hover: #243548;
-  --dropdown-bg: #1e2d3e;
-  --dropdown-hover-bg: #243548;
-  --bg-input: #1a2a3a;
-  --bg-muted: #1c2836;
-  --bg-filter: #141f2d;
-  --bg-number-input: #162030;
-
-  --text-main: #e6f0fa;
-  --text-bright: #ffffff;
-  --text-accent: #7dd3fc;
-  --text-heading: #38bdf8;
-  --text-price: #86efac;
-  --text-muted: #7494b0;
-  --text-soft: #90adc4;
-  --text-dimmed: #4a6580;
-
-  --border-main: #2a3f54;
-  --border-section: #1e3450;
-  --border-card: #3a5068;
-  --border-input: #3a5570;
-  --border-subtle: #2a4060;
-  --border-hype: #5a5a1e;
-  --border-hype-hover: #808030;
-
-  --accent-primary: #00a8ff;
-  --accent-primary-hover: #33bbff;
-  --accent-primary-active: #0080cc;
-  --accent-focus: #00a8ff;
-  --accent-blue-text: #7dd3fc;
-  --accent-green: #4ade80;
-  --accent-green-bright: #22c55e;
-  --accent-teal: #2dd4bf;
-  --accent-gold: #fbbf24;
-  --accent-gold-hype: #f59e0b;
-  --accent-red: #f87171;
-  --accent-red-dark: #ef4444;
-  --accent-red-bg: #2a1515;
-  --accent-red-border: #7f1d1d;
-  --accent-red-border-hover: #991b1b;
-  --accent-hype: #ffab40;
-
-  --chat-user-bg: #0c3a6e;
-  --chat-error-bg: #2a1515;
-  --badge-buy-bg: #0c2d4a;
-  --badge-sell-bg: #0c3a1e;
-  --badge-hype-bg: #3a3010;
-
-  --modal-backdrop: rgba(0, 0, 0, 0.75);
-  --modal-shadow: rgba(0, 0, 0, 0.9);
-  --scrollbar-thumb: #3a5570;
-  --scrollbar-thumb-hover: #4a7090;
-  --link-color: #7dd3fc;
-  --add-flip-bg: #0d5a2a;
-  --limit-ready-bg: #0d2a1a;
-
-  /* Glass helpers */
-  --glass-body-from: #060e18;
-  --glass-body-via: #0a1828;
-  --glass-body-to: #0a1020;
-  --glass-panel: rgba(120, 180, 255, 0.06);
-  --glass-elevated: rgba(120, 180, 255, 0.10);
-  --glass-hover: rgba(120, 180, 255, 0.12);
-  --glass-input: rgba(120, 180, 255, 0.08);
-  --glass-muted: rgba(120, 180, 255, 0.05);
-  --glass-border-card: rgba(100, 180, 255, 0.20);
-  --glass-border-main: rgba(100, 180, 255, 0.10);
-  --glass-border-section: rgba(100, 180, 255, 0.12);
-  --glass-border-input: rgba(100, 180, 255, 0.22);
-  --glass-scrollbar: rgba(100, 180, 255, 0.15);
-
-  /* Neumorphism helpers */
-  --neu-shadow-dark: #080e18;
-  --neu-shadow-light: #2a3a4e;
-  --neu-accent-shadow: #0080cc;
-
-  /* Skeuomorphism helpers */
-  --skeu-body-from: #080e18;
-  --skeu-body-to: #0f1722;
-  --skeu-card-from: #243040;
-  --skeu-card-mid: #1c2836;
-  --skeu-card-to: #141e2c;
-  --skeu-card-highlight: #3a5068;
-  --skeu-card-shadow-edge: #080e18;
-  --skeu-header-from: #243040;
-  --skeu-header-to: #1c2836;
-  --skeu-btn-from: #243548;
-  --skeu-btn-to: #1a2a3a;
-  --skeu-btn-active-from: #00a8ff;
-  --skeu-btn-active-to: #0080cc;
+#alt1-status a {
+  color: var(--link-color);
 }
-
-/* ─────────────────────────────────────────────────────────────────────────────
- *  COLORWAY: RS Lobby — Dark
- *  Inspired by the RuneScape in-game lobby UI — warm parchment browns,
- *  gold accents, ridge-border aesthetic. A blend of OSRS + RS3 Modern.
- * ───────────────────────────────────────────────────────────────────────────── */
-
-body[data-mode="dark"][data-colorway="rs-lobby"] {
-  --bg-main: #1a140f;
-  --bg-panel: #2a221b;
-  --bg-elevated: #3e3529;
-  --bg-hover: #4a3e30;
-  --dropdown-bg: #3e3529;
-  --dropdown-hover-bg: #4a3e30;
-  --bg-input: #1a1510;
-  --bg-muted: #2a221b;
-  --bg-filter: #15100c;
-  --bg-number-input: #1a1510;
-
-  --text-main: #bdae95;
-  --text-bright: #e0e0e0;
-  --text-accent: #c8b07a;
-  --text-heading: #eddca8;
-  --text-price: #86efac;
-  --text-muted: #8a7a68;
-  --text-soft: #a39682;
-  --text-dimmed: #5a4e3d;
-
-  --border-main: #4a3e30;
-  --border-section: #3a3228;
-  --border-card: #5a4e3d;
-  --border-input: #5a4a38;
-  --border-subtle: #3e3224;
-  --border-hype: #806830;
-  --border-hype-hover: #a08840;
-
-  --accent-primary: #7a654c;
-  --accent-primary-hover: #96805c;
-  --accent-primary-active: #5a4830;
-  --accent-focus: #c8b07a;
-  --accent-blue-text: #7192bc;
-  --accent-green: #539e30;
-  --accent-green-bright: #6bba48;
-  --accent-teal: #7192bc;
-  --accent-gold: #c8b07a;
-  --accent-gold-hype: #d98d26;
-  --accent-red: #a32222;
-  --accent-red-dark: #7a1818;
-  --accent-red-bg: #2a1510;
-  --accent-red-border: #8a3030;
-  --accent-red-border-hover: #a84040;
-  --accent-hype: #d98d26;
-
-  --chat-user-bg: #3a3020;
-  --chat-error-bg: #2a1510;
-  --badge-buy-bg: #2a2818;
-  --badge-sell-bg: #1e3010;
-  --badge-hype-bg: #3a3010;
-
-  --modal-backdrop: rgba(0, 0, 0, 0.75);
-  --modal-shadow: rgba(0, 0, 0, 0.9);
-  --scrollbar-thumb: #5a4a38;
-  --scrollbar-thumb-hover: #7a654c;
-  --link-color: #c8b07a;
-  --add-flip-bg: #2a3a1a;
-  --limit-ready-bg: #1e2a14;
-
-  /* Glass helpers */
-  --glass-body-from: #100c08;
-  --glass-body-via: #1a140f;
-  --glass-body-to: #150f0a;
-  --glass-panel: rgba(200, 176, 122, 0.06);
-  --glass-elevated: rgba(200, 176, 122, 0.10);
-  --glass-hover: rgba(200, 176, 122, 0.12);
-  --glass-input: rgba(200, 176, 122, 0.08);
-  --glass-muted: rgba(200, 176, 122, 0.05);
-  --glass-border-card: rgba(200, 176, 122, 0.18);
-  --glass-border-main: rgba(200, 176, 122, 0.10);
-  --glass-border-section: rgba(200, 176, 122, 0.12);
-  --glass-border-input: rgba(200, 176, 122, 0.20);
-  --glass-scrollbar: rgba(200, 176, 122, 0.14);
-
-  /* Neumorphism helpers */
-  --neu-shadow-dark: #100c08;
-  --neu-shadow-light: #4a3e30;
-  --neu-accent-shadow: #5a4830;
-
-  /* Skeuomorphism helpers */
-  --skeu-body-from: #15100c;
-  --skeu-body-to: #2a221b;
-  --skeu-card-from: #4a3e30;
-  --skeu-card-mid: #3e3529;
-  --skeu-card-to: #2a221b;
-  --skeu-card-highlight: #5a4e3d;
-  --skeu-card-shadow-edge: #100c08;
-  --skeu-header-from: #4a3e30;
-  --skeu-header-to: #3a3228;
-  --skeu-btn-from: #506270;
-  --skeu-btn-to: #34414a;
-  --skeu-btn-active-from: #c8b07a;
-  --skeu-btn-active-to: #96805c;
-}
-
-/* ─────────────────────────────────────────────────────────────────────────────
- *  COLORWAY: Gruvbox — Dark
- *  morhetz/gruvbox "retro groove" palette — warm earthy tones with pastel
- *  accents. bg0 #282828, fg1 #ebdbb2, yellow #d79921, aqua #689d6a.
- * ───────────────────────────────────────────────────────────────────────────── */
-
-body[data-mode="dark"][data-colorway="gruvbox"] {
-  --bg-main: #282828;
-  --bg-panel: #3c3836;
-  --bg-elevated: #504945;
-  --bg-hover: #665c54;
-  --dropdown-bg: #504945;
-  --dropdown-hover-bg: #665c54;
-  --bg-input: #32302f;
-  --bg-muted: #3c3836;
-  --bg-filter: #1d2021;
-  --bg-number-input: #32302f;
-
-  --text-main: #ebdbb2;
-  --text-bright: #fbf1c7;
-  --text-accent: #fabd2f;
-  --text-heading: #fe8019;
-  --text-price: #b8bb26;
-  --text-muted: #928374;
-  --text-soft: #a89984;
-  --text-dimmed: #7c6f64;
-
-  --border-main: #504945;
-  --border-section: #3c3836;
-  --border-card: #665c54;
-  --border-input: #665c54;
-  --border-subtle: #504945;
-  --border-hype: #d65d0e;
-  --border-hype-hover: #fe8019;
-
-  --accent-primary: #458588;
-  --accent-primary-hover: #83a598;
-  --accent-primary-active: #076678;
-  --accent-focus: #83a598;
-  --accent-blue-text: #83a598;
-  --accent-green: #98971a;
-  --accent-green-bright: #b8bb26;
-  --accent-teal: #689d6a;
-  --accent-gold: #d79921;
-  --accent-gold-hype: #fabd2f;
-  --accent-red: #fb4934;
-  --accent-red-dark: #cc241d;
-  --accent-red-bg: #3c1f1f;
-  --accent-red-border: #cc241d;
-  --accent-red-border-hover: #fb4934;
-  --accent-hype: #fe8019;
-
-  --chat-user-bg: #3c3836;
-  --chat-error-bg: #3c1f1f;
-  --badge-buy-bg: #2a3428;
-  --badge-sell-bg: #283428;
-  --badge-hype-bg: #3c3020;
-
-  --modal-backdrop: rgba(0, 0, 0, 0.75);
-  --modal-shadow: rgba(0, 0, 0, 0.9);
-  --scrollbar-thumb: #665c54;
-  --scrollbar-thumb-hover: #7c6f64;
-  --link-color: #83a598;
-  --add-flip-bg: #3a4a28;
-  --limit-ready-bg: #2a3a1e;
-
-  /* Glass helpers */
-  --glass-body-from: #1d2021;
-  --glass-body-via: #282828;
-  --glass-body-to: #1d2021;
-  --glass-panel: rgba(235, 219, 178, 0.05);
-  --glass-elevated: rgba(235, 219, 178, 0.08);
-  --glass-hover: rgba(235, 219, 178, 0.10);
-  --glass-input: rgba(235, 219, 178, 0.06);
-  --glass-muted: rgba(235, 219, 178, 0.04);
-  --glass-border-card: rgba(235, 219, 178, 0.15);
-  --glass-border-main: rgba(235, 219, 178, 0.08);
-  --glass-border-section: rgba(235, 219, 178, 0.10);
-  --glass-border-input: rgba(235, 219, 178, 0.18);
-  --glass-scrollbar: rgba(235, 219, 178, 0.12);
-
-  /* Neumorphism helpers */
-  --neu-shadow-dark: #1d2021;
-  --neu-shadow-light: #504945;
-  --neu-accent-shadow: #076678;
-
-  /* Skeuomorphism helpers */
-  --skeu-body-from: #1d2021;
-  --skeu-body-to: #282828;
-  --skeu-card-from: #504945;
-  --skeu-card-mid: #3c3836;
-  --skeu-card-to: #32302f;
-  --skeu-card-highlight: #665c54;
-  --skeu-card-shadow-edge: #1d2021;
-  --skeu-header-from: #504945;
-  --skeu-header-to: #3c3836;
-  --skeu-btn-from: #504945;
-  --skeu-btn-to: #3c3836;
-  --skeu-btn-active-from: #458588;
-  --skeu-btn-active-to: #076678;
-}
-
-/* ─────────────────────────────────────────────────────────────────────────────
- *  COLORWAY: Classic — Light
- * ───────────────────────────────────────────────────────────────────────────── */
-
-body[data-mode="light"][data-colorway="classic"] {
-  --bg-main: #f5f5f5;
-  --bg-panel: #ffffff;
-  --bg-elevated: #fafafa;
-  --bg-hover: #f0f0f0;
-  --dropdown-bg: #fafafa;
-  --dropdown-hover-bg: #f0f0f0;
-  --bg-input: #f0f0f0;
-  --bg-muted: #e8e8e8;
-  --bg-filter: #f0f0f0;
-  --bg-number-input: #f5f5f5;
-
-  --text-main: #333333;
-  --text-bright: #111111;
-  --text-accent: #0066cc;
-  --text-heading: #1a1a1a;
-  --text-price: #2a7a2a;
-  --text-muted: #777777;
-  --text-soft: #999999;
-  --text-dimmed: #bbbbbb;
-
-  --border-main: #e0e0e0;
-  --border-section: #d8d8d8;
-  --border-card: #d0d0d0;
-  --border-input: #cccccc;
-  --border-subtle: #e8e8e8;
-  --border-hype: #d4a520;
-  --border-hype-hover: #b8920a;
-
-  --accent-primary: #0066cc;
-  --accent-primary-hover: #0077dd;
-  --accent-primary-active: #0055aa;
-  --accent-focus: #0066cc;
-  --accent-blue-text: #0066cc;
-  --accent-green: #2a8a2a;
-  --accent-green-bright: #22aa22;
-  --accent-teal: #1a9a8a;
-  --accent-gold: #d4a520;
-  --accent-gold-hype: #c09010;
-  --accent-red: #cc3333;
-  --accent-red-dark: #aa2222;
-  --accent-red-bg: #fff0f0;
-  --accent-red-border: #e0a0a0;
-  --accent-red-border-hover: #d08080;
-  --accent-hype: #e68a00;
-
-  --chat-user-bg: #e6f0ff;
-  --chat-error-bg: #fff0f0;
-  --badge-buy-bg: #e0f0ff;
-  --badge-sell-bg: #e0ffe0;
-  --badge-hype-bg: #fff8e0;
-
-  --modal-backdrop: rgba(0, 0, 0, 0.25);
-  --modal-shadow: rgba(0, 0, 0, 0.15);
-  --scrollbar-thumb: #cccccc;
-  --scrollbar-thumb-hover: #aaaaaa;
-  --link-color: #0066cc;
-  --add-flip-bg: #d0f0d0;
-  --limit-ready-bg: #e0f8e0;
-
-  /* Glass helpers */
-  --glass-body-from: #d0d8e0;
-  --glass-body-via: #e0e4ea;
-  --glass-body-to: #c8d4e0;
-  --glass-panel: rgba(255, 255, 255, 0.50);
-  --glass-elevated: rgba(255, 255, 255, 0.60);
-  --glass-hover: rgba(255, 255, 255, 0.65);
-  --glass-input: rgba(255, 255, 255, 0.45);
-  --glass-muted: rgba(255, 255, 255, 0.35);
-  --glass-border-card: rgba(0, 0, 0, 0.12);
-  --glass-border-main: rgba(0, 0, 0, 0.08);
-  --glass-border-section: rgba(0, 0, 0, 0.10);
-  --glass-border-input: rgba(0, 0, 0, 0.15);
-  --glass-scrollbar: rgba(0, 0, 0, 0.12);
-
-  /* Neumorphism helpers */
-  --neu-shadow-dark: #d0d0d0;
-  --neu-shadow-light: #ffffff;
-  --neu-accent-shadow: #0055aa;
-
-  /* Skeuomorphism helpers */
-  --skeu-body-from: #e8e8e8;
-  --skeu-body-to: #f5f5f5;
-  --skeu-card-from: #ffffff;
-  --skeu-card-mid: #f8f8f8;
-  --skeu-card-to: #f0f0f0;
-  --skeu-card-highlight: #ffffff;
-  --skeu-card-shadow-edge: #cccccc;
-  --skeu-header-from: #fafafa;
-  --skeu-header-to: #f0f0f0;
-  --skeu-btn-from: #f5f5f5;
-  --skeu-btn-to: #e8e8e8;
-  --skeu-btn-active-from: #0066cc;
-  --skeu-btn-active-to: #0055aa;
-}
-
-/* Light-mode colourway backgrounds are set via --bg-main (consumed by body { background: var(--bg-main) }).
-   Active view-btn text forced to white for all light colourways — consolidated here. */
-
-/* ─────────────────────────────────────────────────────────────────────────────
- *  COLORWAY: Solarized — Dark
- * ───────────────────────────────────────────────────────────────────────────── */
-
-body[data-mode="dark"][data-colorway="solarized"] {
-  --bg-main: #002b36;
-  --bg-panel: #073642;
-  --bg-elevated: #0a3f4c;
-  --bg-hover: #0e4756;
-  --dropdown-bg: #0a3f4c;
-  --dropdown-hover-bg: #0e4756;
-  --bg-input: #0a3f4c;
-  --bg-muted: #06313b;
-  --bg-filter: #002830;
-  --bg-number-input: #0a3a48;
-
-  --text-main: #93a1a1;
-  --text-bright: #fdf6e3;
-  --text-accent: #268bd2;
-  --text-heading: #b58900;
-  --text-price: #859900;
-  --text-muted: #839496;
-  --text-soft: #78909a;
-  --text-dimmed: #586e75;
-
-  --border-main: #0a4050;
-  --border-section: #0d4a58;
-  --border-card: #11546a;
-  --border-input: #175468;
-  --border-subtle: #0a4050;
-  --border-hype: #6b5a1e;
-  --border-hype-hover: #a08830;
-
-  --accent-primary: #268bd2;
-  --accent-primary-hover: #2e9ce6;
-  --accent-primary-active: #1a6daa;
-  --accent-focus: #268bd2;
-  --accent-blue-text: #268bd2;
-  --accent-green: #859900;
-  --accent-green-bright: #a0b800;
-  --accent-teal: #2aa198;
-  --accent-gold: #b58900;
-  --accent-gold-hype: #cb9a00;
-  --accent-red: #dc322f;
-  --accent-red-dark: #b02828;
-  --accent-red-bg: #2a1516;
-  --accent-red-border: #5a2020;
-  --accent-red-border-hover: #8a3030;
-  --accent-hype: #cb8b16;
-
-  --chat-user-bg: #0a3a50;
-  --chat-error-bg: #2a1012;
-  --badge-buy-bg: #073a42;
-  --badge-sell-bg: #0a3a18;
-  --badge-hype-bg: #3a3010;
-
-  --modal-backdrop: rgba(0, 0, 0, 0.6);
-  --modal-shadow: rgba(0, 0, 0, 0.8);
-  --scrollbar-thumb: #1a5868;
-  --scrollbar-thumb-hover: #268090;
-  --link-color: #268bd2;
-  --add-flip-bg: #1a4a10;
-  --limit-ready-bg: #0a2a10;
-
-  /* Glass helpers */
-  --glass-body-from: #001820;
-  --glass-body-via: #002030;
-  --glass-body-to: #00182a;
-  --glass-panel: rgba(7, 54, 66, 0.60);
-  --glass-elevated: rgba(7, 54, 66, 0.70);
-  --glass-hover: rgba(14, 71, 86, 0.70);
-  --glass-input: rgba(7, 54, 66, 0.50);
-  --glass-muted: rgba(7, 54, 66, 0.40);
-  --glass-border-card: rgba(38, 139, 210, 0.20);
-  --glass-border-main: rgba(38, 139, 210, 0.10);
-  --glass-border-section: rgba(38, 139, 210, 0.14);
-  --glass-border-input: rgba(38, 139, 210, 0.22);
-  --glass-scrollbar: rgba(38, 139, 210, 0.18);
-
-  /* Neumorphism helpers */
-  --neu-shadow-dark: #001a22;
-  --neu-shadow-light: #0d4a58;
-  --neu-accent-shadow: #1a6daa;
-
-  /* Skeuomorphism helpers */
-  --skeu-body-from: #001a22;
-  --skeu-body-to: #002b36;
-  --skeu-card-from: #0a4050;
-  --skeu-card-mid: #073642;
-  --skeu-card-to: #053038;
-  --skeu-card-highlight: #0e4756;
-  --skeu-card-shadow-edge: #001a22;
-  --skeu-header-from: #0a4050;
-  --skeu-header-to: #073642;
-  --skeu-btn-from: #0d4a58;
-  --skeu-btn-to: #073642;
-  --skeu-btn-active-from: #268bd2;
-  --skeu-btn-active-to: #1a6daa;
-}
-
-/* ─────────────────────────────────────────────────────────────────────────────
- *  COLORWAY: Solarized — Light
- * ───────────────────────────────────────────────────────────────────────────── */
-
-body[data-mode="light"][data-colorway="solarized"] {
-  --bg-main: #e6dec8;
-  --bg-panel: #f0e9d6;
-  --bg-elevated: #f5efdc;
-  --bg-hover: #e4dbc4;
-  --dropdown-bg: #f5efdc;
-  --dropdown-hover-bg: #e4dbc4;
-  --bg-input: #e8e0cc;
-  --bg-muted: #ddd4b8;
-  --bg-filter: #e4dcc8;
-  --bg-number-input: #e8e0cc;
-
-  --text-main: #586e75;
-  --text-bright: #073642;
-  --text-accent: #268bd2;
-  --text-heading: #946e00;
-  --text-price: #637100;
-  --text-muted: #6e8088;
-  --text-soft: #78888c;
-  --text-dimmed: #93a1a1;
-
-  --border-main: #d6ccb0;
-  --border-section: #cfc4a8;
-  --border-card: #c8bc9e;
-  --border-input: #c0b498;
-  --border-subtle: #ddd4ba;
-  --border-hype: #d4a520;
-  --border-hype-hover: #b8920a;
-
-  --accent-primary: #268bd2;
-  --accent-primary-hover: #2e9ce6;
-  --accent-primary-active: #1a6daa;
-  --accent-focus: #268bd2;
-  --accent-blue-text: #268bd2;
-  --accent-green: #859900;
-  --accent-green-bright: #6c8000;
-  --accent-teal: #2aa198;
-  --accent-gold: #b58900;
-  --accent-gold-hype: #9a7400;
-  --accent-red: #dc322f;
-  --accent-red-dark: #b02828;
-  --accent-red-bg: #fdf0ef;
-  --accent-red-border: #e0a0a0;
-  --accent-red-border-hover: #d08080;
-  --accent-hype: #b58900;
-
-  --chat-user-bg: #ddeef8;
-  --chat-error-bg: #fdf0ef;
-  --badge-buy-bg: #dde8f0;
-  --badge-sell-bg: #e0f0d0;
-  --badge-hype-bg: #f5ecc8;
-
-  --modal-backdrop: rgba(0, 0, 0, 0.25);
-  --modal-shadow: rgba(0, 0, 0, 0.15);
-  --scrollbar-thumb: #c0b498;
-  --scrollbar-thumb-hover: #a89a80;
-  --link-color: #268bd2;
-  --add-flip-bg: #d0e8c0;
-  --limit-ready-bg: #daf0d0;
-
-  /* Glass helpers */
-  --glass-body-from: #e0d8c0;
-  --glass-body-via: #eee4cc;
-  --glass-body-to: #ddd4b8;
-  --glass-panel: rgba(238, 232, 213, 0.55);
-  --glass-elevated: rgba(238, 232, 213, 0.65);
-  --glass-hover: rgba(238, 232, 213, 0.70);
-  --glass-input: rgba(238, 232, 213, 0.50);
-  --glass-muted: rgba(238, 232, 213, 0.40);
-  --glass-border-card: rgba(0, 0, 0, 0.12);
-  --glass-border-main: rgba(0, 0, 0, 0.08);
-  --glass-border-section: rgba(0, 0, 0, 0.10);
-  --glass-border-input: rgba(0, 0, 0, 0.15);
-  --glass-scrollbar: rgba(0, 0, 0, 0.10);
-
-  /* Neumorphism helpers */
-  --neu-shadow-dark: #c8bc9e;
-  --neu-shadow-light: #fdf6e3;
-  --neu-accent-shadow: #1a6daa;
-
-  /* Skeuomorphism helpers */
-  --skeu-body-from: #c8bc9e;
-  --skeu-body-to: #ddd4b8;
-  --skeu-card-from: #f5efdc;
-  --skeu-card-mid: #eee8d5;
-  --skeu-card-to: #e6dfc8;
-  --skeu-card-highlight: #fdf6e3;
-  --skeu-card-shadow-edge: #b0a488;
-  --skeu-header-from: #ede6d0;
-  --skeu-header-to: #e4dcc6;
-  --skeu-btn-from: #eee8d5;
-  --skeu-btn-to: #ddd4b8;
-  --skeu-btn-active-from: #268bd2;
-  --skeu-btn-active-to: #1a6daa;
-}
-
-/* (light-mode view-btn.active consolidated — see below contrast modifiers) */
-
-/* ─────────────────────────────────────────────────────────────────────────────
- *  COLORWAY: OSRS — Light
- * ───────────────────────────────────────────────────────────────────────────── */
-
-body[data-mode="light"][data-colorway="osrs"] {
-  --bg-main: #f5ead4;
-  --bg-panel: #fff6e6;
-  --bg-elevated: #fdf2dc;
-  --bg-hover: #f0e2c8;
-  --dropdown-bg: #fdf2dc;
-  --dropdown-hover-bg: #f0e2c8;
-  --bg-input: #f0e4cc;
-  --bg-muted: #e8dcc0;
-  --bg-filter: #f0e8d0;
-  --bg-number-input: #f0e4cc;
-
-  --text-main: #4a3520;
-  --text-bright: #2c1a08;
-  --text-accent: #8b4513;
-  --text-heading: #a05a14;
-  --text-price: #3a6e1e;
-  --text-muted: #8a7560;
-  --text-soft: #a08a70;
-  --text-dimmed: #c0aa88;
-
-  --border-main: #e0d0b0;
-  --border-section: #d8c8a4;
-  --border-card: #d0c098;
-  --border-input: #c8b890;
-  --border-subtle: #e0d4b8;
-  --border-hype: #d4a520;
-  --border-hype-hover: #b8920a;
-
-  --accent-primary: #8b4513;
-  --accent-primary-hover: #a0522d;
-  --accent-primary-active: #6b3410;
-  --accent-focus: #cd853f;
-  --accent-blue-text: #8b5e3c;
-  --accent-green: #5a8a1e;
-  --accent-green-bright: #3a7a10;
-  --accent-teal: #6b8e6b;
-  --accent-gold: #c8960a;
-  --accent-gold-hype: #b07808;
-  --accent-red: #cc3333;
-  --accent-red-dark: #8b0000;
-  --accent-red-bg: #fff0e8;
-  --accent-red-border: #e0a090;
-  --accent-red-border-hover: #d08070;
-  --accent-hype: #c87e10;
-
-  --chat-user-bg: #f5e8d0;
-  --chat-error-bg: #fff0e8;
-  --badge-buy-bg: #e8e0c8;
-  --badge-sell-bg: #e0f0d0;
-  --badge-hype-bg: #f8f0c8;
-
-  --modal-backdrop: rgba(0, 0, 0, 0.25);
-  --modal-shadow: rgba(0, 0, 0, 0.15);
-  --scrollbar-thumb: #c8b890;
-  --scrollbar-thumb-hover: #a89a78;
-  --link-color: #8b4513;
-  --add-flip-bg: #d8eac0;
-  --limit-ready-bg: #e0f0d0;
-
-  /* Glass helpers */
-  --glass-body-from: #e8dcc0;
-  --glass-body-via: #f0e4cc;
-  --glass-body-to: #e0d4b0;
-  --glass-panel: rgba(255, 240, 210, 0.55);
-  --glass-elevated: rgba(255, 240, 210, 0.65);
-  --glass-hover: rgba(255, 240, 210, 0.70);
-  --glass-input: rgba(255, 240, 210, 0.50);
-  --glass-muted: rgba(255, 240, 210, 0.40);
-  --glass-border-card: rgba(139, 69, 19, 0.15);
-  --glass-border-main: rgba(139, 69, 19, 0.08);
-  --glass-border-section: rgba(139, 69, 19, 0.10);
-  --glass-border-input: rgba(139, 69, 19, 0.18);
-  --glass-scrollbar: rgba(139, 69, 19, 0.12);
-
-  /* Neumorphism helpers */
-  --neu-shadow-dark: #d0c098;
-  --neu-shadow-light: #fff8ea;
-  --neu-accent-shadow: #6b3410;
-
-  /* Skeuomorphism helpers */
-  --skeu-body-from: #e0d4b0;
-  --skeu-body-to: #f5ead4;
-  --skeu-card-from: #fff6e6;
-  --skeu-card-mid: #faf0da;
-  --skeu-card-to: #f0e4cc;
-  --skeu-card-highlight: #fff8ea;
-  --skeu-card-shadow-edge: #c8b890;
-  --skeu-header-from: #faf0da;
-  --skeu-header-to: #f0e8d0;
-  --skeu-btn-from: #f5ead4;
-  --skeu-btn-to: #e8dcc0;
-  --skeu-btn-active-from: #8b4513;
-  --skeu-btn-active-to: #6b3410;
-}
-
-/* (light-mode view-btn.active consolidated — see below contrast modifiers) */
-
-/* ─────────────────────────────────────────────────────────────────────────────
- *  COLORWAY: RS3 Modern — Light
- * ───────────────────────────────────────────────────────────────────────────── */
-
-body[data-mode="light"][data-colorway="rs3-modern"] {
-  --bg-main: #eef4fa;
-  --bg-panel: #f8fbff;
-  --bg-elevated: #f4f8fd;
-  --bg-hover: #e6eef6;
-  --dropdown-bg: #f4f8fd;
-  --dropdown-hover-bg: #e6eef6;
-  --bg-input: #e8f0f8;
-  --bg-muted: #dce8f2;
-  --bg-filter: #eaf2fa;
-  --bg-number-input: #e8f0f8;
-
-  --text-main: #1a2a3a;
-  --text-bright: #0a1420;
-  --text-accent: #0078d4;
-  --text-heading: #0060b0;
-  --text-price: #248a3d;
-  --text-muted: #5a7a94;
-  --text-soft: #7a94aa;
-  --text-dimmed: #a0b4c4;
-
-  --border-main: #d0dce8;
-  --border-section: #c8d8e8;
-  --border-card: #c0d0e0;
-  --border-input: #b8cad8;
-  --border-subtle: #dce8f2;
-  --border-hype: #d4a520;
-  --border-hype-hover: #b8920a;
-
-  --accent-primary: #0078d4;
-  --accent-primary-hover: #1888e0;
-  --accent-primary-active: #0060b0;
-  --accent-focus: #0078d4;
-  --accent-blue-text: #0078d4;
-  --accent-green: #248a3d;
-  --accent-green-bright: #1a7a2e;
-  --accent-teal: #1a8a7a;
-  --accent-gold: #d4a520;
-  --accent-gold-hype: #c09010;
-  --accent-red: #d13438;
-  --accent-red-dark: #a4262c;
-  --accent-red-bg: #fff0f0;
-  --accent-red-border: #e0a0a0;
-  --accent-red-border-hover: #d08080;
-  --accent-hype: #e08a00;
-
-  --chat-user-bg: #dcecff;
-  --chat-error-bg: #fff0f0;
-  --badge-buy-bg: #dceaff;
-  --badge-sell-bg: #dcf4dc;
-  --badge-hype-bg: #fff8e0;
-
-  --modal-backdrop: rgba(0, 0, 0, 0.25);
-  --modal-shadow: rgba(0, 0, 0, 0.15);
-  --scrollbar-thumb: #b8cad8;
-  --scrollbar-thumb-hover: #98aec0;
-  --link-color: #0078d4;
-  --add-flip-bg: #d0f0d0;
-  --limit-ready-bg: #daf4da;
-
-  /* Glass helpers */
-  --glass-body-from: #d8e4f0;
-  --glass-body-via: #e4eef6;
-  --glass-body-to: #d0dce8;
-  --glass-panel: rgba(240, 248, 255, 0.55);
-  --glass-elevated: rgba(240, 248, 255, 0.65);
-  --glass-hover: rgba(240, 248, 255, 0.70);
-  --glass-input: rgba(240, 248, 255, 0.50);
-  --glass-muted: rgba(240, 248, 255, 0.40);
-  --glass-border-card: rgba(0, 120, 212, 0.12);
-  --glass-border-main: rgba(0, 120, 212, 0.08);
-  --glass-border-section: rgba(0, 120, 212, 0.10);
-  --glass-border-input: rgba(0, 120, 212, 0.15);
-  --glass-scrollbar: rgba(0, 120, 212, 0.10);
-
-  /* Neumorphism helpers */
-  --neu-shadow-dark: #c0d0e0;
-  --neu-shadow-light: #ffffff;
-  --neu-accent-shadow: #0060b0;
-
-  /* Skeuomorphism helpers */
-  --skeu-body-from: #dce8f2;
-  --skeu-body-to: #eef4fa;
-  --skeu-card-from: #f8fbff;
-  --skeu-card-mid: #f4f8fd;
-  --skeu-card-to: #eaf2fa;
-  --skeu-card-highlight: #ffffff;
-  --skeu-card-shadow-edge: #b8cad8;
-  --skeu-header-from: #f4f8fd;
-  --skeu-header-to: #eaf2fa;
-  --skeu-btn-from: #eef4fa;
-  --skeu-btn-to: #dce8f2;
-  --skeu-btn-active-from: #0078d4;
-  --skeu-btn-active-to: #0060b0;
-}
-
-/* (light-mode view-btn.active consolidated — see below contrast modifiers) */
-
-/* ─────────────────────────────────────────────────────────────────────────────
- *  COLORWAY: RS Lobby — Light
- *  Light-mode counterpart: warm cream/parchment base with gold highlights.
- * ───────────────────────────────────────────────────────────────────────────── */
-
-body[data-mode="light"][data-colorway="rs-lobby"] {
-  --bg-main: #f2ece2;
-  --bg-panel: #faf6ee;
-  --bg-elevated: #f6f0e6;
-  --bg-hover: #ece4d6;
-  --dropdown-bg: #f6f0e6;
-  --dropdown-hover-bg: #ece4d6;
-  --bg-input: #eae2d4;
-  --bg-muted: #e0d8c8;
-  --bg-filter: #f0e8da;
-  --bg-number-input: #eae2d4;
-
-  --text-main: #3e3529;
-  --text-bright: #1a140f;
-  --text-accent: #8b6914;
-  --text-heading: #6b5010;
-  --text-price: #2a7a2a;
-  --text-muted: #7a6d5a;
-  --text-soft: #8a7e6c;
-  --text-dimmed: #b0a490;
-
-  --border-main: #d4c8b4;
-  --border-section: #c8bca8;
-  --border-card: #c0b49e;
-  --border-input: #b8ac96;
-  --border-subtle: #dcd0bc;
-  --border-hype: #c09020;
-  --border-hype-hover: #a07a10;
-
-  --accent-primary: #8b6914;
-  --accent-primary-hover: #a07a20;
-  --accent-primary-active: #6b5010;
-  --accent-focus: #8b6914;
-  --accent-blue-text: #506070;
-  --accent-green: #3a8a28;
-  --accent-green-bright: #2a7a1a;
-  --accent-teal: #4a7a6a;
-  --accent-gold: #c09020;
-  --accent-gold-hype: #a07a10;
-  --accent-red: #a32222;
-  --accent-red-dark: #7a1818;
-  --accent-red-bg: #fff0ec;
-  --accent-red-border: #d8a0a0;
-  --accent-red-border-hover: #c88080;
-  --accent-hype: #c88020;
-
-  --chat-user-bg: #f0e8d4;
-  --chat-error-bg: #fff0ec;
-  --badge-buy-bg: #e8e0ce;
-  --badge-sell-bg: #dcf0dc;
-  --badge-hype-bg: #f8f0d0;
-
-  --modal-backdrop: rgba(0, 0, 0, 0.25);
-  --modal-shadow: rgba(0, 0, 0, 0.15);
-  --scrollbar-thumb: #c0b49e;
-  --scrollbar-thumb-hover: #a09480;
-  --link-color: #8b6914;
-  --add-flip-bg: #d0e8c0;
-  --limit-ready-bg: #daf0d0;
-
-  /* Glass helpers */
-  --glass-body-from: #e0d8c8;
-  --glass-body-via: #ece4d6;
-  --glass-body-to: #d8ceb8;
-  --glass-panel: rgba(250, 244, 230, 0.55);
-  --glass-elevated: rgba(250, 244, 230, 0.65);
-  --glass-hover: rgba(250, 244, 230, 0.70);
-  --glass-input: rgba(250, 244, 230, 0.50);
-  --glass-muted: rgba(250, 244, 230, 0.40);
-  --glass-border-card: rgba(139, 105, 20, 0.14);
-  --glass-border-main: rgba(139, 105, 20, 0.08);
-  --glass-border-section: rgba(139, 105, 20, 0.10);
-  --glass-border-input: rgba(139, 105, 20, 0.16);
-  --glass-scrollbar: rgba(139, 105, 20, 0.12);
-
-  /* Neumorphism helpers */
-  --neu-shadow-dark: #c8bca8;
-  --neu-shadow-light: #ffffff;
-  --neu-accent-shadow: #6b5010;
-
-  /* Skeuomorphism helpers */
-  --skeu-body-from: #e0d8c8;
-  --skeu-body-to: #f2ece2;
-  --skeu-card-from: #faf6ee;
-  --skeu-card-mid: #f6f0e6;
-  --skeu-card-to: #ece4d6;
-  --skeu-card-highlight: #ffffff;
-  --skeu-card-shadow-edge: #b8ac96;
-  --skeu-header-from: #f6f0e6;
-  --skeu-header-to: #ece4d6;
-  --skeu-btn-from: #f2ece2;
-  --skeu-btn-to: #e0d8c8;
-  --skeu-btn-active-from: #8b6914;
-  --skeu-btn-active-to: #6b5010;
-}
-
-/* (light-mode view-btn.active consolidated — see below contrast modifiers) */
-
-/* ─────────────────────────────────────────────────────────────────────────────
- *  COLORWAY: Gruvbox — Light
- *  morhetz/gruvbox light palette — warm cream bg (#fbf1c7), dark fg (#3c3836),
- *  same pastel accent family as Gruvbox Dark.
- * ───────────────────────────────────────────────────────────────────────────── */
-
-body[data-mode="light"][data-colorway="gruvbox"] {
-  --bg-main: #fbf1c7;
-  --bg-panel: #ebdbb2;
-  --bg-elevated: #f2e5bc;
-  --bg-hover: #d5c4a1;
-  --dropdown-bg: #f2e5bc;
-  --dropdown-hover-bg: #d5c4a1;
-  --bg-input: #ebdbb2;
-  --bg-muted: #d5c4a1;
-  --bg-filter: #f9f0c0;
-  --bg-number-input: #ebdbb2;
-
-  --text-main: #3c3836;
-  --text-bright: #282828;
-  --text-accent: #b57614;
-  --text-heading: #af3a03;
-  --text-price: #79740e;
-  --text-muted: #7c6f64;
-  --text-soft: #928374;
-  --text-dimmed: #a89984;
-
-  --border-main: #d5c4a1;
-  --border-section: #bdae93;
-  --border-card: #bdae93;
-  --border-input: #a89984;
-  --border-subtle: #d5c4a1;
-  --border-hype: #af3a03;
-  --border-hype-hover: #d65d0e;
-
-  --accent-primary: #076678;
-  --accent-primary-hover: #458588;
-  --accent-primary-active: #054b5c;
-  --accent-focus: #076678;
-  --accent-blue-text: #076678;
-  --accent-green: #79740e;
-  --accent-green-bright: #98971a;
-  --accent-teal: #427b58;
-  --accent-gold: #b57614;
-  --accent-gold-hype: #d79921;
-  --accent-red: #cc241d;
-  --accent-red-dark: #9d0006;
-  --accent-red-bg: #f9e0de;
-  --accent-red-border: #cc241d;
-  --accent-red-border-hover: #9d0006;
-  --accent-hype: #af3a03;
-
-  --chat-user-bg: #ebdbb2;
-  --chat-error-bg: #f9e0de;
-  --badge-buy-bg: #e0dba8;
-  --badge-sell-bg: #dde0a0;
-  --badge-hype-bg: #eddca0;
-
-  --modal-backdrop: rgba(0, 0, 0, 0.25);
-  --modal-shadow: rgba(0, 0, 0, 0.15);
-  --scrollbar-thumb: #bdae93;
-  --scrollbar-thumb-hover: #a89984;
-  --link-color: #076678;
-  --add-flip-bg: #d0dca0;
-  --limit-ready-bg: #dae4b0;
-
-  /* Glass helpers */
-  --glass-body-from: #e8dcb0;
-  --glass-body-via: #f0e4c0;
-  --glass-body-to: #e0d4a8;
-  --glass-panel: rgba(251, 241, 199, 0.55);
-  --glass-elevated: rgba(251, 241, 199, 0.65);
-  --glass-hover: rgba(251, 241, 199, 0.70);
-  --glass-input: rgba(251, 241, 199, 0.50);
-  --glass-muted: rgba(251, 241, 199, 0.40);
-  --glass-border-card: rgba(60, 56, 54, 0.12);
-  --glass-border-main: rgba(60, 56, 54, 0.08);
-  --glass-border-section: rgba(60, 56, 54, 0.10);
-  --glass-border-input: rgba(60, 56, 54, 0.15);
-  --glass-scrollbar: rgba(60, 56, 54, 0.10);
-
-  /* Neumorphism helpers */
-  --neu-shadow-dark: #d5c4a1;
-  --neu-shadow-light: #fbf1c7;
-  --neu-accent-shadow: #054b5c;
-
-  /* Skeuomorphism helpers */
-  --skeu-body-from: #ebdbb2;
-  --skeu-body-to: #fbf1c7;
-  --skeu-card-from: #f2e5bc;
-  --skeu-card-mid: #ebdbb2;
-  --skeu-card-to: #e0d4a8;
-  --skeu-card-highlight: #fbf1c7;
-  --skeu-card-shadow-edge: #bdae93;
-  --skeu-header-from: #f2e5bc;
-  --skeu-header-to: #ebdbb2;
-  --skeu-btn-from: #f2e5bc;
-  --skeu-btn-to: #ebdbb2;
-  --skeu-btn-active-from: #076678;
-  --skeu-btn-active-to: #054b5c;
-}
-
-/* (light-mode view-btn.active consolidated — see rule below) */
-
-/* ─────────────────────────────────────────────────────────────────────────────
- *  LIGHT-MODE: consolidated overrides
- *  - .view-btn.active text forced white for all light colourways
- *  - Badge/table tokens adjusted for light backgrounds
- * ───────────────────────────────────────────────────────────────────────────── */
-
-body[data-mode="light"] .view-btn.active {
-  color: #ffffff;
-}
-
-body[data-mode="light"] {
-  --badge-velocity-insta-bg: rgba(39, 174, 96, 0.14);
-  --badge-velocity-active-bg: rgba(0, 80, 180, 0.12);
-  --badge-velocity-slow-bg: rgba(200, 150, 0, 0.14);
-  --badge-velocity-muted-bg: rgba(100, 100, 100, 0.12);
-  --badge-trend-up-bg: rgba(39, 174, 96, 0.14);
-  --badge-trend-down-bg: rgba(200, 50, 50, 0.14);
-  --badge-neutral-bg: rgba(100, 100, 100, 0.10);
-  --badge-hype-vol-bg: rgba(200, 130, 0, 0.12);
-  --badge-tier-free-bg: rgba(39, 154, 39, 0.10);
-  --badge-tier-free-border: rgba(39, 154, 39, 0.25);
-  --badge-tier-freetier-bg: rgba(26, 154, 138, 0.10);
-  --badge-tier-freetier-border: rgba(26, 154, 138, 0.25);
-  --badge-tier-lowcost-bg: rgba(0, 80, 180, 0.10);
-  --badge-tier-lowcost-border: rgba(0, 80, 180, 0.25);
-  --badge-tier-neutral-bg: rgba(100, 100, 100, 0.06);
-  --badge-tier-neutral-border: rgba(100, 100, 100, 0.15);
-  --table-active-row-bg: rgba(0, 80, 180, 0.06);
-  --table-hover-row-bg: rgba(0, 0, 0, 0.02);
-  --setup-note-bg: rgba(180, 140, 0, 0.06);
-  --setup-note-border: rgba(180, 140, 0, 0.18);
-  --detail-expanded-bg: rgba(0, 0, 0, 0.04);
-}
-
-/* ─────────────────────────────────────────────────────────────────────────────
- *  CONTRAST MODIFIERS (body[data-contrast])
- *
- *  Layered on top of any Mode × Colorway combination.
- *  "soft"  — reduced contrast (lighter darks, softer lights)
- *  "hard"  — maximum contrast (deeper darks, brighter lights)
- * ───────────────────────────────────────────────────────────────────────────── */
-
-/* ── Soft contrast — dark modes ─────────────────────── */
-body[data-mode="dark"][data-contrast="soft"] {
-  --bg-main: color-mix(in srgb, var(--bg-panel) 70%, var(--bg-main));
-  --border-main: color-mix(in srgb, var(--border-main) 60%, var(--bg-panel));
-  --text-main: color-mix(in srgb, var(--text-main) 80%, var(--text-muted));
-  --text-bright: color-mix(in srgb, var(--text-bright) 85%, var(--text-main));
-}
-
-/* ── Hard contrast — dark modes ─────────────────────── */
-body[data-mode="dark"][data-contrast="hard"] {
-  --bg-main: color-mix(in srgb, var(--bg-main) 80%, black);
-  --bg-panel: color-mix(in srgb, var(--bg-panel) 85%, black);
-  --bg-muted: color-mix(in srgb, var(--bg-muted) 80%, black);
-  --text-main: color-mix(in srgb, var(--text-main) 80%, white);
-  --text-bright: #ffffff;
-  --border-main: color-mix(in srgb, var(--border-main) 65%, black);
-}
-
-/* ── Soft contrast — light modes ────────────────────── */
-body[data-mode="light"][data-contrast="soft"] {
-  --bg-main: color-mix(in srgb, var(--bg-main) 70%, white);
-  --bg-panel: color-mix(in srgb, var(--bg-panel) 80%, white);
-  --border-main: color-mix(in srgb, var(--border-main) 50%, white);
-  --text-main: color-mix(in srgb, var(--text-main) 70%, var(--text-muted));
-  --text-bright: color-mix(in srgb, var(--text-bright) 75%, var(--text-main));
-}
-
-/* ── Hard contrast — light modes ────────────────────── */
-body[data-mode="light"][data-contrast="hard"] {
-  --bg-main: color-mix(in srgb, var(--bg-main) 85%, white);
-  --bg-panel: #ffffff;
-  --bg-muted: color-mix(in srgb, var(--bg-muted) 80%, white);
-  --text-main: color-mix(in srgb, var(--text-main) 85%, black);
-  --text-bright: #000000;
-  --border-main: color-mix(in srgb, var(--border-main) 80%, var(--text-dimmed));
-}
-
-/* ═══════════════════════════════════════════════════════════════════════════
- *  STYLE: Glassmorphism  (body[data-style="glass"])
- *  Frosted panels, backdrop-filter, semi-transparent backgrounds
- * ═══════════════════════════════════════════════════════════════════════════ */
-
-body[data-style="glass"] {
-  background: linear-gradient(135deg, var(--glass-body-from) 0%, var(--glass-body-via) 50%, var(--glass-body-to) 100%);
-  --bg-main: var(--glass-panel);
-  --bg-panel: var(--glass-panel);
-  --bg-elevated: var(--glass-elevated);
-  --bg-hover: var(--glass-hover);
-  --bg-input: var(--glass-input);
-  --bg-muted: var(--glass-muted);
-  --bg-number-input: var(--glass-panel);
-  --bg-filter: var(--glass-muted);
-  --border-card: var(--glass-border-card);
-  --border-main: var(--glass-border-main);
-  --border-section: var(--glass-border-section);
-  --border-input: var(--glass-border-input);
-  --border-subtle: var(--glass-border-main);
-  --scrollbar-thumb: var(--glass-scrollbar);
-  --modal-backdrop: rgba(0, 0, 0, 0.45);
-}
-body[data-style="glass"] #app {
-  background: transparent;
-}
-body[data-style="glass"] .market-card,
-body[data-style="glass"] .top20-section,
-body[data-style="glass"] .favorites-section,
-body[data-style="glass"] #settings-panel,
-body[data-style="glass"] #market-view,
-body[data-style="glass"] #view-tabs,
-body[data-style="glass"] .analytics-modal-content,
-body[data-style="glass"] .analytics-modal,
-body[data-style="glass"] .setup-guide-content,
-body[data-style="glass"] .setup-guide-modal,
-body[data-style="glass"] .item-modal,
-body[data-style="glass"] .graph-modal {
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-}
-
-/* ═══════════════════════════════════════════════════════════════════════════
- *  STYLE: Neumorphism  (body[data-style="neumorphism"])
- *  Soft inset/outset shadows, no visible borders
- * ═══════════════════════════════════════════════════════════════════════════ */
-
-body[data-style="neumorphism"] {
-  --border-main: transparent;
-  --border-section: transparent;
-  --border-card: transparent;
-  --border-input: transparent;
-  --border-subtle: transparent;
-  --border-hype: transparent;
-  --border-hype-hover: transparent;
-  --border-red-border: transparent;
-  --modal-shadow: none;
-}
-body[data-style="neumorphism"] .market-card {
-  border: none;
-  border-radius: 8px;
-  box-shadow: 5px 5px 10px var(--neu-shadow-dark), -5px -5px 10px var(--neu-shadow-light);
-  margin: 2px;
-}
-body[data-style="neumorphism"] .market-card:hover {
-  box-shadow: 3px 3px 8px var(--neu-shadow-dark), -3px -3px 8px var(--neu-shadow-light);
-}
-body[data-style="neumorphism"] .top20-section {
-  border: none;
-  border-radius: 10px;
-  box-shadow: 6px 6px 14px var(--neu-shadow-dark), -6px -6px 14px var(--neu-shadow-light);
-}
-body[data-style="neumorphism"] .favorites-section {
-  border: none;
-  border-radius: 10px;
-  box-shadow: 5px 5px 12px var(--neu-shadow-dark), -5px -5px 12px var(--neu-shadow-light);
-}
-body[data-style="neumorphism"] .view-btn,
-body[data-style="neumorphism"] .section-sort-select,
-body[data-style="neumorphism"] #market-search-input {
-  border: none;
-  box-shadow: inset 2px 2px 5px var(--neu-shadow-dark), inset -2px -2px 5px var(--neu-shadow-light);
-}
-body[data-style="neumorphism"] .view-btn.active {
-  box-shadow: inset 2px 2px 4px var(--neu-shadow-dark), inset -2px -2px 4px var(--neu-accent-shadow);
-}
-body[data-style="neumorphism"] .scan-btn,
-body[data-style="neumorphism"] .analytics-modal-content,
-body[data-style="neumorphism"] .setup-guide-content {
-  box-shadow: 6px 6px 14px var(--neu-shadow-dark), -6px -6px 14px var(--neu-shadow-light);
-}
-/* Neumorphism spacing — shadows need breathing room */
-body[data-style="neumorphism"] .market-items.tile {
-  gap: 14px;
-  padding: 12px 14px;
-}
-body[data-style="neumorphism"] .market-items.hybrid {
-  gap: 12px;
-  padding: 10px 12px;
-}
-body[data-style="neumorphism"] .market-items.list {
-  gap: 10px;
-  padding: 8px 10px;
-}
-
-/* ═══════════════════════════════════════════════════════════════════════════
- *  STYLE: Skeuomorphism  (body[data-style="skeuomorphism"])
- *  Textured gradients, embossed borders, realistic shadows
- * ═══════════════════════════════════════════════════════════════════════════ */
-
-body[data-style="skeuomorphism"] {
-  background: linear-gradient(180deg, var(--skeu-body-from) 0%, var(--skeu-body-to) 100%);
-}
-body[data-style="skeuomorphism"] .market-card {
-  background: linear-gradient(180deg, var(--skeu-card-from) 0%, var(--skeu-card-mid) 40%, var(--skeu-card-to) 100%);
-  border-top: 1px solid var(--skeu-card-highlight);
-  border-bottom: 1px solid var(--skeu-card-shadow-edge);
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.40), inset 0 1px 0 rgba(255, 255, 255, 0.06);
-}
-body[data-style="skeuomorphism"] .market-card:hover {
-  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.50), inset 0 1px 0 rgba(255, 255, 255, 0.08);
-}
-body[data-style="skeuomorphism"] .top20-section {
-  background: linear-gradient(180deg, var(--skeu-card-from) 0%, var(--skeu-body-to) 100%);
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.50), inset 0 1px 0 rgba(255, 255, 255, 0.05);
-}
-body[data-style="skeuomorphism"] .top20-section #market-header {
-  background: linear-gradient(180deg, var(--skeu-header-from) 0%, var(--skeu-header-to) 100%);
-  border-bottom: 1px solid var(--skeu-card-shadow-edge);
-}
-body[data-style="skeuomorphism"] .view-btn,
-body[data-style="skeuomorphism"] .scan-btn {
-  background: linear-gradient(180deg, var(--skeu-btn-from) 0%, var(--skeu-btn-to) 100%);
-  border-top: 1px solid var(--skeu-card-highlight);
-  border-bottom: 1px solid var(--skeu-card-shadow-edge);
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.30);
-}
-body[data-style="skeuomorphism"] .view-btn.active {
-  background: linear-gradient(180deg, var(--skeu-btn-active-from) 0%, var(--skeu-btn-active-to) 100%);
-  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.30);
-  color: var(--text-bright);
-}
-/* Skeuomorphism — softer shadows on light modes (consolidated) */
-body[data-mode="light"][data-style="skeuomorphism"] .market-card {
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.40);
-}
-body[data-mode="light"][data-style="skeuomorphism"] .market-card:hover {
-  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.20), inset 0 1px 0 rgba(255, 255, 255, 0.50);
-}
-body[data-mode="light"][data-style="skeuomorphism"] .top20-section {
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.30);
-}
-
-/* ── Reset & base ─────────────────────────────────────────────────────────── */
+`, ""]);
+// Exports
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (___CSS_LOADER_EXPORT___);
+
+
+/***/ },
+
+/***/ "../node_modules/css-loader/dist/cjs.js!./css/base/reset.css"
+/*!*******************************************************************!*\
+  !*** ../node_modules/css-loader/dist/cjs.js!./css/base/reset.css ***!
+  \*******************************************************************/
+(module, __webpack_exports__, __webpack_require__) {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var _node_modules_css_loader_dist_runtime_noSourceMaps_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../../node_modules/css-loader/dist/runtime/noSourceMaps.js */ "../node_modules/css-loader/dist/runtime/noSourceMaps.js");
+/* harmony import */ var _node_modules_css_loader_dist_runtime_noSourceMaps_js__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_node_modules_css_loader_dist_runtime_noSourceMaps_js__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../../node_modules/css-loader/dist/runtime/api.js */ "../node_modules/css-loader/dist/runtime/api.js");
+/* harmony import */ var _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(_node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1__);
+// Imports
+
+
+var ___CSS_LOADER_EXPORT___ = _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1___default()((_node_modules_css_loader_dist_runtime_noSourceMaps_js__WEBPACK_IMPORTED_MODULE_0___default()));
+// Module
+___CSS_LOADER_EXPORT___.push([module.id, `/* ── Reset & base ─────────────────────────────────────────────────────────── */
 
 *,
 *::before,
@@ -1579,1464 +97,117 @@ body {
   color: var(--text-main);
   background: var(--bg-main);
 }
+`, ""]);
+// Exports
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (___CSS_LOADER_EXPORT___);
 
-/* ── Alt1 status banner ───────────────────────────────────────────────────── */
 
-#alt1-status {
-  padding: 4px 10px;
-  font-size: 11px;
-  text-align: center;
+/***/ },
+
+/***/ "../node_modules/css-loader/dist/cjs.js!./css/components/accessibility.css"
+/*!*********************************************************************************!*\
+  !*** ../node_modules/css-loader/dist/cjs.js!./css/components/accessibility.css ***!
+  \*********************************************************************************/
+(module, __webpack_exports__, __webpack_require__) {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var _node_modules_css_loader_dist_runtime_noSourceMaps_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../../node_modules/css-loader/dist/runtime/noSourceMaps.js */ "../node_modules/css-loader/dist/runtime/noSourceMaps.js");
+/* harmony import */ var _node_modules_css_loader_dist_runtime_noSourceMaps_js__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_node_modules_css_loader_dist_runtime_noSourceMaps_js__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../../node_modules/css-loader/dist/runtime/api.js */ "../node_modules/css-loader/dist/runtime/api.js");
+/* harmony import */ var _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(_node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1__);
+// Imports
+
+
+var ___CSS_LOADER_EXPORT___ = _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1___default()((_node_modules_css_loader_dist_runtime_noSourceMaps_js__WEBPACK_IMPORTED_MODULE_0___default()));
+// Module
+___CSS_LOADER_EXPORT___.push([module.id, `/* ══════════════════════════════════════════════════════════════════════════════
+   Global keyboard focus ring (accessibility)
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+:focus-visible {
+  outline: 2px solid var(--accent-primary);
+  outline-offset: 2px;
 }
 
-#alt1-status:empty {
-  display: none;
-}
-
-#alt1-status a {
-  color: var(--link-color);
-}
-
-/* ── App shell ────────────────────────────────────────────────────────────── */
-
-#app {
-  position: relative;        /* contain startup overlay */
-  display: flex;
-  flex-direction: column;
-  height: 95%;              /* fill parent, not viewport — respects zoom */
-  min-height: 0;             /* allow flex children to shrink properly */
-  overflow: hidden;
-}
-
-/* ── Settings panel ───────────────────────────────────────────────────────── */
-
-#settings-panel {
-  background: var(--bg-panel);
-  border-bottom: 2px solid var(--border-main);
-  padding: 6px 10px;
-  font-size: 12px;
-  flex-shrink: 0;
-}
-
-#settings-panel summary {
-  cursor: pointer;
-  user-select: none;
-  color: var(--text-accent);
-  font-weight: 600;
+:focus:not(:focus-visible) {
   outline: none;
 }
 
-.settings-body {
-  margin-top: 6px;
-}
-
-.settings-body label {
-  display: block;
-  margin-bottom: 3px;
-  color: var(--text-muted);
-  font-size: 11px;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-.settings-row {
-  display: flex;
-  gap: 6px;
-}
-
-.settings-row input {
-  flex: 1;
-}
-
-.status-hint {
-  display: block;
-  margin-top: 4px;
-  font-size: 11px;
-  color: var(--accent-green);
-}
-
-.status-hint.error {
-  color: var(--accent-red);
-}
-
-/* ── Danger button ────────────────────────────────────────────────────────── */
-
-.danger-btn {
-  width: 100%;
-  font-size: 11px;
-  padding: 5px 10px;
-  background: var(--accent-red-bg);
-  border: 1px solid var(--accent-red-border);
-  color: var(--text-main);
+.card-actions button:focus-visible,
+.analytics-modal-close:focus-visible,
+.tab-btn:focus-visible {
+  outline-offset: 1px;
   border-radius: 3px;
-  cursor: pointer;
-  transition: background 0.15s;
 }
+`, ""]);
+// Exports
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (___CSS_LOADER_EXPORT___);
 
-.danger-btn:hover {
-  background: var(--accent-red-border);
-  color: var(--text-bright);
-}
 
-.danger-btn:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
+/***/ },
 
-/* ── Data management buttons ──────────────────────────────────────────────── */
+/***/ "../node_modules/css-loader/dist/cjs.js!./css/components/alerts.css"
+/*!**************************************************************************!*\
+  !*** ../node_modules/css-loader/dist/cjs.js!./css/components/alerts.css ***!
+  \**************************************************************************/
+(module, __webpack_exports__, __webpack_require__) {
 
-.data-mgmt .settings-row {
-  margin-top: 4px;
-}
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var _node_modules_css_loader_dist_runtime_noSourceMaps_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../../node_modules/css-loader/dist/runtime/noSourceMaps.js */ "../node_modules/css-loader/dist/runtime/noSourceMaps.js");
+/* harmony import */ var _node_modules_css_loader_dist_runtime_noSourceMaps_js__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_node_modules_css_loader_dist_runtime_noSourceMaps_js__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../../node_modules/css-loader/dist/runtime/api.js */ "../node_modules/css-loader/dist/runtime/api.js");
+/* harmony import */ var _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(_node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1__);
+// Imports
 
-.data-mgmt button {
-  flex: 1;
-  font-size: 11px;
-  padding: 5px 8px;
-  background: var(--bg-input);
-  border: 1px solid var(--border-input);
-  color: var(--text-main);
-  border-radius: 3px;
-  cursor: pointer;
-  transition: background 0.15s, border-color 0.15s;
-}
 
-.data-mgmt button:hover {
-  background: var(--bg-muted);
-  border-color: var(--accent-blue-text);
-  color: var(--accent-blue-text);
-}
+var ___CSS_LOADER_EXPORT___ = _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1___default()((_node_modules_css_loader_dist_runtime_noSourceMaps_js__WEBPACK_IMPORTED_MODULE_0___default()));
+// Module
+___CSS_LOADER_EXPORT___.push([module.id, `/* ══════════════════════════════════════════════════════════════════════════════
+   Modal — Price Alert Inputs
+   ══════════════════════════════════════════════════════════════════════════════ */
 
-/* ── Settings field helpers ───────────────────────────────────────────────── */
-
-.settings-field {
-  margin-top: 6px;
-}
-
-.settings-field.hidden {
-  display: none;
-}
-
-.settings-body select,
-.settings-body input[type="text"] {
-  width: 100%;
-  margin-bottom: 6px;
-}
-
-/* ── Provider cost hints & setup guide ────────────────────────────────────── */
-
-.provider-cost-hint {
-  display: block;
-  margin: 2px 0 4px;
-  font-size: 11px;
-  line-height: 1.3;
-  color: var(--text-muted);
-}
-.provider-cost-hint.tier-free {
-  color: var(--accent-green);
-}
-.provider-cost-hint.tier-free-tier {
-  color: var(--accent-teal);
-}
-.provider-cost-hint.tier-low-cost {
-  color: var(--accent-blue-text);
-}
-.provider-cost-hint.tier-paid {
-  color: var(--text-muted);
-}
-.provider-cost-hint.tier-self-hosted {
-  color: var(--text-muted);
-}
-
-.setup-guide-btn {
-  display: inline-block;
-  margin-bottom: 6px;
-  padding: 4px 10px;
-  font-size: 11px;
-  background: transparent;
-  border: 1px dashed var(--accent-blue-text);
-  border-radius: 3px;
-  color: var(--accent-blue-text);
-  cursor: pointer;
-  transition: background 0.15s, color 0.15s;
-}
-.setup-guide-btn:hover {
-  background: var(--accent-blue-text);
-  color: var(--bg-main);
-}
-.setup-guide-btn.hidden {
-  display: none;
-}
-
-/* ── Setup guide modal ────────────────────────────────────────────────────── */
-
-.setup-guide-backdrop {
-  position: fixed;
-  inset: 0;
-  background: var(--modal-backdrop);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 10001;
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.15s ease;
-}
-.setup-guide-backdrop.visible {
-  opacity: 1;
-  pointer-events: auto;
-}
-
-.setup-guide-modal {
-  position: relative;
-  background: var(--bg-main);
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  width: 88vw;
-  max-width: 560px;
-  max-height: 80vh;
-  overflow-y: auto;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
-  padding: 1.25rem;
-  box-sizing: border-box;
-  animation: setup-guide-in 0.18s ease-out;
-}
-@keyframes setup-guide-in {
-  from { opacity: 0; transform: scale(0.96) translateY(10px); }
-  to   { opacity: 1; transform: scale(1) translateY(0); }
-}
-
-.setup-guide-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 0.75rem;
-}
-.setup-guide-header h3 {
-  margin: 0;
-  font-size: 16px;
-  color: var(--text-bright);
-}
-.setup-guide-close {
-  background: none;
-  border: none;
-  color: var(--text-muted);
-  font-size: 22px;
-  cursor: pointer;
-  padding: 0 4px;
-  line-height: 1;
-}
-.setup-guide-close:hover {
-  color: var(--text-bright);
-}
-
-.setup-guide-tier {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 8px 12px;
-  border-radius: 6px;
-  margin-bottom: 0.75rem;
-  font-size: 12px;
-  font-weight: 500;
-}
-.setup-guide-tier.tier-free {
-  background: var(--badge-tier-free-bg);
-  border: 1px solid var(--badge-tier-free-border);
-  color: var(--accent-green);
-}
-.setup-guide-tier.tier-free-tier {
-  background: var(--badge-tier-freetier-bg);
-  border: 1px solid var(--badge-tier-freetier-border);
-  color: var(--accent-teal);
-}
-.setup-guide-tier.tier-low-cost {
-  background: var(--badge-tier-lowcost-bg);
-  border: 1px solid var(--badge-tier-lowcost-border);
-  color: var(--accent-blue-text);
-}
-.setup-guide-tier.tier-paid {
-  background: var(--badge-tier-neutral-bg);
-  border: 1px solid var(--badge-tier-neutral-border);
-  color: var(--text-muted);
-}
-.setup-guide-tier.tier-self-hosted {
-  background: var(--badge-tier-neutral-bg);
-  border: 1px solid var(--badge-tier-neutral-border);
-  color: var(--text-muted);
-}
-
-.tier-badge {
-  font-weight: 600;
-  white-space: nowrap;
-}
-
-.setup-guide-steps {
-  margin: 0 0 0.75rem 0;
-  padding-left: 1.4rem;
-  font-size: 12px;
-  line-height: 1.7;
-  color: var(--text-main);
-}
-.setup-guide-steps li {
-  margin-bottom: 6px;
-}
-.setup-guide-steps a {
-  color: var(--accent-blue-text);
-  text-decoration: underline;
-}
-.setup-guide-steps a:hover {
-  color: var(--text-bright);
-}
-
-.setup-guide-note {
-  padding: 8px 12px;
-  border-radius: 6px;
-  background: var(--setup-note-bg);
-  border: 1px solid var(--setup-note-border);
-  font-size: 11px;
-  color: var(--accent-gold);
-  margin-bottom: 0.75rem;
-  line-height: 1.5;
-}
-
-.setup-guide-link {
-  display: inline-block;
-  margin-bottom: 1rem;
-  font-size: 12px;
-  color: var(--accent-blue-text);
-  text-decoration: none;
-  font-weight: 500;
-}
-.setup-guide-link:hover {
-  text-decoration: underline;
-  color: var(--text-bright);
-}
-
-/* ── Provider comparison table ────────────────────────────────────────────── */
-
-.setup-guide-comparison {
-  border-top: 1px solid var(--border);
-  padding-top: 0.75rem;
-}
-.setup-guide-comparison h4 {
-  margin: 0 0 8px;
-  font-size: 13px;
-  color: var(--text-bright);
-}
-
-.provider-comparison-table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 11px;
-}
-.provider-comparison-table th {
-  text-align: left;
-  padding: 5px 8px;
-  border-bottom: 1px solid var(--border);
-  color: var(--text-muted);
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  font-size: 10px;
-}
-.provider-comparison-table td {
-  padding: 6px 8px;
-  border-bottom: 1px solid var(--border-input);
-  color: var(--text-main);
-}
-.provider-comparison-table tr.active-row td {
-  background: var(--table-active-row-bg);
-  color: var(--text-bright);
-  font-weight: 500;
-}
-.provider-comparison-table tr:hover td {
-  background: var(--table-hover-row-bg);
-}
-
-.tier-badge-sm {
-  display: inline-block;
-  padding: 1px 6px;
-  border-radius: 3px;
-  font-size: 10px;
-  font-weight: 600;
-  white-space: nowrap;
-}
-.tier-badge-sm.tier-free {
-  background: var(--badge-tier-free-bg);
-  color: var(--accent-green);
-}
-.tier-badge-sm.tier-free-tier {
-  background: var(--badge-tier-freetier-bg);
-  color: var(--accent-teal);
-}
-.tier-badge-sm.tier-low-cost {
-  background: var(--badge-tier-lowcost-bg);
-  color: var(--accent-blue-text);
-}
-.tier-badge-sm.tier-paid {
-  background: var(--badge-tier-neutral-bg);
-  color: var(--text-muted);
-}
-
-select {
-  background: var(--bg-input);
-  border: 1px solid var(--border-input);
-  border-radius: 3px;
-  padding: 5px 8px;
-  color: var(--text-main);
-  font-family: inherit;
-  font-size: 12px;
-  outline: none;
-  transition: border-color 0.15s;
-  appearance: auto;
-}
-
-select option {
-  background: var(--dropdown-bg);
-  color: var(--text-main);
-}
-
-select option:hover,
-select option:checked {
-  background: var(--dropdown-hover-bg);
-  color: var(--text-bright);
-}
-
-select:focus {
-  border-color: var(--accent-focus);
-}
-
-/* ── Shared input / button styles ─────────────────────────────────────────── */
-
-input[type="text"],
-input[type="password"] {
-  background: var(--bg-input);
-  border: 1px solid var(--border-input);
-  border-radius: 3px;
-  padding: 5px 8px;
-  color: var(--text-main);
-  font-family: inherit;
-  font-size: 12px;
-  outline: none;
-  transition: border-color 0.15s;
-}
-
-input[type="text"]:focus,
-input[type="password"]:focus {
-  border-color: var(--accent-focus);
-}
-
-button {
-  background: var(--accent-primary);
-  border: none;
-  border-radius: 3px;
-  padding: 5px 14px;
-  color: var(--text-bright);
-  font-family: inherit;
-  font-size: 12px;
-  font-weight: 600;
-  cursor: pointer;
-  white-space: nowrap;
-  transition: background 0.15s;
-}
-
-button:hover {
-  background: var(--accent-primary-hover);
-}
-
-button:active {
-  background: var(--accent-primary-active);
-}
-
-button:disabled {
-  background: var(--bg-input);
-  color: var(--text-dimmed);
-  cursor: not-allowed;
-}
-
-/* ── Layout toggle buttons ─────────────────────────────────────────────────── */
-
-.layout-toggle {
-  display: flex;
-  gap: 4px;
-  margin-bottom: 6px;
-}
-
-.layout-btn {
-  flex: 1;
-  font-size: 11px;
-  padding: 4px 8px;
-  background: var(--bg-muted);
-  border: 1px solid var(--border-input);
-  color: var(--text-muted);
-  border-radius: 3px;
-  cursor: pointer;
-  transition: background 0.15s, color 0.15s;
-}
-
-.layout-btn:hover {
-  background: var(--bg-input);
-  color: var(--text-main);
-}
-
-.layout-btn.active {
-  background: var(--accent-primary);
-  color: var(--text-bright);
-  border-color: var(--accent-primary);
-}
-
-/* ── Tab navigation ───────────────────────────────────────────────────────── */
-
-#view-tabs {
-  display: flex;
-  gap: 0;
-  flex-shrink: 0;
-  background: var(--bg-panel);
-  border-bottom: 2px solid var(--border-main);
-}
-
-.tab-btn {
-  flex: 1;
-  padding: 6px 10px;
-  font-size: 12px;
-  font-weight: 600;
-  background: var(--bg-panel);
-  border: none;
-  border-bottom: 2px solid transparent;
-  color: var(--text-muted);
-  border-radius: 0;
-  cursor: pointer;
-  transition: color 0.15s, border-color 0.15s, background 0.15s;
-}
-
-.tab-btn:hover {
-  color: var(--text-main);
-  background: var(--bg-hover);
-}
-
-.tab-btn.active {
-  color: var(--text-accent);
-  border-bottom-color: var(--accent-primary);
-  background: var(--bg-main);
-}
-
-/* ── Main content wrapper ─────────────────────────────────────────────────── */
-
-#app-content {
-  flex: 1 1 0;
-  min-height: 0;
-  overflow: hidden;
-}
-
-/* ── Market data panel ────────────────────────────────────────────────────── */
-
-#market-view {
-  overflow-y: auto;
+.alert-inputs {
+  margin-top: 8px;
   padding: 8px 10px;
+  background: var(--bg-muted);
+  border-radius: 4px;
+  border: 1px solid var(--border-section);
 }
 
-#market-view h2 {
-  font-size: 13px;
+.alert-inputs-title {
+  margin: 0 0 6px;
+  font-size: 11px;
   font-weight: 600;
   color: var(--text-heading);
-  margin: 0;
 }
 
-/* ── Top 20 section container ──────────────────────────────────────────────────── */
-
-.top20-section {
-  margin-bottom: 8px;
-  border: 1px solid var(--border-section);
-  border-radius: 6px;
-  background: var(--bg-main);
-  overflow: hidden;
-}
-
-.top20-section #market-header {
-  padding: 4px 10px;
-  background: var(--bg-panel);
-  border-bottom: 1px solid var(--border-section);
-  margin-bottom: 0;
-}
-
-#market-header {
+.alert-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 6px;
-  flex-wrap: wrap;
-  gap: 4px;
-}
-
-#market-header h2 {
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--text-heading);
-  margin: 0;
-  white-space: nowrap;
-}
-
-.market-header-actions {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  flex-wrap: wrap;
-}
-
-/* ── Per-section sort selects ─────────────────────────────────────────────── */
-
-.section-sort-select {
-  font-size: 10px;
-  padding: 4px 6px;
-  background: var(--bg-input);
-  border: 1px solid var(--border-input);
-  color: var(--text-muted);
-  border-radius: 3px;
-  cursor: pointer;
-  line-height: 1.2;
-}
-
-/* ── View toggle buttons ──────────────────────────────────────────────────── */
-
-.view-toggle {
-  display: flex;
-  gap: 2px;
-  align-items: center;
-}
-
-/* Compact tiles toggle – March 2026 */
-.compact-toggle-label {
-  display: inline-flex;
-  align-items: center;
-  gap: 3px;
-  font-size: 11px;
-  color: var(--text-muted);
-  cursor: pointer;
-  margin-left: 4px;
-  white-space: nowrap;
-  user-select: none;
-}
-.compact-toggle-label input[type="checkbox"] {
-  margin: 0;
-  accent-color: var(--accent-primary);
-  cursor: pointer;
-}
-.compact-toggle-label:hover {
-  color: var(--text-main);
-}
-
-/* Hide predictive badges in compact tile/hybrid mode */
-.predictive-badges.compact-hidden {
-  display: none;
-}
-
-.view-btn {
-  background: var(--bg-muted);
-  border: 1px solid var(--border-input);
-  border-radius: 3px;
-  padding: 4px 7px;
-  color: var(--text-muted);
-  font-size: 13px;
-  cursor: pointer;
-  line-height: 1;
-  min-width: 24px;
-  text-align: center;
-  transition: background 0.15s, color 0.15s;
-}
-
-.view-btn:hover {
-  background: var(--bg-input);
-  color: var(--text-main);
-}
-
-.view-btn.active {
-  background: var(--accent-primary);
-  color: var(--text-bright);
-  border-color: var(--accent-primary);
-}
-
-/* ── Filter bar ───────────────────────────────────────────────────────────── */
-
-.filter-bar {
-  display: flex;
-  gap: 4px;
-  margin-bottom: 6px;
-  flex-wrap: wrap;
-}
-
-.filter-bar select {
-  flex: 1 1 0;
-  min-width: 0;
-  font-size: 11px;
-  padding: 3px 5px;
-}
-
-.refresh-btn {
-  flex-shrink: 0;
-  font-size: 11px;
-  padding: 3px 10px;
-  background: var(--bg-muted);
-  border: 1px solid var(--border-input);
-  color: var(--text-main);
-  border-radius: 3px;
-  cursor: pointer;
-  transition: background 0.15s;
-}
-
-.refresh-btn:hover {
-  background: var(--accent-primary);
-  color: var(--text-bright);
-}
-
-/* ── Full Market Scan button ──────────────────────────────────────────────── */
-
-.scan-btn {
-  flex-shrink: 0;
-  font-size: 10px;
-  padding: 2px 8px;
-  background: var(--accent-primary);
-  border: 1px solid var(--border-input);
-  color: var(--text-bright);
-  border-radius: 3px;
-  cursor: pointer;
-  transition: background 0.15s, opacity 0.15s;
-}
-
-.scan-btn:hover {
-  background: var(--accent-hover, var(--accent-primary));
-  filter: brightness(1.15);
-}
-
-.scan-btn:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-  filter: none;
-}
-
-/* ── Deep-history checkbox label ──────────────────────────────────────────── */
-
-.deep-history-label {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  font-size: 10px;
-  color: var(--text-muted);
-  cursor: pointer;
-  white-space: nowrap;
-}
-
-.deep-history-label input[type="checkbox"] {
-  margin: 0;
-  accent-color: var(--accent-primary);
-}
-
-/* ── Background sync progress bar ─────────────────────────────────────────── */
-
-.sync-progress {
-  margin: 6px 0;
-  padding: 4px 8px;
-  background: var(--bg-muted);
-  border: 1px solid var(--border-input);
-  border-radius: 4px;
-  display: flex;
-  align-items: center;
   gap: 8px;
+  margin-bottom: 4px;
 }
 
-.sync-progress.hidden {
-  display: none;
-}
-
-.sync-progress-track {
-  flex: 1;
-  height: 8px;
-  background: var(--bg-card, #1e1e2e);
-  border-radius: 4px;
-  overflow: hidden;
-}
-
-.sync-progress-fill {
-  height: 100%;
-  width: 0%;
-  background: var(--accent-primary);
-  border-radius: 4px;
-  transition: width 0.3s ease;
-}
-
-.sync-progress-text {
-  font-size: 10px;
-  color: var(--text-muted);
-  white-space: nowrap;
-  min-width: 120px;
-}
-
-/* ── Custom filter precision controls ─────────────────────────────────────── */
-
-.custom-filter-group {
-  margin-bottom: 6px;
-  padding: 4px 6px;
-  background: var(--bg-filter);
-  border: 2px solid var(--border-main);
-  border-radius: 3px;
-}
-
-.custom-filter-label {
-  display: block;
-  font-size: 10px;
-  color: var(--text-soft);
-  margin-bottom: 2px;
-  margin-top: 4px;
-}
-
-.custom-filter-label:first-child {
-  margin-top: 0;
-}
-
-.custom-filter-label .hint {
-  color: var(--text-dimmed);
-}
-
-.slider-row {
-  display: flex;
-  gap: 6px;
-  align-items: center;
-}
-
-.slider-row input[type="range"] {
-  flex: 1 1 0;
-  min-width: 0;
-  height: 16px;
-  cursor: pointer;
-  accent-color: var(--accent-primary);
-  -webkit-appearance: none;
-  appearance: none;
-  background: transparent;
-}
-
-/* Track */
-.slider-row input[type="range"]::-webkit-slider-runnable-track {
-  height: 4px;
-  border-radius: 2px;
-  background: var(--border-input);
-}
-
-.slider-row input[type="range"]::-moz-range-track {
-  height: 4px;
-  border-radius: 2px;
-  border: none;
-  background: var(--border-input);
-}
-
-/* Thumb */
-.slider-row input[type="range"]::-webkit-slider-thumb {
-  -webkit-appearance: none;
-  width: 14px;
-  height: 14px;
-  border-radius: 50%;
-  background: var(--accent-primary);
-  border: none;
-  margin-top: -5px;
-  transition: background 0.15s;
-}
-
-.slider-row input[type="range"]::-moz-range-thumb {
-  width: 14px;
-  height: 14px;
-  border-radius: 50%;
-  background: var(--accent-primary);
-  border: none;
-}
-
-/* Hover / focus */
-.slider-row input[type="range"]:hover::-webkit-slider-thumb {
-  background: var(--accent-primary-hover);
-}
-
-.slider-row input[type="range"]:hover::-moz-range-thumb {
-  background: var(--accent-primary-hover);
-}
-
-.slider-row input[type="range"]:focus {
-  outline: none;
-}
-
-.slider-row input[type="range"]:focus::-webkit-slider-thumb {
-  box-shadow: 0 0 0 2px var(--accent-focus);
-}
-
-.slider-row input[type="number"] {
-  width: 80px;
-  flex-shrink: 0;
-  font-size: 11px;
-  padding: 2px 4px;
-  background: var(--bg-number-input);
-  border: 1px solid var(--border-input);
-  color: var(--text-main);
-  border-radius: 3px;
-  text-align: right;
-}
-
-.slider-row input[type="number"]:focus {
-  outline: 1px solid var(--accent-primary);
-  border-color: var(--accent-primary);
-}
-
-/* ── Startup loading overlay ──────────────────────────────────────────────── */
-
-.startup-overlay {
-  position: absolute;
-  inset: 0;
-  z-index: 900;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 14px;
-  background: var(--bg-main, #1e1e1e);
-  transition: opacity 0.4s ease;
-}
-.startup-overlay.fade-out {
-  opacity: 0;
-  pointer-events: none;
-}
-
-/* Glass style: overlay must stay opaque to hide content behind it */
-body[data-style="glass"] .startup-overlay {
-  background: var(--glass-body-from, var(--bg-main, #1e1e1e));
-  backdrop-filter: blur(24px);
-  -webkit-backdrop-filter: blur(24px);
-}
-
-.startup-spinner {
-  width: 36px;
-  height: 36px;
-  border: 3px solid var(--border-main, #333);
-  border-top-color: var(--accent-primary, #569cd6);
-  border-radius: 50%;
-  animation: startup-spin 0.8s linear infinite;
-}
-@keyframes startup-spin {
-  to { transform: rotate(360deg); }
-}
-
-.startup-status {
-  color: var(--text-muted, #888);
-  font-size: 12px;
-  text-align: center;
-  max-width: 260px;
-  line-height: 1.4;
-}
-
-.loader {
-  color: var(--text-muted);
-  font-style: italic;
-  font-size: 12px;
-  padding: 4px 0;
-}
-
-/* ── Error recovery banner ────────────────────────────────────────────────── */
-
-.error-banner {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 8px 12px;
-  margin: 4px 0 6px;
-  background: var(--accent-red-bg);
-  border: 1px solid var(--accent-red-border);
-  border-radius: 4px;
-  color: var(--accent-red);
-  font-size: 12px;
-  line-height: 1.4;
-}
-
-.error-banner.hidden {
-  display: none;
-}
-
-.error-banner span {
-  flex: 1;
-}
-
-.error-banner button {
-  flex-shrink: 0;
-  padding: 4px 12px;
-  font-size: 11px;
-  background: var(--accent-red-border);
-  color: var(--text-bright);
-  border: none;
-  border-radius: 3px;
-  cursor: pointer;
-  white-space: nowrap;
-}
-
-.error-banner button:hover {
-  background: var(--accent-red-border-hover);
-}
-
-.market-empty {
-  color: var(--text-muted);
-  font-size: 12px;
-  padding: 8px 4px;
-}
-
-/* ── Market card (shared across all views) ────────────────────────────────── */
-
-.market-card {
-  background: var(--bg-panel);
-  border: 1px solid var(--border-card);
-  border-radius: 4px;
-  overflow: hidden;
-  transition: border-color 0.15s;
-}
-
-.market-card:hover {
-  border-color: var(--border-input);
-}
-
-.market-card.risky {
-  border-color: var(--accent-red-border);
-}
-
-.market-card.risky:hover {
-  border-color: var(--accent-red-border-hover);
-}
-
-.market-card.hype {
-  border-color: var(--border-hype);
-}
-
-.market-card.hype:hover {
-  border-color: var(--border-hype-hover);
-}
-
-/* Flip recommendation badges in the card header */
-
-.flip-badges {
-  margin-left: auto;
-  display: flex;
-  gap: 3px;
-  flex-wrap: wrap;
-  justify-content: flex-end;
-  align-items: center;
-  min-width: 0;
-  flex-shrink: 1;
-}
-
-/* Shared badge base — sizing tokens */
-.buy-badge,
-.sell-badge,
-.profit-badge,
-.velocity-badge,
-.hype-badge,
-.predicted-badge,
-.ema-badge,
-.vol-badge {
-  display: inline-block;
-  font-size: var(--badge-font-md);
-  padding: var(--badge-padding-md);
-  border-radius: var(--badge-radius);
-  font-weight: var(--badge-font-weight);
-  line-height: 1.3;
-  white-space: nowrap;
-}
-
-.buy-badge[title],
-.sell-badge[title],
-.profit-badge[title],
-.velocity-badge[title] {
-  cursor: help;
-}
-
-.buy-badge {
-  background: var(--badge-buy-bg);
-  color: var(--accent-blue-text);
-}
-
-.sell-badge {
-  background: var(--badge-sell-bg);
-  color: var(--accent-green);
-}
-
-.sell-badge.risky {
-  background: var(--accent-red-bg);
-  color: var(--accent-red);
-}
-
-.profit-badge {
-  background: var(--badge-sell-bg);
-  color: var(--accent-teal);
-  font-weight: 700;
-  padding: 2px 7px;
-  letter-spacing: 0.02em;
-}
-
-.profit-badge.negative {
-  background: var(--accent-red-bg);
-  color: var(--accent-red);
-  font-weight: 700;
-}
-
-.hype-badge {
-  background: var(--badge-hype-bg);
-  color: var(--accent-hype, var(--accent-gold-hype));
-  animation: hype-pulse 2s ease-in-out infinite;
-}
-
-/* ── Trade velocity badges ────────────────────────────────────────────── */
-
-.velocity-badge {
-  /* inherits sizing from shared badge base above */
-}
-
-.velocity-insta {
-  background: var(--badge-velocity-insta-bg);
-  color: var(--accent-green-bright);
-}
-
-.velocity-active {
-  background: var(--badge-velocity-active-bg);
-  color: var(--accent-blue-text);
-}
-
-.velocity-slow {
-  background: var(--badge-velocity-slow-bg);
-  color: var(--accent-gold);
-}
-
-.velocity-veryslow {
-  background: var(--badge-velocity-muted-bg);
-  color: var(--text-muted);
-}
-
-.trend-badge {
-  font-size: 10px;
-  padding: 1px 6px;
-  border-radius: 3px;
-  white-space: nowrap;
-  font-weight: 600;
-}
-
-.trend-downtrend {
-  background: var(--badge-trend-down-bg);
-  color: var(--accent-red);
-}
-
-.trend-uptrend {
-  background: var(--badge-trend-up-bg);
-  color: var(--accent-green-bright);
-}
-
-@keyframes hype-pulse {
-  0%, 100% { opacity: 1; }
-  50%      { opacity: 0.6; }
-}
-
-/* ── Semantic text-colour highlight classes ──────────────────────────────────
-   Applied by JS on inline text. Doubled selector for specificity over
-   \`.market-card .item-name\`, \`.detail-value\` etc. — no !important needed. */
-
-.market-card .hype-text,
-.hype-text.hype-text {
-  color: var(--accent-gold-hype);
-}
-
-.market-card .buy-highlight,
-.buy-highlight.buy-highlight {
-  color: var(--accent-blue-text);
-}
-
-.market-card .sell-highlight,
-.sell-highlight.sell-highlight {
-  color: var(--accent-teal);
-}
-
-.market-card .profit-highlight,
-.profit-highlight.profit-highlight {
-  color: var(--accent-teal);
-}
-
-.market-card .risky-text,
-.risky-text.risky-text {
-  color: var(--accent-red);
-}
-
-/* ── Market search bar ────────────────────────────────────────────────────── */
-
-#market-search-input {
-  width: 100%;
-  box-sizing: border-box;
-  padding: 7px 10px;
+.alert-row:last-child {
   margin-bottom: 0;
-  background: var(--bg-panel);
-  color: var(--text-main);
-  border: 1px solid var(--bg-input);
-  border-radius: 4px;
-  font-size: 13px;
-  outline: none;
-  transition: border-color 0.15s;
 }
 
-#market-search-input::placeholder {
-  color: var(--text-dimmed);
-}
-
-#market-search-input:focus {
-  border-color: var(--accent-blue-text);
-}
-
-/* ── Search section ────────────────────────────────────────────────────── */
-
-#search-section {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 6px;
-  margin-bottom: 8px;
-}
-
-#search-section #market-search-input {
-  flex: 1 1 140px;
-  min-width: 140px;
-}
-
-#search-section .view-toggle {
-  flex-shrink: 0;
-}
-
-#search-results {
-  width: 100%;
-  margin-top: 6px;
-}
-
-#search-results:empty {
-  display: none;
-}
-
-#search-loading {
-  width: 100%;
-  font-size: 12px;
-  color: var(--text-muted);
-  padding: 4px 0;
-}
-
-.market-card-header {
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 4px 8px;
-  padding: 5px 8px;
-  cursor: pointer;
-  user-select: none;
-  min-height: 36px;
-}
-
-.market-card-header:hover {
-  background: var(--bg-hover);
-}
-
-/* \\u2500\\u2500 Sparkline canvas \\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500 */
-
-.graph-btn {
-  all: unset;
-  cursor: pointer;
-  font-size: 11px;
-  line-height: 1;
-  color: var(--text-muted);
-  padding: 2px 3px;
-  border-radius: 3px;
-  flex-shrink: 0;
-  letter-spacing: -1px;
-  transition: color 0.15s;
-}
-.graph-btn:hover {
-  color: var(--accent-green-bright, #4ec9b0);
-}
-
-.item-sprite {
-  flex-shrink: 0;
-  image-rendering: pixelated;
-  width: 36px;
-  height: 32px;
-  object-fit: contain;
-}
-
-.market-card .item-name {
-  color: var(--text-accent);
-  flex: 1 1 0;
-  min-width: 60px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  font-size: 12px;
-}
-
-.item-price {
-  color: var(--text-price);
-  white-space: nowrap;
-  flex-shrink: 0;
-  font-size: 12px;
-  font-weight: 600;
-}
-
-/* ── Expandable detail panel ──────────────────────────────────────────────── */
-
-.market-card-detail {
-  max-height: 0;
-  overflow: hidden;
-  transition: max-height 0.2s ease, padding 0.2s ease;
-  padding: 0 8px;
-  background: var(--bg-main);
-  border-top: 1px solid transparent;
-}
-
-.market-card.expanded .market-card-detail {
-  max-height: 400px;
-  padding: 6px 8px;
-  border-top-color: var(--border-main);
-  background: var(--detail-expanded-bg);
-  overflow-y: auto;
-}
-
-/* \\u2500\\u2500 Popout button \\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500 */
-
-.popout-btn {
-  all: unset;
-  cursor: pointer;
-  font-size: 14px;
-  line-height: 1;
-  color: var(--text-muted);
-  padding: 2px 4px;
-  border-radius: 3px;
-  flex-shrink: 0;
-  transition: color 0.15s, background 0.15s;
-}
-
-.popout-btn:hover {
-  color: var(--accent-blue-text);
-  background: rgba(86, 156, 214, 0.12);
-}
-
-/* ── Card action button group ──────────────────────────────────────────────── */
-
-.card-actions {
-  display: flex;
-  align-items: center;
-  gap: 2px;
-  flex-shrink: 0;
-  flex-wrap: wrap;
-  justify-content: center;
-}
-
-/* ── Favourite button ──────────────────────────────────────────────────────── */
-
-.fav-btn {
-  all: unset;
-  cursor: pointer;
-  font-size: 15px;
-  line-height: 1;
-  color: var(--text-muted);
-  padding: 2px 4px;
-  border-radius: 3px;
-  flex-shrink: 0;
-  transition: color 0.15s, transform 0.15s;
-}
-
-.fav-btn:hover {
-  color: var(--accent-gold);
-  transform: scale(1.15);
-}
-
-/* Filled star when item is favourited. */
-.market-card.favorited .fav-btn,
-.modal-fav-btn:has(+ .item-modal-close) {
-  /* fallback — override via JS textContent ★ vs ☆ */
-}
-
-.market-card.favorited {
-  border-left: 2px solid var(--accent-gold);
-}
-
-/* Quick-add to portfolio button */
-
-.quick-add-btn {
-  all: unset;
-  cursor: pointer;
-  font-size: 16px;
-  font-weight: 700;
-  line-height: 1;
-  color: var(--text-muted);
-  padding: 1px 5px;
-  border-radius: 3px;
-  flex-shrink: 0;
-  transition: color 0.15s, background 0.15s;
-}
-
-.quick-add-btn:hover {
-  color: var(--accent-teal);
-  background: rgba(78, 201, 176, 0.12);
-}
-
-/* ── Alert bell button (inline on card) ────────────────────────────────────── */
-
-.alert-btn {
-  all: unset;
-  cursor: pointer;
-  font-size: 13px;
-  line-height: 1;
-  color: var(--text-muted);
-  padding: 2px 4px;
-  border-radius: 3px;
-  flex-shrink: 0;
-  opacity: 0.55;
-  transition: color 0.15s, opacity 0.15s, transform 0.15s;
-}
-
-.alert-btn:hover {
-  opacity: 1;
-  transform: scale(1.15);
-}
-
-.alert-btn.alert-active {
-  opacity: 1;
-  color: var(--accent-gold);
-  filter: drop-shadow(0 0 2px rgba(240, 192, 64, 0.5));
-}
-
-/* ── Inline card alert popover ─────────────────────────────────────────────── */
-
-.card-alert-popover {
-  display: none;
-  padding: 6px 10px;
-  background: var(--bg-muted);
-  border: 1px solid var(--border-section);
-  border-top: none;
-  border-radius: 0 0 4px 4px;
-  gap: 4px;
-}
-
-.card-alert-popover.open {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-}
-
-.card-alert-row {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-}
-
-.card-alert-row label {
+.alert-row label {
   font-size: 10px;
   color: var(--text-muted);
   white-space: nowrap;
-  min-width: 34px;
 }
 
-.card-alert-row input[type="number"] {
-  width: 80px;
-  padding: 2px 5px;
+.alert-row input[type="number"] {
+  width: 120px;
+  padding: 2px 6px;
   font-size: 10px;
   background: var(--bg-input);
   border: 1px solid var(--border-input);
@@ -3044,272 +215,88 @@ body[data-style="glass"] .startup-overlay {
   border-radius: 3px;
 }
 
-.card-alert-row input[type="number"]::placeholder {
+.alert-row input[type="number"]::placeholder {
   color: var(--text-muted);
   opacity: 0.6;
 }
+`, ""]);
+// Exports
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (___CSS_LOADER_EXPORT___);
 
-/* ── External link buttons (Wiki / GE) ─────────────────────────────────────── */
 
-.ext-link {
-  all: unset;
-  cursor: pointer;
-  font-size: 11px;
-  font-weight: 600;
-  line-height: 1;
-  color: var(--text-muted);
-  padding: 2px 5px;
-  border-radius: 3px;
-  flex-shrink: 0;
-  text-decoration: none;
-  transition: color 0.15s, background 0.15s;
-}
+/***/ },
 
-.ext-link.wiki-link:hover {
-  color: var(--accent-blue-text);
-  background: rgba(86, 156, 214, 0.12);
-}
+/***/ "../node_modules/css-loader/dist/cjs.js!./css/components/analytics-dividers.css"
+/*!**************************************************************************************!*\
+  !*** ../node_modules/css-loader/dist/cjs.js!./css/components/analytics-dividers.css ***!
+  \**************************************************************************************/
+(module, __webpack_exports__, __webpack_require__) {
 
-.ext-link.ge-link:hover {
-  color: var(--accent-gold);
-  background: rgba(240, 192, 64, 0.12);
-}
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var _node_modules_css_loader_dist_runtime_noSourceMaps_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../../node_modules/css-loader/dist/runtime/noSourceMaps.js */ "../node_modules/css-loader/dist/runtime/noSourceMaps.js");
+/* harmony import */ var _node_modules_css_loader_dist_runtime_noSourceMaps_js__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_node_modules_css_loader_dist_runtime_noSourceMaps_js__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../../node_modules/css-loader/dist/runtime/api.js */ "../node_modules/css-loader/dist/runtime/api.js");
+/* harmony import */ var _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(_node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1__);
+// Imports
 
-/* ── Favourites section ────────────────────────────────────────────────────────────── */
 
-.favorites-section {
-  margin-bottom: 8px;
-  border: 1px solid var(--border-section);
-  border-radius: 6px;
-  background: var(--bg-main);
-  overflow: hidden;
-}
+var ___CSS_LOADER_EXPORT___ = _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1___default()((_node_modules_css_loader_dist_runtime_noSourceMaps_js__WEBPACK_IMPORTED_MODULE_0___default()));
+// Module
+___CSS_LOADER_EXPORT___.push([module.id, `/* ══════════════════════════════════════════════════════════════════════════════
+   Analytics modal: section divider & predictive section accent
+   ══════════════════════════════════════════════════════════════════════════════ */
 
-.favorites-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 4px 10px;
-  background: var(--bg-panel);
-  border-bottom: 1px solid var(--border-section);
-}
-
-.favorites-header-actions {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-}
-
-#favorites-sort-select {
+.analytics-section-divider {
+  grid-column: 1 / -1;
   font-size: 10px;
-  padding: 1px 4px;
-  background: var(--bg-input);
-  border: 1px solid var(--border-input);
-  color: var(--text-muted);
-  border-radius: 3px;
-  cursor: pointer;
-}
-
-.favorites-header h3 {
-  margin: 0;
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--accent-gold);
-}
-
-.favorites-header .view-btn {
-  font-size: 14px;
-  padding: 0 4px;
-}
-
-/* ── Floating Item Detail Modal ────────────────────────────────────────────── */
-
-.item-modal-backdrop {
-  display: none;
-  position: fixed;
-  inset: 0;
-  z-index: 500;
-  background: var(--modal-backdrop);
-  justify-content: center;
-  align-items: center;
-}
-
-.item-modal-backdrop.visible {
-  display: flex;
-}
-
-.item-modal {
-  background: var(--bg-main);
-  border: 1px solid var(--accent-blue-text);
-  border-radius: 6px;
-  width: 380px;
-  max-width: 92vw;
-  max-height: 85vh;
-  overflow-y: auto;
-  box-shadow: 0 8px 32px var(--modal-shadow);
-  animation: modal-in 0.15s ease-out;
-}
-
-@keyframes modal-in {
-  from { opacity: 0; transform: scale(0.95) translateY(8px); }
-  to   { opacity: 1; transform: scale(1) translateY(0); }
-}
-
-.item-modal-header {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 10px 12px;
-  border-bottom: 2px solid var(--border-main);
-}
-
-.item-modal-name {
-  flex: 1;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
   color: var(--text-accent);
-  font-size: 15px;
-  font-weight: 600;
+  padding: 8px 0 4px;
+  margin-top: 4px;
+  border-top: 1px solid var(--border-main);
 }
 
-.item-modal-close {
-  all: unset;
-  cursor: pointer;
-  color: var(--text-muted);
-  font-size: 18px;
-  line-height: 1;
-  padding: 2px 6px;
-  border-radius: 3px;
-  flex-shrink: 0;
-  transition: color 0.15s, background 0.15s;
+.predictive-section {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: inherit;
+  gap: inherit;
+  border-left: 3px solid var(--accent-primary);
+  padding-left: 8px;
+  margin-top: 4px;
 }
+`, ""]);
+// Exports
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (___CSS_LOADER_EXPORT___);
 
-.item-modal-close:hover {
-  color: var(--accent-red);
-  background: rgba(244, 71, 71, 0.12);
-}
 
-.item-modal-body {
-  padding: 10px 12px;
-}
+/***/ },
 
-.item-modal-badges {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 5px;
-  margin-bottom: 8px;
-}
+/***/ "../node_modules/css-loader/dist/cjs.js!./css/components/analytics-modal.css"
+/*!***********************************************************************************!*\
+  !*** ../node_modules/css-loader/dist/cjs.js!./css/components/analytics-modal.css ***!
+  \***********************************************************************************/
+(module, __webpack_exports__, __webpack_require__) {
 
-/* (modal-sparkline removed — chart now in dedicated graph modal) */
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var _node_modules_css_loader_dist_runtime_noSourceMaps_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../../node_modules/css-loader/dist/runtime/noSourceMaps.js */ "../node_modules/css-loader/dist/runtime/noSourceMaps.js");
+/* harmony import */ var _node_modules_css_loader_dist_runtime_noSourceMaps_js__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_node_modules_css_loader_dist_runtime_noSourceMaps_js__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../../node_modules/css-loader/dist/runtime/api.js */ "../node_modules/css-loader/dist/runtime/api.js");
+/* harmony import */ var _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(_node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1__);
+// Imports
 
-/* ── Graph Modal (deprecated — kept for backwards compat) ─────────────────── */
 
-.graph-modal-backdrop {
-  position: fixed;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.55);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 9999;
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.15s ease;
-}
-.graph-modal-backdrop.visible {
-  opacity: 1;
-  pointer-events: auto;
-}
-
-.graph-modal {
-  background: var(--bg-main);
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  width: 92%;
-  max-width: 520px;
-  max-height: 85vh;
-  overflow-y: auto;
-  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.5);
-}
-
-.graph-modal-header {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 10px 12px;
-  border-bottom: 1px solid var(--border);
-}
-.graph-modal-title {
-  flex: 1;
-  font-weight: 600;
-  font-size: 14px;
-  color: var(--text);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.graph-modal-body {
-  padding: 12px;
-}
-
-.graph-modal-canvas {
-  display: block;
-  width: 100%;
-  height: 180px;
-  margin-bottom: 12px;
-  border-radius: 4px;
-  background: var(--bg-elevated);
-}
-
-.graph-history-status {
-  display: none;
-  text-align: center;
-  padding: 8px 4px;
-  font-size: 11px;
-  color: var(--text-muted, #888);
-}
-.graph-history-status.visible {
-  display: block;
-}
-.graph-history-status button {
-  background: none;
-  border: none;
-  cursor: pointer;
-  color: var(--accent-blue, #569cd6);
-  text-decoration: underline;
-  font-size: 11px;
-  padding: 0 2px;
-}
-.graph-history-status button:disabled {
-  opacity: 0.5;
-  cursor: default;
-}
-
-.graph-stats {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.graph-stat-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 4px 0;
-  border-bottom: 1px solid var(--border);
-  font-size: 12px;
-}
-.graph-stat-row:last-child {
-  border-bottom: none;
-}
-.graph-stat-label {
-  color: var(--text-muted);
-}
-.graph-stat-value {
-  font-weight: 600;
-  color: var(--text);
-}
-
-/* ══════════════════════════════════════════════════════════════════════════════
+var ___CSS_LOADER_EXPORT___ = _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1___default()((_node_modules_css_loader_dist_runtime_noSourceMaps_js__WEBPACK_IMPORTED_MODULE_0___default()));
+// Module
+___CSS_LOADER_EXPORT___.push([module.id, `/* ══════════════════════════════════════════════════════════════════════════════
    Unified Analytics Modal – combines details + graph – March 2026
    ══════════════════════════════════════════════════════════════════════════════ */
 
@@ -3403,7 +390,7 @@ body[data-style="glass"] .startup-overlay {
 }
 .analytics-modal-close:hover {
   color: var(--accent-red);
-  background: rgba(244, 71, 71, 0.12);
+  background: var(--close-hover-bg);
 }
 
 /* ── Analytics modal: content sections ──────────────────────────────────────── */
@@ -3672,112 +659,235 @@ body[data-style="glass"] .startup-overlay {
   text-align: right;
   word-break: break-word;
 }
+`, ""]);
+// Exports
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (___CSS_LOADER_EXPORT___);
 
-/* ── List view ────────────────────────────────────────────────────────────── */
 
-.market-items.list {
+/***/ },
+
+/***/ "../node_modules/css-loader/dist/cjs.js!./css/components/card-actions.css"
+/*!********************************************************************************!*\
+  !*** ../node_modules/css-loader/dist/cjs.js!./css/components/card-actions.css ***!
+  \********************************************************************************/
+(module, __webpack_exports__, __webpack_require__) {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var _node_modules_css_loader_dist_runtime_noSourceMaps_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../../node_modules/css-loader/dist/runtime/noSourceMaps.js */ "../node_modules/css-loader/dist/runtime/noSourceMaps.js");
+/* harmony import */ var _node_modules_css_loader_dist_runtime_noSourceMaps_js__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_node_modules_css_loader_dist_runtime_noSourceMaps_js__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../../node_modules/css-loader/dist/runtime/api.js */ "../node_modules/css-loader/dist/runtime/api.js");
+/* harmony import */ var _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(_node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1__);
+// Imports
+
+
+var ___CSS_LOADER_EXPORT___ = _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1___default()((_node_modules_css_loader_dist_runtime_noSourceMaps_js__WEBPACK_IMPORTED_MODULE_0___default()));
+// Module
+___CSS_LOADER_EXPORT___.push([module.id, `/* \\u2500\\u2500 Popout button \\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500 */
+
+.popout-btn {
+  all: unset;
+  cursor: pointer;
+  font-size: 14px;
+  line-height: 1;
+  color: var(--text-muted);
+  padding: 2px 4px;
+  border-radius: 3px;
+  flex-shrink: 0;
+  transition: color 0.15s, background 0.15s;
+}
+
+.popout-btn:hover {
+  color: var(--accent-blue-text);
+  background: rgba(86, 156, 214, 0.12);
+}
+
+/* ── Card action button group ──────────────────────────────────────────────── */
+
+.card-actions {
   display: flex;
-  flex-direction: column;
-  gap: 6px;
-  padding: 6px 8px;
-}
-
-.market-items.list .market-card {
-  border-radius: 2px;
-}
-
-.market-items.list .item-sprite {
-  width: 24px;
-  height: 22px;
-}
-
-/* ── Tile view ────────────────────────────────────────────────────────────── */
-
-.market-items.tile {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
-  gap: 8px;
-  padding: 8px 10px;
-}
-
-.market-items.tile .market-card-header {
-  flex-direction: column;
-  text-align: center;
-  padding: 8px 6px;
-  gap: 4px;
-  overflow: visible;
-}
-
-.market-items.tile .card-actions {
-  gap: 3px;
-  justify-content: center;
-  flex-wrap: wrap;
-}
-
-.market-items.tile .item-sprite {
-  width: 36px;
-  height: 32px;
-}
-
-.market-items.tile .item-name {
-  font-size: 11px;
-  text-align: center;
-  white-space: normal;
-  overflow: visible;
-}
-
-.market-items.tile .item-price {
-  font-size: 11px;
-}
-
-.market-items.tile .flip-badges {
-  margin-left: 0;
-  justify-content: center;
-  width: 100%;
-}
-
-.market-items.tile .buy-badge,
-.market-items.tile .sell-badge,
-.market-items.tile .profit-badge {
-  font-size: var(--badge-font-sm);
-  padding: var(--badge-padding-sm);
-}
-
-/* (tile sparkline rules removed — chart now in dedicated graph modal) */
-
-/* ── Hybrid view (compact grid, list-style rows) ──────────────────────────── */
-
-.market-items.hybrid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-  gap: 6px;
-  padding: 6px 8px;
-}
-
-.market-items.hybrid .market-card-header {
-  padding: 4px 6px;
-  gap: 6px;
-}
-
-.market-items.hybrid .item-sprite {
-  width: 28px;
-  height: 24px;
-}
-
-/* (hybrid sparkline rule removed) */
-
-.market-items.hybrid .flip-badges {
+  align-items: center;
   gap: 2px;
+  flex-shrink: 0;
+  flex-wrap: wrap;
+  justify-content: center;
 }
 
-.market-items.hybrid .buy-badge,
-.market-items.hybrid .sell-badge,
-.market-items.hybrid .profit-badge {
-  font-size: var(--badge-font-sm);
-  padding: var(--badge-padding-sm);
+/* ── Favourite button ──────────────────────────────────────────────────────── */
+
+.fav-btn {
+  all: unset;
+  cursor: pointer;
+  font-size: 15px;
+  line-height: 1;
+  color: var(--text-muted);
+  padding: 2px 4px;
+  border-radius: 3px;
+  flex-shrink: 0;
+  transition: color 0.15s, transform 0.15s;
 }
 
-/* ── Chat / Advisor panel ──────────────────────────────────────────────────── */
+.fav-btn:hover {
+  color: var(--accent-gold);
+  transform: scale(1.15);
+}
+
+/* Filled star when item is favourited. */
+.market-card.favorited .fav-btn,
+.modal-fav-btn:has(+ .item-modal-close) {
+  /* fallback — override via JS textContent ★ vs ☆ */
+}
+
+.market-card.favorited {
+  border-left: 2px solid var(--accent-gold);
+}
+
+/* Quick-add to portfolio button */
+
+.quick-add-btn {
+  all: unset;
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 1;
+  color: var(--text-muted);
+  padding: 1px 5px;
+  border-radius: 3px;
+  flex-shrink: 0;
+  transition: color 0.15s, background 0.15s;
+}
+
+.quick-add-btn:hover {
+  color: var(--accent-teal);
+  background: rgba(78, 201, 176, 0.12);
+}
+
+/* ── Alert bell button (inline on card) ────────────────────────────────────── */
+
+.alert-btn {
+  all: unset;
+  cursor: pointer;
+  font-size: 13px;
+  line-height: 1;
+  color: var(--text-muted);
+  padding: 2px 4px;
+  border-radius: 3px;
+  flex-shrink: 0;
+  opacity: 0.55;
+  transition: color 0.15s, opacity 0.15s, transform 0.15s;
+}
+
+.alert-btn:hover {
+  opacity: 1;
+  transform: scale(1.15);
+}
+
+.alert-btn.alert-active {
+  opacity: 1;
+  color: var(--accent-gold);
+  filter: drop-shadow(0 0 2px rgba(240, 192, 64, 0.5));
+}
+
+/* ── Inline card alert popover ─────────────────────────────────────────────── */
+
+.card-alert-popover {
+  display: none;
+  padding: 6px 10px;
+  background: var(--bg-muted);
+  border: 1px solid var(--border-section);
+  border-top: none;
+  border-radius: 0 0 4px 4px;
+  gap: 4px;
+}
+
+.card-alert-popover.open {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.card-alert-row {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.card-alert-row label {
+  font-size: 10px;
+  color: var(--text-muted);
+  white-space: nowrap;
+  min-width: 34px;
+}
+
+.card-alert-row input[type="number"] {
+  width: 80px;
+  padding: 2px 5px;
+  font-size: 10px;
+  background: var(--bg-input);
+  border: 1px solid var(--border-input);
+  color: var(--text-main);
+  border-radius: 3px;
+}
+
+.card-alert-row input[type="number"]::placeholder {
+  color: var(--text-muted);
+  opacity: 0.6;
+}
+
+/* ── External link buttons (Wiki / GE) ─────────────────────────────────────── */
+
+.ext-link {
+  all: unset;
+  cursor: pointer;
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1;
+  color: var(--text-muted);
+  padding: 2px 5px;
+  border-radius: 3px;
+  flex-shrink: 0;
+  text-decoration: none;
+  transition: color 0.15s, background 0.15s;
+}
+
+.ext-link.wiki-link:hover {
+  color: var(--accent-blue-text);
+  background: rgba(86, 156, 214, 0.12);
+}
+
+.ext-link.ge-link:hover {
+  color: var(--accent-gold);
+  background: rgba(240, 192, 64, 0.12);
+}
+`, ""]);
+// Exports
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (___CSS_LOADER_EXPORT___);
+
+
+/***/ },
+
+/***/ "../node_modules/css-loader/dist/cjs.js!./css/components/chat.css"
+/*!************************************************************************!*\
+  !*** ../node_modules/css-loader/dist/cjs.js!./css/components/chat.css ***!
+  \************************************************************************/
+(module, __webpack_exports__, __webpack_require__) {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var _node_modules_css_loader_dist_runtime_noSourceMaps_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../../node_modules/css-loader/dist/runtime/noSourceMaps.js */ "../node_modules/css-loader/dist/runtime/noSourceMaps.js");
+/* harmony import */ var _node_modules_css_loader_dist_runtime_noSourceMaps_js__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_node_modules_css_loader_dist_runtime_noSourceMaps_js__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../../node_modules/css-loader/dist/runtime/api.js */ "../node_modules/css-loader/dist/runtime/api.js");
+/* harmony import */ var _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(_node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1__);
+// Imports
+
+
+var ___CSS_LOADER_EXPORT___ = _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1___default()((_node_modules_css_loader_dist_runtime_noSourceMaps_js__WEBPACK_IMPORTED_MODULE_0___default()));
+// Module
+___CSS_LOADER_EXPORT___.push([module.id, `/* ── Chat / Advisor panel ──────────────────────────────────────────────────── */
 
 #advisor-view {
   display: flex;
@@ -3905,8 +1015,1291 @@ body[data-style="glass"] .startup-overlay {
 #chat-input {
   flex: 1;
 }
+`, ""]);
+// Exports
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (___CSS_LOADER_EXPORT___);
 
-/* ── Portfolio view ─────────────────────────────────────────────────────────────────── */
+
+/***/ },
+
+/***/ "../node_modules/css-loader/dist/cjs.js!./css/components/completed-flips.css"
+/*!***********************************************************************************!*\
+  !*** ../node_modules/css-loader/dist/cjs.js!./css/components/completed-flips.css ***!
+  \***********************************************************************************/
+(module, __webpack_exports__, __webpack_require__) {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var _node_modules_css_loader_dist_runtime_noSourceMaps_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../../node_modules/css-loader/dist/runtime/noSourceMaps.js */ "../node_modules/css-loader/dist/runtime/noSourceMaps.js");
+/* harmony import */ var _node_modules_css_loader_dist_runtime_noSourceMaps_js__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_node_modules_css_loader_dist_runtime_noSourceMaps_js__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../../node_modules/css-loader/dist/runtime/api.js */ "../node_modules/css-loader/dist/runtime/api.js");
+/* harmony import */ var _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(_node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1__);
+// Imports
+
+
+var ___CSS_LOADER_EXPORT___ = _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1___default()((_node_modules_css_loader_dist_runtime_noSourceMaps_js__WEBPACK_IMPORTED_MODULE_0___default()));
+// Module
+___CSS_LOADER_EXPORT___.push([module.id, `/* ── Completed flips table ─────────────────────────────────────────────────── */
+
+.portfolio-history-toolbar {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 8px;
+  align-items: center;
+}
+
+.portfolio-history-toolbar input[type="text"] {
+  flex: 1;
+  padding: 4px 8px;
+  font-size: 11px;
+  border: 1px solid var(--border-input);
+  border-radius: 3px;
+  background: var(--bg-input);
+  color: var(--text-main);
+}
+
+.portfolio-history-toolbar input[type="text"]::placeholder {
+  color: var(--text-muted);
+  opacity: 0.6;
+}
+
+#export-csv-btn {
+  padding: 4px 10px;
+  font-size: 11px;
+  white-space: nowrap;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-input);
+  border-radius: 3px;
+  color: var(--text-main);
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+#export-csv-btn:hover {
+  background: var(--accent-primary);
+  color: var(--text-bright);
+}
+
+.completed-flips-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 11px;
+}
+
+.completed-flips-table th {
+  text-align: left;
+  padding: 4px 8px;
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--text-heading);
+  border-bottom: 2px solid var(--border-main);
+  cursor: pointer;
+  user-select: none;
+  white-space: nowrap;
+  background: var(--bg-elevated);
+}
+
+.completed-flips-table th:hover {
+  color: var(--text-bright);
+}
+
+.completed-flips-table th .sort-arrow {
+  margin-left: 2px;
+  font-size: 9px;
+  color: var(--text-muted);
+}
+
+.completed-flips-table td {
+  padding: 4px 8px;
+  border-bottom: 2px solid var(--border-main);
+  color: var(--text-main);
+  white-space: nowrap;
+}
+
+.completed-flips-table tr.win td:first-child {
+  border-left: 3px solid var(--accent-green-bright);
+}
+
+.completed-flips-table tr.loss td:first-child {
+  border-left: 3px solid var(--accent-red-dark);
+}
+
+.completed-flips-table .profit-cell {
+  font-weight: 600;
+}
+
+.completed-flips-table .profit-cell.win {
+  color: var(--accent-green);
+}
+
+.completed-flips-table .profit-cell.loss {
+  color: var(--accent-red);
+}
+
+/* ── Graph modal history-range dropdown ──────────────────────────────────── */
+
+.graph-modal-range-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
+.graph-modal-range-row label {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.graph-modal-range-row select {
+  padding: 2px 6px;
+  font-size: 11px;
+  background: var(--bg-input);
+  color: var(--text-main);
+  border: 1px solid var(--border-input);
+  border-radius: 3px;
+}
+
+/* ── Complete flip button ───────────────────────────────────────────────────── */
+
+.flip-card-actions {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.flip-complete-btn {
+  background: transparent;
+  border: 1px solid var(--border-input);
+  border-radius: 3px;
+  color: var(--accent-green);
+  cursor: pointer;
+  font-size: 11px;
+  padding: 1px 6px;
+  transition: background .15s, color .15s;
+}
+
+.flip-complete-btn:hover {
+  background: var(--accent-green-bright);
+  color: var(--text-bright);
+  border-color: var(--accent-green-bright);
+}
+`, ""]);
+// Exports
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (___CSS_LOADER_EXPORT___);
+
+
+/***/ },
+
+/***/ "../node_modules/css-loader/dist/cjs.js!./css/components/detail-panel.css"
+/*!********************************************************************************!*\
+  !*** ../node_modules/css-loader/dist/cjs.js!./css/components/detail-panel.css ***!
+  \********************************************************************************/
+(module, __webpack_exports__, __webpack_require__) {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var _node_modules_css_loader_dist_runtime_noSourceMaps_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../../node_modules/css-loader/dist/runtime/noSourceMaps.js */ "../node_modules/css-loader/dist/runtime/noSourceMaps.js");
+/* harmony import */ var _node_modules_css_loader_dist_runtime_noSourceMaps_js__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_node_modules_css_loader_dist_runtime_noSourceMaps_js__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../../node_modules/css-loader/dist/runtime/api.js */ "../node_modules/css-loader/dist/runtime/api.js");
+/* harmony import */ var _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(_node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1__);
+// Imports
+
+
+var ___CSS_LOADER_EXPORT___ = _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1___default()((_node_modules_css_loader_dist_runtime_noSourceMaps_js__WEBPACK_IMPORTED_MODULE_0___default()));
+// Module
+___CSS_LOADER_EXPORT___.push([module.id, `/* ── Expandable detail panel ──────────────────────────────────────────────── */
+
+.market-card-detail {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.2s ease, padding 0.2s ease;
+  padding: 0 8px;
+  background: var(--bg-main);
+  border-top: 1px solid transparent;
+}
+
+.market-card.expanded .market-card-detail {
+  max-height: 400px;
+  padding: 6px 8px;
+  border-top-color: var(--border-main);
+  background: var(--detail-expanded-bg);
+  overflow-y: auto;
+}`, ""]);
+// Exports
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (___CSS_LOADER_EXPORT___);
+
+
+/***/ },
+
+/***/ "../node_modules/css-loader/dist/cjs.js!./css/components/favourites.css"
+/*!******************************************************************************!*\
+  !*** ../node_modules/css-loader/dist/cjs.js!./css/components/favourites.css ***!
+  \******************************************************************************/
+(module, __webpack_exports__, __webpack_require__) {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var _node_modules_css_loader_dist_runtime_noSourceMaps_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../../node_modules/css-loader/dist/runtime/noSourceMaps.js */ "../node_modules/css-loader/dist/runtime/noSourceMaps.js");
+/* harmony import */ var _node_modules_css_loader_dist_runtime_noSourceMaps_js__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_node_modules_css_loader_dist_runtime_noSourceMaps_js__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../../node_modules/css-loader/dist/runtime/api.js */ "../node_modules/css-loader/dist/runtime/api.js");
+/* harmony import */ var _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(_node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1__);
+// Imports
+
+
+var ___CSS_LOADER_EXPORT___ = _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1___default()((_node_modules_css_loader_dist_runtime_noSourceMaps_js__WEBPACK_IMPORTED_MODULE_0___default()));
+// Module
+___CSS_LOADER_EXPORT___.push([module.id, `/* ── Favourites section ────────────────────────────────────────────────────────────── */
+
+.favorites-section {
+  margin-bottom: 8px;
+  border: 1px solid var(--border-section);
+  border-radius: 6px;
+  background: var(--bg-main);
+  overflow: hidden;
+}
+
+.favorites-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 4px 10px;
+  background: var(--bg-panel);
+  border-bottom: 1px solid var(--border-section);
+}
+
+.favorites-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+#favorites-sort-select {
+  font-size: 10px;
+  padding: 1px 4px;
+  background: var(--bg-input);
+  border: 1px solid var(--border-input);
+  color: var(--text-muted);
+  border-radius: 3px;
+  cursor: pointer;
+}
+
+.favorites-header h3 {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--accent-gold);
+}
+
+.favorites-header .view-btn {
+  font-size: 14px;
+  padding: 0 4px;
+}
+`, ""]);
+// Exports
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (___CSS_LOADER_EXPORT___);
+
+
+/***/ },
+
+/***/ "../node_modules/css-loader/dist/cjs.js!./css/components/filters.css"
+/*!***************************************************************************!*\
+  !*** ../node_modules/css-loader/dist/cjs.js!./css/components/filters.css ***!
+  \***************************************************************************/
+(module, __webpack_exports__, __webpack_require__) {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var _node_modules_css_loader_dist_runtime_noSourceMaps_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../../node_modules/css-loader/dist/runtime/noSourceMaps.js */ "../node_modules/css-loader/dist/runtime/noSourceMaps.js");
+/* harmony import */ var _node_modules_css_loader_dist_runtime_noSourceMaps_js__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_node_modules_css_loader_dist_runtime_noSourceMaps_js__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../../node_modules/css-loader/dist/runtime/api.js */ "../node_modules/css-loader/dist/runtime/api.js");
+/* harmony import */ var _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(_node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1__);
+// Imports
+
+
+var ___CSS_LOADER_EXPORT___ = _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1___default()((_node_modules_css_loader_dist_runtime_noSourceMaps_js__WEBPACK_IMPORTED_MODULE_0___default()));
+// Module
+___CSS_LOADER_EXPORT___.push([module.id, `/* ── Filter bar ───────────────────────────────────────────────────────────── */
+
+.filter-bar {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 6px;
+  flex-wrap: wrap;
+}
+
+.filter-bar select {
+  flex: 1 1 0;
+  min-width: 0;
+  font-size: 11px;
+  padding: 3px 5px;
+}
+
+.refresh-btn {
+  flex-shrink: 0;
+  font-size: 11px;
+  padding: 3px 10px;
+  background: var(--bg-muted);
+  border: 1px solid var(--border-input);
+  color: var(--text-main);
+  border-radius: 3px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.refresh-btn:hover {
+  background: var(--accent-primary);
+  color: var(--text-bright);
+}
+
+/* ── Full Market Scan button ──────────────────────────────────────────────── */
+
+.scan-btn {
+  flex-shrink: 0;
+  font-size: 10px;
+  padding: 2px 8px;
+  background: var(--accent-primary);
+  border: 1px solid var(--border-input);
+  color: var(--text-bright);
+  border-radius: 3px;
+  cursor: pointer;
+  transition: background 0.15s, opacity 0.15s;
+}
+
+.scan-btn:hover {
+  background: var(--accent-hover, var(--accent-primary));
+  filter: brightness(1.15);
+}
+
+.scan-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  filter: none;
+}
+
+/* ── Deep-history checkbox label ──────────────────────────────────────────── */
+
+.deep-history-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 10px;
+  color: var(--text-muted);
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.deep-history-label input[type="checkbox"] {
+  margin: 0;
+  accent-color: var(--accent-primary);
+}
+
+/* ── Background sync progress bar ─────────────────────────────────────────── */
+
+.sync-progress {
+  margin: 6px 0;
+  padding: 4px 8px;
+  background: var(--bg-muted);
+  border: 1px solid var(--border-input);
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.sync-progress.hidden {
+  display: none;
+}
+
+.sync-progress-track {
+  flex: 1;
+  height: 8px;
+  background: var(--bg-card, #1e1e2e);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.sync-progress-fill {
+  height: 100%;
+  width: 0%;
+  background: var(--accent-primary);
+  border-radius: 4px;
+  transition: width 0.3s ease;
+}
+
+.sync-progress-text {
+  font-size: 10px;
+  color: var(--text-muted);
+  white-space: nowrap;
+  min-width: 120px;
+}
+
+/* ── Custom filter precision controls ─────────────────────────────────────── */
+
+.custom-filter-group {
+  margin-bottom: 6px;
+  padding: 4px 6px;
+  background: var(--bg-filter);
+  border: 2px solid var(--border-main);
+  border-radius: 3px;
+}
+
+.custom-filter-label {
+  display: block;
+  font-size: 10px;
+  color: var(--text-soft);
+  margin-bottom: 2px;
+  margin-top: 4px;
+}
+
+.custom-filter-label:first-child {
+  margin-top: 0;
+}
+
+.custom-filter-label .hint {
+  color: var(--text-dimmed);
+}
+
+.slider-row {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
+.slider-row input[type="range"] {
+  flex: 1 1 0;
+  min-width: 0;
+  height: 16px;
+  cursor: pointer;
+  accent-color: var(--accent-primary);
+  -webkit-appearance: none;
+  appearance: none;
+  background: transparent;
+}
+
+/* Track */
+.slider-row input[type="range"]::-webkit-slider-runnable-track {
+  height: 4px;
+  border-radius: 2px;
+  background: var(--border-input);
+}
+
+.slider-row input[type="range"]::-moz-range-track {
+  height: 4px;
+  border-radius: 2px;
+  border: none;
+  background: var(--border-input);
+}
+
+/* Thumb */
+.slider-row input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--accent-primary);
+  border: none;
+  margin-top: -5px;
+  transition: background 0.15s;
+}
+
+.slider-row input[type="range"]::-moz-range-thumb {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--accent-primary);
+  border: none;
+}
+
+/* Hover / focus */
+.slider-row input[type="range"]:hover::-webkit-slider-thumb {
+  background: var(--accent-primary-hover);
+}
+
+.slider-row input[type="range"]:hover::-moz-range-thumb {
+  background: var(--accent-primary-hover);
+}
+
+.slider-row input[type="range"]:focus {
+  outline: none;
+}
+
+.slider-row input[type="range"]:focus::-webkit-slider-thumb {
+  box-shadow: 0 0 0 2px var(--accent-focus);
+}
+
+.slider-row input[type="number"] {
+  width: 80px;
+  flex-shrink: 0;
+  font-size: 11px;
+  padding: 2px 4px;
+  background: var(--bg-number-input);
+  border: 1px solid var(--border-input);
+  color: var(--text-main);
+  border-radius: 3px;
+  text-align: right;
+}
+
+.slider-row input[type="number"]:focus {
+  outline: 1px solid var(--accent-primary);
+  border-color: var(--accent-primary);
+}`, ""]);
+// Exports
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (___CSS_LOADER_EXPORT___);
+
+
+/***/ },
+
+/***/ "../node_modules/css-loader/dist/cjs.js!./css/components/highlights.css"
+/*!******************************************************************************!*\
+  !*** ../node_modules/css-loader/dist/cjs.js!./css/components/highlights.css ***!
+  \******************************************************************************/
+(module, __webpack_exports__, __webpack_require__) {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var _node_modules_css_loader_dist_runtime_noSourceMaps_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../../node_modules/css-loader/dist/runtime/noSourceMaps.js */ "../node_modules/css-loader/dist/runtime/noSourceMaps.js");
+/* harmony import */ var _node_modules_css_loader_dist_runtime_noSourceMaps_js__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_node_modules_css_loader_dist_runtime_noSourceMaps_js__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../../node_modules/css-loader/dist/runtime/api.js */ "../node_modules/css-loader/dist/runtime/api.js");
+/* harmony import */ var _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(_node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1__);
+// Imports
+
+
+var ___CSS_LOADER_EXPORT___ = _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1___default()((_node_modules_css_loader_dist_runtime_noSourceMaps_js__WEBPACK_IMPORTED_MODULE_0___default()));
+// Module
+___CSS_LOADER_EXPORT___.push([module.id, `/* ── Semantic text-colour highlight classes ──────────────────────────────────
+   Applied by JS on inline text. Doubled selector for specificity over
+   \`.market-card .item-name\`, \`.detail-value\` etc. — no !important needed. */
+
+.market-card .hype-text,
+.hype-text.hype-text {
+  color: var(--accent-hype);
+}
+
+.market-card .buy-highlight,
+.buy-highlight.buy-highlight {
+  color: var(--accent-blue-text);
+}
+
+.market-card .sell-highlight,
+.sell-highlight.sell-highlight {
+  color: var(--accent-teal);
+}
+
+.market-card .profit-highlight,
+.profit-highlight.profit-highlight {
+  color: var(--accent-teal);
+}
+
+.market-card .risky-text,
+.risky-text.risky-text {
+  color: var(--accent-red);
+}
+`, ""]);
+// Exports
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (___CSS_LOADER_EXPORT___);
+
+
+/***/ },
+
+/***/ "../node_modules/css-loader/dist/cjs.js!./css/components/inputs.css"
+/*!**************************************************************************!*\
+  !*** ../node_modules/css-loader/dist/cjs.js!./css/components/inputs.css ***!
+  \**************************************************************************/
+(module, __webpack_exports__, __webpack_require__) {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var _node_modules_css_loader_dist_runtime_noSourceMaps_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../../node_modules/css-loader/dist/runtime/noSourceMaps.js */ "../node_modules/css-loader/dist/runtime/noSourceMaps.js");
+/* harmony import */ var _node_modules_css_loader_dist_runtime_noSourceMaps_js__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_node_modules_css_loader_dist_runtime_noSourceMaps_js__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../../node_modules/css-loader/dist/runtime/api.js */ "../node_modules/css-loader/dist/runtime/api.js");
+/* harmony import */ var _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(_node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1__);
+// Imports
+
+
+var ___CSS_LOADER_EXPORT___ = _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1___default()((_node_modules_css_loader_dist_runtime_noSourceMaps_js__WEBPACK_IMPORTED_MODULE_0___default()));
+// Module
+___CSS_LOADER_EXPORT___.push([module.id, `/* ── Shared input / button styles ─────────────────────────────────────────── */
+
+input[type="text"],
+input[type="password"] {
+  background: var(--bg-input);
+  border: 1px solid var(--border-input);
+  border-radius: 3px;
+  padding: 5px 8px;
+  color: var(--text-main);
+  font-family: inherit;
+  font-size: 12px;
+  outline: none;
+  transition: border-color 0.15s;
+}
+
+input[type="text"]:focus,
+input[type="password"]:focus {
+  border-color: var(--accent-focus);
+}
+
+button {
+  background: var(--accent-primary);
+  border: none;
+  border-radius: 3px;
+  padding: 5px 14px;
+  color: var(--text-bright);
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.15s;
+}
+
+button:hover {
+  background: var(--accent-primary-hover);
+}
+
+button:active {
+  background: var(--accent-primary-active);
+}
+
+button:disabled {
+  background: var(--bg-input);
+  color: var(--text-dimmed);
+  cursor: not-allowed;
+}
+`, ""]);
+// Exports
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (___CSS_LOADER_EXPORT___);
+
+
+/***/ },
+
+/***/ "../node_modules/css-loader/dist/cjs.js!./css/components/layout-toggle.css"
+/*!*********************************************************************************!*\
+  !*** ../node_modules/css-loader/dist/cjs.js!./css/components/layout-toggle.css ***!
+  \*********************************************************************************/
+(module, __webpack_exports__, __webpack_require__) {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var _node_modules_css_loader_dist_runtime_noSourceMaps_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../../node_modules/css-loader/dist/runtime/noSourceMaps.js */ "../node_modules/css-loader/dist/runtime/noSourceMaps.js");
+/* harmony import */ var _node_modules_css_loader_dist_runtime_noSourceMaps_js__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_node_modules_css_loader_dist_runtime_noSourceMaps_js__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../../node_modules/css-loader/dist/runtime/api.js */ "../node_modules/css-loader/dist/runtime/api.js");
+/* harmony import */ var _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(_node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1__);
+// Imports
+
+
+var ___CSS_LOADER_EXPORT___ = _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1___default()((_node_modules_css_loader_dist_runtime_noSourceMaps_js__WEBPACK_IMPORTED_MODULE_0___default()));
+// Module
+___CSS_LOADER_EXPORT___.push([module.id, `/* ── Layout toggle buttons ─────────────────────────────────────────────────── */
+
+.layout-toggle {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 6px;
+}
+
+.layout-btn {
+  flex: 1;
+  font-size: 11px;
+  padding: 4px 8px;
+  background: var(--bg-muted);
+  border: 1px solid var(--border-input);
+  color: var(--text-muted);
+  border-radius: 3px;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+
+.layout-btn:hover {
+  background: var(--bg-input);
+  color: var(--text-main);
+}
+
+.layout-btn.active {
+  background: var(--accent-primary);
+  color: var(--text-bright);
+  border-color: var(--accent-primary);
+}`, ""]);
+// Exports
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (___CSS_LOADER_EXPORT___);
+
+
+/***/ },
+
+/***/ "../node_modules/css-loader/dist/cjs.js!./css/components/market-cards.css"
+/*!********************************************************************************!*\
+  !*** ../node_modules/css-loader/dist/cjs.js!./css/components/market-cards.css ***!
+  \********************************************************************************/
+(module, __webpack_exports__, __webpack_require__) {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var _node_modules_css_loader_dist_runtime_noSourceMaps_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../../node_modules/css-loader/dist/runtime/noSourceMaps.js */ "../node_modules/css-loader/dist/runtime/noSourceMaps.js");
+/* harmony import */ var _node_modules_css_loader_dist_runtime_noSourceMaps_js__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_node_modules_css_loader_dist_runtime_noSourceMaps_js__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../../node_modules/css-loader/dist/runtime/api.js */ "../node_modules/css-loader/dist/runtime/api.js");
+/* harmony import */ var _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(_node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1__);
+// Imports
+
+
+var ___CSS_LOADER_EXPORT___ = _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1___default()((_node_modules_css_loader_dist_runtime_noSourceMaps_js__WEBPACK_IMPORTED_MODULE_0___default()));
+// Module
+___CSS_LOADER_EXPORT___.push([module.id, `/* ── Market card (shared across all views) ────────────────────────────────── */
+
+.market-card {
+  background: var(--bg-panel);
+  border: 1px solid var(--border-card);
+  border-radius: 4px;
+  overflow: hidden;
+  transition: border-color 0.15s;
+}
+
+.market-card:hover {
+  border-color: var(--border-input);
+}
+
+.market-card.risky {
+  border-color: var(--accent-red-border);
+}
+
+.market-card.risky:hover {
+  border-color: var(--accent-red-border-hover);
+}
+
+.market-card.hype {
+  border-color: var(--border-hype);
+}
+
+.market-card.hype:hover {
+  border-color: var(--border-hype-hover);
+}
+
+/* Flip recommendation badges in the card header */
+
+.flip-badges {
+  margin-left: auto;
+  display: flex;
+  gap: 3px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  align-items: center;
+  min-width: 0;
+  flex-shrink: 1;
+}
+
+/* Shared badge base — sizing tokens */
+.buy-badge,
+.sell-badge,
+.profit-badge,
+.velocity-badge,
+.hype-badge,
+.predicted-badge,
+.ema-badge,
+.vol-badge {
+  display: inline-block;
+  font-size: var(--badge-font-md);
+  padding: var(--badge-padding-md);
+  border-radius: var(--badge-radius);
+  font-weight: var(--badge-font-weight);
+  line-height: 1.3;
+  white-space: nowrap;
+}
+
+.buy-badge[title],
+.sell-badge[title],
+.profit-badge[title],
+.velocity-badge[title] {
+  cursor: help;
+}
+
+.buy-badge {
+  background: var(--badge-buy-bg);
+  color: var(--accent-blue-text);
+}
+
+.sell-badge {
+  background: var(--badge-sell-bg);
+  color: var(--accent-green);
+}
+
+.sell-badge.risky {
+  background: var(--accent-red-bg);
+  color: var(--accent-red);
+}
+
+.profit-badge {
+  background: var(--badge-sell-bg);
+  color: var(--accent-teal);
+  font-weight: 700;
+  padding: 2px 7px;
+  letter-spacing: 0.02em;
+}
+
+.profit-badge.negative {
+  background: var(--accent-red-bg);
+  color: var(--accent-red);
+  font-weight: 700;
+}
+
+.hype-badge {
+  background: var(--badge-hype-bg);
+  color: var(--accent-hype);
+  animation: hype-pulse 2s ease-in-out infinite;
+}
+
+/* ── Trade velocity badges ────────────────────────────────────────────── */
+
+.velocity-badge {
+  /* inherits sizing from shared badge base above */
+}
+
+.velocity-insta {
+  background: var(--badge-velocity-insta-bg);
+  color: var(--accent-green-bright);
+}
+
+.velocity-active {
+  background: var(--badge-velocity-active-bg);
+  color: var(--accent-blue-text);
+}
+
+.velocity-slow {
+  background: var(--badge-velocity-slow-bg);
+  color: var(--accent-gold);
+}
+
+.velocity-veryslow {
+  background: var(--badge-velocity-muted-bg);
+  color: var(--text-muted);
+}
+
+.trend-badge {
+  font-size: 10px;
+  padding: 1px 6px;
+  border-radius: 3px;
+  white-space: nowrap;
+  font-weight: 600;
+}
+
+.trend-downtrend {
+  background: var(--badge-trend-down-bg);
+  color: var(--accent-red);
+}
+
+.trend-uptrend {
+  background: var(--badge-trend-up-bg);
+  color: var(--accent-green-bright);
+}
+
+@keyframes hype-pulse {
+  0%, 100% { opacity: 1; }
+  50%      { opacity: 0.6; }
+}
+`, ""]);
+// Exports
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (___CSS_LOADER_EXPORT___);
+
+
+/***/ },
+
+/***/ "../node_modules/css-loader/dist/cjs.js!./css/components/market-panel.css"
+/*!********************************************************************************!*\
+  !*** ../node_modules/css-loader/dist/cjs.js!./css/components/market-panel.css ***!
+  \********************************************************************************/
+(module, __webpack_exports__, __webpack_require__) {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var _node_modules_css_loader_dist_runtime_noSourceMaps_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../../node_modules/css-loader/dist/runtime/noSourceMaps.js */ "../node_modules/css-loader/dist/runtime/noSourceMaps.js");
+/* harmony import */ var _node_modules_css_loader_dist_runtime_noSourceMaps_js__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_node_modules_css_loader_dist_runtime_noSourceMaps_js__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../../node_modules/css-loader/dist/runtime/api.js */ "../node_modules/css-loader/dist/runtime/api.js");
+/* harmony import */ var _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(_node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1__);
+// Imports
+
+
+var ___CSS_LOADER_EXPORT___ = _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1___default()((_node_modules_css_loader_dist_runtime_noSourceMaps_js__WEBPACK_IMPORTED_MODULE_0___default()));
+// Module
+___CSS_LOADER_EXPORT___.push([module.id, `/* ── Market data panel ────────────────────────────────────────────────────── */
+
+#market-view {
+  overflow-y: auto;
+  padding: 8px 10px;
+}
+
+#market-view h2 {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-heading);
+  margin: 0;
+}
+
+/* ── Top 20 section container ──────────────────────────────────────────────────── */
+
+.top20-section {
+  margin-bottom: 8px;
+  border: 1px solid var(--border-section);
+  border-radius: 6px;
+  background: var(--bg-main);
+  overflow: hidden;
+}
+
+.top20-section #market-header {
+  padding: 4px 10px;
+  background: var(--bg-panel);
+  border-bottom: 1px solid var(--border-section);
+  margin-bottom: 0;
+}
+
+#market-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 6px;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+#market-header h2 {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-heading);
+  margin: 0;
+  white-space: nowrap;
+}
+
+.market-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+
+/* ── Per-section sort selects ─────────────────────────────────────────────── */
+
+.section-sort-select {
+  font-size: 10px;
+  padding: 4px 6px;
+  background: var(--bg-input);
+  border: 1px solid var(--border-input);
+  color: var(--text-muted);
+  border-radius: 3px;
+  cursor: pointer;
+  line-height: 1.2;
+}
+
+/* ── View toggle buttons ──────────────────────────────────────────────────── */
+
+.view-toggle {
+  display: flex;
+  gap: 2px;
+  align-items: center;
+}
+
+/* Compact tiles toggle – March 2026 */
+.compact-toggle-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 11px;
+  color: var(--text-muted);
+  cursor: pointer;
+  margin-left: 4px;
+  white-space: nowrap;
+  user-select: none;
+}
+.compact-toggle-label input[type="checkbox"] {
+  margin: 0;
+  accent-color: var(--accent-primary);
+  cursor: pointer;
+}
+.compact-toggle-label:hover {
+  color: var(--text-main);
+}
+
+/* Hide predictive badges in compact tile/hybrid mode */
+.predictive-badges.compact-hidden {
+  display: none;
+}
+
+.view-btn {
+  background: var(--bg-muted);
+  border: 1px solid var(--border-input);
+  border-radius: 3px;
+  padding: 4px 7px;
+  color: var(--text-muted);
+  font-size: 13px;
+  cursor: pointer;
+  line-height: 1;
+  min-width: 24px;
+  text-align: center;
+  transition: background 0.15s, color 0.15s;
+}
+
+.view-btn:hover {
+  background: var(--bg-input);
+  color: var(--text-main);
+}
+
+.view-btn.active {
+  background: var(--accent-primary);
+  color: var(--text-bright);
+  border-color: var(--accent-primary);
+}`, ""]);
+// Exports
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (___CSS_LOADER_EXPORT___);
+
+
+/***/ },
+
+/***/ "../node_modules/css-loader/dist/cjs.js!./css/components/modals.css"
+/*!**************************************************************************!*\
+  !*** ../node_modules/css-loader/dist/cjs.js!./css/components/modals.css ***!
+  \**************************************************************************/
+(module, __webpack_exports__, __webpack_require__) {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var _node_modules_css_loader_dist_runtime_noSourceMaps_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../../node_modules/css-loader/dist/runtime/noSourceMaps.js */ "../node_modules/css-loader/dist/runtime/noSourceMaps.js");
+/* harmony import */ var _node_modules_css_loader_dist_runtime_noSourceMaps_js__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_node_modules_css_loader_dist_runtime_noSourceMaps_js__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../../node_modules/css-loader/dist/runtime/api.js */ "../node_modules/css-loader/dist/runtime/api.js");
+/* harmony import */ var _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(_node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1__);
+// Imports
+
+
+var ___CSS_LOADER_EXPORT___ = _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1___default()((_node_modules_css_loader_dist_runtime_noSourceMaps_js__WEBPACK_IMPORTED_MODULE_0___default()));
+// Module
+___CSS_LOADER_EXPORT___.push([module.id, `/* ── Floating Item Detail Modal ────────────────────────────────────────────── */
+
+.item-modal-backdrop {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 500;
+  background: var(--modal-backdrop);
+  justify-content: center;
+  align-items: center;
+}
+
+.item-modal-backdrop.visible {
+  display: flex;
+}
+
+.item-modal {
+  background: var(--bg-main);
+  border: 1px solid var(--accent-blue-text);
+  border-radius: 6px;
+  width: 380px;
+  max-width: 92vw;
+  max-height: 85vh;
+  overflow-y: auto;
+  box-shadow: 0 8px 32px var(--modal-shadow);
+  animation: modal-in 0.15s ease-out;
+}
+
+@keyframes modal-in {
+  from { opacity: 0; transform: scale(0.95) translateY(8px); }
+  to   { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+.item-modal-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-bottom: 2px solid var(--border-main);
+}
+
+.item-modal-name {
+  flex: 1;
+  color: var(--text-accent);
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.item-modal-close {
+  all: unset;
+  cursor: pointer;
+  color: var(--text-muted);
+  font-size: 18px;
+  line-height: 1;
+  padding: 2px 6px;
+  border-radius: 3px;
+  flex-shrink: 0;
+  transition: color 0.15s, background 0.15s;
+}
+
+.item-modal-close:hover {
+  color: var(--accent-red);
+  background: var(--close-hover-bg);
+}
+
+.item-modal-body {
+  padding: 10px 12px;
+}
+
+.item-modal-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin-bottom: 8px;
+}
+
+/* (modal-sparkline removed — chart now in dedicated graph modal) */
+
+/* ── Graph Modal (deprecated — kept for backwards compat) ─────────────────── */
+
+.graph-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.15s ease;
+}
+.graph-modal-backdrop.visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.graph-modal {
+  background: var(--bg-main);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  width: 92%;
+  max-width: 520px;
+  max-height: 85vh;
+  overflow-y: auto;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.5);
+}
+
+.graph-modal-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--border);
+}
+.graph-modal-title {
+  flex: 1;
+  font-weight: 600;
+  font-size: 14px;
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.graph-modal-body {
+  padding: 12px;
+}
+
+.graph-modal-canvas {
+  display: block;
+  width: 100%;
+  height: 180px;
+  margin-bottom: 12px;
+  border-radius: 4px;
+  background: var(--bg-elevated);
+}
+
+.graph-history-status {
+  display: none;
+  text-align: center;
+  padding: 8px 4px;
+  font-size: 11px;
+  color: var(--text-muted, #888);
+}
+.graph-history-status.visible {
+  display: block;
+}
+.graph-history-status button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--accent-blue, #569cd6);
+  text-decoration: underline;
+  font-size: 11px;
+  padding: 0 2px;
+}
+.graph-history-status button:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.graph-stats {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.graph-stat-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 4px 0;
+  border-bottom: 1px solid var(--border);
+  font-size: 12px;
+}
+.graph-stat-row:last-child {
+  border-bottom: none;
+}
+.graph-stat-label {
+  color: var(--text-muted);
+}
+.graph-stat-value {
+  font-weight: 600;
+  color: var(--text);
+}
+`, ""]);
+// Exports
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (___CSS_LOADER_EXPORT___);
+
+
+/***/ },
+
+/***/ "../node_modules/css-loader/dist/cjs.js!./css/components/portfolio.css"
+/*!*****************************************************************************!*\
+  !*** ../node_modules/css-loader/dist/cjs.js!./css/components/portfolio.css ***!
+  \*****************************************************************************/
+(module, __webpack_exports__, __webpack_require__) {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var _node_modules_css_loader_dist_runtime_noSourceMaps_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../../node_modules/css-loader/dist/runtime/noSourceMaps.js */ "../node_modules/css-loader/dist/runtime/noSourceMaps.js");
+/* harmony import */ var _node_modules_css_loader_dist_runtime_noSourceMaps_js__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_node_modules_css_loader_dist_runtime_noSourceMaps_js__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../../node_modules/css-loader/dist/runtime/api.js */ "../node_modules/css-loader/dist/runtime/api.js");
+/* harmony import */ var _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(_node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1__);
+// Imports
+
+
+var ___CSS_LOADER_EXPORT___ = _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1___default()((_node_modules_css_loader_dist_runtime_noSourceMaps_js__WEBPACK_IMPORTED_MODULE_0___default()));
+// Module
+___CSS_LOADER_EXPORT___.push([module.id, `/* ── Portfolio view ─────────────────────────────────────────────────────────────────── */
 
 #portfolio-view {
   display: flex;
@@ -4236,12 +2629,12 @@ body[data-style="glass"] .startup-overlay {
 
 .completed-flip-card.win {
   border-left-color: var(--accent-green-bright);
-  background: linear-gradient(90deg, rgba(39,174,96,0.06) 0%, transparent 40%);
+  background: linear-gradient(90deg, var(--win-glow) 0%, transparent 40%);
 }
 
 .completed-flip-card.loss {
   border-left-color: var(--accent-red-dark);
-  background: linear-gradient(90deg, rgba(192,57,43,0.06) 0%, transparent 40%);
+  background: linear-gradient(90deg, var(--loss-glow) 0%, transparent 40%);
 }
 
 .completed-flip-top {
@@ -4282,8 +2675,33 @@ body[data-style="glass"] .startup-overlay {
 .completed-flip-profit.loss {
   color: var(--accent-red);
 }
+`, ""]);
+// Exports
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (___CSS_LOADER_EXPORT___);
 
-/* ── Predictive analytics badges on market cards ────────────────────────────── */
+
+/***/ },
+
+/***/ "../node_modules/css-loader/dist/cjs.js!./css/components/predictive-badges.css"
+/*!*************************************************************************************!*\
+  !*** ../node_modules/css-loader/dist/cjs.js!./css/components/predictive-badges.css ***!
+  \*************************************************************************************/
+(module, __webpack_exports__, __webpack_require__) {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var _node_modules_css_loader_dist_runtime_noSourceMaps_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../../node_modules/css-loader/dist/runtime/noSourceMaps.js */ "../node_modules/css-loader/dist/runtime/noSourceMaps.js");
+/* harmony import */ var _node_modules_css_loader_dist_runtime_noSourceMaps_js__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_node_modules_css_loader_dist_runtime_noSourceMaps_js__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../../node_modules/css-loader/dist/runtime/api.js */ "../node_modules/css-loader/dist/runtime/api.js");
+/* harmony import */ var _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(_node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1__);
+// Imports
+
+
+var ___CSS_LOADER_EXPORT___ = _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1___default()((_node_modules_css_loader_dist_runtime_noSourceMaps_js__WEBPACK_IMPORTED_MODULE_0___default()));
+// Module
+___CSS_LOADER_EXPORT___.push([module.id, `/* ── Predictive analytics badges on market cards ────────────────────────────── */
 
 .predictive-badges {
   display: flex;
@@ -4338,154 +2756,342 @@ body[data-style="glass"] .startup-overlay {
   background: var(--badge-hype-vol-bg);
   color: var(--accent-hype, var(--accent-gold));
 }
+`, ""]);
+// Exports
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (___CSS_LOADER_EXPORT___);
 
-/* ── Completed flips table ─────────────────────────────────────────────────── */
 
-.portfolio-history-toolbar {
-  display: flex;
-  gap: 6px;
-  margin-bottom: 8px;
-  align-items: center;
-}
+/***/ },
 
-.portfolio-history-toolbar input[type="text"] {
-  flex: 1;
-  padding: 4px 8px;
+/***/ "../node_modules/css-loader/dist/cjs.js!./css/components/provider.css"
+/*!****************************************************************************!*\
+  !*** ../node_modules/css-loader/dist/cjs.js!./css/components/provider.css ***!
+  \****************************************************************************/
+(module, __webpack_exports__, __webpack_require__) {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var _node_modules_css_loader_dist_runtime_noSourceMaps_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../../node_modules/css-loader/dist/runtime/noSourceMaps.js */ "../node_modules/css-loader/dist/runtime/noSourceMaps.js");
+/* harmony import */ var _node_modules_css_loader_dist_runtime_noSourceMaps_js__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_node_modules_css_loader_dist_runtime_noSourceMaps_js__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../../node_modules/css-loader/dist/runtime/api.js */ "../node_modules/css-loader/dist/runtime/api.js");
+/* harmony import */ var _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(_node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1__);
+// Imports
+
+
+var ___CSS_LOADER_EXPORT___ = _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1___default()((_node_modules_css_loader_dist_runtime_noSourceMaps_js__WEBPACK_IMPORTED_MODULE_0___default()));
+// Module
+___CSS_LOADER_EXPORT___.push([module.id, `/* ── Provider cost hints & setup guide ────────────────────────────────────── */
+
+.provider-cost-hint {
+  display: block;
+  margin: 2px 0 4px;
   font-size: 11px;
-  border: 1px solid var(--border-input);
-  border-radius: 3px;
-  background: var(--bg-input);
-  color: var(--text-main);
-}
-
-.portfolio-history-toolbar input[type="text"]::placeholder {
+  line-height: 1.3;
   color: var(--text-muted);
-  opacity: 0.6;
+}
+.provider-cost-hint.tier-free {
+  color: var(--accent-green);
+}
+.provider-cost-hint.tier-free-tier {
+  color: var(--accent-teal);
+}
+.provider-cost-hint.tier-low-cost {
+  color: var(--accent-blue-text);
+}
+.provider-cost-hint.tier-paid {
+  color: var(--text-muted);
+}
+.provider-cost-hint.tier-self-hosted {
+  color: var(--text-muted);
 }
 
-#export-csv-btn {
+.setup-guide-btn {
+  display: inline-block;
+  margin-bottom: 6px;
   padding: 4px 10px;
   font-size: 11px;
-  white-space: nowrap;
-  background: var(--bg-elevated);
-  border: 1px solid var(--border-input);
+  background: transparent;
+  border: 1px dashed var(--accent-blue-text);
   border-radius: 3px;
-  color: var(--text-main);
+  color: var(--accent-blue-text);
   cursor: pointer;
-  transition: background 0.15s;
+  transition: background 0.15s, color 0.15s;
+}
+.setup-guide-btn:hover {
+  background: var(--accent-blue-text);
+  color: var(--bg-main);
+}
+.setup-guide-btn.hidden {
+  display: none;
 }
 
-#export-csv-btn:hover {
-  background: var(--accent-primary);
+/* ── Setup guide modal ────────────────────────────────────────────────────── */
+
+.setup-guide-backdrop {
+  position: fixed;
+  inset: 0;
+  background: var(--modal-backdrop);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10001;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.15s ease;
+}
+.setup-guide-backdrop.visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.setup-guide-modal {
+  position: relative;
+  background: var(--bg-main);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  width: 88vw;
+  max-width: 560px;
+  max-height: 80vh;
+  overflow-y: auto;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+  padding: 1.25rem;
+  box-sizing: border-box;
+  animation: setup-guide-in 0.18s ease-out;
+}
+@keyframes setup-guide-in {
+  from { opacity: 0; transform: scale(0.96) translateY(10px); }
+  to   { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+.setup-guide-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.75rem;
+}
+.setup-guide-header h3 {
+  margin: 0;
+  font-size: 16px;
+  color: var(--text-bright);
+}
+.setup-guide-close {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-size: 22px;
+  cursor: pointer;
+  padding: 0 4px;
+  line-height: 1;
+}
+.setup-guide-close:hover {
   color: var(--text-bright);
 }
 
-.completed-flips-table {
+.setup-guide-tier {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border-radius: 6px;
+  margin-bottom: 0.75rem;
+  font-size: 12px;
+  font-weight: 500;
+}
+.setup-guide-tier.tier-free {
+  background: var(--badge-tier-free-bg);
+  border: 1px solid var(--badge-tier-free-border);
+  color: var(--accent-green);
+}
+.setup-guide-tier.tier-free-tier {
+  background: var(--badge-tier-freetier-bg);
+  border: 1px solid var(--badge-tier-freetier-border);
+  color: var(--accent-teal);
+}
+.setup-guide-tier.tier-low-cost {
+  background: var(--badge-tier-lowcost-bg);
+  border: 1px solid var(--badge-tier-lowcost-border);
+  color: var(--accent-blue-text);
+}
+.setup-guide-tier.tier-paid {
+  background: var(--badge-tier-neutral-bg);
+  border: 1px solid var(--badge-tier-neutral-border);
+  color: var(--text-muted);
+}
+.setup-guide-tier.tier-self-hosted {
+  background: var(--badge-tier-neutral-bg);
+  border: 1px solid var(--badge-tier-neutral-border);
+  color: var(--text-muted);
+}
+
+.tier-badge {
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.setup-guide-steps {
+  margin: 0 0 0.75rem 0;
+  padding-left: 1.4rem;
+  font-size: 12px;
+  line-height: 1.7;
+  color: var(--text-main);
+}
+.setup-guide-steps li {
+  margin-bottom: 6px;
+}
+.setup-guide-steps a {
+  color: var(--accent-blue-text);
+  text-decoration: underline;
+}
+.setup-guide-steps a:hover {
+  color: var(--text-bright);
+}
+
+.setup-guide-note {
+  padding: 8px 12px;
+  border-radius: 6px;
+  background: var(--setup-note-bg);
+  border: 1px solid var(--setup-note-border);
+  font-size: 11px;
+  color: var(--accent-gold);
+  margin-bottom: 0.75rem;
+  line-height: 1.5;
+}
+
+.setup-guide-link {
+  display: inline-block;
+  margin-bottom: 1rem;
+  font-size: 12px;
+  color: var(--accent-blue-text);
+  text-decoration: none;
+  font-weight: 500;
+}
+.setup-guide-link:hover {
+  text-decoration: underline;
+  color: var(--text-bright);
+}
+
+/* ── Provider comparison table ────────────────────────────────────────────── */
+
+.setup-guide-comparison {
+  border-top: 1px solid var(--border);
+  padding-top: 0.75rem;
+}
+.setup-guide-comparison h4 {
+  margin: 0 0 8px;
+  font-size: 13px;
+  color: var(--text-bright);
+}
+
+.provider-comparison-table {
   width: 100%;
   border-collapse: collapse;
   font-size: 11px;
 }
-
-.completed-flips-table th {
+.provider-comparison-table th {
   text-align: left;
-  padding: 4px 8px;
+  padding: 5px 8px;
+  border-bottom: 1px solid var(--border);
+  color: var(--text-muted);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-size: 10px;
+}
+.provider-comparison-table td {
+  padding: 6px 8px;
+  border-bottom: 1px solid var(--border-input);
+  color: var(--text-main);
+}
+.provider-comparison-table tr.active-row td {
+  background: var(--table-active-row-bg);
+  color: var(--text-bright);
+  font-weight: 500;
+}
+.provider-comparison-table tr:hover td {
+  background: var(--table-hover-row-bg);
+}
+
+.tier-badge-sm {
+  display: inline-block;
+  padding: 1px 6px;
+  border-radius: 3px;
   font-size: 10px;
   font-weight: 600;
-  color: var(--text-heading);
-  border-bottom: 2px solid var(--border-main);
-  cursor: pointer;
-  user-select: none;
-  white-space: nowrap;
-  background: var(--bg-elevated);
-}
-
-.completed-flips-table th:hover {
-  color: var(--text-bright);
-}
-
-.completed-flips-table th .sort-arrow {
-  margin-left: 2px;
-  font-size: 9px;
-  color: var(--text-muted);
-}
-
-.completed-flips-table td {
-  padding: 4px 8px;
-  border-bottom: 2px solid var(--border-main);
-  color: var(--text-main);
   white-space: nowrap;
 }
-
-.completed-flips-table tr.win td:first-child {
-  border-left: 3px solid var(--accent-green-bright);
-}
-
-.completed-flips-table tr.loss td:first-child {
-  border-left: 3px solid var(--accent-red-dark);
-}
-
-.completed-flips-table .profit-cell {
-  font-weight: 600;
-}
-
-.completed-flips-table .profit-cell.win {
+.tier-badge-sm.tier-free {
+  background: var(--badge-tier-free-bg);
   color: var(--accent-green);
 }
-
-.completed-flips-table .profit-cell.loss {
-  color: var(--accent-red);
+.tier-badge-sm.tier-free-tier {
+  background: var(--badge-tier-freetier-bg);
+  color: var(--accent-teal);
 }
-
-/* ── Graph modal history-range dropdown ──────────────────────────────────── */
-
-.graph-modal-range-row {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-bottom: 6px;
+.tier-badge-sm.tier-low-cost {
+  background: var(--badge-tier-lowcost-bg);
+  color: var(--accent-blue-text);
 }
-
-.graph-modal-range-row label {
-  font-size: 11px;
+.tier-badge-sm.tier-paid {
+  background: var(--badge-tier-neutral-bg);
   color: var(--text-muted);
 }
 
-.graph-modal-range-row select {
-  padding: 2px 6px;
-  font-size: 11px;
+select {
   background: var(--bg-input);
+  border: 1px solid var(--border-input);
+  border-radius: 3px;
+  padding: 5px 8px;
   color: var(--text-main);
-  border: 1px solid var(--border-input);
-  border-radius: 3px;
+  font-family: inherit;
+  font-size: 12px;
+  outline: none;
+  transition: border-color 0.15s;
+  appearance: auto;
 }
 
-/* ── Complete flip button ───────────────────────────────────────────────────── */
-
-.flip-card-actions {
-  display: flex;
-  gap: 4px;
-  align-items: center;
-  flex-shrink: 0;
+select option {
+  background: var(--dropdown-bg);
+  color: var(--text-main);
 }
 
-.flip-complete-btn {
-  background: transparent;
-  border: 1px solid var(--border-input);
-  border-radius: 3px;
-  color: var(--accent-green);
-  cursor: pointer;
-  font-size: 11px;
-  padding: 1px 6px;
-  transition: background .15s, color .15s;
-}
-
-.flip-complete-btn:hover {
-  background: var(--accent-green-bright);
+select option:hover,
+select option:checked {
+  background: var(--dropdown-hover-bg);
   color: var(--text-bright);
-  border-color: var(--accent-green-bright);
 }
 
-/* ── Webkit scrollbar styling ─────────────────────────────────────────────── */
+select:focus {
+  border-color: var(--accent-focus);
+}
+`, ""]);
+// Exports
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (___CSS_LOADER_EXPORT___);
+
+
+/***/ },
+
+/***/ "../node_modules/css-loader/dist/cjs.js!./css/components/scrollbar.css"
+/*!*****************************************************************************!*\
+  !*** ../node_modules/css-loader/dist/cjs.js!./css/components/scrollbar.css ***!
+  \*****************************************************************************/
+(module, __webpack_exports__, __webpack_require__) {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var _node_modules_css_loader_dist_runtime_noSourceMaps_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../../node_modules/css-loader/dist/runtime/noSourceMaps.js */ "../node_modules/css-loader/dist/runtime/noSourceMaps.js");
+/* harmony import */ var _node_modules_css_loader_dist_runtime_noSourceMaps_js__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_node_modules_css_loader_dist_runtime_noSourceMaps_js__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../../node_modules/css-loader/dist/runtime/api.js */ "../node_modules/css-loader/dist/runtime/api.js");
+/* harmony import */ var _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(_node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1__);
+// Imports
+
+
+var ___CSS_LOADER_EXPORT___ = _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1___default()((_node_modules_css_loader_dist_runtime_noSourceMaps_js__WEBPACK_IMPORTED_MODULE_0___default()));
+// Module
+___CSS_LOADER_EXPORT___.push([module.id, `/* ── Webkit scrollbar styling ─────────────────────────────────────────────── */
 
 ::-webkit-scrollbar {
   width: 6px;
@@ -4503,8 +3109,649 @@ body[data-style="glass"] .startup-overlay {
 ::-webkit-scrollbar-thumb:hover {
   background: var(--scrollbar-thumb-hover);
 }
+`, ""]);
+// Exports
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (___CSS_LOADER_EXPORT___);
 
-/* ═════════════════════════════════════════════════════════════════════════════
+
+/***/ },
+
+/***/ "../node_modules/css-loader/dist/cjs.js!./css/components/search.css"
+/*!**************************************************************************!*\
+  !*** ../node_modules/css-loader/dist/cjs.js!./css/components/search.css ***!
+  \**************************************************************************/
+(module, __webpack_exports__, __webpack_require__) {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var _node_modules_css_loader_dist_runtime_noSourceMaps_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../../node_modules/css-loader/dist/runtime/noSourceMaps.js */ "../node_modules/css-loader/dist/runtime/noSourceMaps.js");
+/* harmony import */ var _node_modules_css_loader_dist_runtime_noSourceMaps_js__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_node_modules_css_loader_dist_runtime_noSourceMaps_js__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../../node_modules/css-loader/dist/runtime/api.js */ "../node_modules/css-loader/dist/runtime/api.js");
+/* harmony import */ var _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(_node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1__);
+// Imports
+
+
+var ___CSS_LOADER_EXPORT___ = _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1___default()((_node_modules_css_loader_dist_runtime_noSourceMaps_js__WEBPACK_IMPORTED_MODULE_0___default()));
+// Module
+___CSS_LOADER_EXPORT___.push([module.id, `/* ── Market search bar ────────────────────────────────────────────────────── */
+
+#market-search-input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 7px 10px;
+  margin-bottom: 0;
+  background: var(--bg-panel);
+  color: var(--text-main);
+  border: 1px solid var(--bg-input);
+  border-radius: 4px;
+  font-size: 13px;
+  outline: none;
+  transition: border-color 0.15s;
+}
+
+#market-search-input::placeholder {
+  color: var(--text-dimmed);
+}
+
+#market-search-input:focus {
+  border-color: var(--accent-blue-text);
+}
+
+/* ── Search section ────────────────────────────────────────────────────── */
+
+#search-section {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 8px;
+}
+
+#search-section #market-search-input {
+  flex: 1 1 140px;
+  min-width: 140px;
+}
+
+#search-section .view-toggle {
+  flex-shrink: 0;
+}
+
+#search-results {
+  width: 100%;
+  margin-top: 6px;
+}
+
+#search-results:empty {
+  display: none;
+}
+
+#search-loading {
+  width: 100%;
+  font-size: 12px;
+  color: var(--text-muted);
+  padding: 4px 0;
+}
+
+.market-card-header {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 4px 8px;
+  padding: 5px 8px;
+  cursor: pointer;
+  user-select: none;
+  min-height: 36px;
+}
+
+.market-card-header:hover {
+  background: var(--bg-hover);
+}
+
+/* \\u2500\\u2500 Sparkline canvas \\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500 */
+
+.graph-btn {
+  all: unset;
+  cursor: pointer;
+  font-size: 11px;
+  line-height: 1;
+  color: var(--text-muted);
+  padding: 2px 3px;
+  border-radius: 3px;
+  flex-shrink: 0;
+  letter-spacing: -1px;
+  transition: color 0.15s;
+}
+.graph-btn:hover {
+  color: var(--accent-green-bright, #4ec9b0);
+}
+
+.item-sprite {
+  flex-shrink: 0;
+  image-rendering: pixelated;
+  width: 36px;
+  height: 32px;
+  object-fit: contain;
+}
+
+.market-card .item-name {
+  color: var(--text-accent);
+  flex: 1 1 0;
+  min-width: 60px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 12px;
+}
+
+.item-price {
+  color: var(--text-price);
+  white-space: nowrap;
+  flex-shrink: 0;
+  font-size: 12px;
+  font-weight: 600;
+}`, ""]);
+// Exports
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (___CSS_LOADER_EXPORT___);
+
+
+/***/ },
+
+/***/ "../node_modules/css-loader/dist/cjs.js!./css/components/settings-fieldsets.css"
+/*!**************************************************************************************!*\
+  !*** ../node_modules/css-loader/dist/cjs.js!./css/components/settings-fieldsets.css ***!
+  \**************************************************************************************/
+(module, __webpack_exports__, __webpack_require__) {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var _node_modules_css_loader_dist_runtime_noSourceMaps_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../../node_modules/css-loader/dist/runtime/noSourceMaps.js */ "../node_modules/css-loader/dist/runtime/noSourceMaps.js");
+/* harmony import */ var _node_modules_css_loader_dist_runtime_noSourceMaps_js__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_node_modules_css_loader_dist_runtime_noSourceMaps_js__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../../node_modules/css-loader/dist/runtime/api.js */ "../node_modules/css-loader/dist/runtime/api.js");
+/* harmony import */ var _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(_node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1__);
+// Imports
+
+
+var ___CSS_LOADER_EXPORT___ = _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1___default()((_node_modules_css_loader_dist_runtime_noSourceMaps_js__WEBPACK_IMPORTED_MODULE_0___default()));
+// Module
+___CSS_LOADER_EXPORT___.push([module.id, `/* ══════════════════════════════════════════════════════════════════════════════
+   Settings group fieldsets
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+.settings-group {
+  border: 1px solid var(--border-main);
+  border-radius: 6px;
+  padding: 8px 10px 10px;
+  margin-bottom: 8px;
+}
+
+.settings-group-title {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-accent);
+  padding: 0 4px;
+}
+`, ""]);
+// Exports
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (___CSS_LOADER_EXPORT___);
+
+
+/***/ },
+
+/***/ "../node_modules/css-loader/dist/cjs.js!./css/components/settings.css"
+/*!****************************************************************************!*\
+  !*** ../node_modules/css-loader/dist/cjs.js!./css/components/settings.css ***!
+  \****************************************************************************/
+(module, __webpack_exports__, __webpack_require__) {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var _node_modules_css_loader_dist_runtime_noSourceMaps_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../../node_modules/css-loader/dist/runtime/noSourceMaps.js */ "../node_modules/css-loader/dist/runtime/noSourceMaps.js");
+/* harmony import */ var _node_modules_css_loader_dist_runtime_noSourceMaps_js__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_node_modules_css_loader_dist_runtime_noSourceMaps_js__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../../node_modules/css-loader/dist/runtime/api.js */ "../node_modules/css-loader/dist/runtime/api.js");
+/* harmony import */ var _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(_node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1__);
+// Imports
+
+
+var ___CSS_LOADER_EXPORT___ = _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1___default()((_node_modules_css_loader_dist_runtime_noSourceMaps_js__WEBPACK_IMPORTED_MODULE_0___default()));
+// Module
+___CSS_LOADER_EXPORT___.push([module.id, `/* ── Settings panel ───────────────────────────────────────────────────────── */
+
+#settings-panel {
+  background: var(--bg-panel);
+  border-bottom: 2px solid var(--border-main);
+  padding: 6px 10px;
+  font-size: 12px;
+  flex-shrink: 0;
+}
+
+#settings-panel summary {
+  cursor: pointer;
+  user-select: none;
+  color: var(--text-accent);
+  font-weight: 600;
+  outline: none;
+}
+
+.settings-body {
+  margin-top: 6px;
+}
+
+.settings-body label {
+  display: block;
+  margin-bottom: 3px;
+  color: var(--text-muted);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.settings-row {
+  display: flex;
+  gap: 6px;
+}
+
+.settings-row input {
+  flex: 1;
+}
+
+.status-hint {
+  display: block;
+  margin-top: 4px;
+  font-size: 11px;
+  color: var(--accent-green);
+}
+
+.status-hint.error {
+  color: var(--accent-red);
+}
+
+/* ── Danger button ────────────────────────────────────────────────────────── */
+
+.danger-btn {
+  width: 100%;
+  font-size: 11px;
+  padding: 5px 10px;
+  background: var(--accent-red-bg);
+  border: 1px solid var(--accent-red-border);
+  color: var(--text-main);
+  border-radius: 3px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.danger-btn:hover {
+  background: var(--accent-red-border);
+  color: var(--text-bright);
+}
+
+.danger-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* ── Data management buttons ──────────────────────────────────────────────── */
+
+.data-mgmt .settings-row {
+  margin-top: 4px;
+}
+
+.data-mgmt button {
+  flex: 1;
+  font-size: 11px;
+  padding: 5px 8px;
+  background: var(--bg-input);
+  border: 1px solid var(--border-input);
+  color: var(--text-main);
+  border-radius: 3px;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.data-mgmt button:hover {
+  background: var(--bg-muted);
+  border-color: var(--accent-blue-text);
+  color: var(--accent-blue-text);
+}
+
+/* ── Settings field helpers ───────────────────────────────────────────────── */
+
+.settings-field {
+  margin-top: 6px;
+}
+
+.settings-field.hidden {
+  display: none;
+}
+
+.settings-body select,
+.settings-body input[type="text"] {
+  width: 100%;
+  margin-bottom: 6px;
+}
+`, ""]);
+// Exports
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (___CSS_LOADER_EXPORT___);
+
+
+/***/ },
+
+/***/ "../node_modules/css-loader/dist/cjs.js!./css/components/startup.css"
+/*!***************************************************************************!*\
+  !*** ../node_modules/css-loader/dist/cjs.js!./css/components/startup.css ***!
+  \***************************************************************************/
+(module, __webpack_exports__, __webpack_require__) {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var _node_modules_css_loader_dist_runtime_noSourceMaps_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../../node_modules/css-loader/dist/runtime/noSourceMaps.js */ "../node_modules/css-loader/dist/runtime/noSourceMaps.js");
+/* harmony import */ var _node_modules_css_loader_dist_runtime_noSourceMaps_js__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_node_modules_css_loader_dist_runtime_noSourceMaps_js__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../../node_modules/css-loader/dist/runtime/api.js */ "../node_modules/css-loader/dist/runtime/api.js");
+/* harmony import */ var _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(_node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1__);
+// Imports
+
+
+var ___CSS_LOADER_EXPORT___ = _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1___default()((_node_modules_css_loader_dist_runtime_noSourceMaps_js__WEBPACK_IMPORTED_MODULE_0___default()));
+// Module
+___CSS_LOADER_EXPORT___.push([module.id, `/* ── Startup loading overlay ──────────────────────────────────────────────── */
+
+.startup-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 900;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  background: var(--bg-main, #1e1e1e);
+  transition: opacity 0.4s ease;
+}
+.startup-overlay.fade-out {
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* Glass style: overlay must stay opaque to hide content behind it */
+body[data-style="glass"] .startup-overlay {
+  background: var(--glass-body-from, var(--bg-main, #1e1e1e));
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+}
+
+.startup-spinner {
+  width: 36px;
+  height: 36px;
+  border: 3px solid var(--border-main, #333);
+  border-top-color: var(--accent-primary, #569cd6);
+  border-radius: 50%;
+  animation: startup-spin 0.8s linear infinite;
+}
+@keyframes startup-spin {
+  to { transform: rotate(360deg); }
+}
+
+.startup-status {
+  color: var(--text-muted, #888);
+  font-size: 12px;
+  text-align: center;
+  max-width: 260px;
+  line-height: 1.4;
+}
+
+.loader {
+  color: var(--text-muted);
+  font-style: italic;
+  font-size: 12px;
+  padding: 4px 0;
+}
+
+/* ── Error recovery banner ────────────────────────────────────────────────── */
+
+.error-banner {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  margin: 4px 0 6px;
+  background: var(--accent-red-bg);
+  border: 1px solid var(--accent-red-border);
+  border-radius: 4px;
+  color: var(--accent-red);
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.error-banner.hidden {
+  display: none;
+}
+
+.error-banner span {
+  flex: 1;
+}
+
+.error-banner button {
+  flex-shrink: 0;
+  padding: 4px 12px;
+  font-size: 11px;
+  background: var(--accent-red-border);
+  color: var(--text-bright);
+  border: none;
+  border-radius: 3px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.error-banner button:hover {
+  background: var(--accent-red-border-hover);
+}
+
+.market-empty {
+  color: var(--text-muted);
+  font-size: 12px;
+  padding: 8px 4px;
+}
+`, ""]);
+// Exports
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (___CSS_LOADER_EXPORT___);
+
+
+/***/ },
+
+/***/ "../node_modules/css-loader/dist/cjs.js!./css/components/tabs.css"
+/*!************************************************************************!*\
+  !*** ../node_modules/css-loader/dist/cjs.js!./css/components/tabs.css ***!
+  \************************************************************************/
+(module, __webpack_exports__, __webpack_require__) {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var _node_modules_css_loader_dist_runtime_noSourceMaps_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../../node_modules/css-loader/dist/runtime/noSourceMaps.js */ "../node_modules/css-loader/dist/runtime/noSourceMaps.js");
+/* harmony import */ var _node_modules_css_loader_dist_runtime_noSourceMaps_js__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_node_modules_css_loader_dist_runtime_noSourceMaps_js__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../../node_modules/css-loader/dist/runtime/api.js */ "../node_modules/css-loader/dist/runtime/api.js");
+/* harmony import */ var _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(_node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1__);
+// Imports
+
+
+var ___CSS_LOADER_EXPORT___ = _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1___default()((_node_modules_css_loader_dist_runtime_noSourceMaps_js__WEBPACK_IMPORTED_MODULE_0___default()));
+// Module
+___CSS_LOADER_EXPORT___.push([module.id, `/* ── Tab navigation ───────────────────────────────────────────────────────── */
+
+#view-tabs {
+  display: flex;
+  gap: 0;
+  flex-shrink: 0;
+  background: var(--bg-panel);
+  border-bottom: 2px solid var(--border-main);
+}
+
+.tab-btn {
+  flex: 1;
+  padding: 6px 10px;
+  font-size: 12px;
+  font-weight: 600;
+  background: var(--bg-panel);
+  border: none;
+  border-bottom: 2px solid transparent;
+  color: var(--text-muted);
+  border-radius: 0;
+  cursor: pointer;
+  transition: color 0.15s, border-color 0.15s, background 0.15s;
+}
+
+.tab-btn:hover {
+  color: var(--text-main);
+  background: var(--bg-hover);
+}
+
+.tab-btn.active {
+  color: var(--text-accent);
+  border-bottom-color: var(--accent-primary);
+  background: var(--bg-main);
+}
+`, ""]);
+// Exports
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (___CSS_LOADER_EXPORT___);
+
+
+/***/ },
+
+/***/ "../node_modules/css-loader/dist/cjs.js!./css/components/toasts.css"
+/*!**************************************************************************!*\
+  !*** ../node_modules/css-loader/dist/cjs.js!./css/components/toasts.css ***!
+  \**************************************************************************/
+(module, __webpack_exports__, __webpack_require__) {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var _node_modules_css_loader_dist_runtime_noSourceMaps_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../../node_modules/css-loader/dist/runtime/noSourceMaps.js */ "../node_modules/css-loader/dist/runtime/noSourceMaps.js");
+/* harmony import */ var _node_modules_css_loader_dist_runtime_noSourceMaps_js__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_node_modules_css_loader_dist_runtime_noSourceMaps_js__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../../node_modules/css-loader/dist/runtime/api.js */ "../node_modules/css-loader/dist/runtime/api.js");
+/* harmony import */ var _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(_node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1__);
+// Imports
+
+
+var ___CSS_LOADER_EXPORT___ = _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1___default()((_node_modules_css_loader_dist_runtime_noSourceMaps_js__WEBPACK_IMPORTED_MODULE_0___default()));
+// Module
+___CSS_LOADER_EXPORT___.push([module.id, `/* ══════════════════════════════════════════════════════════════════════════════
+   Toast Notifications
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+#toast-container {
+  position: fixed;
+  top: 8px;
+  right: 8px;
+  z-index: 900;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  pointer-events: none;
+  max-width: 320px;
+}
+
+.toast {
+  padding: 8px 12px;
+  border-radius: 4px;
+  font-size: 11px;
+  line-height: 1.4;
+  color: var(--text-main);
+  background: var(--bg-panel);
+  border-left: 3px solid var(--accent-primary);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+  opacity: 0;
+  transform: translateX(30px);
+  transition: opacity 0.3s ease, transform 0.3s ease;
+  pointer-events: auto;
+}
+
+.toast.show {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.toast-buy {
+  border-left-color: var(--accent-teal);
+}
+
+.toast-sell {
+  border-left-color: var(--accent-gold);
+}
+`, ""]);
+// Exports
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (___CSS_LOADER_EXPORT___);
+
+
+/***/ },
+
+/***/ "../node_modules/css-loader/dist/cjs.js!./css/layout/app-shell.css"
+/*!*************************************************************************!*\
+  !*** ../node_modules/css-loader/dist/cjs.js!./css/layout/app-shell.css ***!
+  \*************************************************************************/
+(module, __webpack_exports__, __webpack_require__) {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var _node_modules_css_loader_dist_runtime_noSourceMaps_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../../node_modules/css-loader/dist/runtime/noSourceMaps.js */ "../node_modules/css-loader/dist/runtime/noSourceMaps.js");
+/* harmony import */ var _node_modules_css_loader_dist_runtime_noSourceMaps_js__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_node_modules_css_loader_dist_runtime_noSourceMaps_js__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../../node_modules/css-loader/dist/runtime/api.js */ "../node_modules/css-loader/dist/runtime/api.js");
+/* harmony import */ var _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(_node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1__);
+// Imports
+
+
+var ___CSS_LOADER_EXPORT___ = _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1___default()((_node_modules_css_loader_dist_runtime_noSourceMaps_js__WEBPACK_IMPORTED_MODULE_0___default()));
+// Module
+___CSS_LOADER_EXPORT___.push([module.id, `/* ── App shell ────────────────────────────────────────────────────────────── */
+
+#app {
+  position: relative;        /* contain startup overlay */
+  display: flex;
+  flex-direction: column;
+  height: 95%;              /* fill parent, not viewport — respects zoom */
+  min-height: 0;             /* allow flex children to shrink properly */
+  overflow: hidden;
+}
+`, ""]);
+// Exports
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (___CSS_LOADER_EXPORT___);
+
+
+/***/ },
+
+/***/ "../node_modules/css-loader/dist/cjs.js!./css/layout/layout-modes.css"
+/*!****************************************************************************!*\
+  !*** ../node_modules/css-loader/dist/cjs.js!./css/layout/layout-modes.css ***!
+  \****************************************************************************/
+(module, __webpack_exports__, __webpack_require__) {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var _node_modules_css_loader_dist_runtime_noSourceMaps_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../../node_modules/css-loader/dist/runtime/noSourceMaps.js */ "../node_modules/css-loader/dist/runtime/noSourceMaps.js");
+/* harmony import */ var _node_modules_css_loader_dist_runtime_noSourceMaps_js__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_node_modules_css_loader_dist_runtime_noSourceMaps_js__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../../node_modules/css-loader/dist/runtime/api.js */ "../node_modules/css-loader/dist/runtime/api.js");
+/* harmony import */ var _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(_node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1__);
+// Imports
+
+
+var ___CSS_LOADER_EXPORT___ = _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1___default()((_node_modules_css_loader_dist_runtime_noSourceMaps_js__WEBPACK_IMPORTED_MODULE_0___default()));
+// Module
+___CSS_LOADER_EXPORT___.push([module.id, `/* ═════════════════════════════════════════════════════════════════════════════
  *  LAYOUT MODES — driven by body[data-layout]
  * ═════════════════════════════════════════════════════════════════════════════ */
 
@@ -4630,170 +3877,66 @@ body[data-layout="sidebar"] #portfolio-view {
   min-width: 0;
   border-left: 2px solid var(--border-main);
 }
+`, ""]);
+// Exports
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (___CSS_LOADER_EXPORT___);
 
-/* ══════════════════════════════════════════════════════════════════════════════
-   Toast Notifications
-   ══════════════════════════════════════════════════════════════════════════════ */
 
-#toast-container {
-  position: fixed;
-  top: 8px;
-  right: 8px;
-  z-index: 900;
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  pointer-events: none;
-  max-width: 320px;
+/***/ },
+
+/***/ "../node_modules/css-loader/dist/cjs.js!./css/layout/main-content.css"
+/*!****************************************************************************!*\
+  !*** ../node_modules/css-loader/dist/cjs.js!./css/layout/main-content.css ***!
+  \****************************************************************************/
+(module, __webpack_exports__, __webpack_require__) {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var _node_modules_css_loader_dist_runtime_noSourceMaps_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../../node_modules/css-loader/dist/runtime/noSourceMaps.js */ "../node_modules/css-loader/dist/runtime/noSourceMaps.js");
+/* harmony import */ var _node_modules_css_loader_dist_runtime_noSourceMaps_js__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_node_modules_css_loader_dist_runtime_noSourceMaps_js__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../../node_modules/css-loader/dist/runtime/api.js */ "../node_modules/css-loader/dist/runtime/api.js");
+/* harmony import */ var _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(_node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1__);
+// Imports
+
+
+var ___CSS_LOADER_EXPORT___ = _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1___default()((_node_modules_css_loader_dist_runtime_noSourceMaps_js__WEBPACK_IMPORTED_MODULE_0___default()));
+// Module
+___CSS_LOADER_EXPORT___.push([module.id, `/* ── Main content wrapper ─────────────────────────────────────────────────── */
+
+#app-content {
+  flex: 1 1 0;
+  min-height: 0;
+  overflow: hidden;
 }
+`, ""]);
+// Exports
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (___CSS_LOADER_EXPORT___);
 
-.toast {
-  padding: 8px 12px;
-  border-radius: 4px;
-  font-size: 11px;
-  line-height: 1.4;
-  color: var(--text-main);
-  background: var(--bg-panel);
-  border-left: 3px solid var(--accent-primary);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
-  opacity: 0;
-  transform: translateX(30px);
-  transition: opacity 0.3s ease, transform 0.3s ease;
-  pointer-events: auto;
-}
 
-.toast.show {
-  opacity: 1;
-  transform: translateX(0);
-}
+/***/ },
 
-.toast-buy {
-  border-left-color: var(--accent-teal);
-}
+/***/ "../node_modules/css-loader/dist/cjs.js!./css/layout/responsive.css"
+/*!**************************************************************************!*\
+  !*** ../node_modules/css-loader/dist/cjs.js!./css/layout/responsive.css ***!
+  \**************************************************************************/
+(module, __webpack_exports__, __webpack_require__) {
 
-.toast-sell {
-  border-left-color: var(--accent-gold);
-}
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var _node_modules_css_loader_dist_runtime_noSourceMaps_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../../node_modules/css-loader/dist/runtime/noSourceMaps.js */ "../node_modules/css-loader/dist/runtime/noSourceMaps.js");
+/* harmony import */ var _node_modules_css_loader_dist_runtime_noSourceMaps_js__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_node_modules_css_loader_dist_runtime_noSourceMaps_js__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../../node_modules/css-loader/dist/runtime/api.js */ "../node_modules/css-loader/dist/runtime/api.js");
+/* harmony import */ var _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(_node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1__);
+// Imports
 
-/* ══════════════════════════════════════════════════════════════════════════════
-   Modal — Price Alert Inputs
-   ══════════════════════════════════════════════════════════════════════════════ */
 
-.alert-inputs {
-  margin-top: 8px;
-  padding: 8px 10px;
-  background: var(--bg-muted);
-  border-radius: 4px;
-  border: 1px solid var(--border-section);
-}
-
-.alert-inputs-title {
-  margin: 0 0 6px;
-  font-size: 11px;
-  font-weight: 600;
-  color: var(--text-heading);
-}
-
-.alert-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-  margin-bottom: 4px;
-}
-
-.alert-row:last-child {
-  margin-bottom: 0;
-}
-
-.alert-row label {
-  font-size: 10px;
-  color: var(--text-muted);
-  white-space: nowrap;
-}
-
-.alert-row input[type="number"] {
-  width: 120px;
-  padding: 2px 6px;
-  font-size: 10px;
-  background: var(--bg-input);
-  border: 1px solid var(--border-input);
-  color: var(--text-main);
-  border-radius: 3px;
-}
-
-.alert-row input[type="number"]::placeholder {
-  color: var(--text-muted);
-  opacity: 0.6;
-}
-
-/* ══════════════════════════════════════════════════════════════════════════════
-   Global keyboard focus ring (accessibility)
-   ══════════════════════════════════════════════════════════════════════════════ */
-
-:focus-visible {
-  outline: 2px solid var(--accent-primary);
-  outline-offset: 2px;
-}
-
-:focus:not(:focus-visible) {
-  outline: none;
-}
-
-.card-actions button:focus-visible,
-.analytics-modal-close:focus-visible,
-.tab-btn:focus-visible {
-  outline-offset: 1px;
-  border-radius: 3px;
-}
-
-/* ══════════════════════════════════════════════════════════════════════════════
-   Settings group fieldsets
-   ══════════════════════════════════════════════════════════════════════════════ */
-
-.settings-group {
-  border: 1px solid var(--border-main);
-  border-radius: 6px;
-  padding: 8px 10px 10px;
-  margin-bottom: 8px;
-}
-
-.settings-group-title {
-  font-size: 10px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  color: var(--text-accent);
-  padding: 0 4px;
-}
-
-/* ══════════════════════════════════════════════════════════════════════════════
-   Analytics modal: section divider & predictive section accent
-   ══════════════════════════════════════════════════════════════════════════════ */
-
-.analytics-section-divider {
-  grid-column: 1 / -1;
-  font-size: 10px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  color: var(--text-accent);
-  padding: 8px 0 4px;
-  margin-top: 4px;
-  border-top: 1px solid var(--border-main);
-}
-
-.predictive-section {
-  grid-column: 1 / -1;
-  display: grid;
-  grid-template-columns: inherit;
-  gap: inherit;
-  border-left: 3px solid var(--accent-primary);
-  padding-left: 8px;
-  margin-top: 4px;
-}
-
-/* ══════════════════════════════════════════════════════════════════════════════
+var ___CSS_LOADER_EXPORT___ = _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1___default()((_node_modules_css_loader_dist_runtime_noSourceMaps_js__WEBPACK_IMPORTED_MODULE_0___default()));
+// Module
+___CSS_LOADER_EXPORT___.push([module.id, `/* ══════════════════════════════════════════════════════════════════════════════
    Desktop / wide-viewport overrides
    ══════════════════════════════════════════════════════════════════════════════ */
 
@@ -4860,8 +4003,3376 @@ body[data-layout="sidebar"] #portfolio-view {
   #portfolio-view {
     padding: 10px 18px;
   }
+}`, ""]);
+// Exports
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (___CSS_LOADER_EXPORT___);
+
+
+/***/ },
+
+/***/ "../node_modules/css-loader/dist/cjs.js!./css/layout/views.css"
+/*!*********************************************************************!*\
+  !*** ../node_modules/css-loader/dist/cjs.js!./css/layout/views.css ***!
+  \*********************************************************************/
+(module, __webpack_exports__, __webpack_require__) {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var _node_modules_css_loader_dist_runtime_noSourceMaps_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../../node_modules/css-loader/dist/runtime/noSourceMaps.js */ "../node_modules/css-loader/dist/runtime/noSourceMaps.js");
+/* harmony import */ var _node_modules_css_loader_dist_runtime_noSourceMaps_js__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_node_modules_css_loader_dist_runtime_noSourceMaps_js__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../../node_modules/css-loader/dist/runtime/api.js */ "../node_modules/css-loader/dist/runtime/api.js");
+/* harmony import */ var _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(_node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1__);
+// Imports
+
+
+var ___CSS_LOADER_EXPORT___ = _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1___default()((_node_modules_css_loader_dist_runtime_noSourceMaps_js__WEBPACK_IMPORTED_MODULE_0___default()));
+// Module
+___CSS_LOADER_EXPORT___.push([module.id, `/* ── List view ────────────────────────────────────────────────────────────── */
+
+.market-items.list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 6px 8px;
+}
+
+.market-items.list .market-card {
+  border-radius: 2px;
+}
+
+.market-items.list .item-sprite {
+  width: 24px;
+  height: 22px;
+}
+
+/* ── Tile view ────────────────────────────────────────────────────────────── */
+
+.market-items.tile {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+  gap: 8px;
+  padding: 8px 10px;
+}
+
+.market-items.tile .market-card-header {
+  flex-direction: column;
+  text-align: center;
+  padding: 8px 6px;
+  gap: 4px;
+  overflow: visible;
+}
+
+.market-items.tile .card-actions {
+  gap: 3px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.market-items.tile .item-sprite {
+  width: 36px;
+  height: 32px;
+}
+
+.market-items.tile .item-name {
+  font-size: 11px;
+  text-align: center;
+  white-space: normal;
+  overflow: visible;
+}
+
+.market-items.tile .item-price {
+  font-size: 11px;
+}
+
+.market-items.tile .flip-badges {
+  margin-left: 0;
+  justify-content: center;
+  width: 100%;
+}
+
+.market-items.tile .buy-badge,
+.market-items.tile .sell-badge,
+.market-items.tile .profit-badge {
+  font-size: var(--badge-font-sm);
+  padding: var(--badge-padding-sm);
+}
+
+/* (tile sparkline rules removed — chart now in dedicated graph modal) */
+
+/* ── Hybrid view (compact grid, list-style rows) ──────────────────────────── */
+
+.market-items.hybrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 6px;
+  padding: 6px 8px;
+}
+
+.market-items.hybrid .market-card-header {
+  padding: 4px 6px;
+  gap: 6px;
+}
+
+.market-items.hybrid .item-sprite {
+  width: 28px;
+  height: 24px;
+}
+
+/* (hybrid sparkline rule removed) */
+
+.market-items.hybrid .flip-badges {
+  gap: 2px;
+}
+
+.market-items.hybrid .buy-badge,
+.market-items.hybrid .sell-badge,
+.market-items.hybrid .profit-badge {
+  font-size: var(--badge-font-sm);
+  padding: var(--badge-padding-sm);
 }
 `, ""]);
+// Exports
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (___CSS_LOADER_EXPORT___);
+
+
+/***/ },
+
+/***/ "../node_modules/css-loader/dist/cjs.js!./css/main.css"
+/*!*************************************************************!*\
+  !*** ../node_modules/css-loader/dist/cjs.js!./css/main.css ***!
+  \*************************************************************/
+(module, __webpack_exports__, __webpack_require__) {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var _node_modules_css_loader_dist_runtime_noSourceMaps_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../node_modules/css-loader/dist/runtime/noSourceMaps.js */ "../node_modules/css-loader/dist/runtime/noSourceMaps.js");
+/* harmony import */ var _node_modules_css_loader_dist_runtime_noSourceMaps_js__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_node_modules_css_loader_dist_runtime_noSourceMaps_js__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../node_modules/css-loader/dist/runtime/api.js */ "../node_modules/css-loader/dist/runtime/api.js");
+/* harmony import */ var _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(_node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1__);
+/* harmony import */ var _node_modules_css_loader_dist_cjs_js_base_reset_css__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! -!../../node_modules/css-loader/dist/cjs.js!./base/reset.css */ "../node_modules/css-loader/dist/cjs.js!./css/base/reset.css");
+/* harmony import */ var _node_modules_css_loader_dist_cjs_js_base_alt1_status_css__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! -!../../node_modules/css-loader/dist/cjs.js!./base/alt1-status.css */ "../node_modules/css-loader/dist/cjs.js!./css/base/alt1-status.css");
+/* harmony import */ var _node_modules_css_loader_dist_cjs_js_themes_colorway_default_dark_css__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! -!../../node_modules/css-loader/dist/cjs.js!./themes/colorway-default-dark.css */ "../node_modules/css-loader/dist/cjs.js!./css/themes/colorway-default-dark.css");
+/* harmony import */ var _node_modules_css_loader_dist_cjs_js_themes_colorway_classic_dark_css__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! -!../../node_modules/css-loader/dist/cjs.js!./themes/colorway-classic-dark.css */ "../node_modules/css-loader/dist/cjs.js!./css/themes/colorway-classic-dark.css");
+/* harmony import */ var _node_modules_css_loader_dist_cjs_js_themes_colorway_rs3_modern_dark_css__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! -!../../node_modules/css-loader/dist/cjs.js!./themes/colorway-rs3-modern-dark.css */ "../node_modules/css-loader/dist/cjs.js!./css/themes/colorway-rs3-modern-dark.css");
+/* harmony import */ var _node_modules_css_loader_dist_cjs_js_themes_colorway_rs_lobby_dark_css__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! -!../../node_modules/css-loader/dist/cjs.js!./themes/colorway-rs-lobby-dark.css */ "../node_modules/css-loader/dist/cjs.js!./css/themes/colorway-rs-lobby-dark.css");
+/* harmony import */ var _node_modules_css_loader_dist_cjs_js_themes_colorway_gruvbox_dark_css__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! -!../../node_modules/css-loader/dist/cjs.js!./themes/colorway-gruvbox-dark.css */ "../node_modules/css-loader/dist/cjs.js!./css/themes/colorway-gruvbox-dark.css");
+/* harmony import */ var _node_modules_css_loader_dist_cjs_js_themes_colorway_solarized_dark_css__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! -!../../node_modules/css-loader/dist/cjs.js!./themes/colorway-solarized-dark.css */ "../node_modules/css-loader/dist/cjs.js!./css/themes/colorway-solarized-dark.css");
+/* harmony import */ var _node_modules_css_loader_dist_cjs_js_themes_colorway_twilight_amethyst_dark_css__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! -!../../node_modules/css-loader/dist/cjs.js!./themes/colorway-twilight-amethyst-dark.css */ "../node_modules/css-loader/dist/cjs.js!./css/themes/colorway-twilight-amethyst-dark.css");
+/* harmony import */ var _node_modules_css_loader_dist_cjs_js_themes_colorway_osrs_design_dark_css__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! -!../../node_modules/css-loader/dist/cjs.js!./themes/colorway-osrs-design-dark.css */ "../node_modules/css-loader/dist/cjs.js!./css/themes/colorway-osrs-design-dark.css");
+/* harmony import */ var _node_modules_css_loader_dist_cjs_js_themes_colorway_default_light_css__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__(/*! -!../../node_modules/css-loader/dist/cjs.js!./themes/colorway-default-light.css */ "../node_modules/css-loader/dist/cjs.js!./css/themes/colorway-default-light.css");
+/* harmony import */ var _node_modules_css_loader_dist_cjs_js_themes_colorway_solarized_light_css__WEBPACK_IMPORTED_MODULE_13__ = __webpack_require__(/*! -!../../node_modules/css-loader/dist/cjs.js!./themes/colorway-solarized-light.css */ "../node_modules/css-loader/dist/cjs.js!./css/themes/colorway-solarized-light.css");
+/* harmony import */ var _node_modules_css_loader_dist_cjs_js_themes_colorway_classic_light_css__WEBPACK_IMPORTED_MODULE_14__ = __webpack_require__(/*! -!../../node_modules/css-loader/dist/cjs.js!./themes/colorway-classic-light.css */ "../node_modules/css-loader/dist/cjs.js!./css/themes/colorway-classic-light.css");
+/* harmony import */ var _node_modules_css_loader_dist_cjs_js_themes_colorway_rs3_modern_light_css__WEBPACK_IMPORTED_MODULE_15__ = __webpack_require__(/*! -!../../node_modules/css-loader/dist/cjs.js!./themes/colorway-rs3-modern-light.css */ "../node_modules/css-loader/dist/cjs.js!./css/themes/colorway-rs3-modern-light.css");
+/* harmony import */ var _node_modules_css_loader_dist_cjs_js_themes_colorway_rs_lobby_light_css__WEBPACK_IMPORTED_MODULE_16__ = __webpack_require__(/*! -!../../node_modules/css-loader/dist/cjs.js!./themes/colorway-rs-lobby-light.css */ "../node_modules/css-loader/dist/cjs.js!./css/themes/colorway-rs-lobby-light.css");
+/* harmony import */ var _node_modules_css_loader_dist_cjs_js_themes_colorway_gruvbox_light_css__WEBPACK_IMPORTED_MODULE_17__ = __webpack_require__(/*! -!../../node_modules/css-loader/dist/cjs.js!./themes/colorway-gruvbox-light.css */ "../node_modules/css-loader/dist/cjs.js!./css/themes/colorway-gruvbox-light.css");
+/* harmony import */ var _node_modules_css_loader_dist_cjs_js_themes_colorway_twilight_amethyst_light_css__WEBPACK_IMPORTED_MODULE_18__ = __webpack_require__(/*! -!../../node_modules/css-loader/dist/cjs.js!./themes/colorway-twilight-amethyst-light.css */ "../node_modules/css-loader/dist/cjs.js!./css/themes/colorway-twilight-amethyst-light.css");
+/* harmony import */ var _node_modules_css_loader_dist_cjs_js_themes_colorway_osrs_design_light_css__WEBPACK_IMPORTED_MODULE_19__ = __webpack_require__(/*! -!../../node_modules/css-loader/dist/cjs.js!./themes/colorway-osrs-design-light.css */ "../node_modules/css-loader/dist/cjs.js!./css/themes/colorway-osrs-design-light.css");
+/* harmony import */ var _node_modules_css_loader_dist_cjs_js_themes_light_mode_overrides_css__WEBPACK_IMPORTED_MODULE_20__ = __webpack_require__(/*! -!../../node_modules/css-loader/dist/cjs.js!./themes/light-mode-overrides.css */ "../node_modules/css-loader/dist/cjs.js!./css/themes/light-mode-overrides.css");
+/* harmony import */ var _node_modules_css_loader_dist_cjs_js_themes_contrast_modifiers_css__WEBPACK_IMPORTED_MODULE_21__ = __webpack_require__(/*! -!../../node_modules/css-loader/dist/cjs.js!./themes/contrast-modifiers.css */ "../node_modules/css-loader/dist/cjs.js!./css/themes/contrast-modifiers.css");
+/* harmony import */ var _node_modules_css_loader_dist_cjs_js_styles_style_glassmorphism_css__WEBPACK_IMPORTED_MODULE_22__ = __webpack_require__(/*! -!../../node_modules/css-loader/dist/cjs.js!./styles/style-glassmorphism.css */ "../node_modules/css-loader/dist/cjs.js!./css/styles/style-glassmorphism.css");
+/* harmony import */ var _node_modules_css_loader_dist_cjs_js_styles_style_neumorphism_css__WEBPACK_IMPORTED_MODULE_23__ = __webpack_require__(/*! -!../../node_modules/css-loader/dist/cjs.js!./styles/style-neumorphism.css */ "../node_modules/css-loader/dist/cjs.js!./css/styles/style-neumorphism.css");
+/* harmony import */ var _node_modules_css_loader_dist_cjs_js_styles_style_skeuomorphism_css__WEBPACK_IMPORTED_MODULE_24__ = __webpack_require__(/*! -!../../node_modules/css-loader/dist/cjs.js!./styles/style-skeuomorphism.css */ "../node_modules/css-loader/dist/cjs.js!./css/styles/style-skeuomorphism.css");
+/* harmony import */ var _node_modules_css_loader_dist_cjs_js_styles_micro_component_protection_css__WEBPACK_IMPORTED_MODULE_25__ = __webpack_require__(/*! -!../../node_modules/css-loader/dist/cjs.js!./styles/micro-component-protection.css */ "../node_modules/css-loader/dist/cjs.js!./css/styles/micro-component-protection.css");
+/* harmony import */ var _node_modules_css_loader_dist_cjs_js_layout_app_shell_css__WEBPACK_IMPORTED_MODULE_26__ = __webpack_require__(/*! -!../../node_modules/css-loader/dist/cjs.js!./layout/app-shell.css */ "../node_modules/css-loader/dist/cjs.js!./css/layout/app-shell.css");
+/* harmony import */ var _node_modules_css_loader_dist_cjs_js_layout_main_content_css__WEBPACK_IMPORTED_MODULE_27__ = __webpack_require__(/*! -!../../node_modules/css-loader/dist/cjs.js!./layout/main-content.css */ "../node_modules/css-loader/dist/cjs.js!./css/layout/main-content.css");
+/* harmony import */ var _node_modules_css_loader_dist_cjs_js_layout_layout_modes_css__WEBPACK_IMPORTED_MODULE_28__ = __webpack_require__(/*! -!../../node_modules/css-loader/dist/cjs.js!./layout/layout-modes.css */ "../node_modules/css-loader/dist/cjs.js!./css/layout/layout-modes.css");
+/* harmony import */ var _node_modules_css_loader_dist_cjs_js_layout_views_css__WEBPACK_IMPORTED_MODULE_29__ = __webpack_require__(/*! -!../../node_modules/css-loader/dist/cjs.js!./layout/views.css */ "../node_modules/css-loader/dist/cjs.js!./css/layout/views.css");
+/* harmony import */ var _node_modules_css_loader_dist_cjs_js_components_settings_css__WEBPACK_IMPORTED_MODULE_30__ = __webpack_require__(/*! -!../../node_modules/css-loader/dist/cjs.js!./components/settings.css */ "../node_modules/css-loader/dist/cjs.js!./css/components/settings.css");
+/* harmony import */ var _node_modules_css_loader_dist_cjs_js_components_settings_fieldsets_css__WEBPACK_IMPORTED_MODULE_31__ = __webpack_require__(/*! -!../../node_modules/css-loader/dist/cjs.js!./components/settings-fieldsets.css */ "../node_modules/css-loader/dist/cjs.js!./css/components/settings-fieldsets.css");
+/* harmony import */ var _node_modules_css_loader_dist_cjs_js_components_provider_css__WEBPACK_IMPORTED_MODULE_32__ = __webpack_require__(/*! -!../../node_modules/css-loader/dist/cjs.js!./components/provider.css */ "../node_modules/css-loader/dist/cjs.js!./css/components/provider.css");
+/* harmony import */ var _node_modules_css_loader_dist_cjs_js_components_inputs_css__WEBPACK_IMPORTED_MODULE_33__ = __webpack_require__(/*! -!../../node_modules/css-loader/dist/cjs.js!./components/inputs.css */ "../node_modules/css-loader/dist/cjs.js!./css/components/inputs.css");
+/* harmony import */ var _node_modules_css_loader_dist_cjs_js_components_layout_toggle_css__WEBPACK_IMPORTED_MODULE_34__ = __webpack_require__(/*! -!../../node_modules/css-loader/dist/cjs.js!./components/layout-toggle.css */ "../node_modules/css-loader/dist/cjs.js!./css/components/layout-toggle.css");
+/* harmony import */ var _node_modules_css_loader_dist_cjs_js_components_tabs_css__WEBPACK_IMPORTED_MODULE_35__ = __webpack_require__(/*! -!../../node_modules/css-loader/dist/cjs.js!./components/tabs.css */ "../node_modules/css-loader/dist/cjs.js!./css/components/tabs.css");
+/* harmony import */ var _node_modules_css_loader_dist_cjs_js_components_market_panel_css__WEBPACK_IMPORTED_MODULE_36__ = __webpack_require__(/*! -!../../node_modules/css-loader/dist/cjs.js!./components/market-panel.css */ "../node_modules/css-loader/dist/cjs.js!./css/components/market-panel.css");
+/* harmony import */ var _node_modules_css_loader_dist_cjs_js_components_filters_css__WEBPACK_IMPORTED_MODULE_37__ = __webpack_require__(/*! -!../../node_modules/css-loader/dist/cjs.js!./components/filters.css */ "../node_modules/css-loader/dist/cjs.js!./css/components/filters.css");
+/* harmony import */ var _node_modules_css_loader_dist_cjs_js_components_startup_css__WEBPACK_IMPORTED_MODULE_38__ = __webpack_require__(/*! -!../../node_modules/css-loader/dist/cjs.js!./components/startup.css */ "../node_modules/css-loader/dist/cjs.js!./css/components/startup.css");
+/* harmony import */ var _node_modules_css_loader_dist_cjs_js_components_market_cards_css__WEBPACK_IMPORTED_MODULE_39__ = __webpack_require__(/*! -!../../node_modules/css-loader/dist/cjs.js!./components/market-cards.css */ "../node_modules/css-loader/dist/cjs.js!./css/components/market-cards.css");
+/* harmony import */ var _node_modules_css_loader_dist_cjs_js_components_highlights_css__WEBPACK_IMPORTED_MODULE_40__ = __webpack_require__(/*! -!../../node_modules/css-loader/dist/cjs.js!./components/highlights.css */ "../node_modules/css-loader/dist/cjs.js!./css/components/highlights.css");
+/* harmony import */ var _node_modules_css_loader_dist_cjs_js_components_search_css__WEBPACK_IMPORTED_MODULE_41__ = __webpack_require__(/*! -!../../node_modules/css-loader/dist/cjs.js!./components/search.css */ "../node_modules/css-loader/dist/cjs.js!./css/components/search.css");
+/* harmony import */ var _node_modules_css_loader_dist_cjs_js_components_detail_panel_css__WEBPACK_IMPORTED_MODULE_42__ = __webpack_require__(/*! -!../../node_modules/css-loader/dist/cjs.js!./components/detail-panel.css */ "../node_modules/css-loader/dist/cjs.js!./css/components/detail-panel.css");
+/* harmony import */ var _node_modules_css_loader_dist_cjs_js_components_card_actions_css__WEBPACK_IMPORTED_MODULE_43__ = __webpack_require__(/*! -!../../node_modules/css-loader/dist/cjs.js!./components/card-actions.css */ "../node_modules/css-loader/dist/cjs.js!./css/components/card-actions.css");
+/* harmony import */ var _node_modules_css_loader_dist_cjs_js_components_favourites_css__WEBPACK_IMPORTED_MODULE_44__ = __webpack_require__(/*! -!../../node_modules/css-loader/dist/cjs.js!./components/favourites.css */ "../node_modules/css-loader/dist/cjs.js!./css/components/favourites.css");
+/* harmony import */ var _node_modules_css_loader_dist_cjs_js_components_modals_css__WEBPACK_IMPORTED_MODULE_45__ = __webpack_require__(/*! -!../../node_modules/css-loader/dist/cjs.js!./components/modals.css */ "../node_modules/css-loader/dist/cjs.js!./css/components/modals.css");
+/* harmony import */ var _node_modules_css_loader_dist_cjs_js_components_analytics_modal_css__WEBPACK_IMPORTED_MODULE_46__ = __webpack_require__(/*! -!../../node_modules/css-loader/dist/cjs.js!./components/analytics-modal.css */ "../node_modules/css-loader/dist/cjs.js!./css/components/analytics-modal.css");
+/* harmony import */ var _node_modules_css_loader_dist_cjs_js_components_analytics_dividers_css__WEBPACK_IMPORTED_MODULE_47__ = __webpack_require__(/*! -!../../node_modules/css-loader/dist/cjs.js!./components/analytics-dividers.css */ "../node_modules/css-loader/dist/cjs.js!./css/components/analytics-dividers.css");
+/* harmony import */ var _node_modules_css_loader_dist_cjs_js_components_chat_css__WEBPACK_IMPORTED_MODULE_48__ = __webpack_require__(/*! -!../../node_modules/css-loader/dist/cjs.js!./components/chat.css */ "../node_modules/css-loader/dist/cjs.js!./css/components/chat.css");
+/* harmony import */ var _node_modules_css_loader_dist_cjs_js_components_portfolio_css__WEBPACK_IMPORTED_MODULE_49__ = __webpack_require__(/*! -!../../node_modules/css-loader/dist/cjs.js!./components/portfolio.css */ "../node_modules/css-loader/dist/cjs.js!./css/components/portfolio.css");
+/* harmony import */ var _node_modules_css_loader_dist_cjs_js_components_predictive_badges_css__WEBPACK_IMPORTED_MODULE_50__ = __webpack_require__(/*! -!../../node_modules/css-loader/dist/cjs.js!./components/predictive-badges.css */ "../node_modules/css-loader/dist/cjs.js!./css/components/predictive-badges.css");
+/* harmony import */ var _node_modules_css_loader_dist_cjs_js_components_completed_flips_css__WEBPACK_IMPORTED_MODULE_51__ = __webpack_require__(/*! -!../../node_modules/css-loader/dist/cjs.js!./components/completed-flips.css */ "../node_modules/css-loader/dist/cjs.js!./css/components/completed-flips.css");
+/* harmony import */ var _node_modules_css_loader_dist_cjs_js_components_scrollbar_css__WEBPACK_IMPORTED_MODULE_52__ = __webpack_require__(/*! -!../../node_modules/css-loader/dist/cjs.js!./components/scrollbar.css */ "../node_modules/css-loader/dist/cjs.js!./css/components/scrollbar.css");
+/* harmony import */ var _node_modules_css_loader_dist_cjs_js_components_toasts_css__WEBPACK_IMPORTED_MODULE_53__ = __webpack_require__(/*! -!../../node_modules/css-loader/dist/cjs.js!./components/toasts.css */ "../node_modules/css-loader/dist/cjs.js!./css/components/toasts.css");
+/* harmony import */ var _node_modules_css_loader_dist_cjs_js_components_alerts_css__WEBPACK_IMPORTED_MODULE_54__ = __webpack_require__(/*! -!../../node_modules/css-loader/dist/cjs.js!./components/alerts.css */ "../node_modules/css-loader/dist/cjs.js!./css/components/alerts.css");
+/* harmony import */ var _node_modules_css_loader_dist_cjs_js_components_accessibility_css__WEBPACK_IMPORTED_MODULE_55__ = __webpack_require__(/*! -!../../node_modules/css-loader/dist/cjs.js!./components/accessibility.css */ "../node_modules/css-loader/dist/cjs.js!./css/components/accessibility.css");
+/* harmony import */ var _node_modules_css_loader_dist_cjs_js_layout_responsive_css__WEBPACK_IMPORTED_MODULE_56__ = __webpack_require__(/*! -!../../node_modules/css-loader/dist/cjs.js!./layout/responsive.css */ "../node_modules/css-loader/dist/cjs.js!./css/layout/responsive.css");
+// Imports
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+var ___CSS_LOADER_EXPORT___ = _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1___default()((_node_modules_css_loader_dist_runtime_noSourceMaps_js__WEBPACK_IMPORTED_MODULE_0___default()));
+___CSS_LOADER_EXPORT___.i(_node_modules_css_loader_dist_cjs_js_base_reset_css__WEBPACK_IMPORTED_MODULE_2__["default"]);
+___CSS_LOADER_EXPORT___.i(_node_modules_css_loader_dist_cjs_js_base_alt1_status_css__WEBPACK_IMPORTED_MODULE_3__["default"]);
+___CSS_LOADER_EXPORT___.i(_node_modules_css_loader_dist_cjs_js_themes_colorway_default_dark_css__WEBPACK_IMPORTED_MODULE_4__["default"]);
+___CSS_LOADER_EXPORT___.i(_node_modules_css_loader_dist_cjs_js_themes_colorway_classic_dark_css__WEBPACK_IMPORTED_MODULE_5__["default"]);
+___CSS_LOADER_EXPORT___.i(_node_modules_css_loader_dist_cjs_js_themes_colorway_rs3_modern_dark_css__WEBPACK_IMPORTED_MODULE_6__["default"]);
+___CSS_LOADER_EXPORT___.i(_node_modules_css_loader_dist_cjs_js_themes_colorway_rs_lobby_dark_css__WEBPACK_IMPORTED_MODULE_7__["default"]);
+___CSS_LOADER_EXPORT___.i(_node_modules_css_loader_dist_cjs_js_themes_colorway_gruvbox_dark_css__WEBPACK_IMPORTED_MODULE_8__["default"]);
+___CSS_LOADER_EXPORT___.i(_node_modules_css_loader_dist_cjs_js_themes_colorway_solarized_dark_css__WEBPACK_IMPORTED_MODULE_9__["default"]);
+___CSS_LOADER_EXPORT___.i(_node_modules_css_loader_dist_cjs_js_themes_colorway_twilight_amethyst_dark_css__WEBPACK_IMPORTED_MODULE_10__["default"]);
+___CSS_LOADER_EXPORT___.i(_node_modules_css_loader_dist_cjs_js_themes_colorway_osrs_design_dark_css__WEBPACK_IMPORTED_MODULE_11__["default"]);
+___CSS_LOADER_EXPORT___.i(_node_modules_css_loader_dist_cjs_js_themes_colorway_default_light_css__WEBPACK_IMPORTED_MODULE_12__["default"]);
+___CSS_LOADER_EXPORT___.i(_node_modules_css_loader_dist_cjs_js_themes_colorway_solarized_light_css__WEBPACK_IMPORTED_MODULE_13__["default"]);
+___CSS_LOADER_EXPORT___.i(_node_modules_css_loader_dist_cjs_js_themes_colorway_classic_light_css__WEBPACK_IMPORTED_MODULE_14__["default"]);
+___CSS_LOADER_EXPORT___.i(_node_modules_css_loader_dist_cjs_js_themes_colorway_rs3_modern_light_css__WEBPACK_IMPORTED_MODULE_15__["default"]);
+___CSS_LOADER_EXPORT___.i(_node_modules_css_loader_dist_cjs_js_themes_colorway_rs_lobby_light_css__WEBPACK_IMPORTED_MODULE_16__["default"]);
+___CSS_LOADER_EXPORT___.i(_node_modules_css_loader_dist_cjs_js_themes_colorway_gruvbox_light_css__WEBPACK_IMPORTED_MODULE_17__["default"]);
+___CSS_LOADER_EXPORT___.i(_node_modules_css_loader_dist_cjs_js_themes_colorway_twilight_amethyst_light_css__WEBPACK_IMPORTED_MODULE_18__["default"]);
+___CSS_LOADER_EXPORT___.i(_node_modules_css_loader_dist_cjs_js_themes_colorway_osrs_design_light_css__WEBPACK_IMPORTED_MODULE_19__["default"]);
+___CSS_LOADER_EXPORT___.i(_node_modules_css_loader_dist_cjs_js_themes_light_mode_overrides_css__WEBPACK_IMPORTED_MODULE_20__["default"]);
+___CSS_LOADER_EXPORT___.i(_node_modules_css_loader_dist_cjs_js_themes_contrast_modifiers_css__WEBPACK_IMPORTED_MODULE_21__["default"]);
+___CSS_LOADER_EXPORT___.i(_node_modules_css_loader_dist_cjs_js_styles_style_glassmorphism_css__WEBPACK_IMPORTED_MODULE_22__["default"]);
+___CSS_LOADER_EXPORT___.i(_node_modules_css_loader_dist_cjs_js_styles_style_neumorphism_css__WEBPACK_IMPORTED_MODULE_23__["default"]);
+___CSS_LOADER_EXPORT___.i(_node_modules_css_loader_dist_cjs_js_styles_style_skeuomorphism_css__WEBPACK_IMPORTED_MODULE_24__["default"]);
+___CSS_LOADER_EXPORT___.i(_node_modules_css_loader_dist_cjs_js_styles_micro_component_protection_css__WEBPACK_IMPORTED_MODULE_25__["default"]);
+___CSS_LOADER_EXPORT___.i(_node_modules_css_loader_dist_cjs_js_layout_app_shell_css__WEBPACK_IMPORTED_MODULE_26__["default"]);
+___CSS_LOADER_EXPORT___.i(_node_modules_css_loader_dist_cjs_js_layout_main_content_css__WEBPACK_IMPORTED_MODULE_27__["default"]);
+___CSS_LOADER_EXPORT___.i(_node_modules_css_loader_dist_cjs_js_layout_layout_modes_css__WEBPACK_IMPORTED_MODULE_28__["default"]);
+___CSS_LOADER_EXPORT___.i(_node_modules_css_loader_dist_cjs_js_layout_views_css__WEBPACK_IMPORTED_MODULE_29__["default"]);
+___CSS_LOADER_EXPORT___.i(_node_modules_css_loader_dist_cjs_js_components_settings_css__WEBPACK_IMPORTED_MODULE_30__["default"]);
+___CSS_LOADER_EXPORT___.i(_node_modules_css_loader_dist_cjs_js_components_settings_fieldsets_css__WEBPACK_IMPORTED_MODULE_31__["default"]);
+___CSS_LOADER_EXPORT___.i(_node_modules_css_loader_dist_cjs_js_components_provider_css__WEBPACK_IMPORTED_MODULE_32__["default"]);
+___CSS_LOADER_EXPORT___.i(_node_modules_css_loader_dist_cjs_js_components_inputs_css__WEBPACK_IMPORTED_MODULE_33__["default"]);
+___CSS_LOADER_EXPORT___.i(_node_modules_css_loader_dist_cjs_js_components_layout_toggle_css__WEBPACK_IMPORTED_MODULE_34__["default"]);
+___CSS_LOADER_EXPORT___.i(_node_modules_css_loader_dist_cjs_js_components_tabs_css__WEBPACK_IMPORTED_MODULE_35__["default"]);
+___CSS_LOADER_EXPORT___.i(_node_modules_css_loader_dist_cjs_js_components_market_panel_css__WEBPACK_IMPORTED_MODULE_36__["default"]);
+___CSS_LOADER_EXPORT___.i(_node_modules_css_loader_dist_cjs_js_components_filters_css__WEBPACK_IMPORTED_MODULE_37__["default"]);
+___CSS_LOADER_EXPORT___.i(_node_modules_css_loader_dist_cjs_js_components_startup_css__WEBPACK_IMPORTED_MODULE_38__["default"]);
+___CSS_LOADER_EXPORT___.i(_node_modules_css_loader_dist_cjs_js_components_market_cards_css__WEBPACK_IMPORTED_MODULE_39__["default"]);
+___CSS_LOADER_EXPORT___.i(_node_modules_css_loader_dist_cjs_js_components_highlights_css__WEBPACK_IMPORTED_MODULE_40__["default"]);
+___CSS_LOADER_EXPORT___.i(_node_modules_css_loader_dist_cjs_js_components_search_css__WEBPACK_IMPORTED_MODULE_41__["default"]);
+___CSS_LOADER_EXPORT___.i(_node_modules_css_loader_dist_cjs_js_components_detail_panel_css__WEBPACK_IMPORTED_MODULE_42__["default"]);
+___CSS_LOADER_EXPORT___.i(_node_modules_css_loader_dist_cjs_js_components_card_actions_css__WEBPACK_IMPORTED_MODULE_43__["default"]);
+___CSS_LOADER_EXPORT___.i(_node_modules_css_loader_dist_cjs_js_components_favourites_css__WEBPACK_IMPORTED_MODULE_44__["default"]);
+___CSS_LOADER_EXPORT___.i(_node_modules_css_loader_dist_cjs_js_components_modals_css__WEBPACK_IMPORTED_MODULE_45__["default"]);
+___CSS_LOADER_EXPORT___.i(_node_modules_css_loader_dist_cjs_js_components_analytics_modal_css__WEBPACK_IMPORTED_MODULE_46__["default"]);
+___CSS_LOADER_EXPORT___.i(_node_modules_css_loader_dist_cjs_js_components_analytics_dividers_css__WEBPACK_IMPORTED_MODULE_47__["default"]);
+___CSS_LOADER_EXPORT___.i(_node_modules_css_loader_dist_cjs_js_components_chat_css__WEBPACK_IMPORTED_MODULE_48__["default"]);
+___CSS_LOADER_EXPORT___.i(_node_modules_css_loader_dist_cjs_js_components_portfolio_css__WEBPACK_IMPORTED_MODULE_49__["default"]);
+___CSS_LOADER_EXPORT___.i(_node_modules_css_loader_dist_cjs_js_components_predictive_badges_css__WEBPACK_IMPORTED_MODULE_50__["default"]);
+___CSS_LOADER_EXPORT___.i(_node_modules_css_loader_dist_cjs_js_components_completed_flips_css__WEBPACK_IMPORTED_MODULE_51__["default"]);
+___CSS_LOADER_EXPORT___.i(_node_modules_css_loader_dist_cjs_js_components_scrollbar_css__WEBPACK_IMPORTED_MODULE_52__["default"]);
+___CSS_LOADER_EXPORT___.i(_node_modules_css_loader_dist_cjs_js_components_toasts_css__WEBPACK_IMPORTED_MODULE_53__["default"]);
+___CSS_LOADER_EXPORT___.i(_node_modules_css_loader_dist_cjs_js_components_alerts_css__WEBPACK_IMPORTED_MODULE_54__["default"]);
+___CSS_LOADER_EXPORT___.i(_node_modules_css_loader_dist_cjs_js_components_accessibility_css__WEBPACK_IMPORTED_MODULE_55__["default"]);
+___CSS_LOADER_EXPORT___.i(_node_modules_css_loader_dist_cjs_js_layout_responsive_css__WEBPACK_IMPORTED_MODULE_56__["default"]);
+// Module
+___CSS_LOADER_EXPORT___.push([module.id, `/* ═══════════════════════════════════════════════════════════════════════════
+ *  GE Market Analyzer — CSS Module Entry Point
+ *
+ *  Import order is CRITICAL to the cascade. Do not rearrange.
+ *
+ *  1st: Base styles (reset, body, Alt1 status)
+ *  2nd: Theme colorways (dark palettes, then light palettes)
+ *  3rd: Light-mode consolidated overrides  +  Contrast modifiers
+ *  4th: Thematic styles (glass, neumorphism, skeuomorphism)
+ *  5th: Micro-component protections
+ *  6th: Layouts and Components
+ * ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ── 1. Base ────────────────────────────────────────────────────────────────── */
+
+/* ── 2. Theme Colorways ─────────────────────────────────────────────────────── */
+/* Dark palettes first (Classic Dark defines :root defaults) */
+
+/* Light palettes */
+
+/* ── 3. Light-mode overrides  +  Contrast modifiers ────────────────────────── */
+
+/* ── 4. Thematic Styles ─────────────────────────────────────────────────────── */
+
+/* ── 5. Micro-component Protections ─────────────────────────────────────────── */
+
+/* ── 6. Layout ──────────────────────────────────────────────────────────────── */
+
+/* ── 7. Components ──────────────────────────────────────────────────────────── */
+
+/* ── 8. Responsive overrides (must come last to win specificity) ────────────── */
+`, ""]);
+// Exports
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (___CSS_LOADER_EXPORT___);
+
+
+/***/ },
+
+/***/ "../node_modules/css-loader/dist/cjs.js!./css/styles/micro-component-protection.css"
+/*!******************************************************************************************!*\
+  !*** ../node_modules/css-loader/dist/cjs.js!./css/styles/micro-component-protection.css ***!
+  \******************************************************************************************/
+(module, __webpack_exports__, __webpack_require__) {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var _node_modules_css_loader_dist_runtime_noSourceMaps_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../../node_modules/css-loader/dist/runtime/noSourceMaps.js */ "../node_modules/css-loader/dist/runtime/noSourceMaps.js");
+/* harmony import */ var _node_modules_css_loader_dist_runtime_noSourceMaps_js__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_node_modules_css_loader_dist_runtime_noSourceMaps_js__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../../node_modules/css-loader/dist/runtime/api.js */ "../node_modules/css-loader/dist/runtime/api.js");
+/* harmony import */ var _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(_node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1__);
+// Imports
+
+
+var ___CSS_LOADER_EXPORT___ = _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1___default()((_node_modules_css_loader_dist_runtime_noSourceMaps_js__WEBPACK_IMPORTED_MODULE_0___default()));
+// Module
+___CSS_LOADER_EXPORT___.push([module.id, `/* ═══════════════════════════════════════════════════════════════════════════
+ *  MICRO-COMPONENT PROTECTION
+ *
+ *  Small icon-only buttons (.card-actions, .flip-card-actions, .popout-btn,
+ *  .fav-btn, .alert-btn, .quick-add-btn, .ext-link, .flip-remove-btn,
+ *  .flip-complete-btn, #export-csv-btn, .data-mgmt button) must remain
+ *  legible and clickable regardless of active style. Heavy shadows, blurs,
+ *  and gradients are suppressed on these micro-targets.
+ * ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ── Glass: don't inherit parent's blur on micro-buttons ─────────────────── */
+body[data-style="glass"] .card-actions button,
+body[data-style="glass"] .card-actions a,
+body[data-style="glass"] .flip-card-actions button,
+body[data-style="glass"] #export-csv-btn {
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+
+/* ── Neumorphism: minimal shadow for icon buttons ────────────────────────── */
+body[data-style="neumorphism"] .popout-btn,
+body[data-style="neumorphism"] .fav-btn,
+body[data-style="neumorphism"] .alert-btn,
+body[data-style="neumorphism"] .quick-add-btn,
+body[data-style="neumorphism"] .flip-remove-btn,
+body[data-style="neumorphism"] .flip-complete-btn,
+body[data-style="neumorphism"] #export-csv-btn,
+body[data-style="neumorphism"] .ext-link {
+  box-shadow: none;
+  border: none;
+  background: transparent;
+}
+body[data-style="neumorphism"] .popout-btn:hover,
+body[data-style="neumorphism"] .fav-btn:hover,
+body[data-style="neumorphism"] .alert-btn:hover,
+body[data-style="neumorphism"] .quick-add-btn:hover,
+body[data-style="neumorphism"] .flip-remove-btn:hover,
+body[data-style="neumorphism"] .flip-complete-btn:hover,
+body[data-style="neumorphism"] #export-csv-btn:hover {
+  box-shadow: 2px 2px 4px var(--neu-shadow-dark),
+             -2px -2px 4px var(--neu-shadow-light);
+  border-radius: 4px;
+}
+
+/* ── Skeuomorphism: flatten micro-buttons to avoid visual clutter ────────── */
+body[data-style="skeuomorphism"] .popout-btn,
+body[data-style="skeuomorphism"] .fav-btn,
+body[data-style="skeuomorphism"] .alert-btn,
+body[data-style="skeuomorphism"] .quick-add-btn,
+body[data-style="skeuomorphism"] .ext-link {
+  background: transparent;
+  border: none;
+  box-shadow: none;
+}
+body[data-style="skeuomorphism"] .popout-btn:hover,
+body[data-style="skeuomorphism"] .fav-btn:hover,
+body[data-style="skeuomorphism"] .alert-btn:hover,
+body[data-style="skeuomorphism"] .quick-add-btn:hover {
+  background: color-mix(in srgb, var(--skeu-card-highlight), transparent 60%);
+  border-radius: 3px;
+}
+/* Flip action buttons keep a subtle bevel at small scale */
+body[data-style="skeuomorphism"] .flip-remove-btn,
+body[data-style="skeuomorphism"] .flip-complete-btn,
+body[data-style="skeuomorphism"] #export-csv-btn {
+  background: linear-gradient(180deg, var(--skeu-btn-from) 0%, var(--skeu-btn-to) 100%);
+  border: 1px solid var(--skeu-card-shadow-edge);
+  border-top: 1px solid color-mix(in srgb, var(--skeu-card-highlight), transparent 50%);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
+}
+body[data-style="skeuomorphism"] .flip-remove-btn:active,
+body[data-style="skeuomorphism"] .flip-complete-btn:active,
+body[data-style="skeuomorphism"] #export-csv-btn:active {
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.35);
+  transform: translateY(1px);
+}`, ""]);
+// Exports
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (___CSS_LOADER_EXPORT___);
+
+
+/***/ },
+
+/***/ "../node_modules/css-loader/dist/cjs.js!./css/styles/style-glassmorphism.css"
+/*!***********************************************************************************!*\
+  !*** ../node_modules/css-loader/dist/cjs.js!./css/styles/style-glassmorphism.css ***!
+  \***********************************************************************************/
+(module, __webpack_exports__, __webpack_require__) {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var _node_modules_css_loader_dist_runtime_noSourceMaps_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../../node_modules/css-loader/dist/runtime/noSourceMaps.js */ "../node_modules/css-loader/dist/runtime/noSourceMaps.js");
+/* harmony import */ var _node_modules_css_loader_dist_runtime_noSourceMaps_js__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_node_modules_css_loader_dist_runtime_noSourceMaps_js__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../../node_modules/css-loader/dist/runtime/api.js */ "../node_modules/css-loader/dist/runtime/api.js");
+/* harmony import */ var _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(_node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1__);
+// Imports
+
+
+var ___CSS_LOADER_EXPORT___ = _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1___default()((_node_modules_css_loader_dist_runtime_noSourceMaps_js__WEBPACK_IMPORTED_MODULE_0___default()));
+// Module
+___CSS_LOADER_EXPORT___.push([module.id, `/* ═══════════════════════════════════════════════════════════════════════════
+ *  STYLE: Glassmorphism  (body[data-style="glass"])
+ *
+ *  Frosted-glass panels via backdrop-filter: blur(), highly translucent
+ *  rgba backgrounds, and crisp semi-transparent borders. Body gets a
+ *  gradient background that shows through the frosted panels.
+ * ═══════════════════════════════════════════════════════════════════════════ */
+
+body[data-style="glass"] {
+  background: linear-gradient(135deg, var(--glass-body-from) 0%, var(--glass-body-via) 50%, var(--glass-body-to) 100%);
+  --bg-main: var(--glass-panel);
+  --bg-panel: var(--glass-panel);
+  --bg-elevated: var(--glass-elevated);
+  --bg-hover: var(--glass-hover);
+  --bg-input: var(--glass-input);
+  --bg-muted: var(--glass-muted);
+  --bg-number-input: var(--glass-panel);
+  --bg-filter: var(--glass-muted);
+  --border-card: var(--glass-border-card);
+  --border-main: var(--glass-border-main);
+  --border-section: var(--glass-border-section);
+  --border-input: var(--glass-border-input);
+  --border-subtle: var(--glass-border-main);
+  --scrollbar-thumb: var(--glass-scrollbar);
+  --modal-backdrop: rgba(0, 0, 0, 0.45);
+}
+body[data-style="glass"] #app {
+  background: transparent;
+}
+
+/* ── Frosted panel treatment — backdrop-filter + rounded corners ─────────── */
+body[data-style="glass"] .market-card,
+body[data-style="glass"] .top20-section,
+body[data-style="glass"] .favorites-section,
+body[data-style="glass"] #settings-panel,
+body[data-style="glass"] #market-view,
+body[data-style="glass"] #view-tabs,
+body[data-style="glass"] .analytics-modal-content,
+body[data-style="glass"] .analytics-modal,
+body[data-style="glass"] .setup-guide-content,
+body[data-style="glass"] .setup-guide-modal,
+body[data-style="glass"] .item-modal,
+body[data-style="glass"] .graph-modal,
+body[data-style="glass"] .filter-bar,
+body[data-style="glass"] .flip-card,
+body[data-style="glass"] .completed-flip-card,
+body[data-style="glass"] .settings-group,
+body[data-style="glass"] #advisor-view,
+body[data-style="glass"] #portfolio-view {
+  backdrop-filter: blur(18px) saturate(1.2);
+  -webkit-backdrop-filter: blur(18px) saturate(1.2);
+}
+/* Cards: crisp semi-transparent border + subtle radius */
+body[data-style="glass"] .market-card {
+  border: 1px solid var(--glass-border-card);
+  border-radius: 8px;
+}
+/* Sections: frosted panels with luminous top edge */
+body[data-style="glass"] .top20-section,
+body[data-style="glass"] .favorites-section {
+  border: 1px solid var(--glass-border-section);
+  border-radius: 10px;
+}
+/* Settings fieldsets: subtle glass border */
+body[data-style="glass"] .settings-group {
+  border: 1px solid var(--glass-border-section);
+  border-radius: 8px;
+}
+/* Flip cards: glass treatment */
+body[data-style="glass"] .flip-card,
+body[data-style="glass"] .completed-flip-card {
+  border: 1px solid var(--glass-border-card);
+  border-radius: 6px;
+}
+/* Tab buttons: glass pill shape */
+body[data-style="glass"] .tab-btn {
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-radius: 6px;
+}
+/* Modal content: stronger blur for overlays */
+body[data-style="glass"] .analytics-modal-content,
+body[data-style="glass"] .setup-guide-content {
+  backdrop-filter: blur(24px) saturate(1.3);
+  -webkit-backdrop-filter: blur(24px) saturate(1.3);
+  border: 1px solid var(--glass-border-card);
+  border-radius: 12px;
+}
+/* Input fields: inner glow border on focus */
+body[data-style="glass"] input:focus,
+body[data-style="glass"] select:focus {
+  box-shadow: 0 0 0 1px var(--glass-border-input);
+}`, ""]);
+// Exports
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (___CSS_LOADER_EXPORT___);
+
+
+/***/ },
+
+/***/ "../node_modules/css-loader/dist/cjs.js!./css/styles/style-neumorphism.css"
+/*!*********************************************************************************!*\
+  !*** ../node_modules/css-loader/dist/cjs.js!./css/styles/style-neumorphism.css ***!
+  \*********************************************************************************/
+(module, __webpack_exports__, __webpack_require__) {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var _node_modules_css_loader_dist_runtime_noSourceMaps_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../../node_modules/css-loader/dist/runtime/noSourceMaps.js */ "../node_modules/css-loader/dist/runtime/noSourceMaps.js");
+/* harmony import */ var _node_modules_css_loader_dist_runtime_noSourceMaps_js__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_node_modules_css_loader_dist_runtime_noSourceMaps_js__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../../node_modules/css-loader/dist/runtime/api.js */ "../node_modules/css-loader/dist/runtime/api.js");
+/* harmony import */ var _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(_node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1__);
+// Imports
+
+
+var ___CSS_LOADER_EXPORT___ = _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1___default()((_node_modules_css_loader_dist_runtime_noSourceMaps_js__WEBPACK_IMPORTED_MODULE_0___default()));
+// Module
+___CSS_LOADER_EXPORT___.push([module.id, `/* ═══════════════════════════════════════════════════════════════════════════
+ *  STYLE: Neumorphism  (body[data-style="neumorphism"])
+ *
+ *  Elements share the canvas background colour. Shape is conveyed entirely
+ *  through paired box-shadows (one light, one dark) — no visible borders.
+ *  Outset shadows = extruded; inset shadows = indented.
+ * ═══════════════════════════════════════════════════════════════════════════ */
+
+body[data-style="neumorphism"] {
+  /* Strip ALL visible borders — shape comes from shadows only */
+  --border-main: transparent;
+  --border-section: transparent;
+  --border-card: transparent;
+  --border-input: transparent;
+  --border-subtle: transparent;
+  --border-hype: transparent;
+  --border-hype-hover: transparent;
+  --border-red-border: transparent;
+  --modal-shadow: none;
+}
+
+/* ── Cards: extruded from the canvas ─────────────────────────────────────── */
+body[data-style="neumorphism"] .market-card {
+  background: var(--bg-main);  /* must match canvas */
+  border: none;
+  border-radius: 12px;
+  box-shadow: 6px 6px 12px var(--neu-shadow-dark),
+             -6px -6px 12px var(--neu-shadow-light);
+  margin: 2px;
+}
+body[data-style="neumorphism"] .market-card:hover {
+  box-shadow: 4px 4px 8px var(--neu-shadow-dark),
+             -4px -4px 8px var(--neu-shadow-light);
+}
+/* Expanded card detail: gentle inset well */
+body[data-style="neumorphism"] .market-card.expanded .market-card-detail {
+  box-shadow: inset 2px 2px 5px var(--neu-shadow-dark),
+              inset -2px -2px 5px var(--neu-shadow-light);
+  border-radius: 0 0 12px 12px;
+}
+
+/* ── Sections: raised panels ─────────────────────────────────────────────── */
+body[data-style="neumorphism"] .top20-section {
+  background: var(--bg-main);
+  border: none;
+  border-radius: 14px;
+  box-shadow: 8px 8px 16px var(--neu-shadow-dark),
+             -8px -8px 16px var(--neu-shadow-light);
+}
+body[data-style="neumorphism"] .favorites-section {
+  background: var(--bg-main);
+  border: none;
+  border-radius: 14px;
+  box-shadow: 6px 6px 14px var(--neu-shadow-dark),
+             -6px -6px 14px var(--neu-shadow-light);
+}
+body[data-style="neumorphism"] #settings-panel {
+  background: var(--bg-main);
+  border: none;
+  border-radius: 10px;
+  box-shadow: 4px 4px 10px var(--neu-shadow-dark),
+             -4px -4px 10px var(--neu-shadow-light);
+}
+body[data-style="neumorphism"] .settings-group {
+  border: none;
+  border-radius: 10px;
+  box-shadow: inset 3px 3px 6px var(--neu-shadow-dark),
+              inset -3px -3px 6px var(--neu-shadow-light);
+}
+
+/* ── Flip / portfolio cards ──────────────────────────────────────────────── */
+body[data-style="neumorphism"] .flip-card,
+body[data-style="neumorphism"] .completed-flip-card {
+  background: var(--bg-main);
+  border: none;
+  border-radius: 10px;
+  box-shadow: 4px 4px 8px var(--neu-shadow-dark),
+             -4px -4px 8px var(--neu-shadow-light);
+}
+
+/* ── Inputs/selects: indented wells ──────────────────────────────────────── */
+body[data-style="neumorphism"] .view-btn,
+body[data-style="neumorphism"] .section-sort-select,
+body[data-style="neumorphism"] #market-search-input,
+body[data-style="neumorphism"] .filter-bar select,
+body[data-style="neumorphism"] input[type="number"],
+body[data-style="neumorphism"] input[type="text"],
+body[data-style="neumorphism"] input[type="password"] {
+  background: var(--bg-main);
+  border: none;
+  border-radius: 8px;
+  box-shadow: inset 2px 2px 5px var(--neu-shadow-dark),
+              inset -2px -2px 5px var(--neu-shadow-light);
+}
+body[data-style="neumorphism"] .view-btn.active {
+  box-shadow: inset 3px 3px 6px var(--neu-shadow-dark),
+              inset -3px -3px 6px var(--neu-accent-shadow);
+}
+
+/* ── Buttons: raised pillows ─────────────────────────────────────────────── */
+body[data-style="neumorphism"] .scan-btn,
+body[data-style="neumorphism"] .refresh-btn,
+body[data-style="neumorphism"] .tab-btn,
+body[data-style="neumorphism"] .danger-btn,
+body[data-style="neumorphism"] .data-mgmt button {
+  background: var(--bg-main);
+  border: none;
+  border-radius: 8px;
+  box-shadow: 4px 4px 8px var(--neu-shadow-dark),
+             -4px -4px 8px var(--neu-shadow-light);
+}
+body[data-style="neumorphism"] .scan-btn:hover,
+body[data-style="neumorphism"] .refresh-btn:hover,
+body[data-style="neumorphism"] .tab-btn:hover,
+body[data-style="neumorphism"] .data-mgmt button:hover {
+  box-shadow: 2px 2px 5px var(--neu-shadow-dark),
+             -2px -2px 5px var(--neu-shadow-light);
+}
+body[data-style="neumorphism"] .tab-btn.active {
+  box-shadow: inset 3px 3px 6px var(--neu-shadow-dark),
+              inset -3px -3px 6px var(--neu-accent-shadow);
+}
+
+/* ── Modals: floating neumorphic panel ───────────────────────────────────── */
+body[data-style="neumorphism"] .analytics-modal-content,
+body[data-style="neumorphism"] .setup-guide-content {
+  background: var(--bg-main);
+  border: none;
+  border-radius: 16px;
+  box-shadow: 10px 10px 20px var(--neu-shadow-dark),
+             -10px -10px 20px var(--neu-shadow-light);
+}
+
+/* Neumorphism spacing — shadows need breathing room */
+body[data-style="neumorphism"] .market-items.tile {
+  gap: 14px;
+  padding: 12px 14px;
+}
+body[data-style="neumorphism"] .market-items.hybrid {
+  gap: 12px;
+  padding: 10px 12px;
+}
+body[data-style="neumorphism"] .market-items.list {
+  gap: 10px;
+  padding: 8px 10px;
+}`, ""]);
+// Exports
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (___CSS_LOADER_EXPORT___);
+
+
+/***/ },
+
+/***/ "../node_modules/css-loader/dist/cjs.js!./css/styles/style-skeuomorphism.css"
+/*!***********************************************************************************!*\
+  !*** ../node_modules/css-loader/dist/cjs.js!./css/styles/style-skeuomorphism.css ***!
+  \***********************************************************************************/
+(module, __webpack_exports__, __webpack_require__) {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var _node_modules_css_loader_dist_runtime_noSourceMaps_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../../node_modules/css-loader/dist/runtime/noSourceMaps.js */ "../node_modules/css-loader/dist/runtime/noSourceMaps.js");
+/* harmony import */ var _node_modules_css_loader_dist_runtime_noSourceMaps_js__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_node_modules_css_loader_dist_runtime_noSourceMaps_js__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../../node_modules/css-loader/dist/runtime/api.js */ "../node_modules/css-loader/dist/runtime/api.js");
+/* harmony import */ var _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(_node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1__);
+// Imports
+
+
+var ___CSS_LOADER_EXPORT___ = _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1___default()((_node_modules_css_loader_dist_runtime_noSourceMaps_js__WEBPACK_IMPORTED_MODULE_0___default()));
+// Module
+___CSS_LOADER_EXPORT___.push([module.id, `/* ═══════════════════════════════════════════════════════════════════════════
+ *  STYLE: Skeuomorphism  (body[data-style="skeuomorphism"])
+ *
+ *  Tactile realism: linear-gradient backgrounds for material texture,
+ *  inner shadows for beveled edges, and drop shadows for physical depth.
+ *  Top border = highlight (light edge), bottom border = shadow edge.
+ * ═══════════════════════════════════════════════════════════════════════════ */
+
+body[data-style="skeuomorphism"] {
+  background: linear-gradient(180deg, var(--skeu-body-from) 0%, var(--skeu-body-to) 100%);
+}
+
+/* ── Cards: textured surface with bevel ──────────────────────────────────── */
+body[data-style="skeuomorphism"] .market-card {
+  background: linear-gradient(180deg, var(--skeu-card-from) 0%, var(--skeu-card-mid) 40%, var(--skeu-card-to) 100%);
+  border: 1px solid var(--skeu-card-shadow-edge);
+  border-top: 1px solid var(--skeu-card-highlight);
+  border-radius: 5px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.45),
+              inset 0 1px 0 rgba(255, 255, 255, 0.08),
+              inset 0 -1px 0 rgba(0, 0, 0, 0.15);
+}
+body[data-style="skeuomorphism"] .market-card:hover {
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.55),
+              inset 0 1px 0 rgba(255, 255, 255, 0.10),
+              inset 0 -1px 0 rgba(0, 0, 0, 0.18);
+}
+
+/* ── Sections: embossed panel frame ──────────────────────────────────────── */
+body[data-style="skeuomorphism"] .top20-section {
+  background: linear-gradient(180deg, var(--skeu-card-from) 0%, var(--skeu-body-to) 100%);
+  border: 1px solid var(--skeu-card-shadow-edge);
+  border-top: 1px solid var(--skeu-card-highlight);
+  border-radius: 6px;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.50),
+              inset 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+body[data-style="skeuomorphism"] .favorites-section {
+  background: linear-gradient(180deg, var(--skeu-card-from) 0%, var(--skeu-body-to) 100%);
+  border: 1px solid var(--skeu-card-shadow-edge);
+  border-top: 1px solid var(--skeu-card-highlight);
+  border-radius: 6px;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.45),
+              inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+body[data-style="skeuomorphism"] .top20-section #market-header {
+  background: linear-gradient(180deg, var(--skeu-header-from) 0%, var(--skeu-header-to) 100%);
+  border-bottom: 1px solid var(--skeu-card-shadow-edge);
+  border-radius: 5px 5px 0 0;
+}
+body[data-style="skeuomorphism"] #settings-panel {
+  background: linear-gradient(180deg, var(--skeu-header-from) 0%, var(--skeu-header-to) 100%);
+  border: 1px solid var(--skeu-card-shadow-edge);
+  border-top: 1px solid var(--skeu-card-highlight);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.40),
+              inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+body[data-style="skeuomorphism"] .settings-group {
+  background: linear-gradient(180deg, var(--skeu-card-mid) 0%, var(--skeu-card-to) 100%);
+  border: 1px solid var(--skeu-card-shadow-edge);
+  border-top: 1px solid color-mix(in srgb, var(--skeu-card-highlight), transparent 40%);
+  border-radius: 5px;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.15);
+}
+
+/* ── Buttons: beveled pushable surfaces ──────────────────────────────────── */
+body[data-style="skeuomorphism"] .view-btn,
+body[data-style="skeuomorphism"] .scan-btn,
+body[data-style="skeuomorphism"] .refresh-btn,
+body[data-style="skeuomorphism"] .tab-btn,
+body[data-style="skeuomorphism"] .data-mgmt button,
+body[data-style="skeuomorphism"] .danger-btn {
+  background: linear-gradient(180deg, var(--skeu-btn-from) 0%, var(--skeu-btn-to) 100%);
+  border: 1px solid var(--skeu-card-shadow-edge);
+  border-top: 1px solid var(--skeu-card-highlight);
+  border-radius: 4px;
+  box-shadow: 0 2px 3px rgba(0, 0, 0, 0.35),
+              inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+body[data-style="skeuomorphism"] .view-btn:hover,
+body[data-style="skeuomorphism"] .scan-btn:hover,
+body[data-style="skeuomorphism"] .refresh-btn:hover,
+body[data-style="skeuomorphism"] .tab-btn:hover,
+body[data-style="skeuomorphism"] .data-mgmt button:hover {
+  box-shadow: 0 3px 5px rgba(0, 0, 0, 0.40),
+              inset 0 1px 0 rgba(255, 255, 255, 0.10);
+}
+body[data-style="skeuomorphism"] .view-btn.active,
+body[data-style="skeuomorphism"] .tab-btn.active {
+  background: linear-gradient(180deg, var(--skeu-btn-active-from) 0%, var(--skeu-btn-active-to) 100%);
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.40),
+              inset 0 -1px 0 rgba(255, 255, 255, 0.06);
+  color: var(--text-bright);
+}
+body[data-style="skeuomorphism"] .view-btn:active,
+body[data-style="skeuomorphism"] .scan-btn:active,
+body[data-style="skeuomorphism"] .tab-btn:active {
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.35);
+  transform: translateY(1px);
+}
+
+/* ── Flip / portfolio cards ──────────────────────────────────────────────── */
+body[data-style="skeuomorphism"] .flip-card,
+body[data-style="skeuomorphism"] .completed-flip-card {
+  background: linear-gradient(180deg, var(--skeu-card-from) 0%, var(--skeu-card-mid) 50%, var(--skeu-card-to) 100%);
+  border: 1px solid var(--skeu-card-shadow-edge);
+  border-top: 1px solid var(--skeu-card-highlight);
+  border-radius: 5px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.35),
+              inset 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+
+/* ── Inputs: carved inset fields ─────────────────────────────────────────── */
+body[data-style="skeuomorphism"] input[type="text"],
+body[data-style="skeuomorphism"] input[type="password"],
+body[data-style="skeuomorphism"] input[type="number"],
+body[data-style="skeuomorphism"] select,
+body[data-style="skeuomorphism"] #market-search-input {
+  background: linear-gradient(180deg,
+    color-mix(in srgb, var(--skeu-card-to), black 8%) 0%,
+    var(--skeu-card-to) 100%);
+  border: 1px solid var(--skeu-card-shadow-edge);
+  border-radius: 4px;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.25),
+              inset 0 -1px 0 rgba(255, 255, 255, 0.05);
+}
+
+/* ── Modals: heavy realistic frame ───────────────────────────────────────── */
+body[data-style="skeuomorphism"] .analytics-modal-content,
+body[data-style="skeuomorphism"] .setup-guide-content {
+  background: linear-gradient(180deg, var(--skeu-card-from) 0%, var(--skeu-card-mid) 30%, var(--skeu-card-to) 100%);
+  border: 1px solid var(--skeu-card-shadow-edge);
+  border-top: 2px solid var(--skeu-card-highlight);
+  border-radius: 8px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.60),
+              0 2px 4px rgba(0, 0, 0, 0.30),
+              inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+
+/* Skeuomorphism — softer shadows & stronger highlights on light modes */
+body[data-mode="light"][data-style="skeuomorphism"] .market-card {
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.14),
+              inset 0 1px 0 rgba(255, 255, 255, 0.50),
+              inset 0 -1px 0 rgba(0, 0, 0, 0.05);
+}
+body[data-mode="light"][data-style="skeuomorphism"] .market-card:hover {
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.18),
+              inset 0 1px 0 rgba(255, 255, 255, 0.60),
+              inset 0 -1px 0 rgba(0, 0, 0, 0.06);
+}
+body[data-mode="light"][data-style="skeuomorphism"] .top20-section,
+body[data-mode="light"][data-style="skeuomorphism"] .favorites-section {
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.10),
+              inset 0 1px 0 rgba(255, 255, 255, 0.40);
+}
+body[data-mode="light"][data-style="skeuomorphism"] .flip-card,
+body[data-mode="light"][data-style="skeuomorphism"] .completed-flip-card {
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.10),
+              inset 0 1px 0 rgba(255, 255, 255, 0.45);
+}
+body[data-mode="light"][data-style="skeuomorphism"] input[type="text"],
+body[data-mode="light"][data-style="skeuomorphism"] input[type="password"],
+body[data-mode="light"][data-style="skeuomorphism"] input[type="number"],
+body[data-mode="light"][data-style="skeuomorphism"] select,
+body[data-mode="light"][data-style="skeuomorphism"] #market-search-input {
+  box-shadow: inset 0 2px 3px rgba(0, 0, 0, 0.10),
+              inset 0 -1px 0 rgba(255, 255, 255, 0.30);
+}
+body[data-mode="light"][data-style="skeuomorphism"] .analytics-modal-content,
+body[data-mode="light"][data-style="skeuomorphism"] .setup-guide-content {
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.18),
+              0 2px 4px rgba(0, 0, 0, 0.08),
+              inset 0 1px 0 rgba(255, 255, 255, 0.50);
+}`, ""]);
+// Exports
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (___CSS_LOADER_EXPORT___);
+
+
+/***/ },
+
+/***/ "../node_modules/css-loader/dist/cjs.js!./css/themes/colorway-classic-dark.css"
+/*!*************************************************************************************!*\
+  !*** ../node_modules/css-loader/dist/cjs.js!./css/themes/colorway-classic-dark.css ***!
+  \*************************************************************************************/
+(module, __webpack_exports__, __webpack_require__) {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var _node_modules_css_loader_dist_runtime_noSourceMaps_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../../node_modules/css-loader/dist/runtime/noSourceMaps.js */ "../node_modules/css-loader/dist/runtime/noSourceMaps.js");
+/* harmony import */ var _node_modules_css_loader_dist_runtime_noSourceMaps_js__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_node_modules_css_loader_dist_runtime_noSourceMaps_js__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../../node_modules/css-loader/dist/runtime/api.js */ "../node_modules/css-loader/dist/runtime/api.js");
+/* harmony import */ var _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(_node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1__);
+// Imports
+
+
+var ___CSS_LOADER_EXPORT___ = _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1___default()((_node_modules_css_loader_dist_runtime_noSourceMaps_js__WEBPACK_IMPORTED_MODULE_0___default()));
+// Module
+___CSS_LOADER_EXPORT___.push([module.id, `/* ─────────────────────────────────────────────────────────────────────────────
+ *  COLORWAY: Classic Dark (OSRS Brown)
+ * ───────────────────────────────────────────────────────────────────────────── */
+
+body[data-mode="dark"][data-colorway="classic"] {
+  --bg-main: #382b1f;
+  --bg-panel: #4a3a2a;
+  --bg-elevated: #56452f;
+  --bg-hover: #5c4b35;
+  --dropdown-bg: #56452f;
+  --dropdown-hover-bg: #5c4b35;
+  --bg-input: #3e2e1e;
+  --bg-muted: #4a3a2a;
+  --bg-filter: #322418;
+  --bg-number-input: #3a2c1e;
+
+  --text-main: #ffdf8f;
+  --text-bright: #fff5d0;
+  --text-accent: #ffd666;
+  --text-heading: #ff9900;
+  --text-price: #6bba48;
+  --text-muted: #b89860;
+  --text-soft: #c8a060;
+  --text-dimmed: #8a6d40;
+
+  --border-main: #1f160e;
+  --border-section: #2a1e12;
+  --border-card: #5a4428;
+  --border-input: #6b5030;
+  --border-subtle: #5a4020;
+  --border-hype: #806020;
+  --border-hype-hover: #a08030;
+
+  --accent-primary: #8b4513;
+  --accent-primary-hover: #a0522d;
+  --accent-primary-active: #6b3410;
+  --accent-focus: #cd853f;
+  --accent-blue-text: #cd853f;
+  --accent-green: #6b8e23;
+  --accent-green-bright: #228b22;
+  --accent-teal: #8fbc8f;
+  --accent-gold: #ffd700;
+  --accent-gold-hype: #ffa500;
+  --accent-red: #dc143c;
+  --accent-red-dark: #8b0000;
+  --accent-red-bg: #3a1a0a;
+  --accent-red-border: #8b3030;
+  --accent-red-border-hover: #a04040;
+  --accent-hype: #e89830;
+
+  /* Contrast base (referenced by contrast-modifiers) */
+  --accent-teal-base: #8fbc8f;
+  --accent-red-base: #dc143c;
+  --accent-blue-text-base: #cd853f;
+  --accent-gold-base: #ffd700;
+
+  --chat-user-bg: #5a3a18;
+  --chat-error-bg: #3a1a0a;
+  --badge-buy-bg: #3a2810;
+  --badge-sell-bg: #283a10;
+  --badge-hype-bg: #3a3010;
+
+  --modal-backdrop: rgba(0, 0, 0, 0.7);
+  --modal-shadow: rgba(0, 0, 0, 0.9);
+  --scrollbar-thumb: #6b5030;
+  --scrollbar-thumb-hover: #8a6d40;
+  --link-color: #cd853f;
+  --add-flip-bg: #4a6b1a;
+  --limit-ready-bg: #2a3a1a;
+
+  /* Glass helpers */
+  --glass-body-from: #1a1008;
+  --glass-body-via: #2a1e10;
+  --glass-body-to: #1a1508;
+  --glass-panel: rgba(255, 220, 150, 0.06);
+  --glass-elevated: rgba(255, 220, 150, 0.10);
+  --glass-hover: rgba(255, 220, 150, 0.12);
+  --glass-input: rgba(255, 220, 150, 0.08);
+  --glass-muted: rgba(255, 220, 150, 0.05);
+  --glass-border-card: rgba(255, 200, 100, 0.20);
+  --glass-border-main: rgba(255, 200, 100, 0.10);
+  --glass-border-section: rgba(255, 200, 100, 0.12);
+  --glass-border-input: rgba(255, 200, 100, 0.22);
+  --glass-scrollbar: rgba(255, 200, 100, 0.15);
+
+  /* Neumorphism helpers */
+  --neu-shadow-dark: #2a1e14;
+  --neu-shadow-light: #5c4a38;
+  --neu-accent-shadow: #6b3410;
+
+  /* Skeuomorphism helpers */
+  --skeu-body-from: #2a2018;
+  --skeu-body-to: #382b1f;
+  --skeu-card-from: #584838;
+  --skeu-card-mid: #4a3a2a;
+  --skeu-card-to: #403020;
+  --skeu-card-highlight: #6a5840;
+  --skeu-card-shadow-edge: #1f160e;
+  --skeu-header-from: #584838;
+  --skeu-header-to: #4a4038;
+  --skeu-btn-from: #5a4830;
+  --skeu-btn-to: #4a3820;
+  --skeu-btn-active-from: #8b4513;
+  --skeu-btn-active-to: #6b3410;
+}`, ""]);
+// Exports
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (___CSS_LOADER_EXPORT___);
+
+
+/***/ },
+
+/***/ "../node_modules/css-loader/dist/cjs.js!./css/themes/colorway-classic-light.css"
+/*!**************************************************************************************!*\
+  !*** ../node_modules/css-loader/dist/cjs.js!./css/themes/colorway-classic-light.css ***!
+  \**************************************************************************************/
+(module, __webpack_exports__, __webpack_require__) {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var _node_modules_css_loader_dist_runtime_noSourceMaps_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../../node_modules/css-loader/dist/runtime/noSourceMaps.js */ "../node_modules/css-loader/dist/runtime/noSourceMaps.js");
+/* harmony import */ var _node_modules_css_loader_dist_runtime_noSourceMaps_js__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_node_modules_css_loader_dist_runtime_noSourceMaps_js__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../../node_modules/css-loader/dist/runtime/api.js */ "../node_modules/css-loader/dist/runtime/api.js");
+/* harmony import */ var _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(_node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1__);
+// Imports
+
+
+var ___CSS_LOADER_EXPORT___ = _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1___default()((_node_modules_css_loader_dist_runtime_noSourceMaps_js__WEBPACK_IMPORTED_MODULE_0___default()));
+// Module
+___CSS_LOADER_EXPORT___.push([module.id, `/* ─────────────────────────────────────────────────────────────────────────────
+ *  COLORWAY: Classic — Light (OSRS)
+ * ───────────────────────────────────────────────────────────────────────────── */
+
+body[data-mode="light"][data-colorway="classic"] {
+  --bg-main: #f5ead4;
+  --bg-panel: #fff6e6;
+  --bg-elevated: #fdf2dc;
+  --bg-hover: #f0e2c8;
+  --dropdown-bg: #fdf2dc;
+  --dropdown-hover-bg: #f0e2c8;
+  --bg-input: #f0e4cc;
+  --bg-muted: #e8dcc0;
+  --bg-filter: #f0e8d0;
+  --bg-number-input: #f0e4cc;
+
+  --text-main: #4a3520;
+  --text-bright: #2c1a08;
+  --text-accent: #8b4513;
+  --text-heading: #a05a14;
+  --text-price: #2a7a1a;
+  --text-muted: #8a7560;
+  --text-soft: #a08a70;
+  --text-dimmed: #c0aa88;
+
+  --border-main: #e0d0b0;
+  --border-section: #d8c8a4;
+  --border-card: #d0c098;
+  --border-input: #c8b890;
+  --border-subtle: #e0d4b8;
+  --border-hype: #d4a520;
+  --border-hype-hover: #b8920a;
+
+  --accent-primary: #8b4513;
+  --accent-primary-hover: #a0522d;
+  --accent-primary-active: #6b3410;
+  --accent-focus: #cd853f;
+  --accent-blue-text: #8b5e3c;
+  --accent-green: #5a8a1e;
+  --accent-green-bright: #3a7a10;
+  --accent-teal: #6b8e6b;
+  --accent-gold: #c8960a;
+  --accent-gold-hype: #b07808;
+  --accent-red: #cc3333;
+  --accent-red-dark: #8b0000;
+  --accent-red-bg: #fff0e8;
+  --accent-red-border: #e0a090;
+  --accent-red-border-hover: #d08070;
+  --accent-hype: #c87e10;
+
+  /* Contrast base (referenced by contrast-modifiers) */
+  --accent-teal-base: #6b8e6b;
+  --accent-red-base: #cc3333;
+  --accent-blue-text-base: #8b5e3c;
+  --accent-gold-base: #c8960a;
+
+  --chat-user-bg: #f5e8d0;
+  --chat-error-bg: #fff0e8;
+  --badge-buy-bg: #e8e0c8;
+  --badge-sell-bg: #e0f0d0;
+  --badge-hype-bg: #f8f0c8;
+
+  --modal-backdrop: rgba(0, 0, 0, 0.25);
+  --modal-shadow: rgba(0, 0, 0, 0.15);
+  --scrollbar-thumb: #c8b890;
+  --scrollbar-thumb-hover: #a89a78;
+  --link-color: #8b4513;
+  --add-flip-bg: #d8eac0;
+  --limit-ready-bg: #e0f0d0;
+
+  /* Glass helpers */
+  --glass-body-from: #e8dcc0;
+  --glass-body-via: #f0e4cc;
+  --glass-body-to: #e0d4b0;
+  --glass-panel: rgba(255, 240, 210, 0.55);
+  --glass-elevated: rgba(255, 240, 210, 0.65);
+  --glass-hover: rgba(255, 240, 210, 0.70);
+  --glass-input: rgba(255, 240, 210, 0.50);
+  --glass-muted: rgba(255, 240, 210, 0.40);
+  --glass-border-card: rgba(139, 69, 19, 0.15);
+  --glass-border-main: rgba(139, 69, 19, 0.08);
+  --glass-border-section: rgba(139, 69, 19, 0.10);
+  --glass-border-input: rgba(139, 69, 19, 0.18);
+  --glass-scrollbar: rgba(139, 69, 19, 0.12);
+
+  /* Neumorphism helpers */
+  --neu-shadow-dark: #d0c098;
+  --neu-shadow-light: #fff8ea;
+  --neu-accent-shadow: #6b3410;
+
+  /* Skeuomorphism helpers */
+  --skeu-body-from: #e0d4b0;
+  --skeu-body-to: #f5ead4;
+  --skeu-card-from: #fff6e6;
+  --skeu-card-mid: #faf0da;
+  --skeu-card-to: #f0e4cc;
+  --skeu-card-highlight: #fff8ea;
+  --skeu-card-shadow-edge: #c8b890;
+  --skeu-header-from: #faf0da;
+  --skeu-header-to: #f0e8d0;
+  --skeu-btn-from: #f5ead4;
+  --skeu-btn-to: #e8dcc0;
+  --skeu-btn-active-from: #8b4513;
+  --skeu-btn-active-to: #6b3410;
+}
+
+/* (light-mode view-btn.active consolidated — see below contrast modifiers) */
+`, ""]);
+// Exports
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (___CSS_LOADER_EXPORT___);
+
+
+/***/ },
+
+/***/ "../node_modules/css-loader/dist/cjs.js!./css/themes/colorway-default-dark.css"
+/*!*************************************************************************************!*\
+  !*** ../node_modules/css-loader/dist/cjs.js!./css/themes/colorway-default-dark.css ***!
+  \*************************************************************************************/
+(module, __webpack_exports__, __webpack_require__) {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var _node_modules_css_loader_dist_runtime_noSourceMaps_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../../node_modules/css-loader/dist/runtime/noSourceMaps.js */ "../node_modules/css-loader/dist/runtime/noSourceMaps.js");
+/* harmony import */ var _node_modules_css_loader_dist_runtime_noSourceMaps_js__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_node_modules_css_loader_dist_runtime_noSourceMaps_js__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../../node_modules/css-loader/dist/runtime/api.js */ "../node_modules/css-loader/dist/runtime/api.js");
+/* harmony import */ var _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(_node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1__);
+// Imports
+
+
+var ___CSS_LOADER_EXPORT___ = _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1___default()((_node_modules_css_loader_dist_runtime_noSourceMaps_js__WEBPACK_IMPORTED_MODULE_0___default()));
+// Module
+___CSS_LOADER_EXPORT___.push([module.id, `/* ─────────────────────────────────────────────────────────────────────────────
+ * GE Market Analyzer — Alt1 Overlay Stylesheet
+ *
+ * Dark palette optimised for readability on top of the RS3 game client.
+ * All measurements use px/rem so the overlay renders consistently regardless
+ * of the host page's base font-size.
+ * ───────────────────────────────────────────────────────────────────────────── */
+
+/* ═══════════════════════════════════════════════════════════════════════════
+ *  THEME SYSTEM — Two-axis: Colorway × Style
+ *
+ *  Mode     (body[data-mode]):       dark | light
+ *  Colorway (body[data-colorway]):   default | classic | rs3-modern | solarized | rs-lobby | gruvbox | twilight-amethyst | osrs-design
+ *  Contrast (body[data-contrast]):   default | soft | hard
+ *  Style    (body[data-style]):      basic | glass | neumorphism | skeuomorphism
+ *
+ *  Mode × Colorway sets ALL colour variables + per-style helper vars.
+ *  Contrast applies brightness adjustments on top.
+ *  Style applies structural overrides (shadows, filters, gradients)
+ *  using the helper vars so every combination works automatically.
+ * ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ─────────────────────────────────────────────────────────────────────────────
+ *  COLORWAY: Default Dark
+ * ───────────────────────────────────────────────────────────────────────────── */
+
+:root {
+  /* ── Backgrounds ─────────────────────── */
+  --bg-main: #1e1e1e;
+  --bg-panel: #252526;
+  --bg-elevated: #2d2d30;
+  --bg-hover: #2a2d2e;
+  --dropdown-bg: #2d2d30;
+  --dropdown-hover-bg: #2a2d2e;
+  --bg-input: #3c3c3c;
+  --bg-muted: #333;
+  --bg-filter: #1e1e24;
+  --bg-number-input: #2a2a2e;
+
+  /* ── Text ────────────────────────────── */
+  --text-main: #d4d4d4;
+  --text-bright: #fff;
+  --text-accent: #9cdcfe;
+  --text-heading: #dcdcaa;
+  --text-price: #4ade80;
+  --text-muted: #94a3b8;
+  --text-soft: #aaa;
+  --text-dimmed: #666;
+
+  /* ── Borders ─────────────────────────── */
+  --border-main: #333;
+  --border-section: #3a3d40;
+  --border-card: #4a4d50;
+  --border-input: #555;
+  --border-subtle: #444;
+  --border-hype: #6b5a1e;
+  --border-hype-hover: #a08830;
+
+  /* ── Primary action ──────────────────── */
+  --accent-primary: #0e639c;
+  --accent-primary-hover: #1177bb;
+  --accent-primary-active: #094771;
+  --accent-focus: #007acc;
+
+  /* ── Semantic accents ────────────────── */
+  --accent-blue-text: #569cd6;
+  --accent-green: #5ece6b;
+  --accent-green-bright: #27ae60;
+  --accent-teal: #4ec9b0;
+  --accent-gold: #f0c040;
+  --accent-gold-hype: #f5c542;
+  --accent-hype: #ffab40;
+  --accent-red: #ff6b6b;
+  --accent-red-dark: #c0392b;
+  --accent-red-bg: #3a1d1d;
+  --accent-red-border: #6b3030;
+  --accent-red-border-hover: #a04040;
+
+  /* ── Contrast base (referenced by contrast-modifiers — never self-referencing) */
+  --accent-teal-base: #4ec9b0;
+  --accent-red-base: #ff6b6b;
+  --accent-blue-text-base: #569cd6;
+  --accent-gold-base: #f0c040;
+
+  /* ── Chat ─────────────────────────────── */
+  --chat-user-bg: #264f78;
+  --chat-error-bg: #3b1a1a;
+
+  /* ── Badges ──────────────────────────── */
+  --badge-buy-bg: #1e2d3a;
+  --badge-sell-bg: #1e3a1e;
+  --badge-hype-bg: #3a2e10;
+
+  /* ── Modal ───────────────────────────── */
+  --modal-backdrop: rgba(0, 0, 0, 0.6);
+  --modal-shadow: rgba(0, 0, 0, 0.8);
+
+  /* ── Scrollbar ───────────────────────── */
+  --scrollbar-thumb: #555;
+  --scrollbar-thumb-hover: #777;
+
+  /* ── Badge sizing tokens ──────────────── */
+  --badge-font-sm: 11px;
+  --badge-font-md: 12px;
+  --badge-padding-sm: 2px 6px;
+  --badge-padding-md: 3px 7px;
+  --badge-radius: 3px;
+  --badge-font-weight: 600;
+
+  /* ── Alias tokens (consumed by components that use short names) ── */
+  --border: var(--border-main);
+  --text: var(--text-main);
+
+  /* ── Semantic badge-bg tokens (theme-aware, replaces hard-coded rgba) ── */
+  --badge-velocity-insta-bg: rgba(39, 174, 96, 0.18);
+  --badge-velocity-active-bg: rgba(86, 156, 214, 0.18);
+  --badge-velocity-slow-bg: rgba(240, 192, 64, 0.18);
+  --badge-velocity-muted-bg: rgba(136, 136, 136, 0.18);
+  --badge-trend-up-bg: rgba(39, 174, 96, 0.18);
+  --badge-trend-down-bg: rgba(244, 71, 71, 0.18);
+  --badge-neutral-bg: rgba(136, 136, 136, 0.15);
+  --badge-hype-vol-bg: rgba(255, 171, 64, 0.15);
+  --badge-tier-free-bg: rgba(76, 175, 80, 0.12);
+  --badge-tier-free-border: rgba(76, 175, 80, 0.3);
+  --badge-tier-freetier-bg: rgba(78, 205, 196, 0.12);
+  --badge-tier-freetier-border: rgba(78, 205, 196, 0.3);
+  --badge-tier-lowcost-bg: rgba(100, 149, 237, 0.12);
+  --badge-tier-lowcost-border: rgba(100, 149, 237, 0.3);
+  --badge-tier-neutral-bg: rgba(180, 180, 180, 0.08);
+  --badge-tier-neutral-border: rgba(180, 180, 180, 0.2);
+  --table-active-row-bg: rgba(100, 149, 237, 0.08);
+  --table-hover-row-bg: rgba(255, 255, 255, 0.03);
+  --setup-note-bg: rgba(255, 215, 0, 0.08);
+  --setup-note-border: rgba(255, 215, 0, 0.2);
+  --detail-expanded-bg: rgba(0, 0, 0, 0.08);
+
+  /* ── Close / win-loss glow tokens ─────── */
+  --close-hover-bg: rgba(244, 71, 71, 0.12);
+  --win-glow: color-mix(in srgb, var(--accent-green-bright) 8%, transparent);
+  --loss-glow: color-mix(in srgb, var(--accent-red-dark) 8%, transparent);
+
+  /* ── Misc ─────────────────────────────── */
+  --link-color: #6cb4ee;
+  --add-flip-bg: #1b6b2a;
+  --limit-ready-bg: #1a2e1a;
+
+  /* ── Style helper vars (Glass) ───────── */
+  --glass-body-from: #141414;
+  --glass-body-via: #1e1e1e;
+  --glass-body-to: #181818;
+  --glass-panel: rgba(255, 255, 255, 0.06);
+  --glass-elevated: rgba(255, 255, 255, 0.10);
+  --glass-hover: rgba(255, 255, 255, 0.12);
+  --glass-input: rgba(255, 255, 255, 0.08);
+  --glass-muted: rgba(255, 255, 255, 0.05);
+  --glass-border-card: rgba(255, 255, 255, 0.18);
+  --glass-border-main: rgba(255, 255, 255, 0.10);
+  --glass-border-section: rgba(255, 255, 255, 0.12);
+  --glass-border-input: rgba(255, 255, 255, 0.20);
+  --glass-scrollbar: rgba(255, 255, 255, 0.15);
+
+  /* ── Style helper vars (Neumorphism) ─── */
+  --neu-shadow-dark: #151518;
+  --neu-shadow-light: #383840;
+  --neu-accent-shadow: #094771;
+
+  /* ── Style helper vars (Skeuomorphism) ── */
+  --skeu-body-from: #151518;
+  --skeu-body-to: #1e1e1e;
+  --skeu-card-from: #353538;
+  --skeu-card-mid: #252526;
+  --skeu-card-to: #1e1e20;
+  --skeu-card-highlight: #444;
+  --skeu-card-shadow-edge: #151518;
+  --skeu-header-from: #353538;
+  --skeu-header-to: #2a2a2e;
+  --skeu-btn-from: #3a3a3e;
+  --skeu-btn-to: #2a2a2e;
+  --skeu-btn-active-from: #0e639c;
+  --skeu-btn-active-to: #094771;
+}`, ""]);
+// Exports
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (___CSS_LOADER_EXPORT___);
+
+
+/***/ },
+
+/***/ "../node_modules/css-loader/dist/cjs.js!./css/themes/colorway-default-light.css"
+/*!**************************************************************************************!*\
+  !*** ../node_modules/css-loader/dist/cjs.js!./css/themes/colorway-default-light.css ***!
+  \**************************************************************************************/
+(module, __webpack_exports__, __webpack_require__) {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var _node_modules_css_loader_dist_runtime_noSourceMaps_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../../node_modules/css-loader/dist/runtime/noSourceMaps.js */ "../node_modules/css-loader/dist/runtime/noSourceMaps.js");
+/* harmony import */ var _node_modules_css_loader_dist_runtime_noSourceMaps_js__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_node_modules_css_loader_dist_runtime_noSourceMaps_js__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../../node_modules/css-loader/dist/runtime/api.js */ "../node_modules/css-loader/dist/runtime/api.js");
+/* harmony import */ var _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(_node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1__);
+// Imports
+
+
+var ___CSS_LOADER_EXPORT___ = _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1___default()((_node_modules_css_loader_dist_runtime_noSourceMaps_js__WEBPACK_IMPORTED_MODULE_0___default()));
+// Module
+___CSS_LOADER_EXPORT___.push([module.id, `/* ─────────────────────────────────────────────────────────────────────────────
+ *  COLORWAY: Default — Light
+ * ───────────────────────────────────────────────────────────────────────────── */
+
+body[data-mode="light"][data-colorway="default"] {
+  --bg-main: #f5f5f5;
+  --bg-panel: #ffffff;
+  --bg-elevated: #fafafa;
+  --bg-hover: #f0f0f0;
+  --dropdown-bg: #fafafa;
+  --dropdown-hover-bg: #f0f0f0;
+  --bg-input: #f0f0f0;
+  --bg-muted: #e8e8e8;
+  --bg-filter: #f0f0f0;
+  --bg-number-input: #f5f5f5;
+
+  --text-main: #333333;
+  --text-bright: #111111;
+  --text-accent: #0066cc;
+  --text-heading: #1a1a1a;
+  --text-price: #1a8a2a;
+  --text-muted: #777777;
+  --text-soft: #999999;
+  --text-dimmed: #bbbbbb;
+
+  --border-main: #e0e0e0;
+  --border-section: #d8d8d8;
+  --border-card: #d0d0d0;
+  --border-input: #cccccc;
+  --border-subtle: #e8e8e8;
+  --border-hype: #d4a520;
+  --border-hype-hover: #b8920a;
+
+  --accent-primary: #0066cc;
+  --accent-primary-hover: #0077dd;
+  --accent-primary-active: #0055aa;
+  --accent-focus: #0066cc;
+  --accent-blue-text: #0066cc;
+  --accent-green: #2a8a2a;
+  --accent-green-bright: #22aa22;
+  --accent-teal: #1a9a8a;
+  --accent-gold: #d4a520;
+  --accent-gold-hype: #c09010;
+  --accent-red: #cc3333;
+  --accent-red-dark: #aa2222;
+  --accent-red-bg: #fff0f0;
+  --accent-red-border: #e0a0a0;
+  --accent-red-border-hover: #d08080;
+  --accent-hype: #e68a00;
+
+  /* Contrast base (referenced by contrast-modifiers) */
+  --accent-teal-base: #1a9a8a;
+  --accent-red-base: #cc3333;
+  --accent-blue-text-base: #0066cc;
+  --accent-gold-base: #d4a520;
+
+  --chat-user-bg: #e6f0ff;
+  --chat-error-bg: #fff0f0;
+  --badge-buy-bg: #e0f0ff;
+  --badge-sell-bg: #e0ffe0;
+  --badge-hype-bg: #fff8e0;
+
+  --modal-backdrop: rgba(0, 0, 0, 0.25);
+  --modal-shadow: rgba(0, 0, 0, 0.15);
+  --scrollbar-thumb: #cccccc;
+  --scrollbar-thumb-hover: #aaaaaa;
+  --link-color: #0066cc;
+  --add-flip-bg: #d0f0d0;
+  --limit-ready-bg: #e0f8e0;
+
+  /* Glass helpers */
+  --glass-body-from: #d8d8d8;
+  --glass-body-via: #e4e4e4;
+  --glass-body-to: #d0d0d0;
+  --glass-panel: rgba(255, 255, 255, 0.50);
+  --glass-elevated: rgba(255, 255, 255, 0.60);
+  --glass-hover: rgba(255, 255, 255, 0.65);
+  --glass-input: rgba(255, 255, 255, 0.45);
+  --glass-muted: rgba(255, 255, 255, 0.35);
+  --glass-border-card: rgba(0, 0, 0, 0.12);
+  --glass-border-main: rgba(0, 0, 0, 0.08);
+  --glass-border-section: rgba(0, 0, 0, 0.10);
+  --glass-border-input: rgba(0, 0, 0, 0.15);
+  --glass-scrollbar: rgba(0, 0, 0, 0.12);
+
+  /* Neumorphism helpers */
+  --neu-shadow-dark: #d0d0d0;
+  --neu-shadow-light: #ffffff;
+  --neu-accent-shadow: #0055aa;
+
+  /* Skeuomorphism helpers */
+  --skeu-body-from: #e8e8e8;
+  --skeu-body-to: #f5f5f5;
+  --skeu-card-from: #ffffff;
+  --skeu-card-mid: #f8f8f8;
+  --skeu-card-to: #f0f0f0;
+  --skeu-card-highlight: #ffffff;
+  --skeu-card-shadow-edge: #cccccc;
+  --skeu-header-from: #fafafa;
+  --skeu-header-to: #f0f0f0;
+  --skeu-btn-from: #f5f5f5;
+  --skeu-btn-to: #e8e8e8;
+  --skeu-btn-active-from: #0066cc;
+  --skeu-btn-active-to: #0055aa;
+}`, ""]);
+// Exports
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (___CSS_LOADER_EXPORT___);
+
+
+/***/ },
+
+/***/ "../node_modules/css-loader/dist/cjs.js!./css/themes/colorway-gruvbox-dark.css"
+/*!*************************************************************************************!*\
+  !*** ../node_modules/css-loader/dist/cjs.js!./css/themes/colorway-gruvbox-dark.css ***!
+  \*************************************************************************************/
+(module, __webpack_exports__, __webpack_require__) {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var _node_modules_css_loader_dist_runtime_noSourceMaps_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../../node_modules/css-loader/dist/runtime/noSourceMaps.js */ "../node_modules/css-loader/dist/runtime/noSourceMaps.js");
+/* harmony import */ var _node_modules_css_loader_dist_runtime_noSourceMaps_js__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_node_modules_css_loader_dist_runtime_noSourceMaps_js__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../../node_modules/css-loader/dist/runtime/api.js */ "../node_modules/css-loader/dist/runtime/api.js");
+/* harmony import */ var _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(_node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1__);
+// Imports
+
+
+var ___CSS_LOADER_EXPORT___ = _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1___default()((_node_modules_css_loader_dist_runtime_noSourceMaps_js__WEBPACK_IMPORTED_MODULE_0___default()));
+// Module
+___CSS_LOADER_EXPORT___.push([module.id, `/* ─────────────────────────────────────────────────────────────────────────────
+ *  COLORWAY: Gruvbox — Dark
+ *  morhetz/gruvbox "retro groove" palette — warm earthy tones with pastel
+ *  accents. bg0 #282828, fg1 #ebdbb2, yellow #d79921, aqua #689d6a.
+ * ───────────────────────────────────────────────────────────────────────────── */
+
+body[data-mode="dark"][data-colorway="gruvbox"] {
+  --bg-main: #282828;
+  --bg-panel: #3c3836;
+  --bg-elevated: #504945;
+  --bg-hover: #665c54;
+  --dropdown-bg: #504945;
+  --dropdown-hover-bg: #665c54;
+  --bg-input: #32302f;
+  --bg-muted: #3c3836;
+  --bg-filter: #1d2021;
+  --bg-number-input: #32302f;
+
+  --text-main: #ebdbb2;
+  --text-bright: #fbf1c7;
+  --text-accent: #fabd2f;
+  --text-heading: #fe8019;
+  --text-price: #8ecc2a;
+  --text-muted: #928374;
+  --text-soft: #a89984;
+  --text-dimmed: #7c6f64;
+
+  --border-main: #504945;
+  --border-section: #3c3836;
+  --border-card: #665c54;
+  --border-input: #665c54;
+  --border-subtle: #504945;
+  --border-hype: #d65d0e;
+  --border-hype-hover: #fe8019;
+
+  --accent-primary: #458588;
+  --accent-primary-hover: #83a598;
+  --accent-primary-active: #076678;
+  --accent-focus: #83a598;
+  --accent-blue-text: #83a598;
+  --accent-green: #98971a;
+  --accent-green-bright: #b8bb26;
+  --accent-teal: #689d6a;
+  --accent-gold: #d79921;
+  --accent-gold-hype: #fabd2f;
+  --accent-red: #fb4934;
+  --accent-red-dark: #cc241d;
+  --accent-red-bg: #3c1f1f;
+  --accent-red-border: #cc241d;
+  --accent-red-border-hover: #fb4934;
+  --accent-hype: #fe8019;
+
+  /* Contrast base (referenced by contrast-modifiers) */
+  --accent-teal-base: #689d6a;
+  --accent-red-base: #fb4934;
+  --accent-blue-text-base: #83a598;
+  --accent-gold-base: #d79921;
+
+  --chat-user-bg: #3c3836;
+  --chat-error-bg: #3c1f1f;
+  --badge-buy-bg: #2a3428;
+  --badge-sell-bg: #283428;
+  --badge-hype-bg: #3c3020;
+
+  --modal-backdrop: rgba(0, 0, 0, 0.75);
+  --modal-shadow: rgba(0, 0, 0, 0.9);
+  --scrollbar-thumb: #665c54;
+  --scrollbar-thumb-hover: #7c6f64;
+  --link-color: #83a598;
+  --add-flip-bg: #3a4a28;
+  --limit-ready-bg: #2a3a1e;
+
+  /* Glass helpers */
+  --glass-body-from: #1d2021;
+  --glass-body-via: #282828;
+  --glass-body-to: #1d2021;
+  --glass-panel: rgba(235, 219, 178, 0.05);
+  --glass-elevated: rgba(235, 219, 178, 0.08);
+  --glass-hover: rgba(235, 219, 178, 0.10);
+  --glass-input: rgba(235, 219, 178, 0.06);
+  --glass-muted: rgba(235, 219, 178, 0.04);
+  --glass-border-card: rgba(235, 219, 178, 0.15);
+  --glass-border-main: rgba(235, 219, 178, 0.08);
+  --glass-border-section: rgba(235, 219, 178, 0.10);
+  --glass-border-input: rgba(235, 219, 178, 0.18);
+  --glass-scrollbar: rgba(235, 219, 178, 0.12);
+
+  /* Neumorphism helpers */
+  --neu-shadow-dark: #1d2021;
+  --neu-shadow-light: #504945;
+  --neu-accent-shadow: #076678;
+
+  /* Skeuomorphism helpers */
+  --skeu-body-from: #1d2021;
+  --skeu-body-to: #282828;
+  --skeu-card-from: #504945;
+  --skeu-card-mid: #3c3836;
+  --skeu-card-to: #32302f;
+  --skeu-card-highlight: #665c54;
+  --skeu-card-shadow-edge: #1d2021;
+  --skeu-header-from: #504945;
+  --skeu-header-to: #3c3836;
+  --skeu-btn-from: #504945;
+  --skeu-btn-to: #3c3836;
+  --skeu-btn-active-from: #458588;
+  --skeu-btn-active-to: #076678;
+}`, ""]);
+// Exports
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (___CSS_LOADER_EXPORT___);
+
+
+/***/ },
+
+/***/ "../node_modules/css-loader/dist/cjs.js!./css/themes/colorway-gruvbox-light.css"
+/*!**************************************************************************************!*\
+  !*** ../node_modules/css-loader/dist/cjs.js!./css/themes/colorway-gruvbox-light.css ***!
+  \**************************************************************************************/
+(module, __webpack_exports__, __webpack_require__) {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var _node_modules_css_loader_dist_runtime_noSourceMaps_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../../node_modules/css-loader/dist/runtime/noSourceMaps.js */ "../node_modules/css-loader/dist/runtime/noSourceMaps.js");
+/* harmony import */ var _node_modules_css_loader_dist_runtime_noSourceMaps_js__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_node_modules_css_loader_dist_runtime_noSourceMaps_js__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../../node_modules/css-loader/dist/runtime/api.js */ "../node_modules/css-loader/dist/runtime/api.js");
+/* harmony import */ var _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(_node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1__);
+// Imports
+
+
+var ___CSS_LOADER_EXPORT___ = _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1___default()((_node_modules_css_loader_dist_runtime_noSourceMaps_js__WEBPACK_IMPORTED_MODULE_0___default()));
+// Module
+___CSS_LOADER_EXPORT___.push([module.id, `/* ─────────────────────────────────────────────────────────────────────────────
+ *  COLORWAY: Gruvbox — Light
+ *  morhetz/gruvbox light palette — warm cream bg (#fbf1c7), dark fg (#3c3836),
+ *  same pastel accent family as Gruvbox Dark.
+ * ───────────────────────────────────────────────────────────────────────────── */
+
+body[data-mode="light"][data-colorway="gruvbox"] {
+  --bg-main: #fbf1c7;
+  --bg-panel: #ebdbb2;
+  --bg-elevated: #f2e5bc;
+  --bg-hover: #d5c4a1;
+  --dropdown-bg: #f2e5bc;
+  --dropdown-hover-bg: #d5c4a1;
+  --bg-input: #ebdbb2;
+  --bg-muted: #d5c4a1;
+  --bg-filter: #f9f0c0;
+  --bg-number-input: #ebdbb2;
+
+  --text-main: #3c3836;
+  --text-bright: #282828;
+  --text-accent: #b57614;
+  --text-heading: #af3a03;
+  --text-price: #5a8a0e;
+  --text-muted: #7c6f64;
+  --text-soft: #928374;
+  --text-dimmed: #a89984;
+
+  --border-main: #d5c4a1;
+  --border-section: #bdae93;
+  --border-card: #bdae93;
+  --border-input: #a89984;
+  --border-subtle: #d5c4a1;
+  --border-hype: #af3a03;
+  --border-hype-hover: #d65d0e;
+
+  --accent-primary: #076678;
+  --accent-primary-hover: #458588;
+  --accent-primary-active: #054b5c;
+  --accent-focus: #076678;
+  --accent-blue-text: #076678;
+  --accent-green: #79740e;
+  --accent-green-bright: #98971a;
+  --accent-teal: #427b58;
+  --accent-gold: #b57614;
+  --accent-gold-hype: #d79921;
+  --accent-red: #cc241d;
+  --accent-red-dark: #9d0006;
+  --accent-red-bg: #f9e0de;
+  --accent-red-border: #cc241d;
+  --accent-red-border-hover: #9d0006;
+  --accent-hype: #af3a03;
+
+  /* Contrast base (referenced by contrast-modifiers) */
+  --accent-teal-base: #427b58;
+  --accent-red-base: #cc241d;
+  --accent-blue-text-base: #076678;
+  --accent-gold-base: #b57614;
+
+  --chat-user-bg: #ebdbb2;
+  --chat-error-bg: #f9e0de;
+  --badge-buy-bg: #e0dba8;
+  --badge-sell-bg: #dde0a0;
+  --badge-hype-bg: #eddca0;
+
+  --modal-backdrop: rgba(0, 0, 0, 0.25);
+  --modal-shadow: rgba(0, 0, 0, 0.15);
+  --scrollbar-thumb: #bdae93;
+  --scrollbar-thumb-hover: #a89984;
+  --link-color: #076678;
+  --add-flip-bg: #d0dca0;
+  --limit-ready-bg: #dae4b0;
+
+  /* Glass helpers */
+  --glass-body-from: #e8dcb0;
+  --glass-body-via: #f0e4c0;
+  --glass-body-to: #e0d4a8;
+  --glass-panel: rgba(251, 241, 199, 0.55);
+  --glass-elevated: rgba(251, 241, 199, 0.65);
+  --glass-hover: rgba(251, 241, 199, 0.70);
+  --glass-input: rgba(251, 241, 199, 0.50);
+  --glass-muted: rgba(251, 241, 199, 0.40);
+  --glass-border-card: rgba(60, 56, 54, 0.12);
+  --glass-border-main: rgba(60, 56, 54, 0.08);
+  --glass-border-section: rgba(60, 56, 54, 0.10);
+  --glass-border-input: rgba(60, 56, 54, 0.15);
+  --glass-scrollbar: rgba(60, 56, 54, 0.10);
+
+  /* Neumorphism helpers */
+  --neu-shadow-dark: #d5c4a1;
+  --neu-shadow-light: #fbf1c7;
+  --neu-accent-shadow: #054b5c;
+
+  /* Skeuomorphism helpers */
+  --skeu-body-from: #ebdbb2;
+  --skeu-body-to: #fbf1c7;
+  --skeu-card-from: #f2e5bc;
+  --skeu-card-mid: #ebdbb2;
+  --skeu-card-to: #e0d4a8;
+  --skeu-card-highlight: #fbf1c7;
+  --skeu-card-shadow-edge: #bdae93;
+  --skeu-header-from: #f2e5bc;
+  --skeu-header-to: #ebdbb2;
+  --skeu-btn-from: #f2e5bc;
+  --skeu-btn-to: #ebdbb2;
+  --skeu-btn-active-from: #076678;
+  --skeu-btn-active-to: #054b5c;
+}
+
+/* (light-mode view-btn.active consolidated — see rule below) */
+`, ""]);
+// Exports
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (___CSS_LOADER_EXPORT___);
+
+
+/***/ },
+
+/***/ "../node_modules/css-loader/dist/cjs.js!./css/themes/colorway-osrs-design-dark.css"
+/*!*****************************************************************************************!*\
+  !*** ../node_modules/css-loader/dist/cjs.js!./css/themes/colorway-osrs-design-dark.css ***!
+  \*****************************************************************************************/
+(module, __webpack_exports__, __webpack_require__) {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var _node_modules_css_loader_dist_runtime_noSourceMaps_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../../node_modules/css-loader/dist/runtime/noSourceMaps.js */ "../node_modules/css-loader/dist/runtime/noSourceMaps.js");
+/* harmony import */ var _node_modules_css_loader_dist_runtime_noSourceMaps_js__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_node_modules_css_loader_dist_runtime_noSourceMaps_js__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../../node_modules/css-loader/dist/runtime/api.js */ "../node_modules/css-loader/dist/runtime/api.js");
+/* harmony import */ var _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(_node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1__);
+// Imports
+
+
+var ___CSS_LOADER_EXPORT___ = _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1___default()((_node_modules_css_loader_dist_runtime_noSourceMaps_js__WEBPACK_IMPORTED_MODULE_0___default()));
+// Module
+___CSS_LOADER_EXPORT___.push([module.id, `/* ─────────────────────────────────────────────────────────────────────────────
+ *  COLORWAY: OSRS Design — Dark
+ *
+ *  Based on the official OSRS Design System (osrs.design/foundations/colors).
+ *  Primary: yellow #FFCF3F, gold #E6A519, brown #694D23, darkBrown #382D1A
+ *  UI: background #2E2C29, border #474745, panel #46433A
+ *  Status: green #00FF00, red #FF0000, blue #0088FF
+ *  Text: yellow #FFCF3F, gold #E6A519, chat cyan #00FFFF
+ * ───────────────────────────────────────────────────────────────────────────── */
+
+body[data-mode="dark"][data-colorway="osrs-design"] {
+  /* ── Backgrounds ─────────────────────── */
+  --bg-main: #2e2c29;
+  --bg-panel: #46433a;
+  --bg-elevated: #524e44;
+  --bg-hover: #5a5648;
+  --dropdown-bg: #524e44;
+  --dropdown-hover-bg: #5a5648;
+  --bg-input: #382d1a;
+  --bg-muted: #3e3a32;
+  --bg-filter: #262420;
+  --bg-number-input: #342e24;
+
+  /* ── Text ────────────────────────────── */
+  --text-main: #ffcf3f;
+  --text-bright: #fff5d0;
+  --text-accent: #00ffff;
+  --text-heading: #e6a519;
+  --text-price: #4ade80;
+  --text-muted: #b8a882;
+  --text-soft: #a89870;
+  --text-dimmed: #7a7060;
+
+  /* ── Borders ─────────────────────────── */
+  --border-main: #474745;
+  --border-section: #555350;
+  --border-card: #5e5c58;
+  --border-input: #6a6860;
+  --border-subtle: #504e48;
+  --border-hype: #806020;
+  --border-hype-hover: #a08830;
+
+  /* ── Primary action ──────────────────── */
+  --accent-primary: #694d23;
+  --accent-primary-hover: #7a5e30;
+  --accent-primary-active: #503a18;
+  --accent-focus: #e6a519;
+
+  /* ── Semantic accents ────────────────── */
+  --accent-blue-text: #0088ff;
+  --accent-green: #40e040;
+  --accent-green-bright: #00cc00;
+  --accent-teal: #00ddcc;
+  --accent-gold: #e6a519;
+  --accent-gold-hype: #ffcf3f;
+  --accent-hype: #ffab40;
+  --accent-red: #ff4444;
+  --accent-red-dark: #cc0000;
+  --accent-red-bg: #3a1a0a;
+  --accent-red-border: #8b3030;
+  --accent-red-border-hover: #a04040;
+
+  /* ── Contrast base (referenced by contrast-modifiers — never self-referencing) */
+  --accent-teal-base: #00ddcc;
+  --accent-red-base: #ff4444;
+  --accent-blue-text-base: #0088ff;
+  --accent-gold-base: #e6a519;
+
+  /* ── Chat ─────────────────────────────── */
+  --chat-user-bg: #4a3e28;
+  --chat-error-bg: #3a1a0a;
+
+  /* ── Badges ──────────────────────────── */
+  --badge-buy-bg: #2a3040;
+  --badge-sell-bg: #1e3a1e;
+  --badge-hype-bg: #3a3010;
+
+  /* ── Modal ───────────────────────────── */
+  --modal-backdrop: rgba(0, 0, 0, 0.7);
+  --modal-shadow: rgba(0, 0, 0, 0.9);
+
+  /* ── Scrollbar ───────────────────────── */
+  --scrollbar-thumb: #6a6860;
+  --scrollbar-thumb-hover: #877a68;
+
+  /* ── Misc ─────────────────────────────── */
+  --link-color: #00ccff;
+  --add-flip-bg: #1a4a1a;
+  --limit-ready-bg: #1a3a1a;
+
+  /* ── Style helper vars (Glass) ───────── */
+  --glass-body-from: #1a1810;
+  --glass-body-via: #282420;
+  --glass-body-to: #1e1c18;
+  --glass-panel: rgba(255, 207, 63, 0.06);
+  --glass-elevated: rgba(255, 207, 63, 0.10);
+  --glass-hover: rgba(255, 207, 63, 0.12);
+  --glass-input: rgba(255, 207, 63, 0.08);
+  --glass-muted: rgba(255, 207, 63, 0.05);
+  --glass-border-card: rgba(230, 165, 25, 0.22);
+  --glass-border-main: rgba(230, 165, 25, 0.12);
+  --glass-border-section: rgba(230, 165, 25, 0.14);
+  --glass-border-input: rgba(230, 165, 25, 0.24);
+  --glass-scrollbar: rgba(230, 165, 25, 0.15);
+
+  /* ── Style helper vars (Neumorphism) ─── */
+  --neu-shadow-dark: #1a1810;
+  --neu-shadow-light: #524e44;
+  --neu-accent-shadow: #503a18;
+
+  /* ── Style helper vars (Skeuomorphism) ── */
+  --skeu-body-from: #201e18;
+  --skeu-body-to: #2e2c29;
+  --skeu-card-from: #564e40;
+  --skeu-card-mid: #46433a;
+  --skeu-card-to: #3e3a32;
+  --skeu-card-highlight: #686050;
+  --skeu-card-shadow-edge: #1a1810;
+  --skeu-header-from: #564e40;
+  --skeu-header-to: #4a4638;
+  --skeu-btn-from: #5a5240;
+  --skeu-btn-to: #4a4230;
+  --skeu-btn-active-from: #694d23;
+  --skeu-btn-active-to: #503a18;
+}
+`, ""]);
+// Exports
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (___CSS_LOADER_EXPORT___);
+
+
+/***/ },
+
+/***/ "../node_modules/css-loader/dist/cjs.js!./css/themes/colorway-osrs-design-light.css"
+/*!******************************************************************************************!*\
+  !*** ../node_modules/css-loader/dist/cjs.js!./css/themes/colorway-osrs-design-light.css ***!
+  \******************************************************************************************/
+(module, __webpack_exports__, __webpack_require__) {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var _node_modules_css_loader_dist_runtime_noSourceMaps_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../../node_modules/css-loader/dist/runtime/noSourceMaps.js */ "../node_modules/css-loader/dist/runtime/noSourceMaps.js");
+/* harmony import */ var _node_modules_css_loader_dist_runtime_noSourceMaps_js__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_node_modules_css_loader_dist_runtime_noSourceMaps_js__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../../node_modules/css-loader/dist/runtime/api.js */ "../node_modules/css-loader/dist/runtime/api.js");
+/* harmony import */ var _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(_node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1__);
+// Imports
+
+
+var ___CSS_LOADER_EXPORT___ = _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1___default()((_node_modules_css_loader_dist_runtime_noSourceMaps_js__WEBPACK_IMPORTED_MODULE_0___default()));
+// Module
+___CSS_LOADER_EXPORT___.push([module.id, `/* ─────────────────────────────────────────────────────────────────────────────
+ *  COLORWAY: OSRS Design — Light
+ *
+ *  Light-mode adaptation of the OSRS Design System palette.
+ *  Warm parchment backgrounds with deep brown/gold text and accents.
+ * ───────────────────────────────────────────────────────────────────────────── */
+
+body[data-mode="light"][data-colorway="osrs-design"] {
+  /* ── Backgrounds ─────────────────────── */
+  --bg-main: #f8f0dc;
+  --bg-panel: #fff8e8;
+  --bg-elevated: #fdf4e0;
+  --bg-hover: #f0e6cc;
+  --dropdown-bg: #fdf4e0;
+  --dropdown-hover-bg: #f0e6cc;
+  --bg-input: #f2e8d0;
+  --bg-muted: #eadfc4;
+  --bg-filter: #f4ecd4;
+  --bg-number-input: #f2e8d0;
+
+  /* ── Text ────────────────────────────── */
+  --text-main: #382d1a;
+  --text-bright: #0f0f0f;
+  --text-accent: #694d23;
+  --text-heading: #8a5e0a;
+  --text-price: #1a7a1a;
+  --text-muted: #7a6a4a;
+  --text-soft: #9a8a68;
+  --text-dimmed: #baa880;
+
+  /* ── Borders ─────────────────────────── */
+  --border-main: #d8c8a4;
+  --border-section: #d0be96;
+  --border-card: #c8b68a;
+  --border-input: #c0ae80;
+  --border-subtle: #e0d2b0;
+  --border-hype: #d4a520;
+  --border-hype-hover: #b8920a;
+
+  /* ── Primary action ──────────────────── */
+  --accent-primary: #694d23;
+  --accent-primary-hover: #7a5e30;
+  --accent-primary-active: #503a18;
+  --accent-focus: #e6a519;
+
+  /* ── Semantic accents ────────────────── */
+  --accent-blue-text: #0066cc;
+  --accent-green: #228b22;
+  --accent-green-bright: #1a7a1a;
+  --accent-teal: #1a8a7a;
+  --accent-gold: #c89000;
+  --accent-gold-hype: #b07808;
+  --accent-red: #cc2222;
+  --accent-red-dark: #990000;
+  --accent-red-bg: #fff0e8;
+  --accent-red-border: #e0a090;
+  --accent-red-border-hover: #d08070;
+  --accent-hype: #c87e10;
+
+  /* ── Contrast base (referenced by contrast-modifiers — never self-referencing) */
+  --accent-teal-base: #1a8a7a;
+  --accent-red-base: #cc2222;
+  --accent-blue-text-base: #0066cc;
+  --accent-gold-base: #c89000;
+
+  /* ── Chat ─────────────────────────────── */
+  --chat-user-bg: #f8eed0;
+  --chat-error-bg: #fff0e8;
+
+  /* ── Badges ──────────────────────────── */
+  --badge-buy-bg: #e0eaf0;
+  --badge-sell-bg: #d8f0d0;
+  --badge-hype-bg: #f8f0c8;
+
+  /* ── Modal ───────────────────────────── */
+  --modal-backdrop: rgba(0, 0, 0, 0.25);
+  --modal-shadow: rgba(0, 0, 0, 0.15);
+
+  /* ── Scrollbar ───────────────────────── */
+  --scrollbar-thumb: #c0ae80;
+  --scrollbar-thumb-hover: #a09068;
+
+  /* ── Misc ─────────────────────────────── */
+  --link-color: #694d23;
+  --add-flip-bg: #d0ecc0;
+  --limit-ready-bg: #d8f0d0;
+
+  /* ── Style helper vars (Glass) ───────── */
+  --glass-body-from: #e8dcc0;
+  --glass-body-via: #f0e4cc;
+  --glass-body-to: #e0d4b0;
+  --glass-panel: rgba(255, 248, 232, 0.55);
+  --glass-elevated: rgba(255, 248, 232, 0.65);
+  --glass-hover: rgba(255, 248, 232, 0.70);
+  --glass-input: rgba(255, 248, 232, 0.50);
+  --glass-muted: rgba(255, 248, 232, 0.40);
+  --glass-border-card: rgba(105, 77, 35, 0.15);
+  --glass-border-main: rgba(105, 77, 35, 0.08);
+  --glass-border-section: rgba(105, 77, 35, 0.10);
+  --glass-border-input: rgba(105, 77, 35, 0.18);
+  --glass-scrollbar: rgba(105, 77, 35, 0.12);
+
+  /* ── Style helper vars (Neumorphism) ─── */
+  --neu-shadow-dark: #c8b890;
+  --neu-shadow-light: #fff8ea;
+  --neu-accent-shadow: #503a18;
+
+  /* ── Style helper vars (Skeuomorphism) ── */
+  --skeu-body-from: #e4d8b8;
+  --skeu-body-to: #f8f0dc;
+  --skeu-card-from: #fff8e8;
+  --skeu-card-mid: #fdf4e0;
+  --skeu-card-to: #f4ecd4;
+  --skeu-card-highlight: #fff8ea;
+  --skeu-card-shadow-edge: #c0ae80;
+  --skeu-header-from: #fdf4e0;
+  --skeu-header-to: #f4ecd4;
+  --skeu-btn-from: #f8f0dc;
+  --skeu-btn-to: #eadfc4;
+  --skeu-btn-active-from: #694d23;
+  --skeu-btn-active-to: #503a18;
+}
+
+/* (light-mode view-btn.active consolidated — see light-mode-overrides.css) */
+`, ""]);
+// Exports
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (___CSS_LOADER_EXPORT___);
+
+
+/***/ },
+
+/***/ "../node_modules/css-loader/dist/cjs.js!./css/themes/colorway-rs-lobby-dark.css"
+/*!**************************************************************************************!*\
+  !*** ../node_modules/css-loader/dist/cjs.js!./css/themes/colorway-rs-lobby-dark.css ***!
+  \**************************************************************************************/
+(module, __webpack_exports__, __webpack_require__) {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var _node_modules_css_loader_dist_runtime_noSourceMaps_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../../node_modules/css-loader/dist/runtime/noSourceMaps.js */ "../node_modules/css-loader/dist/runtime/noSourceMaps.js");
+/* harmony import */ var _node_modules_css_loader_dist_runtime_noSourceMaps_js__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_node_modules_css_loader_dist_runtime_noSourceMaps_js__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../../node_modules/css-loader/dist/runtime/api.js */ "../node_modules/css-loader/dist/runtime/api.js");
+/* harmony import */ var _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(_node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1__);
+// Imports
+
+
+var ___CSS_LOADER_EXPORT___ = _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1___default()((_node_modules_css_loader_dist_runtime_noSourceMaps_js__WEBPACK_IMPORTED_MODULE_0___default()));
+// Module
+___CSS_LOADER_EXPORT___.push([module.id, `/* ─────────────────────────────────────────────────────────────────────────────
+ *  COLORWAY: RS Lobby — Dark
+ *  Inspired by the RuneScape in-game lobby UI — warm parchment browns,
+ *  gold accents, ridge-border aesthetic. A blend of OSRS + RS3 Modern.
+ * ───────────────────────────────────────────────────────────────────────────── */
+
+body[data-mode="dark"][data-colorway="rs-lobby"] {
+  --bg-main: #1a140f;
+  --bg-panel: #2a221b;
+  --bg-elevated: #3e3529;
+  --bg-hover: #4a3e30;
+  --dropdown-bg: #3e3529;
+  --dropdown-hover-bg: #4a3e30;
+  --bg-input: #1a1510;
+  --bg-muted: #2a221b;
+  --bg-filter: #15100c;
+  --bg-number-input: #1a1510;
+
+  --text-main: #bdae95;
+  --text-bright: #e0e0e0;
+  --text-accent: #c8b07a;
+  --text-heading: #eddca8;
+  --text-price: #6bba48;
+  --text-muted: #8a7a68;
+  --text-soft: #a39682;
+  --text-dimmed: #5a4e3d;
+
+  --border-main: #4a3e30;
+  --border-section: #3a3228;
+  --border-card: #5a4e3d;
+  --border-input: #5a4a38;
+  --border-subtle: #3e3224;
+  --border-hype: #806830;
+  --border-hype-hover: #a08840;
+
+  --accent-primary: #7a654c;
+  --accent-primary-hover: #96805c;
+  --accent-primary-active: #5a4830;
+  --accent-focus: #c8b07a;
+  --accent-blue-text: #7192bc;
+  --accent-green: #539e30;
+  --accent-green-bright: #6bba48;
+  --accent-teal: #7192bc;
+  --accent-gold: #c8b07a;
+  --accent-gold-hype: #d98d26;
+  --accent-red: #a32222;
+  --accent-red-dark: #7a1818;
+  --accent-red-bg: #2a1510;
+  --accent-red-border: #8a3030;
+  --accent-red-border-hover: #a84040;
+  --accent-hype: #d98d26;
+
+  /* Contrast base (referenced by contrast-modifiers) */
+  --accent-teal-base: #7192bc;
+  --accent-red-base: #a32222;
+  --accent-blue-text-base: #7192bc;
+  --accent-gold-base: #c8b07a;
+
+  --chat-user-bg: #3a3020;
+  --chat-error-bg: #2a1510;
+  --badge-buy-bg: #2a2818;
+  --badge-sell-bg: #1e3010;
+  --badge-hype-bg: #3a3010;
+
+  --modal-backdrop: rgba(0, 0, 0, 0.75);
+  --modal-shadow: rgba(0, 0, 0, 0.9);
+  --scrollbar-thumb: #5a4a38;
+  --scrollbar-thumb-hover: #7a654c;
+  --link-color: #c8b07a;
+  --add-flip-bg: #2a3a1a;
+  --limit-ready-bg: #1e2a14;
+
+  /* Glass helpers */
+  --glass-body-from: #100c08;
+  --glass-body-via: #1a140f;
+  --glass-body-to: #150f0a;
+  --glass-panel: rgba(200, 176, 122, 0.06);
+  --glass-elevated: rgba(200, 176, 122, 0.10);
+  --glass-hover: rgba(200, 176, 122, 0.12);
+  --glass-input: rgba(200, 176, 122, 0.08);
+  --glass-muted: rgba(200, 176, 122, 0.05);
+  --glass-border-card: rgba(200, 176, 122, 0.18);
+  --glass-border-main: rgba(200, 176, 122, 0.10);
+  --glass-border-section: rgba(200, 176, 122, 0.12);
+  --glass-border-input: rgba(200, 176, 122, 0.20);
+  --glass-scrollbar: rgba(200, 176, 122, 0.14);
+
+  /* Neumorphism helpers */
+  --neu-shadow-dark: #100c08;
+  --neu-shadow-light: #4a3e30;
+  --neu-accent-shadow: #5a4830;
+
+  /* Skeuomorphism helpers */
+  --skeu-body-from: #15100c;
+  --skeu-body-to: #2a221b;
+  --skeu-card-from: #4a3e30;
+  --skeu-card-mid: #3e3529;
+  --skeu-card-to: #2a221b;
+  --skeu-card-highlight: #5a4e3d;
+  --skeu-card-shadow-edge: #100c08;
+  --skeu-header-from: #4a3e30;
+  --skeu-header-to: #3a3228;
+  --skeu-btn-from: #506270;
+  --skeu-btn-to: #34414a;
+  --skeu-btn-active-from: #c8b07a;
+  --skeu-btn-active-to: #96805c;
+}`, ""]);
+// Exports
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (___CSS_LOADER_EXPORT___);
+
+
+/***/ },
+
+/***/ "../node_modules/css-loader/dist/cjs.js!./css/themes/colorway-rs-lobby-light.css"
+/*!***************************************************************************************!*\
+  !*** ../node_modules/css-loader/dist/cjs.js!./css/themes/colorway-rs-lobby-light.css ***!
+  \***************************************************************************************/
+(module, __webpack_exports__, __webpack_require__) {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var _node_modules_css_loader_dist_runtime_noSourceMaps_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../../node_modules/css-loader/dist/runtime/noSourceMaps.js */ "../node_modules/css-loader/dist/runtime/noSourceMaps.js");
+/* harmony import */ var _node_modules_css_loader_dist_runtime_noSourceMaps_js__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_node_modules_css_loader_dist_runtime_noSourceMaps_js__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../../node_modules/css-loader/dist/runtime/api.js */ "../node_modules/css-loader/dist/runtime/api.js");
+/* harmony import */ var _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(_node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1__);
+// Imports
+
+
+var ___CSS_LOADER_EXPORT___ = _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1___default()((_node_modules_css_loader_dist_runtime_noSourceMaps_js__WEBPACK_IMPORTED_MODULE_0___default()));
+// Module
+___CSS_LOADER_EXPORT___.push([module.id, `/* ─────────────────────────────────────────────────────────────────────────────
+ *  COLORWAY: RS Lobby — Light
+ *  Light-mode counterpart: warm cream/parchment base with gold highlights.
+ * ───────────────────────────────────────────────────────────────────────────── */
+
+body[data-mode="light"][data-colorway="rs-lobby"] {
+  --bg-main: #f2ece2;
+  --bg-panel: #faf6ee;
+  --bg-elevated: #f6f0e6;
+  --bg-hover: #ece4d6;
+  --dropdown-bg: #f6f0e6;
+  --dropdown-hover-bg: #ece4d6;
+  --bg-input: #eae2d4;
+  --bg-muted: #e0d8c8;
+  --bg-filter: #f0e8da;
+  --bg-number-input: #eae2d4;
+
+  --text-main: #3e3529;
+  --text-bright: #1a140f;
+  --text-accent: #8b6914;
+  --text-heading: #6b5010;
+  --text-price: #2a7a1a;
+  --text-muted: #7a6d5a;
+  --text-soft: #8a7e6c;
+  --text-dimmed: #b0a490;
+
+  --border-main: #d4c8b4;
+  --border-section: #c8bca8;
+  --border-card: #c0b49e;
+  --border-input: #b8ac96;
+  --border-subtle: #dcd0bc;
+  --border-hype: #c09020;
+  --border-hype-hover: #a07a10;
+
+  --accent-primary: #8b6914;
+  --accent-primary-hover: #a07a20;
+  --accent-primary-active: #6b5010;
+  --accent-focus: #8b6914;
+  --accent-blue-text: #506070;
+  --accent-green: #3a8a28;
+  --accent-green-bright: #2a7a1a;
+  --accent-teal: #4a7a6a;
+  --accent-gold: #c09020;
+  --accent-gold-hype: #a07a10;
+  --accent-red: #a32222;
+  --accent-red-dark: #7a1818;
+  --accent-red-bg: #fff0ec;
+  --accent-red-border: #d8a0a0;
+  --accent-red-border-hover: #c88080;
+  --accent-hype: #c88020;
+
+  /* Contrast base (referenced by contrast-modifiers) */
+  --accent-teal-base: #4a7a6a;
+  --accent-red-base: #a32222;
+  --accent-blue-text-base: #506070;
+  --accent-gold-base: #c09020;
+
+  --chat-user-bg: #f0e8d4;
+  --chat-error-bg: #fff0ec;
+  --badge-buy-bg: #e8e0ce;
+  --badge-sell-bg: #dcf0dc;
+  --badge-hype-bg: #f8f0d0;
+
+  --modal-backdrop: rgba(0, 0, 0, 0.25);
+  --modal-shadow: rgba(0, 0, 0, 0.15);
+  --scrollbar-thumb: #c0b49e;
+  --scrollbar-thumb-hover: #a09480;
+  --link-color: #8b6914;
+  --add-flip-bg: #d0e8c0;
+  --limit-ready-bg: #daf0d0;
+
+  /* Glass helpers */
+  --glass-body-from: #e0d8c8;
+  --glass-body-via: #ece4d6;
+  --glass-body-to: #d8ceb8;
+  --glass-panel: rgba(250, 244, 230, 0.55);
+  --glass-elevated: rgba(250, 244, 230, 0.65);
+  --glass-hover: rgba(250, 244, 230, 0.70);
+  --glass-input: rgba(250, 244, 230, 0.50);
+  --glass-muted: rgba(250, 244, 230, 0.40);
+  --glass-border-card: rgba(139, 105, 20, 0.14);
+  --glass-border-main: rgba(139, 105, 20, 0.08);
+  --glass-border-section: rgba(139, 105, 20, 0.10);
+  --glass-border-input: rgba(139, 105, 20, 0.16);
+  --glass-scrollbar: rgba(139, 105, 20, 0.12);
+
+  /* Neumorphism helpers */
+  --neu-shadow-dark: #c8bca8;
+  --neu-shadow-light: #ffffff;
+  --neu-accent-shadow: #6b5010;
+
+  /* Skeuomorphism helpers */
+  --skeu-body-from: #e0d8c8;
+  --skeu-body-to: #f2ece2;
+  --skeu-card-from: #faf6ee;
+  --skeu-card-mid: #f6f0e6;
+  --skeu-card-to: #ece4d6;
+  --skeu-card-highlight: #ffffff;
+  --skeu-card-shadow-edge: #b8ac96;
+  --skeu-header-from: #f6f0e6;
+  --skeu-header-to: #ece4d6;
+  --skeu-btn-from: #f2ece2;
+  --skeu-btn-to: #e0d8c8;
+  --skeu-btn-active-from: #8b6914;
+  --skeu-btn-active-to: #6b5010;
+}
+
+/* (light-mode view-btn.active consolidated — see below contrast modifiers) */
+`, ""]);
+// Exports
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (___CSS_LOADER_EXPORT___);
+
+
+/***/ },
+
+/***/ "../node_modules/css-loader/dist/cjs.js!./css/themes/colorway-rs3-modern-dark.css"
+/*!****************************************************************************************!*\
+  !*** ../node_modules/css-loader/dist/cjs.js!./css/themes/colorway-rs3-modern-dark.css ***!
+  \****************************************************************************************/
+(module, __webpack_exports__, __webpack_require__) {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var _node_modules_css_loader_dist_runtime_noSourceMaps_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../../node_modules/css-loader/dist/runtime/noSourceMaps.js */ "../node_modules/css-loader/dist/runtime/noSourceMaps.js");
+/* harmony import */ var _node_modules_css_loader_dist_runtime_noSourceMaps_js__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_node_modules_css_loader_dist_runtime_noSourceMaps_js__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../../node_modules/css-loader/dist/runtime/api.js */ "../node_modules/css-loader/dist/runtime/api.js");
+/* harmony import */ var _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(_node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1__);
+// Imports
+
+
+var ___CSS_LOADER_EXPORT___ = _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1___default()((_node_modules_css_loader_dist_runtime_noSourceMaps_js__WEBPACK_IMPORTED_MODULE_0___default()));
+// Module
+___CSS_LOADER_EXPORT___.push([module.id, `/* ─────────────────────────────────────────────────────────────────────────────
+ *  COLORWAY: RS3 Modern — Dark
+ * ───────────────────────────────────────────────────────────────────────────── */
+
+body[data-mode="dark"][data-colorway="rs3-modern"] {
+  --bg-main: #0f1722;
+  --bg-panel: #1c2836;
+  --bg-elevated: #1e2d3e;
+  --bg-hover: #243548;
+  --dropdown-bg: #1e2d3e;
+  --dropdown-hover-bg: #243548;
+  --bg-input: #1a2a3a;
+  --bg-muted: #1c2836;
+  --bg-filter: #141f2d;
+  --bg-number-input: #162030;
+
+  --text-main: #e6f0fa;
+  --text-bright: #ffffff;
+  --text-accent: #7dd3fc;
+  --text-heading: #38bdf8;
+  --text-price: #4ade80;
+  --text-muted: #7494b0;
+  --text-soft: #90adc4;
+  --text-dimmed: #4a6580;
+
+  --border-main: #2a3f54;
+  --border-section: #1e3450;
+  --border-card: #3a5068;
+  --border-input: #3a5570;
+  --border-subtle: #2a4060;
+  --border-hype: #5a5a1e;
+  --border-hype-hover: #808030;
+
+  --accent-primary: #00a8ff;
+  --accent-primary-hover: #33bbff;
+  --accent-primary-active: #0080cc;
+  --accent-focus: #00a8ff;
+  --accent-blue-text: #7dd3fc;
+  --accent-green: #4ade80;
+  --accent-green-bright: #22c55e;
+  --accent-teal: #2dd4bf;
+  --accent-gold: #fbbf24;
+  --accent-gold-hype: #f59e0b;
+  --accent-red: #f87171;
+  --accent-red-dark: #ef4444;
+  --accent-red-bg: #2a1515;
+  --accent-red-border: #7f1d1d;
+  --accent-red-border-hover: #991b1b;
+  --accent-hype: #ffab40;
+
+  /* Contrast base (referenced by contrast-modifiers) */
+  --accent-teal-base: #2dd4bf;
+  --accent-red-base: #f87171;
+  --accent-blue-text-base: #7dd3fc;
+  --accent-gold-base: #fbbf24;
+
+  --chat-user-bg: #0c3a6e;
+  --chat-error-bg: #2a1515;
+  --badge-buy-bg: #0c2d4a;
+  --badge-sell-bg: #0c3a1e;
+  --badge-hype-bg: #3a3010;
+
+  --modal-backdrop: rgba(0, 0, 0, 0.75);
+  --modal-shadow: rgba(0, 0, 0, 0.9);
+  --scrollbar-thumb: #3a5570;
+  --scrollbar-thumb-hover: #4a7090;
+  --link-color: #7dd3fc;
+  --add-flip-bg: #0d5a2a;
+  --limit-ready-bg: #0d2a1a;
+
+  /* Glass helpers */
+  --glass-body-from: #060e18;
+  --glass-body-via: #0a1828;
+  --glass-body-to: #0a1020;
+  --glass-panel: rgba(120, 180, 255, 0.06);
+  --glass-elevated: rgba(120, 180, 255, 0.10);
+  --glass-hover: rgba(120, 180, 255, 0.12);
+  --glass-input: rgba(120, 180, 255, 0.08);
+  --glass-muted: rgba(120, 180, 255, 0.05);
+  --glass-border-card: rgba(100, 180, 255, 0.20);
+  --glass-border-main: rgba(100, 180, 255, 0.10);
+  --glass-border-section: rgba(100, 180, 255, 0.12);
+  --glass-border-input: rgba(100, 180, 255, 0.22);
+  --glass-scrollbar: rgba(100, 180, 255, 0.15);
+
+  /* Neumorphism helpers */
+  --neu-shadow-dark: #080e18;
+  --neu-shadow-light: #2a3a4e;
+  --neu-accent-shadow: #0080cc;
+
+  /* Skeuomorphism helpers */
+  --skeu-body-from: #080e18;
+  --skeu-body-to: #0f1722;
+  --skeu-card-from: #243040;
+  --skeu-card-mid: #1c2836;
+  --skeu-card-to: #141e2c;
+  --skeu-card-highlight: #3a5068;
+  --skeu-card-shadow-edge: #080e18;
+  --skeu-header-from: #243040;
+  --skeu-header-to: #1c2836;
+  --skeu-btn-from: #243548;
+  --skeu-btn-to: #1a2a3a;
+  --skeu-btn-active-from: #00a8ff;
+  --skeu-btn-active-to: #0080cc;
+}`, ""]);
+// Exports
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (___CSS_LOADER_EXPORT___);
+
+
+/***/ },
+
+/***/ "../node_modules/css-loader/dist/cjs.js!./css/themes/colorway-rs3-modern-light.css"
+/*!*****************************************************************************************!*\
+  !*** ../node_modules/css-loader/dist/cjs.js!./css/themes/colorway-rs3-modern-light.css ***!
+  \*****************************************************************************************/
+(module, __webpack_exports__, __webpack_require__) {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var _node_modules_css_loader_dist_runtime_noSourceMaps_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../../node_modules/css-loader/dist/runtime/noSourceMaps.js */ "../node_modules/css-loader/dist/runtime/noSourceMaps.js");
+/* harmony import */ var _node_modules_css_loader_dist_runtime_noSourceMaps_js__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_node_modules_css_loader_dist_runtime_noSourceMaps_js__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../../node_modules/css-loader/dist/runtime/api.js */ "../node_modules/css-loader/dist/runtime/api.js");
+/* harmony import */ var _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(_node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1__);
+// Imports
+
+
+var ___CSS_LOADER_EXPORT___ = _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1___default()((_node_modules_css_loader_dist_runtime_noSourceMaps_js__WEBPACK_IMPORTED_MODULE_0___default()));
+// Module
+___CSS_LOADER_EXPORT___.push([module.id, `/* ─────────────────────────────────────────────────────────────────────────────
+ *  COLORWAY: RS3 Modern — Light
+ * ───────────────────────────────────────────────────────────────────────────── */
+
+body[data-mode="light"][data-colorway="rs3-modern"] {
+  --bg-main: #eef4fa;
+  --bg-panel: #f8fbff;
+  --bg-elevated: #f4f8fd;
+  --bg-hover: #e6eef6;
+  --dropdown-bg: #f4f8fd;
+  --dropdown-hover-bg: #e6eef6;
+  --bg-input: #e8f0f8;
+  --bg-muted: #dce8f2;
+  --bg-filter: #eaf2fa;
+  --bg-number-input: #e8f0f8;
+
+  --text-main: #1a2a3a;
+  --text-bright: #0a1420;
+  --text-accent: #0078d4;
+  --text-heading: #0060b0;
+  --text-price: #1a8a2a;
+  --text-muted: #5a7a94;
+  --text-soft: #7a94aa;
+  --text-dimmed: #a0b4c4;
+
+  --border-main: #d0dce8;
+  --border-section: #c8d8e8;
+  --border-card: #c0d0e0;
+  --border-input: #b8cad8;
+  --border-subtle: #dce8f2;
+  --border-hype: #d4a520;
+  --border-hype-hover: #b8920a;
+
+  --accent-primary: #0078d4;
+  --accent-primary-hover: #1888e0;
+  --accent-primary-active: #0060b0;
+  --accent-focus: #0078d4;
+  --accent-blue-text: #0078d4;
+  --accent-green: #248a3d;
+  --accent-green-bright: #1a7a2e;
+  --accent-teal: #1a8a7a;
+  --accent-gold: #d4a520;
+  --accent-gold-hype: #c09010;
+  --accent-red: #d13438;
+  --accent-red-dark: #a4262c;
+  --accent-red-bg: #fff0f0;
+  --accent-red-border: #e0a0a0;
+  --accent-red-border-hover: #d08080;
+  --accent-hype: #e08a00;
+
+  /* Contrast base (referenced by contrast-modifiers) */
+  --accent-teal-base: #1a8a7a;
+  --accent-red-base: #d13438;
+  --accent-blue-text-base: #0078d4;
+  --accent-gold-base: #d4a520;
+
+  --chat-user-bg: #dcecff;
+  --chat-error-bg: #fff0f0;
+  --badge-buy-bg: #dceaff;
+  --badge-sell-bg: #dcf4dc;
+  --badge-hype-bg: #fff8e0;
+
+  --modal-backdrop: rgba(0, 0, 0, 0.25);
+  --modal-shadow: rgba(0, 0, 0, 0.15);
+  --scrollbar-thumb: #b8cad8;
+  --scrollbar-thumb-hover: #98aec0;
+  --link-color: #0078d4;
+  --add-flip-bg: #d0f0d0;
+  --limit-ready-bg: #daf4da;
+
+  /* Glass helpers */
+  --glass-body-from: #d8e4f0;
+  --glass-body-via: #e4eef6;
+  --glass-body-to: #d0dce8;
+  --glass-panel: rgba(240, 248, 255, 0.55);
+  --glass-elevated: rgba(240, 248, 255, 0.65);
+  --glass-hover: rgba(240, 248, 255, 0.70);
+  --glass-input: rgba(240, 248, 255, 0.50);
+  --glass-muted: rgba(240, 248, 255, 0.40);
+  --glass-border-card: rgba(0, 120, 212, 0.12);
+  --glass-border-main: rgba(0, 120, 212, 0.08);
+  --glass-border-section: rgba(0, 120, 212, 0.10);
+  --glass-border-input: rgba(0, 120, 212, 0.15);
+  --glass-scrollbar: rgba(0, 120, 212, 0.10);
+
+  /* Neumorphism helpers */
+  --neu-shadow-dark: #c0d0e0;
+  --neu-shadow-light: #ffffff;
+  --neu-accent-shadow: #0060b0;
+
+  /* Skeuomorphism helpers */
+  --skeu-body-from: #dce8f2;
+  --skeu-body-to: #eef4fa;
+  --skeu-card-from: #f8fbff;
+  --skeu-card-mid: #f4f8fd;
+  --skeu-card-to: #eaf2fa;
+  --skeu-card-highlight: #ffffff;
+  --skeu-card-shadow-edge: #b8cad8;
+  --skeu-header-from: #f4f8fd;
+  --skeu-header-to: #eaf2fa;
+  --skeu-btn-from: #eef4fa;
+  --skeu-btn-to: #dce8f2;
+  --skeu-btn-active-from: #0078d4;
+  --skeu-btn-active-to: #0060b0;
+}
+
+/* (light-mode view-btn.active consolidated — see below contrast modifiers) */
+`, ""]);
+// Exports
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (___CSS_LOADER_EXPORT___);
+
+
+/***/ },
+
+/***/ "../node_modules/css-loader/dist/cjs.js!./css/themes/colorway-solarized-dark.css"
+/*!***************************************************************************************!*\
+  !*** ../node_modules/css-loader/dist/cjs.js!./css/themes/colorway-solarized-dark.css ***!
+  \***************************************************************************************/
+(module, __webpack_exports__, __webpack_require__) {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var _node_modules_css_loader_dist_runtime_noSourceMaps_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../../node_modules/css-loader/dist/runtime/noSourceMaps.js */ "../node_modules/css-loader/dist/runtime/noSourceMaps.js");
+/* harmony import */ var _node_modules_css_loader_dist_runtime_noSourceMaps_js__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_node_modules_css_loader_dist_runtime_noSourceMaps_js__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../../node_modules/css-loader/dist/runtime/api.js */ "../node_modules/css-loader/dist/runtime/api.js");
+/* harmony import */ var _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(_node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1__);
+// Imports
+
+
+var ___CSS_LOADER_EXPORT___ = _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1___default()((_node_modules_css_loader_dist_runtime_noSourceMaps_js__WEBPACK_IMPORTED_MODULE_0___default()));
+// Module
+___CSS_LOADER_EXPORT___.push([module.id, `/* ─────────────────────────────────────────────────────────────────────────────
+ *  COLORWAY: Solarized — Dark
+ * ───────────────────────────────────────────────────────────────────────────── */
+
+body[data-mode="dark"][data-colorway="solarized"] {
+  --bg-main: #002b36;
+  --bg-panel: #073642;
+  --bg-elevated: #0a3f4c;
+  --bg-hover: #0e4756;
+  --dropdown-bg: #0a3f4c;
+  --dropdown-hover-bg: #0e4756;
+  --bg-input: #0a3f4c;
+  --bg-muted: #06313b;
+  --bg-filter: #002830;
+  --bg-number-input: #0a3a48;
+
+  --text-main: #93a1a1;
+  --text-bright: #fdf6e3;
+  --text-accent: #268bd2;
+  --text-heading: #b58900;
+  --text-price: #a0b800;
+  --text-muted: #839496;
+  --text-soft: #78909a;
+  --text-dimmed: #586e75;
+
+  --border-main: #0a4050;
+  --border-section: #0d4a58;
+  --border-card: #11546a;
+  --border-input: #175468;
+  --border-subtle: #0a4050;
+  --border-hype: #6b5a1e;
+  --border-hype-hover: #a08830;
+
+  --accent-primary: #268bd2;
+  --accent-primary-hover: #2e9ce6;
+  --accent-primary-active: #1a6daa;
+  --accent-focus: #268bd2;
+  --accent-blue-text: #268bd2;
+  --accent-green: #859900;
+  --accent-green-bright: #a0b800;
+  --accent-teal: #2aa198;
+  --accent-gold: #b58900;
+  --accent-gold-hype: #cb9a00;
+  --accent-red: #dc322f;
+  --accent-red-dark: #b02828;
+  --accent-red-bg: #2a1516;
+  --accent-red-border: #5a2020;
+  --accent-red-border-hover: #8a3030;
+  --accent-hype: #cb8b16;
+
+  /* Contrast base (referenced by contrast-modifiers) */
+  --accent-teal-base: #2aa198;
+  --accent-red-base: #dc322f;
+  --accent-blue-text-base: #268bd2;
+  --accent-gold-base: #b58900;
+
+  --chat-user-bg: #0a3a50;
+  --chat-error-bg: #2a1012;
+  --badge-buy-bg: #073a42;
+  --badge-sell-bg: #0a3a18;
+  --badge-hype-bg: #3a3010;
+
+  --modal-backdrop: rgba(0, 0, 0, 0.6);
+  --modal-shadow: rgba(0, 0, 0, 0.8);
+  --scrollbar-thumb: #1a5868;
+  --scrollbar-thumb-hover: #268090;
+  --link-color: #268bd2;
+  --add-flip-bg: #1a4a10;
+  --limit-ready-bg: #0a2a10;
+
+  /* Glass helpers */
+  --glass-body-from: #001820;
+  --glass-body-via: #002030;
+  --glass-body-to: #00182a;
+  --glass-panel: rgba(7, 54, 66, 0.60);
+  --glass-elevated: rgba(7, 54, 66, 0.70);
+  --glass-hover: rgba(14, 71, 86, 0.70);
+  --glass-input: rgba(7, 54, 66, 0.50);
+  --glass-muted: rgba(7, 54, 66, 0.40);
+  --glass-border-card: rgba(38, 139, 210, 0.20);
+  --glass-border-main: rgba(38, 139, 210, 0.10);
+  --glass-border-section: rgba(38, 139, 210, 0.14);
+  --glass-border-input: rgba(38, 139, 210, 0.22);
+  --glass-scrollbar: rgba(38, 139, 210, 0.18);
+
+  /* Neumorphism helpers */
+  --neu-shadow-dark: #001a22;
+  --neu-shadow-light: #0d4a58;
+  --neu-accent-shadow: #1a6daa;
+
+  /* Skeuomorphism helpers */
+  --skeu-body-from: #001a22;
+  --skeu-body-to: #002b36;
+  --skeu-card-from: #0a4050;
+  --skeu-card-mid: #073642;
+  --skeu-card-to: #053038;
+  --skeu-card-highlight: #0e4756;
+  --skeu-card-shadow-edge: #001a22;
+  --skeu-header-from: #0a4050;
+  --skeu-header-to: #073642;
+  --skeu-btn-from: #0d4a58;
+  --skeu-btn-to: #073642;
+  --skeu-btn-active-from: #268bd2;
+  --skeu-btn-active-to: #1a6daa;
+}
+`, ""]);
+// Exports
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (___CSS_LOADER_EXPORT___);
+
+
+/***/ },
+
+/***/ "../node_modules/css-loader/dist/cjs.js!./css/themes/colorway-solarized-light.css"
+/*!****************************************************************************************!*\
+  !*** ../node_modules/css-loader/dist/cjs.js!./css/themes/colorway-solarized-light.css ***!
+  \****************************************************************************************/
+(module, __webpack_exports__, __webpack_require__) {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var _node_modules_css_loader_dist_runtime_noSourceMaps_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../../node_modules/css-loader/dist/runtime/noSourceMaps.js */ "../node_modules/css-loader/dist/runtime/noSourceMaps.js");
+/* harmony import */ var _node_modules_css_loader_dist_runtime_noSourceMaps_js__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_node_modules_css_loader_dist_runtime_noSourceMaps_js__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../../node_modules/css-loader/dist/runtime/api.js */ "../node_modules/css-loader/dist/runtime/api.js");
+/* harmony import */ var _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(_node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1__);
+// Imports
+
+
+var ___CSS_LOADER_EXPORT___ = _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1___default()((_node_modules_css_loader_dist_runtime_noSourceMaps_js__WEBPACK_IMPORTED_MODULE_0___default()));
+// Module
+___CSS_LOADER_EXPORT___.push([module.id, `/* ─────────────────────────────────────────────────────────────────────────────
+ *  COLORWAY: Solarized — Light
+ * ───────────────────────────────────────────────────────────────────────────── */
+
+body[data-mode="light"][data-colorway="solarized"] {
+  --bg-main: #e6dec8;
+  --bg-panel: #f0e9d6;
+  --bg-elevated: #f5efdc;
+  --bg-hover: #e4dbc4;
+  --dropdown-bg: #f5efdc;
+  --dropdown-hover-bg: #e4dbc4;
+  --bg-input: #e8e0cc;
+  --bg-muted: #ddd4b8;
+  --bg-filter: #e4dcc8;
+  --bg-number-input: #e8e0cc;
+
+  --text-main: #586e75;
+  --text-bright: #073642;
+  --text-accent: #268bd2;
+  --text-heading: #946e00;
+  --text-price: #4a7a0a;
+  --text-muted: #6e8088;
+  --text-soft: #78888c;
+  --text-dimmed: #93a1a1;
+
+  --border-main: #d6ccb0;
+  --border-section: #cfc4a8;
+  --border-card: #c8bc9e;
+  --border-input: #c0b498;
+  --border-subtle: #ddd4ba;
+  --border-hype: #d4a520;
+  --border-hype-hover: #b8920a;
+
+  --accent-primary: #268bd2;
+  --accent-primary-hover: #2e9ce6;
+  --accent-primary-active: #1a6daa;
+  --accent-focus: #268bd2;
+  --accent-blue-text: #268bd2;
+  --accent-green: #859900;
+  --accent-green-bright: #6c8000;
+  --accent-teal: #2aa198;
+  --accent-gold: #b58900;
+  --accent-gold-hype: #9a7400;
+  --accent-red: #dc322f;
+  --accent-red-dark: #b02828;
+  --accent-red-bg: #fdf0ef;
+  --accent-red-border: #e0a0a0;
+  --accent-red-border-hover: #d08080;
+  --accent-hype: #b58900;
+
+  /* Contrast base (referenced by contrast-modifiers) */
+  --accent-teal-base: #2aa198;
+  --accent-red-base: #dc322f;
+  --accent-blue-text-base: #268bd2;
+  --accent-gold-base: #b58900;
+
+  --chat-user-bg: #ddeef8;
+  --chat-error-bg: #fdf0ef;
+  --badge-buy-bg: #dde8f0;
+  --badge-sell-bg: #e0f0d0;
+  --badge-hype-bg: #f5ecc8;
+
+  --modal-backdrop: rgba(0, 0, 0, 0.25);
+  --modal-shadow: rgba(0, 0, 0, 0.15);
+  --scrollbar-thumb: #c0b498;
+  --scrollbar-thumb-hover: #a89a80;
+  --link-color: #268bd2;
+  --add-flip-bg: #d0e8c0;
+  --limit-ready-bg: #daf0d0;
+
+  /* Glass helpers */
+  --glass-body-from: #e0d8c0;
+  --glass-body-via: #eee4cc;
+  --glass-body-to: #ddd4b8;
+  --glass-panel: rgba(238, 232, 213, 0.55);
+  --glass-elevated: rgba(238, 232, 213, 0.65);
+  --glass-hover: rgba(238, 232, 213, 0.70);
+  --glass-input: rgba(238, 232, 213, 0.50);
+  --glass-muted: rgba(238, 232, 213, 0.40);
+  --glass-border-card: rgba(0, 0, 0, 0.12);
+  --glass-border-main: rgba(0, 0, 0, 0.08);
+  --glass-border-section: rgba(0, 0, 0, 0.10);
+  --glass-border-input: rgba(0, 0, 0, 0.15);
+  --glass-scrollbar: rgba(0, 0, 0, 0.10);
+
+  /* Neumorphism helpers */
+  --neu-shadow-dark: #c8bc9e;
+  --neu-shadow-light: #fdf6e3;
+  --neu-accent-shadow: #1a6daa;
+
+  /* Skeuomorphism helpers */
+  --skeu-body-from: #c8bc9e;
+  --skeu-body-to: #ddd4b8;
+  --skeu-card-from: #f5efdc;
+  --skeu-card-mid: #eee8d5;
+  --skeu-card-to: #e6dfc8;
+  --skeu-card-highlight: #fdf6e3;
+  --skeu-card-shadow-edge: #b0a488;
+  --skeu-header-from: #ede6d0;
+  --skeu-header-to: #e4dcc6;
+  --skeu-btn-from: #eee8d5;
+  --skeu-btn-to: #ddd4b8;
+  --skeu-btn-active-from: #268bd2;
+  --skeu-btn-active-to: #1a6daa;
+}
+
+/* (light-mode view-btn.active consolidated — see below contrast modifiers) */
+`, ""]);
+// Exports
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (___CSS_LOADER_EXPORT___);
+
+
+/***/ },
+
+/***/ "../node_modules/css-loader/dist/cjs.js!./css/themes/colorway-twilight-amethyst-dark.css"
+/*!***********************************************************************************************!*\
+  !*** ../node_modules/css-loader/dist/cjs.js!./css/themes/colorway-twilight-amethyst-dark.css ***!
+  \***********************************************************************************************/
+(module, __webpack_exports__, __webpack_require__) {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var _node_modules_css_loader_dist_runtime_noSourceMaps_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../../node_modules/css-loader/dist/runtime/noSourceMaps.js */ "../node_modules/css-loader/dist/runtime/noSourceMaps.js");
+/* harmony import */ var _node_modules_css_loader_dist_runtime_noSourceMaps_js__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_node_modules_css_loader_dist_runtime_noSourceMaps_js__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../../node_modules/css-loader/dist/runtime/api.js */ "../node_modules/css-loader/dist/runtime/api.js");
+/* harmony import */ var _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(_node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1__);
+// Imports
+
+
+var ___CSS_LOADER_EXPORT___ = _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1___default()((_node_modules_css_loader_dist_runtime_noSourceMaps_js__WEBPACK_IMPORTED_MODULE_0___default()));
+// Module
+___CSS_LOADER_EXPORT___.push([module.id, `/* ─────────────────────────────────────────────────────────────────────────────
+ *  COLORWAY: Twilight Amethyst — Dark
+ *  Deep indigo-violet palette inspired by the Classic Glass aesthetic.
+ *  Rich purple backgrounds, lavender text accents, amethyst highlights.
+ * ───────────────────────────────────────────────────────────────────────────── */
+
+body[data-mode="dark"][data-colorway="twilight-amethyst"] {
+  /* ── Backgrounds ─────────────────────── */
+  --bg-main: #12101e;
+  --bg-panel: #1a1530;
+  --bg-elevated: #221c3a;
+  --bg-hover: #2a2244;
+  --dropdown-bg: #221c3a;
+  --dropdown-hover-bg: #2a2244;
+  --bg-input: #2e264a;
+  --bg-muted: #1e1832;
+  --bg-filter: #0e0c18;
+  --bg-number-input: #241e3e;
+
+  /* ── Text ────────────────────────────── */
+  --text-main: #cdc5e0;
+  --text-bright: #f0ecff;
+  --text-accent: #b8a4e8;
+  --text-heading: #d4b8ff;
+  --text-price: #4ade80;
+  --text-muted: #9088aa;
+  --text-soft: #a89cc4;
+  --text-dimmed: #5e5478;
+
+  /* ── Borders ─────────────────────────── */
+  --border-main: #2e2648;
+  --border-section: #38305a;
+  --border-card: #443a68;
+  --border-input: #504674;
+  --border-subtle: #382e56;
+  --border-hype: #7a5a2e;
+  --border-hype-hover: #a08030;
+
+  /* ── Primary action ──────────────────── */
+  --accent-primary: #7c4dff;
+  --accent-primary-hover: #9060ff;
+  --accent-primary-active: #5c30cc;
+  --accent-focus: #9070ff;
+
+  /* ── Semantic accents ────────────────── */
+  --accent-blue-text: #a088d8;
+  --accent-green: #5ece6b;
+  --accent-green-bright: #27ae60;
+  --accent-teal: #4ec9b0;
+  --accent-gold: #f0c040;
+  --accent-gold-hype: #f5c542;
+  --accent-hype: #ffab40;
+  --accent-red: #ff6b6b;
+  --accent-red-dark: #c0392b;
+  --accent-red-bg: #2e1428;
+  --accent-red-border: #6b3050;
+  --accent-red-border-hover: #a04070;
+
+  /* ── Contrast base (referenced by contrast-modifiers — never self-referencing) */
+  --accent-teal-base: #4ec9b0;
+  --accent-red-base: #ff6b6b;
+  --accent-blue-text-base: #a088d8;
+  --accent-gold-base: #f0c040;
+
+  /* ── Chat ─────────────────────────────── */
+  --chat-user-bg: #2e2258;
+  --chat-error-bg: #2e1428;
+
+  /* ── Badges ──────────────────────────── */
+  --badge-buy-bg: #1e1838;
+  --badge-sell-bg: #1e3a1e;
+  --badge-hype-bg: #3a2e10;
+
+  /* ── Modal ───────────────────────────── */
+  --modal-backdrop: rgba(8, 6, 20, 0.75);
+  --modal-shadow: rgba(0, 0, 0, 0.85);
+
+  /* ── Scrollbar ───────────────────────── */
+  --scrollbar-thumb: #443a68;
+  --scrollbar-thumb-hover: #5e5288;
+
+  /* ── Misc ─────────────────────────────── */
+  --link-color: #b8a4e8;
+  --add-flip-bg: #1b6b2a;
+  --limit-ready-bg: #1a2e1a;
+
+  /* ── Style helper vars (Glass) ───────── */
+  --glass-body-from: #0a0a1e;
+  --glass-body-via: #1a1040;
+  --glass-body-to: #0a2040;
+  --glass-panel: rgba(180, 160, 255, 0.06);
+  --glass-elevated: rgba(180, 160, 255, 0.10);
+  --glass-hover: rgba(180, 160, 255, 0.13);
+  --glass-input: rgba(180, 160, 255, 0.08);
+  --glass-muted: rgba(180, 160, 255, 0.05);
+  --glass-border-card: rgba(180, 160, 255, 0.20);
+  --glass-border-main: rgba(180, 160, 255, 0.10);
+  --glass-border-section: rgba(180, 160, 255, 0.13);
+  --glass-border-input: rgba(180, 160, 255, 0.22);
+  --glass-scrollbar: rgba(180, 160, 255, 0.15);
+
+  /* ── Style helper vars (Neumorphism) ─── */
+  --neu-shadow-dark: #0a0818;
+  --neu-shadow-light: #2e2648;
+  --neu-accent-shadow: #5c30cc;
+
+  /* ── Style helper vars (Skeuomorphism) ── */
+  --skeu-body-from: #0e0c18;
+  --skeu-body-to: #12101e;
+  --skeu-card-from: #2e2648;
+  --skeu-card-mid: #1a1530;
+  --skeu-card-to: #141020;
+  --skeu-card-highlight: #443a68;
+  --skeu-card-shadow-edge: #0a0818;
+  --skeu-header-from: #2e2648;
+  --skeu-header-to: #1e1832;
+  --skeu-btn-from: #38305a;
+  --skeu-btn-to: #28204a;
+  --skeu-btn-active-from: #7c4dff;
+  --skeu-btn-active-to: #5c30cc;
+}
+`, ""]);
+// Exports
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (___CSS_LOADER_EXPORT___);
+
+
+/***/ },
+
+/***/ "../node_modules/css-loader/dist/cjs.js!./css/themes/colorway-twilight-amethyst-light.css"
+/*!************************************************************************************************!*\
+  !*** ../node_modules/css-loader/dist/cjs.js!./css/themes/colorway-twilight-amethyst-light.css ***!
+  \************************************************************************************************/
+(module, __webpack_exports__, __webpack_require__) {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var _node_modules_css_loader_dist_runtime_noSourceMaps_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../../node_modules/css-loader/dist/runtime/noSourceMaps.js */ "../node_modules/css-loader/dist/runtime/noSourceMaps.js");
+/* harmony import */ var _node_modules_css_loader_dist_runtime_noSourceMaps_js__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_node_modules_css_loader_dist_runtime_noSourceMaps_js__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../../node_modules/css-loader/dist/runtime/api.js */ "../node_modules/css-loader/dist/runtime/api.js");
+/* harmony import */ var _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(_node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1__);
+// Imports
+
+
+var ___CSS_LOADER_EXPORT___ = _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1___default()((_node_modules_css_loader_dist_runtime_noSourceMaps_js__WEBPACK_IMPORTED_MODULE_0___default()));
+// Module
+___CSS_LOADER_EXPORT___.push([module.id, `/* ─────────────────────────────────────────────────────────────────────────────
+ *  COLORWAY: Twilight Amethyst — Light
+ *  Soft lavender-lilac palette — light counterpart to the dark indigo-violet.
+ *  Pale purple backgrounds, deep violet text, amethyst accents.
+ * ───────────────────────────────────────────────────────────────────────────── */
+
+body[data-mode="light"][data-colorway="twilight-amethyst"] {
+  /* ── Backgrounds ─────────────────────── */
+  --bg-main: #f0ecfa;
+  --bg-panel: #f8f5ff;
+  --bg-elevated: #f4f0fc;
+  --bg-hover: #eae4f6;
+  --dropdown-bg: #f4f0fc;
+  --dropdown-hover-bg: #eae4f6;
+  --bg-input: #ebe4f8;
+  --bg-muted: #e2daf2;
+  --bg-filter: #f0eafa;
+  --bg-number-input: #ebe4f8;
+
+  /* ── Text ────────────────────────────── */
+  --text-main: #3a2e5a;
+  --text-bright: #1a1030;
+  --text-accent: #6c4daa;
+  --text-heading: #4a2e80;
+  --text-price: #1a8a2a;
+  --text-muted: #7a6e98;
+  --text-soft: #9688b4;
+  --text-dimmed: #b8aed0;
+
+  /* ── Borders ─────────────────────────── */
+  --border-main: #d8d0ea;
+  --border-section: #cec4e2;
+  --border-card: #c4b8da;
+  --border-input: #b8aace;
+  --border-subtle: #e0d8ef;
+  --border-hype: #d4a520;
+  --border-hype-hover: #b8920a;
+
+  /* ── Primary action ──────────────────── */
+  --accent-primary: #6c4daa;
+  --accent-primary-hover: #7e5cc0;
+  --accent-primary-active: #5a3d90;
+  --accent-focus: #7c5cb8;
+
+  /* ── Semantic accents ────────────────── */
+  --accent-blue-text: #6c4daa;
+  --accent-green: #2a8a2a;
+  --accent-green-bright: #22aa22;
+  --accent-teal: #1a9a8a;
+  --accent-gold: #d4a520;
+  --accent-gold-hype: #c09010;
+  --accent-red: #cc3333;
+  --accent-red-dark: #aa2222;
+  --accent-red-bg: #faf0f4;
+  --accent-red-border: #dca0b0;
+  --accent-red-border-hover: #cc8898;
+  --accent-hype: #e68a00;
+
+  /* Contrast base (referenced by contrast-modifiers) */
+  --accent-teal-base: #1a9a8a;
+  --accent-red-base: #cc3333;
+  --accent-blue-text-base: #6c4daa;
+  --accent-gold-base: #d4a520;
+
+  /* ── Chat ─────────────────────────────── */
+  --chat-user-bg: #ece4ff;
+  --chat-error-bg: #faf0f4;
+
+  /* ── Badges ──────────────────────────── */
+  --badge-buy-bg: #e4deff;
+  --badge-sell-bg: #e0ffe0;
+  --badge-hype-bg: #fff8e0;
+
+  /* ── Modal ───────────────────────────── */
+  --modal-backdrop: rgba(20, 14, 40, 0.25);
+  --modal-shadow: rgba(20, 14, 40, 0.15);
+
+  /* ── Scrollbar ───────────────────────── */
+  --scrollbar-thumb: #c4b8da;
+  --scrollbar-thumb-hover: #a89cc0;
+
+  /* ── Misc ─────────────────────────────── */
+  --link-color: #6c4daa;
+  --add-flip-bg: #d0f0d0;
+  --limit-ready-bg: #e0f8e0;
+
+  /* ── Style helper vars (Glass) ───────── */
+  --glass-body-from: #d8d0ea;
+  --glass-body-via: #e4ddf2;
+  --glass-body-to: #d0c8e4;
+  --glass-panel: rgba(255, 255, 255, 0.50);
+  --glass-elevated: rgba(255, 255, 255, 0.60);
+  --glass-hover: rgba(255, 255, 255, 0.65);
+  --glass-input: rgba(255, 255, 255, 0.45);
+  --glass-muted: rgba(255, 255, 255, 0.35);
+  --glass-border-card: rgba(80, 50, 140, 0.14);
+  --glass-border-main: rgba(80, 50, 140, 0.08);
+  --glass-border-section: rgba(80, 50, 140, 0.10);
+  --glass-border-input: rgba(80, 50, 140, 0.18);
+  --glass-scrollbar: rgba(80, 50, 140, 0.12);
+
+  /* ── Style helper vars (Neumorphism) ─── */
+  --neu-shadow-dark: #c8c0da;
+  --neu-shadow-light: #ffffff;
+  --neu-accent-shadow: #5a3d90;
+
+  /* ── Style helper vars (Skeuomorphism) ── */
+  --skeu-body-from: #e2daf2;
+  --skeu-body-to: #f0ecfa;
+  --skeu-card-from: #ffffff;
+  --skeu-card-mid: #f8f5ff;
+  --skeu-card-to: #f0ecfa;
+  --skeu-card-highlight: #ffffff;
+  --skeu-card-shadow-edge: #c4b8da;
+  --skeu-header-from: #f4f0fc;
+  --skeu-header-to: #ebe4f8;
+  --skeu-btn-from: #f0ecfa;
+  --skeu-btn-to: #e2daf2;
+  --skeu-btn-active-from: #6c4daa;
+  --skeu-btn-active-to: #5a3d90;
+}
+`, ""]);
+// Exports
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (___CSS_LOADER_EXPORT___);
+
+
+/***/ },
+
+/***/ "../node_modules/css-loader/dist/cjs.js!./css/themes/contrast-modifiers.css"
+/*!**********************************************************************************!*\
+  !*** ../node_modules/css-loader/dist/cjs.js!./css/themes/contrast-modifiers.css ***!
+  \**********************************************************************************/
+(module, __webpack_exports__, __webpack_require__) {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var _node_modules_css_loader_dist_runtime_noSourceMaps_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../../node_modules/css-loader/dist/runtime/noSourceMaps.js */ "../node_modules/css-loader/dist/runtime/noSourceMaps.js");
+/* harmony import */ var _node_modules_css_loader_dist_runtime_noSourceMaps_js__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_node_modules_css_loader_dist_runtime_noSourceMaps_js__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../../node_modules/css-loader/dist/runtime/api.js */ "../node_modules/css-loader/dist/runtime/api.js");
+/* harmony import */ var _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(_node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1__);
+// Imports
+
+
+var ___CSS_LOADER_EXPORT___ = _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1___default()((_node_modules_css_loader_dist_runtime_noSourceMaps_js__WEBPACK_IMPORTED_MODULE_0___default()));
+// Module
+___CSS_LOADER_EXPORT___.push([module.id, `/* ─────────────────────────────────────────────────────────────────────────────
+ *  CONTRAST MODIFIERS (body[data-contrast])
+ *
+ *  Layered on top of any Mode × Colorway combination.
+ *  "soft"  — reduced contrast (lighter darks, softer lights)
+ *  "hard"  — maximum contrast (deeper darks, brighter lights)
+ *
+ *  IMPORTANT: Each override references ONLY sibling properties (never the
+ *  property being set) to avoid CSS custom-property dependency cycles.
+ *  The dependency graph is a strict DAG — no circular references.
+ *
+ *  Specificity is intentionally 0,3,1 (\`body[mode][contrast][colorway]\`)
+ *  so contrast modifiers always beat colorway selectors (0,2,1),
+ *  regardless of source order. [data-colorway] is always present on body.
+ *
+ *  Financial accent colours (--accent-green, --accent-teal, --accent-red,
+ *  --accent-blue-text, --accent-gold) are adjusted in hard contrast to
+ *  maintain WCAG AA ≥ 4.5:1 against shifted backgrounds.
+ * ───────────────────────────────────────────────────────────────────────────── */
+
+/* ── Soft contrast — dark modes ──────────────────────────────────────────── */
+body[data-mode="dark"][data-contrast="soft"][data-colorway] {
+  /* Lift base bg toward panel/elevated — compresses the dark range */
+  --bg-main:      color-mix(in srgb, var(--bg-panel) 65%, var(--bg-elevated));
+  --bg-filter:    var(--bg-muted);
+  /* Soften borders — blend section border toward elevated bg */
+  --border-main:  color-mix(in srgb, var(--border-section) 55%, var(--bg-elevated));
+  /* Pull text extremes inward — narrower brightness span */
+  --text-bright:  color-mix(in srgb, var(--text-main), white 15%);
+  --text-dimmed:  var(--text-muted);
+  /* Lighter modal scrim */
+  --modal-backdrop: rgba(0, 0, 0, 0.35);
+}
+
+/* ── Hard contrast — dark modes ──────────────────────────────────────────── */
+body[data-mode="dark"][data-contrast="hard"][data-colorway] {
+  /* Push backgrounds toward black — deepest blacks, vivid separation */
+  --bg-filter:   color-mix(in srgb, var(--bg-elevated) 55%, black);
+  --bg-main:     color-mix(in srgb, var(--bg-filter) 70%, black);
+  --bg-muted:    color-mix(in srgb, var(--bg-filter) 65%, black);
+  --bg-panel:    color-mix(in srgb, var(--bg-muted) 72%, black);
+  /* Full-white text ceiling */
+  --text-bright: #ffffff;
+  /* Harden borders */
+  --border-main: color-mix(in srgb, var(--border-section) 60%, black);
+  /* Stronger modal scrim */
+  --modal-backdrop: rgba(0, 0, 0, 0.75);
+  /* WCAG: vivify financial accent colours against deeper backgrounds.
+     References *-base vars (set by each colorway) to avoid circular deps. */
+  --accent-green:       color-mix(in srgb, var(--accent-green-bright), white 12%);
+  --accent-teal:        color-mix(in srgb, var(--accent-teal-base), white 10%);
+  --accent-red:         color-mix(in srgb, var(--accent-red-base), white 8%);
+  --accent-blue-text:   color-mix(in srgb, var(--accent-blue-text-base), white 10%);
+  --accent-gold:        color-mix(in srgb, var(--accent-gold-base), white 8%);
+}
+
+/* ── Soft contrast — light modes ─────────────────────────────────────────── */
+body[data-mode="light"][data-contrast="soft"][data-colorway] {
+  /* Push backgrounds toward white — flatter, airier feel */
+  --bg-main:     color-mix(in srgb, var(--bg-panel) 55%, white);
+  --bg-panel:    color-mix(in srgb, var(--bg-elevated) 60%, white);
+  /* Lighten borders */
+  --border-main: color-mix(in srgb, var(--border-section) 50%, white);
+  /* Reduce text intensity */
+  --text-main:   var(--text-muted);
+  --text-bright: color-mix(in srgb, var(--text-muted), black 25%);
+  /* Softer modal scrim */
+  --modal-backdrop: rgba(0, 0, 0, 0.15);
+}
+
+/* ── Hard contrast — light modes ─────────────────────────────────────────── */
+body[data-mode="light"][data-contrast="hard"][data-colorway] {
+  /* Push backgrounds brighter — near-white panels */
+  --bg-main:     color-mix(in srgb, var(--bg-panel) 50%, white);
+  --bg-panel:    #ffffff;
+  --bg-muted:    color-mix(in srgb, var(--bg-elevated) 60%, white);
+  /* Maximum text darkness */
+  --text-bright: #000000;
+  /* Harden borders */
+  --border-main: color-mix(in srgb, var(--border-section) 70%, var(--text-dimmed));
+  /* Stronger modal scrim */
+  --modal-backdrop: rgba(0, 0, 0, 0.40);
+  /* WCAG: darken financial accent colours against bright bg (≥ 4.5:1).
+     References *-base vars (set by each colorway) to avoid circular deps. */
+  --accent-green:       color-mix(in srgb, var(--accent-green-bright), black 18%);
+  --accent-teal:        color-mix(in srgb, var(--accent-teal-base), black 15%);
+  --accent-blue-text:   color-mix(in srgb, var(--accent-blue-text-base), black 12%);
+  --accent-gold:        color-mix(in srgb, var(--accent-gold-base), black 15%);
+}`, ""]);
+// Exports
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (___CSS_LOADER_EXPORT___);
+
+
+/***/ },
+
+/***/ "../node_modules/css-loader/dist/cjs.js!./css/themes/light-mode-overrides.css"
+/*!************************************************************************************!*\
+  !*** ../node_modules/css-loader/dist/cjs.js!./css/themes/light-mode-overrides.css ***!
+  \************************************************************************************/
+(module, __webpack_exports__, __webpack_require__) {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var _node_modules_css_loader_dist_runtime_noSourceMaps_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../../node_modules/css-loader/dist/runtime/noSourceMaps.js */ "../node_modules/css-loader/dist/runtime/noSourceMaps.js");
+/* harmony import */ var _node_modules_css_loader_dist_runtime_noSourceMaps_js__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_node_modules_css_loader_dist_runtime_noSourceMaps_js__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../../node_modules/css-loader/dist/runtime/api.js */ "../node_modules/css-loader/dist/runtime/api.js");
+/* harmony import */ var _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(_node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1__);
+// Imports
+
+
+var ___CSS_LOADER_EXPORT___ = _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1___default()((_node_modules_css_loader_dist_runtime_noSourceMaps_js__WEBPACK_IMPORTED_MODULE_0___default()));
+// Module
+___CSS_LOADER_EXPORT___.push([module.id, `/* ─────────────────────────────────────────────────────────────────────────────
+ *  LIGHT-MODE: consolidated overrides
+ *  - .view-btn.active text forced white for all light colourways
+ *  - Badge/table tokens adjusted for light backgrounds
+ * ───────────────────────────────────────────────────────────────────────────── */
+
+body[data-mode="light"] .view-btn.active {
+  color: #ffffff;
+}
+
+body[data-mode="light"] {
+  --badge-velocity-insta-bg: rgba(22, 163, 74, 0.22);
+  --badge-velocity-active-bg: rgba(0, 80, 180, 0.18);
+  --badge-velocity-slow-bg: rgba(200, 150, 0, 0.20);
+  --badge-velocity-muted-bg: rgba(100, 100, 100, 0.16);
+  --badge-trend-up-bg: rgba(22, 163, 74, 0.22);
+  --badge-trend-down-bg: rgba(220, 38, 38, 0.20);
+  --badge-neutral-bg: rgba(100, 100, 100, 0.14);
+  --badge-hype-vol-bg: rgba(217, 119, 6, 0.18);
+  --badge-tier-free-bg: rgba(22, 163, 74, 0.14);
+  --badge-tier-free-border: rgba(22, 163, 74, 0.35);
+  --badge-tier-freetier-bg: rgba(13, 148, 136, 0.14);
+  --badge-tier-freetier-border: rgba(13, 148, 136, 0.35);
+  --badge-tier-lowcost-bg: rgba(0, 80, 180, 0.14);
+  --badge-tier-lowcost-border: rgba(0, 80, 180, 0.35);
+  --badge-tier-neutral-bg: rgba(100, 100, 100, 0.10);
+  --badge-tier-neutral-border: rgba(100, 100, 100, 0.22);
+  --table-active-row-bg: rgba(0, 80, 180, 0.08);
+  --table-hover-row-bg: rgba(0, 0, 0, 0.03);
+  --setup-note-bg: rgba(180, 140, 0, 0.10);
+  --setup-note-border: rgba(180, 140, 0, 0.25);
+  --detail-expanded-bg: rgba(0, 0, 0, 0.05);
+  --close-hover-bg: rgba(220, 38, 38, 0.10);
+  --win-glow: color-mix(in srgb, var(--accent-green-bright) 10%, transparent);
+  --loss-glow: color-mix(in srgb, var(--accent-red-dark) 10%, transparent);
+}`, ""]);
 // Exports
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (___CSS_LOADER_EXPORT___);
 
@@ -4976,29 +7487,29 @@ module.exports = function (i) {
 
 /***/ },
 
-/***/ "./style.css"
-/*!*******************!*\
-  !*** ./style.css ***!
-  \*******************/
+/***/ "./css/main.css"
+/*!**********************!*\
+  !*** ./css/main.css ***!
+  \**********************/
 (__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
 /* harmony export */ });
-/* harmony import */ var _node_modules_style_loader_dist_runtime_injectStylesIntoStyleTag_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! !../node_modules/style-loader/dist/runtime/injectStylesIntoStyleTag.js */ "../node_modules/style-loader/dist/runtime/injectStylesIntoStyleTag.js");
+/* harmony import */ var _node_modules_style_loader_dist_runtime_injectStylesIntoStyleTag_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! !../../node_modules/style-loader/dist/runtime/injectStylesIntoStyleTag.js */ "../node_modules/style-loader/dist/runtime/injectStylesIntoStyleTag.js");
 /* harmony import */ var _node_modules_style_loader_dist_runtime_injectStylesIntoStyleTag_js__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_node_modules_style_loader_dist_runtime_injectStylesIntoStyleTag_js__WEBPACK_IMPORTED_MODULE_0__);
-/* harmony import */ var _node_modules_style_loader_dist_runtime_styleDomAPI_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! !../node_modules/style-loader/dist/runtime/styleDomAPI.js */ "../node_modules/style-loader/dist/runtime/styleDomAPI.js");
+/* harmony import */ var _node_modules_style_loader_dist_runtime_styleDomAPI_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! !../../node_modules/style-loader/dist/runtime/styleDomAPI.js */ "../node_modules/style-loader/dist/runtime/styleDomAPI.js");
 /* harmony import */ var _node_modules_style_loader_dist_runtime_styleDomAPI_js__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(_node_modules_style_loader_dist_runtime_styleDomAPI_js__WEBPACK_IMPORTED_MODULE_1__);
-/* harmony import */ var _node_modules_style_loader_dist_runtime_insertBySelector_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! !../node_modules/style-loader/dist/runtime/insertBySelector.js */ "../node_modules/style-loader/dist/runtime/insertBySelector.js");
+/* harmony import */ var _node_modules_style_loader_dist_runtime_insertBySelector_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! !../../node_modules/style-loader/dist/runtime/insertBySelector.js */ "../node_modules/style-loader/dist/runtime/insertBySelector.js");
 /* harmony import */ var _node_modules_style_loader_dist_runtime_insertBySelector_js__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(_node_modules_style_loader_dist_runtime_insertBySelector_js__WEBPACK_IMPORTED_MODULE_2__);
-/* harmony import */ var _node_modules_style_loader_dist_runtime_setAttributesWithoutAttributes_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! !../node_modules/style-loader/dist/runtime/setAttributesWithoutAttributes.js */ "../node_modules/style-loader/dist/runtime/setAttributesWithoutAttributes.js");
+/* harmony import */ var _node_modules_style_loader_dist_runtime_setAttributesWithoutAttributes_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! !../../node_modules/style-loader/dist/runtime/setAttributesWithoutAttributes.js */ "../node_modules/style-loader/dist/runtime/setAttributesWithoutAttributes.js");
 /* harmony import */ var _node_modules_style_loader_dist_runtime_setAttributesWithoutAttributes_js__WEBPACK_IMPORTED_MODULE_3___default = /*#__PURE__*/__webpack_require__.n(_node_modules_style_loader_dist_runtime_setAttributesWithoutAttributes_js__WEBPACK_IMPORTED_MODULE_3__);
-/* harmony import */ var _node_modules_style_loader_dist_runtime_insertStyleElement_js__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! !../node_modules/style-loader/dist/runtime/insertStyleElement.js */ "../node_modules/style-loader/dist/runtime/insertStyleElement.js");
+/* harmony import */ var _node_modules_style_loader_dist_runtime_insertStyleElement_js__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! !../../node_modules/style-loader/dist/runtime/insertStyleElement.js */ "../node_modules/style-loader/dist/runtime/insertStyleElement.js");
 /* harmony import */ var _node_modules_style_loader_dist_runtime_insertStyleElement_js__WEBPACK_IMPORTED_MODULE_4___default = /*#__PURE__*/__webpack_require__.n(_node_modules_style_loader_dist_runtime_insertStyleElement_js__WEBPACK_IMPORTED_MODULE_4__);
-/* harmony import */ var _node_modules_style_loader_dist_runtime_styleTagTransform_js__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! !../node_modules/style-loader/dist/runtime/styleTagTransform.js */ "../node_modules/style-loader/dist/runtime/styleTagTransform.js");
+/* harmony import */ var _node_modules_style_loader_dist_runtime_styleTagTransform_js__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! !../../node_modules/style-loader/dist/runtime/styleTagTransform.js */ "../node_modules/style-loader/dist/runtime/styleTagTransform.js");
 /* harmony import */ var _node_modules_style_loader_dist_runtime_styleTagTransform_js__WEBPACK_IMPORTED_MODULE_5___default = /*#__PURE__*/__webpack_require__.n(_node_modules_style_loader_dist_runtime_styleTagTransform_js__WEBPACK_IMPORTED_MODULE_5__);
-/* harmony import */ var _node_modules_css_loader_dist_cjs_js_style_css__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! !!../node_modules/css-loader/dist/cjs.js!./style.css */ "../node_modules/css-loader/dist/cjs.js!./style.css");
+/* harmony import */ var _node_modules_css_loader_dist_cjs_js_main_css__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! !!../../node_modules/css-loader/dist/cjs.js!./main.css */ "../node_modules/css-loader/dist/cjs.js!./css/main.css");
 
       
       
@@ -5018,12 +7529,12 @@ options.insert = _node_modules_style_loader_dist_runtime_insertBySelector_js__WE
 options.domAPI = (_node_modules_style_loader_dist_runtime_styleDomAPI_js__WEBPACK_IMPORTED_MODULE_1___default());
 options.insertStyleElement = (_node_modules_style_loader_dist_runtime_insertStyleElement_js__WEBPACK_IMPORTED_MODULE_4___default());
 
-var update = _node_modules_style_loader_dist_runtime_injectStylesIntoStyleTag_js__WEBPACK_IMPORTED_MODULE_0___default()(_node_modules_css_loader_dist_cjs_js_style_css__WEBPACK_IMPORTED_MODULE_6__["default"], options);
+var update = _node_modules_style_loader_dist_runtime_injectStylesIntoStyleTag_js__WEBPACK_IMPORTED_MODULE_0___default()(_node_modules_css_loader_dist_cjs_js_main_css__WEBPACK_IMPORTED_MODULE_6__["default"], options);
 
 
 
 
-       /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (_node_modules_css_loader_dist_cjs_js_style_css__WEBPACK_IMPORTED_MODULE_6__["default"] && _node_modules_css_loader_dist_cjs_js_style_css__WEBPACK_IMPORTED_MODULE_6__["default"].locals ? _node_modules_css_loader_dist_cjs_js_style_css__WEBPACK_IMPORTED_MODULE_6__["default"].locals : undefined);
+       /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (_node_modules_css_loader_dist_cjs_js_main_css__WEBPACK_IMPORTED_MODULE_6__["default"] && _node_modules_css_loader_dist_cjs_js_main_css__WEBPACK_IMPORTED_MODULE_6__["default"].locals ? _node_modules_css_loader_dist_cjs_js_main_css__WEBPACK_IMPORTED_MODULE_6__["default"].locals : undefined);
 
 
 /***/ },
@@ -8581,7 +11092,7 @@ const LS_LAYOUT = "ge-analyzer:layout";
 const LS_THEME = "ge-analyzer:theme";
 /** `localStorage` key for persisted style preference (basic/glass/neumorphism/skeuomorphism). */
 const LS_STYLE = "ge-analyzer:style";
-/** `localStorage` key for persisted colorway preference (classic/osrs/rs3-modern/solarized). */
+/** `localStorage` key for persisted colorway preference (default/classic/rs3-modern/solarized). */
 const LS_COLORWAY = "ge-analyzer:colorway";
 /** `localStorage` key for persisted mode preference (dark/light). */
 const LS_MODE = "ge-analyzer:mode";
@@ -8604,10 +11115,10 @@ const PORTFOLIO_TICK_MS = 30000;
  * Used for one-time migration of persisted settings.
  */
 const LEGACY_COLORWAY_MAP = {
-    classic: { mode: "dark", colorway: "classic" },
-    osrs: { mode: "dark", colorway: "osrs" },
+    classic: { mode: "dark", colorway: "default" },
+    osrs: { mode: "dark", colorway: "classic" },
     "rs3-modern": { mode: "dark", colorway: "rs3-modern" },
-    light: { mode: "light", colorway: "classic" },
+    light: { mode: "light", colorway: "default" },
     "sol-dark": { mode: "dark", colorway: "solarized" },
     "sol-light": { mode: "light", colorway: "solarized" },
 };
@@ -9300,9 +11811,10 @@ function bindLayoutToggle() {
 function bindTheme() {
     migrateThemeKey();
     migrateColorwayToMode();
+    migrateColorwayRename();
     const savedMode = localStorage.getItem(LS_MODE) ?? "dark";
     const savedStyle = localStorage.getItem(LS_STYLE) ?? "basic";
-    const savedColorway = localStorage.getItem(LS_COLORWAY) ?? "classic";
+    const savedColorway = localStorage.getItem(LS_COLORWAY) ?? "default";
     const savedContrast = localStorage.getItem(LS_CONTRAST) ?? "default";
     // Batch all four dataset writes — only one style recalc on init
     applyThemeBatch(savedMode, savedStyle, savedColorway, savedContrast);
@@ -9337,10 +11849,10 @@ function migrateThemeKey() {
     // Map legacy theme → mode + colorway (handled by migrateColorwayToMode next)
     if (!localStorage.getItem(LS_COLORWAY)) {
         const COLORWAY_TMP = {
-            classic: "classic", osrs: "osrs", "rs3-modern": "rs3-modern",
-            glass: "classic", neumorphism: "classic", minimalism: "light", skeuomorphism: "classic",
+            classic: "default", osrs: "classic", "rs3-modern": "rs3-modern",
+            glass: "default", neumorphism: "default", minimalism: "light", skeuomorphism: "default",
         };
-        localStorage.setItem(LS_COLORWAY, COLORWAY_TMP[legacy] ?? "classic");
+        localStorage.setItem(LS_COLORWAY, COLORWAY_TMP[legacy] ?? "default");
     }
     localStorage.removeItem(LS_THEME);
 }
@@ -9364,12 +11876,70 @@ function migrateColorwayToMode() {
         localStorage.setItem(LS_MODE, "dark");
     }
 }
+/**
+ * One-time migration: renamed colorway values "classic" → "default", "osrs" → "classic".
+ * Uses a flag key (`ge-analyzer:colorway-v2`) to run exactly once.
+ */
+function migrateColorwayRename() {
+    if (localStorage.getItem("ge-analyzer:colorway-v2"))
+        return;
+    const RENAME_MAP = {
+        classic: "default",
+        osrs: "classic",
+    };
+    const current = localStorage.getItem(LS_COLORWAY);
+    if (current && RENAME_MAP[current]) {
+        localStorage.setItem(LS_COLORWAY, RENAME_MAP[current]);
+    }
+    localStorage.setItem("ge-analyzer:colorway-v2", "1");
+}
+/**
+ * Force a full browser style recalculation.
+ *
+ * Some browsers (notably Chrome/Edge) cache `color-mix()` resolved values
+ * across `data-*` attribute changes and fail to invalidate them when the
+ * referenced custom properties change via a different cascade rule. This
+ * manifests on page refresh with light mode — the `:root` (dark) defaults
+ * are computed first (before the IIFE sets attributes), and Chrome keeps
+ * stale dark `color-mix()` values even after light-mode selectors activate.
+ *
+ * Strategy: toggle `data-mode` to the **opposite** mode, force a
+ * synchronous `getComputedStyle` read (which locks in that mode's cascade),
+ * then restore the original mode and force another read. The browser sees
+ * two genuine selector flips (e.g. light→dark→light), each activating
+ * entirely different `body[data-mode]` rules. This bypasses the cache
+ * because the resolved custom-property values are demonstrably different
+ * at each step.
+ *
+ * This avoids the previous approach of removing ALL `data-*` attributes
+ * (falling back to bare `:root`), which introduced a transient dark-default
+ * intermediate state that *itself* poisoned Chrome's `color-mix()` cache
+ * when the target mode was light.
+ *
+ * No visual flash occurs because all mutations + reads happen in one
+ * synchronous JS turn; the browser only paints at the next animation
+ * frame boundary, by which time the correct attributes are restored.
+ */
+function forceStyleInvalidation() {
+    const ds = document.body.dataset;
+    const currentMode = ds.mode ?? "dark";
+    const oppositeMode = currentMode === "dark" ? "light" : "dark";
+    // Flip to opposite mode — activates a different set of
+    // body[data-mode] selectors, forcing fresh custom-property resolution.
+    ds.mode = oppositeMode;
+    void getComputedStyle(document.body).getPropertyValue("--bg-main");
+    // Restore the correct mode — another genuine cascade change forces
+    // Chrome to fully recompute the target mode's values from scratch.
+    ds.mode = currentMode;
+    void getComputedStyle(document.body).getPropertyValue("--bg-main");
+}
 /** Apply an appearance mode (dark/light) and persist the choice. */
 function applyMode(mode) {
     document.body.dataset.mode = mode;
     localStorage.setItem(LS_MODE, mode);
     els.modeDarkBtn.classList.toggle("active", mode === "dark");
     els.modeLightBtn.classList.toggle("active", mode === "light");
+    forceStyleInvalidation();
 }
 /** Apply a style to the document and persist the choice. */
 function applyStyle(style) {
@@ -9382,18 +11952,29 @@ function applyColorway(colorway) {
     document.body.dataset.colorway = colorway;
     localStorage.setItem(LS_COLORWAY, colorway);
     els.colorwaySelect.value = colorway;
+    forceStyleInvalidation();
 }
 /** Apply a contrast level to the document and persist the choice. */
 function applyContrast(contrast) {
     document.body.dataset.contrast = contrast;
     localStorage.setItem(LS_CONTRAST, contrast);
     els.contrastSelect.value = contrast;
+    forceStyleInvalidation();
 }
 /**
  * Apply all four theme axes in a single synchronous pass to minimise
  * style recalculations during initialisation and data-import restores.
  * Writes all four `dataset` properties before the browser can trigger
  * an intermediate layout, producing one composite style recalc.
+ *
+ * Always calls `forceStyleInvalidation()` after writing the attributes.
+ * On page refresh with a non-default mode (e.g. light), the CSS is
+ * injected before the early-restoration IIFE runs, so Chrome computes
+ * `:root` (dark) `color-mix()` values first. Even though the IIFE then
+ * sets the correct attributes, Chrome's stale cached values persist.
+ * The mode-toggle invalidation strategy (see `forceStyleInvalidation`)
+ * forces fresh recomputation without the bare-`:root` intermediate that
+ * previously broke light mode.
  */
 function applyThemeBatch(mode, style, colorway, contrast) {
     const ds = document.body.dataset;
@@ -9411,6 +11992,9 @@ function applyThemeBatch(mode, style, colorway, contrast) {
     els.styleSelect.value = style;
     els.colorwaySelect.value = colorway;
     els.contrastSelect.value = contrast;
+    // Always flush — the mode-toggle strategy is safe even when values
+    // haven't changed, unlike the old strip-all-attributes approach.
+    forceStyleInvalidation();
 }
 /** Apply a layout mode to the document and persist the choice. */
 function applyLayout(mode) {
@@ -9664,6 +12248,11 @@ function bindDataManagement() {
                 if (restoredCount === 0) {
                     alert("No recognised data keys found in the file.");
                     return;
+                }
+                // Clear the one-time migration flag so that imported legacy
+                // colorway values ("classic" / "osrs") get re-migrated on reload.
+                if ("ge-analyzer:colorway" in data) {
+                    localStorage.removeItem("ge-analyzer:colorway-v2");
                 }
                 alert("Data imported successfully!");
                 window.location.reload();
@@ -12574,6 +15163,26 @@ function formatVolume(vol) {
 }
 
 
+/***/ },
+
+/***/ "./appconfig.json"
+/*!************************!*\
+  !*** ./appconfig.json ***!
+  \************************/
+(module, __unused_webpack_exports, __webpack_require__) {
+
+module.exports = __webpack_require__.p + "appconfig.json";
+
+/***/ },
+
+/***/ "./icon.png"
+/*!******************!*\
+  !*** ./icon.png ***!
+  \******************/
+(module, __unused_webpack_exports, __webpack_require__) {
+
+module.exports = __webpack_require__.p + "icon.png";
+
 /***/ }
 
 /******/ 	});
@@ -12588,12 +15197,6 @@ function formatVolume(vol) {
 /******/ 		if (cachedModule !== undefined) {
 /******/ 			return cachedModule.exports;
 /******/ 		}
-/******/ 		// Check if module exists (development only)
-/******/ 		if (__webpack_modules__[moduleId] === undefined) {
-/******/ 			var e = new Error("Cannot find module '" + moduleId + "'");
-/******/ 			e.code = 'MODULE_NOT_FOUND';
-/******/ 			throw e;
-/******/ 		}
 /******/ 		// Create a new module (and put it into the cache)
 /******/ 		var module = __webpack_module_cache__[moduleId] = {
 /******/ 			id: moduleId,
@@ -12602,6 +15205,12 @@ function formatVolume(vol) {
 /******/ 		};
 /******/ 	
 /******/ 		// Execute the module function
+/******/ 		if (!(moduleId in __webpack_modules__)) {
+/******/ 			delete __webpack_module_cache__[moduleId];
+/******/ 			var e = new Error("Cannot find module '" + moduleId + "'");
+/******/ 			e.code = 'MODULE_NOT_FOUND';
+/******/ 			throw e;
+/******/ 		}
 /******/ 		__webpack_modules__[moduleId](module, module.exports, __webpack_require__);
 /******/ 	
 /******/ 		// Return the exports of the module
@@ -12633,6 +15242,18 @@ function formatVolume(vol) {
 /******/ 		};
 /******/ 	})();
 /******/ 	
+/******/ 	/* webpack/runtime/global */
+/******/ 	(() => {
+/******/ 		__webpack_require__.g = (function() {
+/******/ 			if (typeof globalThis === 'object') return globalThis;
+/******/ 			try {
+/******/ 				return this || new Function('return this')();
+/******/ 			} catch (e) {
+/******/ 				if (typeof window === 'object') return window;
+/******/ 			}
+/******/ 		})();
+/******/ 	})();
+/******/ 	
 /******/ 	/* webpack/runtime/hasOwnProperty shorthand */
 /******/ 	(() => {
 /******/ 		__webpack_require__.o = (obj, prop) => (Object.prototype.hasOwnProperty.call(obj, prop))
@@ -12647,6 +15268,29 @@ function formatVolume(vol) {
 /******/ 			}
 /******/ 			Object.defineProperty(exports, '__esModule', { value: true });
 /******/ 		};
+/******/ 	})();
+/******/ 	
+/******/ 	/* webpack/runtime/publicPath */
+/******/ 	(() => {
+/******/ 		var scriptUrl;
+/******/ 		if (__webpack_require__.g.importScripts) scriptUrl = __webpack_require__.g.location + "";
+/******/ 		var document = __webpack_require__.g.document;
+/******/ 		if (!scriptUrl && document) {
+/******/ 			if (document.currentScript && document.currentScript.tagName.toUpperCase() === 'SCRIPT')
+/******/ 				scriptUrl = document.currentScript.src;
+/******/ 			if (!scriptUrl) {
+/******/ 				var scripts = document.getElementsByTagName("script");
+/******/ 				if(scripts.length) {
+/******/ 					var i = scripts.length - 1;
+/******/ 					while (i > -1 && (!scriptUrl || !/^http(s?):/.test(scriptUrl))) scriptUrl = scripts[i--].src;
+/******/ 				}
+/******/ 			}
+/******/ 		}
+/******/ 		// When supporting browsers where an automatic publicPath is not supported you must specify an output.publicPath manually via configuration
+/******/ 		// or pass an empty string ("") and set the __webpack_public_path__ variable from your code to use your own logic.
+/******/ 		if (!scriptUrl) throw new Error("Automatic publicPath is not supported in this browser");
+/******/ 		scriptUrl = scriptUrl.replace(/^blob:/, "").replace(/#.*$/, "").replace(/\?.*$/, "").replace(/\/[^\/]+$/, "/");
+/******/ 		__webpack_require__.p = scriptUrl;
 /******/ 	})();
 /******/ 	
 /******/ 	/* webpack/runtime/nonce */
@@ -12664,7 +15308,9 @@ var __webpack_exports__ = {};
 __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _services__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./services */ "./services/index.ts");
 /* harmony import */ var _uiService__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./uiService */ "./uiService.ts");
-/* harmony import */ var _style_css__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./style.css */ "./style.css");
+/* harmony import */ var _appconfig_json__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./appconfig.json */ "./appconfig.json");
+/* harmony import */ var _icon_png__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./icon.png */ "./icon.png");
+/* harmony import */ var _css_main_css__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./css/main.css */ "./css/main.css");
 /**
  * @module index
  * Application entry point.
@@ -12681,21 +15327,17 @@ __webpack_require__.r(__webpack_exports__);
 // ── Static asset imports (Webpack asset/resource) ───────────────────────────
 
 
-// ── Stylesheet (Webpack style-loader injects into <head>) ───────────────────
+// ── Stylesheet (Webpack css-loader resolves @imports → style-loader injects) ─
 
 // ── Early theme restoration ─────────────────────────────────────────────────
-// Apply all four persisted theme axes before any content renders so the
-// startup overlay matches the user's chosen appearance settings.
-(() => {
-    const mode = localStorage.getItem("ge-analyzer:mode") ?? "dark";
-    const style = localStorage.getItem("ge-analyzer:style") ?? "basic";
-    const colorway = localStorage.getItem("ge-analyzer:colorway") ?? "classic";
-    const contrast = localStorage.getItem("ge-analyzer:contrast") ?? "default";
-    document.body.dataset.mode = mode;
-    document.body.dataset.style = style;
-    document.body.dataset.colorway = colorway;
-    document.body.dataset.contrast = contrast;
-})();
+// Theme attributes (data-mode, data-style, data-colorway, data-contrast) are
+// now set by an inline <script> in index.html that runs BEFORE the webpack
+// bundle loads. This ensures body[data-mode="light"][data-colorway="..."]
+// selectors match on the *first* style computation (when style-loader injects
+// CSS), preventing Chrome from caching stale dark :root values.
+//
+// The IIFE that was here previously ran too late — style-loader had already
+// injected CSS and Chrome had already computed/cached dark :root defaults.
 // ── Alt1 environment detection ──────────────────────────────────────────────
 const alt1Status = document.getElementById("alt1-status");
 if (window.alt1) {
