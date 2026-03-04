@@ -1,0 +1,46 @@
+﻿/* ── Favourites section ────────────────────────────────────────────────────────────── */
+
+.favorites-section {
+  margin-bottom: 8px;
+  border: 1px solid var(--border-section);
+  border-radius: 6px;
+  background: var(--bg-main);
+  overflow: hidden;
+}
+
+.favorites-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 4px 10px;
+  background: var(--bg-panel);
+  border-bottom: 1px solid var(--border-section);
+}
+
+.favorites-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+#favorites-sort-select {
+  font-size: 10px;
+  padding: 1px 4px;
+  background: var(--bg-input);
+  border: 1px solid var(--border-input);
+  color: var(--text-muted);
+  border-radius: 3px;
+  cursor: pointer;
+}
+
+.favorites-header h3 {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--accent-gold);
+}
+
+.favorites-header .view-btn {
+  font-size: 14px;
+  padding: 0 4px;
+}

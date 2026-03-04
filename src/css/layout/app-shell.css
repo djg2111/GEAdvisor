@@ -1,0 +1,10 @@
+﻿/* ── App shell ────────────────────────────────────────────────────────────── */
+
+#app {
+  position: relative;        /* contain startup overlay */
+  display: flex;
+  flex-direction: column;
+  height: 95%;              /* fill parent, not viewport — respects zoom */
+  min-height: 0;             /* allow flex children to shrink properly */
+  overflow: hidden;
+}

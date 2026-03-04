@@ -18,22 +18,18 @@ import { initUI } from "./uiService";
 import "./appconfig.json";
 import "./icon.png";
 
-// ── Stylesheet (Webpack style-loader injects into <head>) ───────────────────
-import "./style.css";
+// ── Stylesheet (Webpack css-loader resolves @imports → style-loader injects) ─
+import "./css/main.css";
 
 // ── Early theme restoration ─────────────────────────────────────────────────
-// Apply all four persisted theme axes before any content renders so the
-// startup overlay matches the user's chosen appearance settings.
-(() => {
-  const mode     = localStorage.getItem("ge-analyzer:mode")     ?? "dark";
-  const style    = localStorage.getItem("ge-analyzer:style")    ?? "basic";
-  const colorway = localStorage.getItem("ge-analyzer:colorway") ?? "classic";
-  const contrast = localStorage.getItem("ge-analyzer:contrast") ?? "default";
-  document.body.dataset.mode     = mode;
-  document.body.dataset.style    = style;
-  document.body.dataset.colorway = colorway;
-  document.body.dataset.contrast = contrast;
-})();
+// Theme attributes (data-mode, data-style, data-colorway, data-contrast) are
+// now set by an inline <script> in index.html that runs BEFORE the webpack
+// bundle loads. This ensures body[data-mode="light"][data-colorway="..."]
+// selectors match on the *first* style computation (when style-loader injects
+// CSS), preventing Chrome from caching stale dark :root values.
+//
+// The IIFE that was here previously ran too late — style-loader had already
+// injected CSS and Chrome had already computed/cached dark :root defaults.
 
 // ── Alt1 environment detection ──────────────────────────────────────────────
 const alt1Status = document.getElementById("alt1-status");

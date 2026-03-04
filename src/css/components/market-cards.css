@@ -1,0 +1,151 @@
+﻿/* ── Market card (shared across all views) ────────────────────────────────── */
+
+.market-card {
+  background: var(--bg-panel);
+  border: 1px solid var(--border-card);
+  border-radius: 4px;
+  overflow: hidden;
+  transition: border-color 0.15s;
+}
+
+.market-card:hover {
+  border-color: var(--border-input);
+}
+
+.market-card.risky {
+  border-color: var(--accent-red-border);
+}
+
+.market-card.risky:hover {
+  border-color: var(--accent-red-border-hover);
+}
+
+.market-card.hype {
+  border-color: var(--border-hype);
+}
+
+.market-card.hype:hover {
+  border-color: var(--border-hype-hover);
+}
+
+/* Flip recommendation badges in the card header */
+
+.flip-badges {
+  margin-left: auto;
+  display: flex;
+  gap: 3px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  align-items: center;
+  min-width: 0;
+  flex-shrink: 1;
+}
+
+/* Shared badge base — sizing tokens */
+.buy-badge,
+.sell-badge,
+.profit-badge,
+.velocity-badge,
+.hype-badge,
+.predicted-badge,
+.ema-badge,
+.vol-badge {
+  display: inline-block;
+  font-size: var(--badge-font-md);
+  padding: var(--badge-padding-md);
+  border-radius: var(--badge-radius);
+  font-weight: var(--badge-font-weight);
+  line-height: 1.3;
+  white-space: nowrap;
+}
+
+.buy-badge[title],
+.sell-badge[title],
+.profit-badge[title],
+.velocity-badge[title] {
+  cursor: help;
+}
+
+.buy-badge {
+  background: var(--badge-buy-bg);
+  color: var(--accent-blue-text);
+}
+
+.sell-badge {
+  background: var(--badge-sell-bg);
+  color: var(--accent-green);
+}
+
+.sell-badge.risky {
+  background: var(--accent-red-bg);
+  color: var(--accent-red);
+}
+
+.profit-badge {
+  background: var(--badge-sell-bg);
+  color: var(--accent-teal);
+  font-weight: 700;
+  padding: 2px 7px;
+  letter-spacing: 0.02em;
+}
+
+.profit-badge.negative {
+  background: var(--accent-red-bg);
+  color: var(--accent-red);
+  font-weight: 700;
+}
+
+.hype-badge {
+  background: var(--badge-hype-bg);
+  color: var(--accent-hype);
+  animation: hype-pulse 2s ease-in-out infinite;
+}
+
+/* ── Trade velocity badges ────────────────────────────────────────────── */
+
+.velocity-badge {
+  /* inherits sizing from shared badge base above */
+}
+
+.velocity-insta {
+  background: var(--badge-velocity-insta-bg);
+  color: var(--accent-green-bright);
+}
+
+.velocity-active {
+  background: var(--badge-velocity-active-bg);
+  color: var(--accent-blue-text);
+}
+
+.velocity-slow {
+  background: var(--badge-velocity-slow-bg);
+  color: var(--accent-gold);
+}
+
+.velocity-veryslow {
+  background: var(--badge-velocity-muted-bg);
+  color: var(--text-muted);
+}
+
+.trend-badge {
+  font-size: 10px;
+  padding: 1px 6px;
+  border-radius: 3px;
+  white-space: nowrap;
+  font-weight: 600;
+}
+
+.trend-downtrend {
+  background: var(--badge-trend-down-bg);
+  color: var(--accent-red);
+}
+
+.trend-uptrend {
+  background: var(--badge-trend-up-bg);
+  color: var(--accent-green-bright);
+}
+
+@keyframes hype-pulse {
+  0%, 100% { opacity: 1; }
+  50%      { opacity: 0.6; }
+}

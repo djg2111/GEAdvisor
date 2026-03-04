@@ -1,0 +1,181 @@
+﻿/* ─────────────────────────────────────────────────────────────────────────────
+ * GE Market Analyzer — Alt1 Overlay Stylesheet
+ *
+ * Dark palette optimised for readability on top of the RS3 game client.
+ * All measurements use px/rem so the overlay renders consistently regardless
+ * of the host page's base font-size.
+ * ───────────────────────────────────────────────────────────────────────────── */
+
+/* ═══════════════════════════════════════════════════════════════════════════
+ *  THEME SYSTEM — Two-axis: Colorway × Style
+ *
+ *  Mode     (body[data-mode]):       dark | light
+ *  Colorway (body[data-colorway]):   default | classic | rs3-modern | solarized | rs-lobby | gruvbox | twilight-amethyst | osrs-design
+ *  Contrast (body[data-contrast]):   default | soft | hard
+ *  Style    (body[data-style]):      basic | glass | neumorphism | skeuomorphism
+ *
+ *  Mode × Colorway sets ALL colour variables + per-style helper vars.
+ *  Contrast applies brightness adjustments on top.
+ *  Style applies structural overrides (shadows, filters, gradients)
+ *  using the helper vars so every combination works automatically.
+ * ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ─────────────────────────────────────────────────────────────────────────────
+ *  COLORWAY: Default Dark
+ * ───────────────────────────────────────────────────────────────────────────── */
+
+:root {
+  /* ── Backgrounds ─────────────────────── */
+  --bg-main: #1e1e1e;
+  --bg-panel: #252526;
+  --bg-elevated: #2d2d30;
+  --bg-hover: #2a2d2e;
+  --dropdown-bg: #2d2d30;
+  --dropdown-hover-bg: #2a2d2e;
+  --bg-input: #3c3c3c;
+  --bg-muted: #333;
+  --bg-filter: #1e1e24;
+  --bg-number-input: #2a2a2e;
+
+  /* ── Text ────────────────────────────── */
+  --text-main: #d4d4d4;
+  --text-bright: #fff;
+  --text-accent: #9cdcfe;
+  --text-heading: #dcdcaa;
+  --text-price: #4ade80;
+  --text-muted: #94a3b8;
+  --text-soft: #aaa;
+  --text-dimmed: #666;
+
+  /* ── Borders ─────────────────────────── */
+  --border-main: #333;
+  --border-section: #3a3d40;
+  --border-card: #4a4d50;
+  --border-input: #555;
+  --border-subtle: #444;
+  --border-hype: #6b5a1e;
+  --border-hype-hover: #a08830;
+
+  /* ── Primary action ──────────────────── */
+  --accent-primary: #0e639c;
+  --accent-primary-hover: #1177bb;
+  --accent-primary-active: #094771;
+  --accent-focus: #007acc;
+
+  /* ── Semantic accents ────────────────── */
+  --accent-blue-text: #569cd6;
+  --accent-green: #5ece6b;
+  --accent-green-bright: #27ae60;
+  --accent-teal: #4ec9b0;
+  --accent-gold: #f0c040;
+  --accent-gold-hype: #f5c542;
+  --accent-hype: #ffab40;
+  --accent-red: #ff6b6b;
+  --accent-red-dark: #c0392b;
+  --accent-red-bg: #3a1d1d;
+  --accent-red-border: #6b3030;
+  --accent-red-border-hover: #a04040;
+
+  /* ── Contrast base (referenced by contrast-modifiers — never self-referencing) */
+  --accent-teal-base: #4ec9b0;
+  --accent-red-base: #ff6b6b;
+  --accent-blue-text-base: #569cd6;
+  --accent-gold-base: #f0c040;
+
+  /* ── Chat ─────────────────────────────── */
+  --chat-user-bg: #264f78;
+  --chat-error-bg: #3b1a1a;
+
+  /* ── Badges ──────────────────────────── */
+  --badge-buy-bg: #1e2d3a;
+  --badge-sell-bg: #1e3a1e;
+  --badge-hype-bg: #3a2e10;
+
+  /* ── Modal ───────────────────────────── */
+  --modal-backdrop: rgba(0, 0, 0, 0.6);
+  --modal-shadow: rgba(0, 0, 0, 0.8);
+
+  /* ── Scrollbar ───────────────────────── */
+  --scrollbar-thumb: #555;
+  --scrollbar-thumb-hover: #777;
+
+  /* ── Badge sizing tokens ──────────────── */
+  --badge-font-sm: 11px;
+  --badge-font-md: 12px;
+  --badge-padding-sm: 2px 6px;
+  --badge-padding-md: 3px 7px;
+  --badge-radius: 3px;
+  --badge-font-weight: 600;
+
+  /* ── Alias tokens (consumed by components that use short names) ── */
+  --border: var(--border-main);
+  --text: var(--text-main);
+
+  /* ── Semantic badge-bg tokens (theme-aware, replaces hard-coded rgba) ── */
+  --badge-velocity-insta-bg: rgba(39, 174, 96, 0.18);
+  --badge-velocity-active-bg: rgba(86, 156, 214, 0.18);
+  --badge-velocity-slow-bg: rgba(240, 192, 64, 0.18);
+  --badge-velocity-muted-bg: rgba(136, 136, 136, 0.18);
+  --badge-trend-up-bg: rgba(39, 174, 96, 0.18);
+  --badge-trend-down-bg: rgba(244, 71, 71, 0.18);
+  --badge-neutral-bg: rgba(136, 136, 136, 0.15);
+  --badge-hype-vol-bg: rgba(255, 171, 64, 0.15);
+  --badge-tier-free-bg: rgba(76, 175, 80, 0.12);
+  --badge-tier-free-border: rgba(76, 175, 80, 0.3);
+  --badge-tier-freetier-bg: rgba(78, 205, 196, 0.12);
+  --badge-tier-freetier-border: rgba(78, 205, 196, 0.3);
+  --badge-tier-lowcost-bg: rgba(100, 149, 237, 0.12);
+  --badge-tier-lowcost-border: rgba(100, 149, 237, 0.3);
+  --badge-tier-neutral-bg: rgba(180, 180, 180, 0.08);
+  --badge-tier-neutral-border: rgba(180, 180, 180, 0.2);
+  --table-active-row-bg: rgba(100, 149, 237, 0.08);
+  --table-hover-row-bg: rgba(255, 255, 255, 0.03);
+  --setup-note-bg: rgba(255, 215, 0, 0.08);
+  --setup-note-border: rgba(255, 215, 0, 0.2);
+  --detail-expanded-bg: rgba(0, 0, 0, 0.08);
+
+  /* ── Close / win-loss glow tokens ─────── */
+  --close-hover-bg: rgba(244, 71, 71, 0.12);
+  --win-glow: color-mix(in srgb, var(--accent-green-bright) 8%, transparent);
+  --loss-glow: color-mix(in srgb, var(--accent-red-dark) 8%, transparent);
+
+  /* ── Misc ─────────────────────────────── */
+  --link-color: #6cb4ee;
+  --add-flip-bg: #1b6b2a;
+  --limit-ready-bg: #1a2e1a;
+
+  /* ── Style helper vars (Glass) ───────── */
+  --glass-body-from: #141414;
+  --glass-body-via: #1e1e1e;
+  --glass-body-to: #181818;
+  --glass-panel: rgba(255, 255, 255, 0.06);
+  --glass-elevated: rgba(255, 255, 255, 0.10);
+  --glass-hover: rgba(255, 255, 255, 0.12);
+  --glass-input: rgba(255, 255, 255, 0.08);
+  --glass-muted: rgba(255, 255, 255, 0.05);
+  --glass-border-card: rgba(255, 255, 255, 0.18);
+  --glass-border-main: rgba(255, 255, 255, 0.10);
+  --glass-border-section: rgba(255, 255, 255, 0.12);
+  --glass-border-input: rgba(255, 255, 255, 0.20);
+  --glass-scrollbar: rgba(255, 255, 255, 0.15);
+
+  /* ── Style helper vars (Neumorphism) ─── */
+  --neu-shadow-dark: #151518;
+  --neu-shadow-light: #383840;
+  --neu-accent-shadow: #094771;
+
+  /* ── Style helper vars (Skeuomorphism) ── */
+  --skeu-body-from: #151518;
+  --skeu-body-to: #1e1e1e;
+  --skeu-card-from: #353538;
+  --skeu-card-mid: #252526;
+  --skeu-card-to: #1e1e20;
+  --skeu-card-highlight: #444;
+  --skeu-card-shadow-edge: #151518;
+  --skeu-header-from: #353538;
+  --skeu-header-to: #2a2a2e;
+  --skeu-btn-from: #3a3a3e;
+  --skeu-btn-to: #2a2a2e;
+  --skeu-btn-active-from: #0e639c;
+  --skeu-btn-active-to: #094771;
+}

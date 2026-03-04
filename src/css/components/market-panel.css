@@ -1,0 +1,126 @@
+﻿/* ── Market data panel ────────────────────────────────────────────────────── */
+
+#market-view {
+  overflow-y: auto;
+  padding: 8px 10px;
+}
+
+#market-view h2 {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-heading);
+  margin: 0;
+}
+
+/* ── Top 20 section container ──────────────────────────────────────────────────── */
+
+.top20-section {
+  margin-bottom: 8px;
+  border: 1px solid var(--border-section);
+  border-radius: 6px;
+  background: var(--bg-main);
+  overflow: hidden;
+}
+
+.top20-section #market-header {
+  padding: 4px 10px;
+  background: var(--bg-panel);
+  border-bottom: 1px solid var(--border-section);
+  margin-bottom: 0;
+}
+
+#market-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 6px;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+#market-header h2 {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-heading);
+  margin: 0;
+  white-space: nowrap;
+}
+
+.market-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+
+/* ── Per-section sort selects ─────────────────────────────────────────────── */
+
+.section-sort-select {
+  font-size: 10px;
+  padding: 4px 6px;
+  background: var(--bg-input);
+  border: 1px solid var(--border-input);
+  color: var(--text-muted);
+  border-radius: 3px;
+  cursor: pointer;
+  line-height: 1.2;
+}
+
+/* ── View toggle buttons ──────────────────────────────────────────────────── */
+
+.view-toggle {
+  display: flex;
+  gap: 2px;
+  align-items: center;
+}
+
+/* Compact tiles toggle – March 2026 */
+.compact-toggle-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 11px;
+  color: var(--text-muted);
+  cursor: pointer;
+  margin-left: 4px;
+  white-space: nowrap;
+  user-select: none;
+}
+.compact-toggle-label input[type="checkbox"] {
+  margin: 0;
+  accent-color: var(--accent-primary);
+  cursor: pointer;
+}
+.compact-toggle-label:hover {
+  color: var(--text-main);
+}
+
+/* Hide predictive badges in compact tile/hybrid mode */
+.predictive-badges.compact-hidden {
+  display: none;
+}
+
+.view-btn {
+  background: var(--bg-muted);
+  border: 1px solid var(--border-input);
+  border-radius: 3px;
+  padding: 4px 7px;
+  color: var(--text-muted);
+  font-size: 13px;
+  cursor: pointer;
+  line-height: 1;
+  min-width: 24px;
+  text-align: center;
+  transition: background 0.15s, color 0.15s;
+}
+
+.view-btn:hover {
+  background: var(--bg-input);
+  color: var(--text-main);
+}
+
+.view-btn.active {
+  background: var(--accent-primary);
+  color: var(--text-bright);
+  border-color: var(--accent-primary);
+}

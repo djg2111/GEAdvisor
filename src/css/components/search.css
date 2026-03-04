@@ -1,0 +1,117 @@
+﻿/* ── Market search bar ────────────────────────────────────────────────────── */
+
+#market-search-input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 7px 10px;
+  margin-bottom: 0;
+  background: var(--bg-panel);
+  color: var(--text-main);
+  border: 1px solid var(--bg-input);
+  border-radius: 4px;
+  font-size: 13px;
+  outline: none;
+  transition: border-color 0.15s;
+}
+
+#market-search-input::placeholder {
+  color: var(--text-dimmed);
+}
+
+#market-search-input:focus {
+  border-color: var(--accent-blue-text);
+}
+
+/* ── Search section ────────────────────────────────────────────────────── */
+
+#search-section {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 8px;
+}
+
+#search-section #market-search-input {
+  flex: 1 1 140px;
+  min-width: 140px;
+}
+
+#search-section .view-toggle {
+  flex-shrink: 0;
+}
+
+#search-results {
+  width: 100%;
+  margin-top: 6px;
+}
+
+#search-results:empty {
+  display: none;
+}
+
+#search-loading {
+  width: 100%;
+  font-size: 12px;
+  color: var(--text-muted);
+  padding: 4px 0;
+}
+
+.market-card-header {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 4px 8px;
+  padding: 5px 8px;
+  cursor: pointer;
+  user-select: none;
+  min-height: 36px;
+}
+
+.market-card-header:hover {
+  background: var(--bg-hover);
+}
+
+/* \u2500\u2500 Sparkline canvas \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */
+
+.graph-btn {
+  all: unset;
+  cursor: pointer;
+  font-size: 11px;
+  line-height: 1;
+  color: var(--text-muted);
+  padding: 2px 3px;
+  border-radius: 3px;
+  flex-shrink: 0;
+  letter-spacing: -1px;
+  transition: color 0.15s;
+}
+.graph-btn:hover {
+  color: var(--accent-green-bright, #4ec9b0);
+}
+
+.item-sprite {
+  flex-shrink: 0;
+  image-rendering: pixelated;
+  width: 36px;
+  height: 32px;
+  object-fit: contain;
+}
+
+.market-card .item-name {
+  color: var(--text-accent);
+  flex: 1 1 0;
+  min-width: 60px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 12px;
+}
+
+.item-price {
+  color: var(--text-price);
+  white-space: nowrap;
+  flex-shrink: 0;
+  font-size: 12px;
+  font-weight: 600;
+}

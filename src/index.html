@@ -6,6 +6,30 @@
 	<title>GE Market Analyzer</title>
 </head>
 <body data-layout="tabbed">
+	<!-- ── Pre-bundle theme restoration ───────────────────────────────────
+	     This MUST run before the webpack bundle loads. style-loader injects
+	     CSS when the bundle executes; if body lacks data-mode/data-colorway
+	     at that point, Chrome computes all custom properties from the dark
+	     :root defaults and caches them. Setting attributes here means the
+	     correct body[data-mode][data-colorway] selectors match on the FIRST
+	     style computation, eliminating stale-cache issues entirely.
+	     ─────────────────────────────────────────────────────────────────── -->
+	<script>
+	(function() {
+		var b = document.body;
+		// One-time migration: renamed colorway values (classic→default, osrs→classic)
+		if (!localStorage.getItem('ge-analyzer:colorway-v2')) {
+			var raw = localStorage.getItem('ge-analyzer:colorway');
+			if (raw === 'osrs')    localStorage.setItem('ge-analyzer:colorway', 'classic');
+			else if (raw === 'classic') localStorage.setItem('ge-analyzer:colorway', 'default');
+			localStorage.setItem('ge-analyzer:colorway-v2', '1');
+		}
+		b.dataset.mode     = localStorage.getItem('ge-analyzer:mode')     || 'dark';
+		b.dataset.style    = localStorage.getItem('ge-analyzer:style')    || 'basic';
+		b.dataset.colorway = localStorage.getItem('ge-analyzer:colorway') || 'default';
+		b.dataset.contrast = localStorage.getItem('ge-analyzer:contrast') || 'default';
+	})();
+	</script>
 	<!-- ── Alt1 detection banner (hidden once services load) ───────────── -->
 	<div id="alt1-status"></div>
 
@@ -52,12 +76,14 @@
 
 					<label for="colorway-select">Colorway</label>
 					<select id="colorway-select">
+						<option value="default">Default</option>
 						<option value="classic">Classic</option>
-						<option value="osrs">OSRS</option>
 						<option value="rs3-modern">RS3 Modern</option>
 						<option value="rs-lobby">RS Lobby</option>
 						<option value="gruvbox">Gruvbox</option>
 						<option value="solarized">Solarized</option>
+						<option value="twilight-amethyst">Twilight Amethyst</option>
+						<option value="osrs-design">OSRS Design</option>
 					</select>
 
 					<label for="contrast-select">Contrast</label>

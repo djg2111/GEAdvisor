@@ -62,7 +62,7 @@ const LS_THEME = "ge-analyzer:theme";
 /** `localStorage` key for persisted style preference (basic/glass/neumorphism/skeuomorphism). */
 const LS_STYLE = "ge-analyzer:style";
 
-/** `localStorage` key for persisted colorway preference (classic/osrs/rs3-modern/solarized). */
+/** `localStorage` key for persisted colorway preference (default/classic/rs3-modern/solarized). */
 const LS_COLORWAY = "ge-analyzer:colorway";
 
 /** `localStorage` key for persisted mode preference (dark/light). */
@@ -96,7 +96,7 @@ type LayoutMode = "tabbed" | "sidebar";
 type StyleMode = "basic" | "glass" | "neumorphism" | "skeuomorphism";
 
 /** Available colorways (colour palettes — mode-agnostic). */
-type ColorwayMode = "classic" | "osrs" | "rs3-modern" | "solarized" | "rs-lobby" | "gruvbox";
+type ColorwayMode = "default" | "classic" | "rs3-modern" | "solarized" | "rs-lobby" | "gruvbox" | "twilight-amethyst" | "osrs-design";
 
 /** Available appearance modes (dark / light). */
 type AppMode = "dark" | "light";
@@ -109,10 +109,10 @@ type ContrastMode = "default" | "soft" | "hard";
  * Used for one-time migration of persisted settings.
  */
 const LEGACY_COLORWAY_MAP: Record<string, { mode: AppMode; colorway: ColorwayMode }> = {
-  classic:      { mode: "dark",  colorway: "classic" },
-  osrs:         { mode: "dark",  colorway: "osrs" },
+  classic:      { mode: "dark",  colorway: "default" },
+  osrs:         { mode: "dark",  colorway: "classic" },
   "rs3-modern": { mode: "dark",  colorway: "rs3-modern" },
-  light:        { mode: "light", colorway: "classic" },
+  light:        { mode: "light", colorway: "default" },
   "sol-dark":   { mode: "dark",  colorway: "solarized" },
   "sol-light":  { mode: "light", colorway: "solarized" },
 };
@@ -992,10 +992,11 @@ function bindLayoutToggle(): void {
 function bindTheme(): void {
   migrateThemeKey();
   migrateColorwayToMode();
+  migrateColorwayRename();
 
   const savedMode = (localStorage.getItem(LS_MODE) as AppMode | null) ?? "dark";
   const savedStyle = (localStorage.getItem(LS_STYLE) as StyleMode | null) ?? "basic";
-  const savedColorway = (localStorage.getItem(LS_COLORWAY) as ColorwayMode | null) ?? "classic";
+  const savedColorway = (localStorage.getItem(LS_COLORWAY) as ColorwayMode | null) ?? "default";
   const savedContrast = (localStorage.getItem(LS_CONTRAST) as ContrastMode | null) ?? "default";
 
   // Batch all four dataset writes — only one style recalc on init
@@ -1035,10 +1036,10 @@ function migrateThemeKey(): void {
   // Map legacy theme → mode + colorway (handled by migrateColorwayToMode next)
   if (!localStorage.getItem(LS_COLORWAY)) {
     const COLORWAY_TMP: Record<string, string> = {
-      classic: "classic", osrs: "osrs", "rs3-modern": "rs3-modern",
-      glass: "classic", neumorphism: "classic", minimalism: "light", skeuomorphism: "classic",
+      classic: "default", osrs: "classic", "rs3-modern": "rs3-modern",
+      glass: "default", neumorphism: "default", minimalism: "light", skeuomorphism: "default",
     };
-    localStorage.setItem(LS_COLORWAY, COLORWAY_TMP[legacy] ?? "classic");
+    localStorage.setItem(LS_COLORWAY, COLORWAY_TMP[legacy] ?? "default");
   }
   localStorage.removeItem(LS_THEME);
 }
@@ -1062,12 +1063,73 @@ function migrateColorwayToMode(): void {
   }
 }
 
+/**
+ * One-time migration: renamed colorway values "classic" → "default", "osrs" → "classic".
+ * Uses a flag key (`ge-analyzer:colorway-v2`) to run exactly once.
+ */
+function migrateColorwayRename(): void {
+  if (localStorage.getItem("ge-analyzer:colorway-v2")) return;
+  const RENAME_MAP: Record<string, ColorwayMode> = {
+    classic: "default",
+    osrs: "classic",
+  };
+  const current = localStorage.getItem(LS_COLORWAY);
+  if (current && RENAME_MAP[current]) {
+    localStorage.setItem(LS_COLORWAY, RENAME_MAP[current]);
+  }
+  localStorage.setItem("ge-analyzer:colorway-v2", "1");
+}
+
+/**
+ * Force a full browser style recalculation.
+ *
+ * Some browsers (notably Chrome/Edge) cache `color-mix()` resolved values
+ * across `data-*` attribute changes and fail to invalidate them when the
+ * referenced custom properties change via a different cascade rule. This
+ * manifests on page refresh with light mode — the `:root` (dark) defaults
+ * are computed first (before the IIFE sets attributes), and Chrome keeps
+ * stale dark `color-mix()` values even after light-mode selectors activate.
+ *
+ * Strategy: toggle `data-mode` to the **opposite** mode, force a
+ * synchronous `getComputedStyle` read (which locks in that mode's cascade),
+ * then restore the original mode and force another read. The browser sees
+ * two genuine selector flips (e.g. light→dark→light), each activating
+ * entirely different `body[data-mode]` rules. This bypasses the cache
+ * because the resolved custom-property values are demonstrably different
+ * at each step.
+ *
+ * This avoids the previous approach of removing ALL `data-*` attributes
+ * (falling back to bare `:root`), which introduced a transient dark-default
+ * intermediate state that *itself* poisoned Chrome's `color-mix()` cache
+ * when the target mode was light.
+ *
+ * No visual flash occurs because all mutations + reads happen in one
+ * synchronous JS turn; the browser only paints at the next animation
+ * frame boundary, by which time the correct attributes are restored.
+ */
+function forceStyleInvalidation(): void {
+  const ds = document.body.dataset;
+  const currentMode = ds.mode ?? "dark";
+  const oppositeMode = currentMode === "dark" ? "light" : "dark";
+
+  // Flip to opposite mode — activates a different set of
+  // body[data-mode] selectors, forcing fresh custom-property resolution.
+  ds.mode = oppositeMode;
+  void getComputedStyle(document.body).getPropertyValue("--bg-main");
+
+  // Restore the correct mode — another genuine cascade change forces
+  // Chrome to fully recompute the target mode's values from scratch.
+  ds.mode = currentMode;
+  void getComputedStyle(document.body).getPropertyValue("--bg-main");
+}
+
 /** Apply an appearance mode (dark/light) and persist the choice. */
 function applyMode(mode: AppMode): void {
   document.body.dataset.mode = mode;
   localStorage.setItem(LS_MODE, mode);
   els.modeDarkBtn.classList.toggle("active", mode === "dark");
   els.modeLightBtn.classList.toggle("active", mode === "light");
+  forceStyleInvalidation();
 }
 
 /** Apply a style to the document and persist the choice. */
@@ -1082,6 +1144,7 @@ function applyColorway(colorway: ColorwayMode): void {
   document.body.dataset.colorway = colorway;
   localStorage.setItem(LS_COLORWAY, colorway);
   els.colorwaySelect.value = colorway;
+  forceStyleInvalidation();
 }
 
 /** Apply a contrast level to the document and persist the choice. */
@@ -1089,6 +1152,7 @@ function applyContrast(contrast: ContrastMode): void {
   document.body.dataset.contrast = contrast;
   localStorage.setItem(LS_CONTRAST, contrast);
   els.contrastSelect.value = contrast;
+  forceStyleInvalidation();
 }
 
 /**
@@ -1096,6 +1160,15 @@ function applyContrast(contrast: ContrastMode): void {
  * style recalculations during initialisation and data-import restores.
  * Writes all four `dataset` properties before the browser can trigger
  * an intermediate layout, producing one composite style recalc.
+ *
+ * Always calls `forceStyleInvalidation()` after writing the attributes.
+ * On page refresh with a non-default mode (e.g. light), the CSS is
+ * injected before the early-restoration IIFE runs, so Chrome computes
+ * `:root` (dark) `color-mix()` values first. Even though the IIFE then
+ * sets the correct attributes, Chrome's stale cached values persist.
+ * The mode-toggle invalidation strategy (see `forceStyleInvalidation`)
+ * forces fresh recomputation without the bare-`:root` intermediate that
+ * previously broke light mode.
  */
 function applyThemeBatch(
   mode: AppMode,
@@ -1104,6 +1177,7 @@ function applyThemeBatch(
   contrast: ContrastMode,
 ): void {
   const ds = document.body.dataset;
+
   ds.mode = mode;
   ds.style = style;
   ds.colorway = colorway;
@@ -1120,6 +1194,10 @@ function applyThemeBatch(
   els.styleSelect.value = style;
   els.colorwaySelect.value = colorway;
   els.contrastSelect.value = contrast;
+
+  // Always flush — the mode-toggle strategy is safe even when values
+  // haven't changed, unlike the old strip-all-attributes approach.
+  forceStyleInvalidation();
 }
 
 /** Apply a layout mode to the document and persist the choice. */
@@ -1399,6 +1477,12 @@ function bindDataManagement(): void {
         if (restoredCount === 0) {
           alert("No recognised data keys found in the file.");
           return;
+        }
+
+        // Clear the one-time migration flag so that imported legacy
+        // colorway values ("classic" / "osrs") get re-migrated on reload.
+        if ("ge-analyzer:colorway" in data) {
+          localStorage.removeItem("ge-analyzer:colorway-v2");
         }
 
         alert("Data imported successfully!");

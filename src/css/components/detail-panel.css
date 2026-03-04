@@ -1,0 +1,18 @@
+﻿/* ── Expandable detail panel ──────────────────────────────────────────────── */
+
+.market-card-detail {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.2s ease, padding 0.2s ease;
+  padding: 0 8px;
+  background: var(--bg-main);
+  border-top: 1px solid transparent;
+}
+
+.market-card.expanded .market-card-detail {
+  max-height: 400px;
+  padding: 6px 8px;
+  border-top-color: var(--border-main);
+  background: var(--detail-expanded-bg);
+  overflow-y: auto;
+}

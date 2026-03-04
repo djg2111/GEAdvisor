@@ -1,0 +1,86 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+ *  GE Market Analyzer — CSS Module Entry Point
+ *
+ *  Import order is CRITICAL to the cascade. Do not rearrange.
+ *
+ *  1st: Base styles (reset, body, Alt1 status)
+ *  2nd: Theme colorways (dark palettes, then light palettes)
+ *  3rd: Light-mode consolidated overrides  +  Contrast modifiers
+ *  4th: Thematic styles (glass, neumorphism, skeuomorphism)
+ *  5th: Micro-component protections
+ *  6th: Layouts and Components
+ * ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ── 1. Base ────────────────────────────────────────────────────────────────── */
+@import "./base/reset.css";
+@import "./base/alt1-status.css";
+
+/* ── 2. Theme Colorways ─────────────────────────────────────────────────────── */
+/* Dark palettes first (Classic Dark defines :root defaults) */
+@import "./themes/colorway-default-dark.css";
+@import "./themes/colorway-classic-dark.css";
+@import "./themes/colorway-rs3-modern-dark.css";
+@import "./themes/colorway-rs-lobby-dark.css";
+@import "./themes/colorway-gruvbox-dark.css";
+@import "./themes/colorway-solarized-dark.css";
+@import "./themes/colorway-twilight-amethyst-dark.css";
+@import "./themes/colorway-osrs-design-dark.css";
+
+/* Light palettes */
+@import "./themes/colorway-default-light.css";
+@import "./themes/colorway-solarized-light.css";
+@import "./themes/colorway-classic-light.css";
+@import "./themes/colorway-rs3-modern-light.css";
+@import "./themes/colorway-rs-lobby-light.css";
+@import "./themes/colorway-gruvbox-light.css";
+@import "./themes/colorway-twilight-amethyst-light.css";
+@import "./themes/colorway-osrs-design-light.css";
+
+/* ── 3. Light-mode overrides  +  Contrast modifiers ────────────────────────── */
+@import "./themes/light-mode-overrides.css";
+@import "./themes/contrast-modifiers.css";
+
+/* ── 4. Thematic Styles ─────────────────────────────────────────────────────── */
+@import "./styles/style-glassmorphism.css";
+@import "./styles/style-neumorphism.css";
+@import "./styles/style-skeuomorphism.css";
+
+/* ── 5. Micro-component Protections ─────────────────────────────────────────── */
+@import "./styles/micro-component-protection.css";
+
+/* ── 6. Layout ──────────────────────────────────────────────────────────────── */
+@import "./layout/app-shell.css";
+@import "./layout/main-content.css";
+@import "./layout/layout-modes.css";
+@import "./layout/views.css";
+
+/* ── 7. Components ──────────────────────────────────────────────────────────── */
+@import "./components/settings.css";
+@import "./components/settings-fieldsets.css";
+@import "./components/provider.css";
+@import "./components/inputs.css";
+@import "./components/layout-toggle.css";
+@import "./components/tabs.css";
+@import "./components/market-panel.css";
+@import "./components/filters.css";
+@import "./components/startup.css";
+@import "./components/market-cards.css";
+@import "./components/highlights.css";
+@import "./components/search.css";
+@import "./components/detail-panel.css";
+@import "./components/card-actions.css";
+@import "./components/favourites.css";
+@import "./components/modals.css";
+@import "./components/analytics-modal.css";
+@import "./components/analytics-dividers.css";
+@import "./components/chat.css";
+@import "./components/portfolio.css";
+@import "./components/predictive-badges.css";
+@import "./components/completed-flips.css";
+@import "./components/scrollbar.css";
+@import "./components/toasts.css";
+@import "./components/alerts.css";
+@import "./components/accessibility.css";
+
+/* ── 8. Responsive overrides (must come last to win specificity) ────────────── */
+@import "./layout/responsive.css";

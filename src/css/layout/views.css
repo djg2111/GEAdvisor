@@ -1,0 +1,103 @@
+﻿/* ── List view ────────────────────────────────────────────────────────────── */
+
+.market-items.list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 6px 8px;
+}
+
+.market-items.list .market-card {
+  border-radius: 2px;
+}
+
+.market-items.list .item-sprite {
+  width: 24px;
+  height: 22px;
+}
+
+/* ── Tile view ────────────────────────────────────────────────────────────── */
+
+.market-items.tile {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+  gap: 8px;
+  padding: 8px 10px;
+}
+
+.market-items.tile .market-card-header {
+  flex-direction: column;
+  text-align: center;
+  padding: 8px 6px;
+  gap: 4px;
+  overflow: visible;
+}
+
+.market-items.tile .card-actions {
+  gap: 3px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.market-items.tile .item-sprite {
+  width: 36px;
+  height: 32px;
+}
+
+.market-items.tile .item-name {
+  font-size: 11px;
+  text-align: center;
+  white-space: normal;
+  overflow: visible;
+}
+
+.market-items.tile .item-price {
+  font-size: 11px;
+}
+
+.market-items.tile .flip-badges {
+  margin-left: 0;
+  justify-content: center;
+  width: 100%;
+}
+
+.market-items.tile .buy-badge,
+.market-items.tile .sell-badge,
+.market-items.tile .profit-badge {
+  font-size: var(--badge-font-sm);
+  padding: var(--badge-padding-sm);
+}
+
+/* (tile sparkline rules removed — chart now in dedicated graph modal) */
+
+/* ── Hybrid view (compact grid, list-style rows) ──────────────────────────── */
+
+.market-items.hybrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 6px;
+  padding: 6px 8px;
+}
+
+.market-items.hybrid .market-card-header {
+  padding: 4px 6px;
+  gap: 6px;
+}
+
+.market-items.hybrid .item-sprite {
+  width: 28px;
+  height: 24px;
+}
+
+/* (hybrid sparkline rule removed) */
+
+.market-items.hybrid .flip-badges {
+  gap: 2px;
+}
+
+.market-items.hybrid .buy-badge,
+.market-items.hybrid .sell-badge,
+.market-items.hybrid .profit-badge {
+  font-size: var(--badge-font-sm);
+  padding: var(--badge-padding-sm);
+}

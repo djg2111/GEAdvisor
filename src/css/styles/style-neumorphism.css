@@ -1,0 +1,146 @@
+﻿/* ═══════════════════════════════════════════════════════════════════════════
+ *  STYLE: Neumorphism  (body[data-style="neumorphism"])
+ *
+ *  Elements share the canvas background colour. Shape is conveyed entirely
+ *  through paired box-shadows (one light, one dark) — no visible borders.
+ *  Outset shadows = extruded; inset shadows = indented.
+ * ═══════════════════════════════════════════════════════════════════════════ */
+
+body[data-style="neumorphism"] {
+  /* Strip ALL visible borders — shape comes from shadows only */
+  --border-main: transparent;
+  --border-section: transparent;
+  --border-card: transparent;
+  --border-input: transparent;
+  --border-subtle: transparent;
+  --border-hype: transparent;
+  --border-hype-hover: transparent;
+  --border-red-border: transparent;
+  --modal-shadow: none;
+}
+
+/* ── Cards: extruded from the canvas ─────────────────────────────────────── */
+body[data-style="neumorphism"] .market-card {
+  background: var(--bg-main);  /* must match canvas */
+  border: none;
+  border-radius: 12px;
+  box-shadow: 6px 6px 12px var(--neu-shadow-dark),
+             -6px -6px 12px var(--neu-shadow-light);
+  margin: 2px;
+}
+body[data-style="neumorphism"] .market-card:hover {
+  box-shadow: 4px 4px 8px var(--neu-shadow-dark),
+             -4px -4px 8px var(--neu-shadow-light);
+}
+/* Expanded card detail: gentle inset well */
+body[data-style="neumorphism"] .market-card.expanded .market-card-detail {
+  box-shadow: inset 2px 2px 5px var(--neu-shadow-dark),
+              inset -2px -2px 5px var(--neu-shadow-light);
+  border-radius: 0 0 12px 12px;
+}
+
+/* ── Sections: raised panels ─────────────────────────────────────────────── */
+body[data-style="neumorphism"] .top20-section {
+  background: var(--bg-main);
+  border: none;
+  border-radius: 14px;
+  box-shadow: 8px 8px 16px var(--neu-shadow-dark),
+             -8px -8px 16px var(--neu-shadow-light);
+}
+body[data-style="neumorphism"] .favorites-section {
+  background: var(--bg-main);
+  border: none;
+  border-radius: 14px;
+  box-shadow: 6px 6px 14px var(--neu-shadow-dark),
+             -6px -6px 14px var(--neu-shadow-light);
+}
+body[data-style="neumorphism"] #settings-panel {
+  background: var(--bg-main);
+  border: none;
+  border-radius: 10px;
+  box-shadow: 4px 4px 10px var(--neu-shadow-dark),
+             -4px -4px 10px var(--neu-shadow-light);
+}
+body[data-style="neumorphism"] .settings-group {
+  border: none;
+  border-radius: 10px;
+  box-shadow: inset 3px 3px 6px var(--neu-shadow-dark),
+              inset -3px -3px 6px var(--neu-shadow-light);
+}
+
+/* ── Flip / portfolio cards ──────────────────────────────────────────────── */
+body[data-style="neumorphism"] .flip-card,
+body[data-style="neumorphism"] .completed-flip-card {
+  background: var(--bg-main);
+  border: none;
+  border-radius: 10px;
+  box-shadow: 4px 4px 8px var(--neu-shadow-dark),
+             -4px -4px 8px var(--neu-shadow-light);
+}
+
+/* ── Inputs/selects: indented wells ──────────────────────────────────────── */
+body[data-style="neumorphism"] .view-btn,
+body[data-style="neumorphism"] .section-sort-select,
+body[data-style="neumorphism"] #market-search-input,
+body[data-style="neumorphism"] .filter-bar select,
+body[data-style="neumorphism"] input[type="number"],
+body[data-style="neumorphism"] input[type="text"],
+body[data-style="neumorphism"] input[type="password"] {
+  background: var(--bg-main);
+  border: none;
+  border-radius: 8px;
+  box-shadow: inset 2px 2px 5px var(--neu-shadow-dark),
+              inset -2px -2px 5px var(--neu-shadow-light);
+}
+body[data-style="neumorphism"] .view-btn.active {
+  box-shadow: inset 3px 3px 6px var(--neu-shadow-dark),
+              inset -3px -3px 6px var(--neu-accent-shadow);
+}
+
+/* ── Buttons: raised pillows ─────────────────────────────────────────────── */
+body[data-style="neumorphism"] .scan-btn,
+body[data-style="neumorphism"] .refresh-btn,
+body[data-style="neumorphism"] .tab-btn,
+body[data-style="neumorphism"] .danger-btn,
+body[data-style="neumorphism"] .data-mgmt button {
+  background: var(--bg-main);
+  border: none;
+  border-radius: 8px;
+  box-shadow: 4px 4px 8px var(--neu-shadow-dark),
+             -4px -4px 8px var(--neu-shadow-light);
+}
+body[data-style="neumorphism"] .scan-btn:hover,
+body[data-style="neumorphism"] .refresh-btn:hover,
+body[data-style="neumorphism"] .tab-btn:hover,
+body[data-style="neumorphism"] .data-mgmt button:hover {
+  box-shadow: 2px 2px 5px var(--neu-shadow-dark),
+             -2px -2px 5px var(--neu-shadow-light);
+}
+body[data-style="neumorphism"] .tab-btn.active {
+  box-shadow: inset 3px 3px 6px var(--neu-shadow-dark),
+              inset -3px -3px 6px var(--neu-accent-shadow);
+}
+
+/* ── Modals: floating neumorphic panel ───────────────────────────────────── */
+body[data-style="neumorphism"] .analytics-modal-content,
+body[data-style="neumorphism"] .setup-guide-content {
+  background: var(--bg-main);
+  border: none;
+  border-radius: 16px;
+  box-shadow: 10px 10px 20px var(--neu-shadow-dark),
+             -10px -10px 20px var(--neu-shadow-light);
+}
+
+/* Neumorphism spacing — shadows need breathing room */
+body[data-style="neumorphism"] .market-items.tile {
+  gap: 14px;
+  padding: 12px 14px;
+}
+body[data-style="neumorphism"] .market-items.hybrid {
+  gap: 12px;
+  padding: 10px 12px;
+}
+body[data-style="neumorphism"] .market-items.list {
+  gap: 10px;
+  padding: 8px 10px;
+}

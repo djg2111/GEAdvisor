@@ -1,0 +1,105 @@
+﻿/* ─────────────────────────────────────────────────────────────────────────────
+ *  COLORWAY: Solarized — Dark
+ * ───────────────────────────────────────────────────────────────────────────── */
+
+body[data-mode="dark"][data-colorway="solarized"] {
+  --bg-main: #002b36;
+  --bg-panel: #073642;
+  --bg-elevated: #0a3f4c;
+  --bg-hover: #0e4756;
+  --dropdown-bg: #0a3f4c;
+  --dropdown-hover-bg: #0e4756;
+  --bg-input: #0a3f4c;
+  --bg-muted: #06313b;
+  --bg-filter: #002830;
+  --bg-number-input: #0a3a48;
+
+  --text-main: #93a1a1;
+  --text-bright: #fdf6e3;
+  --text-accent: #268bd2;
+  --text-heading: #b58900;
+  --text-price: #a0b800;
+  --text-muted: #839496;
+  --text-soft: #78909a;
+  --text-dimmed: #586e75;
+
+  --border-main: #0a4050;
+  --border-section: #0d4a58;
+  --border-card: #11546a;
+  --border-input: #175468;
+  --border-subtle: #0a4050;
+  --border-hype: #6b5a1e;
+  --border-hype-hover: #a08830;
+
+  --accent-primary: #268bd2;
+  --accent-primary-hover: #2e9ce6;
+  --accent-primary-active: #1a6daa;
+  --accent-focus: #268bd2;
+  --accent-blue-text: #268bd2;
+  --accent-green: #859900;
+  --accent-green-bright: #a0b800;
+  --accent-teal: #2aa198;
+  --accent-gold: #b58900;
+  --accent-gold-hype: #cb9a00;
+  --accent-red: #dc322f;
+  --accent-red-dark: #b02828;
+  --accent-red-bg: #2a1516;
+  --accent-red-border: #5a2020;
+  --accent-red-border-hover: #8a3030;
+  --accent-hype: #cb8b16;
+
+  /* Contrast base (referenced by contrast-modifiers) */
+  --accent-teal-base: #2aa198;
+  --accent-red-base: #dc322f;
+  --accent-blue-text-base: #268bd2;
+  --accent-gold-base: #b58900;
+
+  --chat-user-bg: #0a3a50;
+  --chat-error-bg: #2a1012;
+  --badge-buy-bg: #073a42;
+  --badge-sell-bg: #0a3a18;
+  --badge-hype-bg: #3a3010;
+
+  --modal-backdrop: rgba(0, 0, 0, 0.6);
+  --modal-shadow: rgba(0, 0, 0, 0.8);
+  --scrollbar-thumb: #1a5868;
+  --scrollbar-thumb-hover: #268090;
+  --link-color: #268bd2;
+  --add-flip-bg: #1a4a10;
+  --limit-ready-bg: #0a2a10;
+
+  /* Glass helpers */
+  --glass-body-from: #001820;
+  --glass-body-via: #002030;
+  --glass-body-to: #00182a;
+  --glass-panel: rgba(7, 54, 66, 0.60);
+  --glass-elevated: rgba(7, 54, 66, 0.70);
+  --glass-hover: rgba(14, 71, 86, 0.70);
+  --glass-input: rgba(7, 54, 66, 0.50);
+  --glass-muted: rgba(7, 54, 66, 0.40);
+  --glass-border-card: rgba(38, 139, 210, 0.20);
+  --glass-border-main: rgba(38, 139, 210, 0.10);
+  --glass-border-section: rgba(38, 139, 210, 0.14);
+  --glass-border-input: rgba(38, 139, 210, 0.22);
+  --glass-scrollbar: rgba(38, 139, 210, 0.18);
+
+  /* Neumorphism helpers */
+  --neu-shadow-dark: #001a22;
+  --neu-shadow-light: #0d4a58;
+  --neu-accent-shadow: #1a6daa;
+
+  /* Skeuomorphism helpers */
+  --skeu-body-from: #001a22;
+  --skeu-body-to: #002b36;
+  --skeu-card-from: #0a4050;
+  --skeu-card-mid: #073642;
+  --skeu-card-to: #053038;
+  --skeu-card-highlight: #0e4756;
+  --skeu-card-shadow-edge: #001a22;
+  --skeu-header-from: #0a4050;
+  --skeu-header-to: #073642;
+  --skeu-btn-from: #0d4a58;
+  --skeu-btn-to: #073642;
+  --skeu-btn-active-from: #268bd2;
+  --skeu-btn-active-to: #1a6daa;
+}

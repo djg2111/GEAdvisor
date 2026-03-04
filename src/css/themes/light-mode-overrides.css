@@ -1,0 +1,36 @@
+﻿/* ─────────────────────────────────────────────────────────────────────────────
+ *  LIGHT-MODE: consolidated overrides
+ *  - .view-btn.active text forced white for all light colourways
+ *  - Badge/table tokens adjusted for light backgrounds
+ * ───────────────────────────────────────────────────────────────────────────── */
+
+body[data-mode="light"] .view-btn.active {
+  color: #ffffff;
+}
+
+body[data-mode="light"] {
+  --badge-velocity-insta-bg: rgba(22, 163, 74, 0.22);
+  --badge-velocity-active-bg: rgba(0, 80, 180, 0.18);
+  --badge-velocity-slow-bg: rgba(200, 150, 0, 0.20);
+  --badge-velocity-muted-bg: rgba(100, 100, 100, 0.16);
+  --badge-trend-up-bg: rgba(22, 163, 74, 0.22);
+  --badge-trend-down-bg: rgba(220, 38, 38, 0.20);
+  --badge-neutral-bg: rgba(100, 100, 100, 0.14);
+  --badge-hype-vol-bg: rgba(217, 119, 6, 0.18);
+  --badge-tier-free-bg: rgba(22, 163, 74, 0.14);
+  --badge-tier-free-border: rgba(22, 163, 74, 0.35);
+  --badge-tier-freetier-bg: rgba(13, 148, 136, 0.14);
+  --badge-tier-freetier-border: rgba(13, 148, 136, 0.35);
+  --badge-tier-lowcost-bg: rgba(0, 80, 180, 0.14);
+  --badge-tier-lowcost-border: rgba(0, 80, 180, 0.35);
+  --badge-tier-neutral-bg: rgba(100, 100, 100, 0.10);
+  --badge-tier-neutral-border: rgba(100, 100, 100, 0.22);
+  --table-active-row-bg: rgba(0, 80, 180, 0.08);
+  --table-hover-row-bg: rgba(0, 0, 0, 0.03);
+  --setup-note-bg: rgba(180, 140, 0, 0.10);
+  --setup-note-border: rgba(180, 140, 0, 0.25);
+  --detail-expanded-bg: rgba(0, 0, 0, 0.05);
+  --close-hover-bg: rgba(220, 38, 38, 0.10);
+  --win-glow: color-mix(in srgb, var(--accent-green-bright) 10%, transparent);
+  --loss-glow: color-mix(in srgb, var(--accent-red-dark) 10%, transparent);
+}

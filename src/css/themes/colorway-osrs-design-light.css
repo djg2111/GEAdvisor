@@ -1,0 +1,124 @@
+/* ─────────────────────────────────────────────────────────────────────────────
+ *  COLORWAY: OSRS Design — Light
+ *
+ *  Light-mode adaptation of the OSRS Design System palette.
+ *  Warm parchment backgrounds with deep brown/gold text and accents.
+ * ───────────────────────────────────────────────────────────────────────────── */
+
+body[data-mode="light"][data-colorway="osrs-design"] {
+  /* ── Backgrounds ─────────────────────── */
+  --bg-main: #f8f0dc;
+  --bg-panel: #fff8e8;
+  --bg-elevated: #fdf4e0;
+  --bg-hover: #f0e6cc;
+  --dropdown-bg: #fdf4e0;
+  --dropdown-hover-bg: #f0e6cc;
+  --bg-input: #f2e8d0;
+  --bg-muted: #eadfc4;
+  --bg-filter: #f4ecd4;
+  --bg-number-input: #f2e8d0;
+
+  /* ── Text ────────────────────────────── */
+  --text-main: #382d1a;
+  --text-bright: #0f0f0f;
+  --text-accent: #694d23;
+  --text-heading: #8a5e0a;
+  --text-price: #1a7a1a;
+  --text-muted: #7a6a4a;
+  --text-soft: #9a8a68;
+  --text-dimmed: #baa880;
+
+  /* ── Borders ─────────────────────────── */
+  --border-main: #d8c8a4;
+  --border-section: #d0be96;
+  --border-card: #c8b68a;
+  --border-input: #c0ae80;
+  --border-subtle: #e0d2b0;
+  --border-hype: #d4a520;
+  --border-hype-hover: #b8920a;
+
+  /* ── Primary action ──────────────────── */
+  --accent-primary: #694d23;
+  --accent-primary-hover: #7a5e30;
+  --accent-primary-active: #503a18;
+  --accent-focus: #e6a519;
+
+  /* ── Semantic accents ────────────────── */
+  --accent-blue-text: #0066cc;
+  --accent-green: #228b22;
+  --accent-green-bright: #1a7a1a;
+  --accent-teal: #1a8a7a;
+  --accent-gold: #c89000;
+  --accent-gold-hype: #b07808;
+  --accent-red: #cc2222;
+  --accent-red-dark: #990000;
+  --accent-red-bg: #fff0e8;
+  --accent-red-border: #e0a090;
+  --accent-red-border-hover: #d08070;
+  --accent-hype: #c87e10;
+
+  /* ── Contrast base (referenced by contrast-modifiers — never self-referencing) */
+  --accent-teal-base: #1a8a7a;
+  --accent-red-base: #cc2222;
+  --accent-blue-text-base: #0066cc;
+  --accent-gold-base: #c89000;
+
+  /* ── Chat ─────────────────────────────── */
+  --chat-user-bg: #f8eed0;
+  --chat-error-bg: #fff0e8;
+
+  /* ── Badges ──────────────────────────── */
+  --badge-buy-bg: #e0eaf0;
+  --badge-sell-bg: #d8f0d0;
+  --badge-hype-bg: #f8f0c8;
+
+  /* ── Modal ───────────────────────────── */
+  --modal-backdrop: rgba(0, 0, 0, 0.25);
+  --modal-shadow: rgba(0, 0, 0, 0.15);
+
+  /* ── Scrollbar ───────────────────────── */
+  --scrollbar-thumb: #c0ae80;
+  --scrollbar-thumb-hover: #a09068;
+
+  /* ── Misc ─────────────────────────────── */
+  --link-color: #694d23;
+  --add-flip-bg: #d0ecc0;
+  --limit-ready-bg: #d8f0d0;
+
+  /* ── Style helper vars (Glass) ───────── */
+  --glass-body-from: #e8dcc0;
+  --glass-body-via: #f0e4cc;
+  --glass-body-to: #e0d4b0;
+  --glass-panel: rgba(255, 248, 232, 0.55);
+  --glass-elevated: rgba(255, 248, 232, 0.65);
+  --glass-hover: rgba(255, 248, 232, 0.70);
+  --glass-input: rgba(255, 248, 232, 0.50);
+  --glass-muted: rgba(255, 248, 232, 0.40);
+  --glass-border-card: rgba(105, 77, 35, 0.15);
+  --glass-border-main: rgba(105, 77, 35, 0.08);
+  --glass-border-section: rgba(105, 77, 35, 0.10);
+  --glass-border-input: rgba(105, 77, 35, 0.18);
+  --glass-scrollbar: rgba(105, 77, 35, 0.12);
+
+  /* ── Style helper vars (Neumorphism) ─── */
+  --neu-shadow-dark: #c8b890;
+  --neu-shadow-light: #fff8ea;
+  --neu-accent-shadow: #503a18;
+
+  /* ── Style helper vars (Skeuomorphism) ── */
+  --skeu-body-from: #e4d8b8;
+  --skeu-body-to: #f8f0dc;
+  --skeu-card-from: #fff8e8;
+  --skeu-card-mid: #fdf4e0;
+  --skeu-card-to: #f4ecd4;
+  --skeu-card-highlight: #fff8ea;
+  --skeu-card-shadow-edge: #c0ae80;
+  --skeu-header-from: #fdf4e0;
+  --skeu-header-to: #f4ecd4;
+  --skeu-btn-from: #f8f0dc;
+  --skeu-btn-to: #eadfc4;
+  --skeu-btn-active-from: #694d23;
+  --skeu-btn-active-to: #503a18;
+}
+
+/* (light-mode view-btn.active consolidated — see light-mode-overrides.css) */

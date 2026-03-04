@@ -1,0 +1,376 @@
+﻿/* ── Portfolio view ─────────────────────────────────────────────────────────────────── */
+
+#portfolio-view {
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  padding: 8px 10px 10px;
+}
+
+#portfolio-view h2 {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-heading);
+  margin: 0 0 6px;
+  flex-shrink: 0;
+}
+
+/* Add-flip form */
+
+.portfolio-form {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-bottom: 8px;
+  padding: 6px;
+  background: var(--bg-panel);
+  border: 2px solid var(--border-main);
+  border-radius: 4px;
+}
+
+.portfolio-form input[type="text"],
+.portfolio-form input[type="number"] {
+  width: 100%;
+  font-size: 11px;
+  padding: 4px 6px;
+  background: var(--bg-input);
+  border: 1px solid var(--border-input);
+  border-radius: 3px;
+  color: var(--text-main);
+}
+
+.portfolio-form input[type="text"]:focus,
+.portfolio-form input[type="number"]:focus {
+  border-color: var(--accent-focus);
+  outline: none;
+}
+
+/* Autocomplete dropdown */
+
+.autocomplete-wrap {
+  position: relative;
+}
+
+.autocomplete-list {
+  display: none;
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  z-index: 50;
+  max-height: 180px;
+  overflow-y: auto;
+  background: var(--bg-elevated);
+  border: 1px solid var(--accent-focus);
+  border-top: none;
+  border-radius: 0 0 4px 4px;
+}
+
+.autocomplete-list.open {
+  display: block;
+}
+
+.autocomplete-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 4px 8px;
+  font-size: 11px;
+  color: var(--text-main);
+  cursor: pointer;
+  transition: background .1s;
+}
+
+.autocomplete-item:hover,
+.autocomplete-item.highlighted {
+  background: var(--accent-primary-active);
+}
+
+.autocomplete-item-price {
+  color: var(--accent-green);
+  font-size: 10px;
+  margin-left: 8px;
+  flex-shrink: 0;
+}
+
+.autocomplete-empty {
+  padding: 6px 8px;
+  font-size: 11px;
+  color: var(--text-dimmed);
+  font-style: italic;
+}
+
+.autocomplete-section {
+  padding: 3px 8px;
+  font-size: 9px;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  background: var(--bg-main);
+  border-top: 2px solid var(--border-main);
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+
+.autocomplete-section:first-child {
+  border-top: none;
+}
+
+.portfolio-form-row {
+  display: flex;
+  gap: 4px;
+}
+
+.portfolio-form-row input {
+  flex: 1;
+  min-width: 0;
+}
+
+#add-flip-btn {
+  font-size: 11px;
+  padding: 4px 10px;
+  background: var(--add-flip-bg);
+  border: none;
+  border-radius: 3px;
+  color: var(--text-bright);
+  cursor: pointer;
+  font-weight: 600;
+  transition: background .15s;
+}
+
+#add-flip-btn:hover {
+  background: var(--accent-green-bright);
+}
+
+/* Active flips list */
+
+#active-flips-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.flip-card {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 6px 8px;
+  background: var(--bg-panel);
+  border: 2px solid var(--border-main);
+  border-radius: 4px;
+  font-size: 11px;
+  transition: border-color .3s;
+}
+
+.flip-card.limit-ready {
+  border-color: var(--accent-green-bright);
+  background: var(--limit-ready-bg);
+}
+
+.flip-card-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.flip-item-name {
+  font-weight: 600;
+  color: var(--text-accent);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.flip-remove-btn {
+  background: transparent;
+  border: 1px solid var(--border-input);
+  border-radius: 3px;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: 10px;
+  padding: 1px 6px;
+  transition: background .15s, color .15s;
+}
+
+.flip-remove-btn:hover {
+  background: var(--accent-red-dark);
+  color: var(--text-bright);
+  border-color: var(--accent-red-dark);
+}
+
+.flip-details {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 12px;
+  color: var(--text-soft);
+}
+
+.flip-details span {
+  white-space: nowrap;
+}
+
+.flip-timer {
+  font-weight: 600;
+  color: var(--text-heading);
+}
+
+.flip-timer.ready {
+  color: var(--accent-green-bright);
+}
+
+.flip-profit {
+  color: var(--accent-green);
+  font-weight: 600;
+}
+
+.flip-profit.loss {
+  color: var(--accent-red);
+}
+
+.portfolio-empty {
+  color: var(--text-dimmed);
+  font-size: 11px;
+  font-style: italic;
+  padding: 8px 0;
+}
+
+/* ── Portfolio sub-navigation ───────────────────────────────────────────────── */
+
+.portfolio-sub-nav {
+  display: flex;
+  gap: 2px;
+  margin-bottom: 8px;
+  border-bottom: 2px solid var(--border-main);
+  padding-bottom: 4px;
+}
+
+.portfolio-sub-btn {
+  flex: 1;
+  padding: 5px 8px;
+  background: transparent;
+  border: 1px solid var(--border-subtle);
+  border-radius: 4px 4px 0 0;
+  color: var(--text-muted);
+  font-size: 11px;
+  cursor: pointer;
+  transition: background .15s, color .15s, border-color .15s;
+}
+
+.portfolio-sub-btn:hover {
+  color: var(--text-main);
+  border-color: var(--text-dimmed);
+}
+
+.portfolio-sub-btn.active {
+  background: var(--bg-elevated);
+  color: var(--text-main);
+  border-color: var(--accent-primary);
+  border-bottom: 2px solid var(--accent-primary);
+}
+
+/* ── Portfolio stats dashboard ──────────────────────────────────────────────── */
+
+.portfolio-stats {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.stat-card {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 8px 6px;
+  background: var(--bg-panel);
+  border: 2px solid var(--border-main);
+  border-radius: 4px;
+}
+
+.stat-label {
+  font-size: 10px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.stat-value {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-main);
+}
+
+.stat-value.profit {
+  color: var(--accent-green);
+}
+
+.stat-value.loss {
+  color: var(--accent-red);
+}
+
+/* ── Completed flip cards ───────────────────────────────────────────────────── */
+
+.completed-flip-card {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 6px 8px;
+  background: var(--bg-panel);
+  border: 2px solid var(--border-main);
+  border-left: 3px solid var(--border-main);
+  border-radius: 4px;
+  font-size: 11px;
+  margin-bottom: 4px;
+}
+
+.completed-flip-card.win {
+  border-left-color: var(--accent-green-bright);
+  background: linear-gradient(90deg, var(--win-glow) 0%, transparent 40%);
+}
+
+.completed-flip-card.loss {
+  border-left-color: var(--accent-red-dark);
+  background: linear-gradient(90deg, var(--loss-glow) 0%, transparent 40%);
+}
+
+.completed-flip-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.completed-flip-top .flip-item-name {
+  font-weight: 600;
+  color: var(--text-accent);
+}
+
+.completed-flip-date {
+  font-size: 10px;
+  color: var(--text-dimmed);
+}
+
+.completed-flip-details {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 12px;
+  color: var(--text-soft);
+}
+
+.completed-flip-details span {
+  white-space: nowrap;
+}
+
+.completed-flip-profit {
+  font-weight: 600;
+}
+
+.completed-flip-profit.win {
+  color: var(--accent-green);
+}
+
+.completed-flip-profit.loss {
+  color: var(--accent-red);
+}

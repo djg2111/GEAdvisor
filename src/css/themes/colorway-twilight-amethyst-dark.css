@@ -1,0 +1,121 @@
+/* ─────────────────────────────────────────────────────────────────────────────
+ *  COLORWAY: Twilight Amethyst — Dark
+ *  Deep indigo-violet palette inspired by the Classic Glass aesthetic.
+ *  Rich purple backgrounds, lavender text accents, amethyst highlights.
+ * ───────────────────────────────────────────────────────────────────────────── */
+
+body[data-mode="dark"][data-colorway="twilight-amethyst"] {
+  /* ── Backgrounds ─────────────────────── */
+  --bg-main: #12101e;
+  --bg-panel: #1a1530;
+  --bg-elevated: #221c3a;
+  --bg-hover: #2a2244;
+  --dropdown-bg: #221c3a;
+  --dropdown-hover-bg: #2a2244;
+  --bg-input: #2e264a;
+  --bg-muted: #1e1832;
+  --bg-filter: #0e0c18;
+  --bg-number-input: #241e3e;
+
+  /* ── Text ────────────────────────────── */
+  --text-main: #cdc5e0;
+  --text-bright: #f0ecff;
+  --text-accent: #b8a4e8;
+  --text-heading: #d4b8ff;
+  --text-price: #4ade80;
+  --text-muted: #9088aa;
+  --text-soft: #a89cc4;
+  --text-dimmed: #5e5478;
+
+  /* ── Borders ─────────────────────────── */
+  --border-main: #2e2648;
+  --border-section: #38305a;
+  --border-card: #443a68;
+  --border-input: #504674;
+  --border-subtle: #382e56;
+  --border-hype: #7a5a2e;
+  --border-hype-hover: #a08030;
+
+  /* ── Primary action ──────────────────── */
+  --accent-primary: #7c4dff;
+  --accent-primary-hover: #9060ff;
+  --accent-primary-active: #5c30cc;
+  --accent-focus: #9070ff;
+
+  /* ── Semantic accents ────────────────── */
+  --accent-blue-text: #a088d8;
+  --accent-green: #5ece6b;
+  --accent-green-bright: #27ae60;
+  --accent-teal: #4ec9b0;
+  --accent-gold: #f0c040;
+  --accent-gold-hype: #f5c542;
+  --accent-hype: #ffab40;
+  --accent-red: #ff6b6b;
+  --accent-red-dark: #c0392b;
+  --accent-red-bg: #2e1428;
+  --accent-red-border: #6b3050;
+  --accent-red-border-hover: #a04070;
+
+  /* ── Contrast base (referenced by contrast-modifiers — never self-referencing) */
+  --accent-teal-base: #4ec9b0;
+  --accent-red-base: #ff6b6b;
+  --accent-blue-text-base: #a088d8;
+  --accent-gold-base: #f0c040;
+
+  /* ── Chat ─────────────────────────────── */
+  --chat-user-bg: #2e2258;
+  --chat-error-bg: #2e1428;
+
+  /* ── Badges ──────────────────────────── */
+  --badge-buy-bg: #1e1838;
+  --badge-sell-bg: #1e3a1e;
+  --badge-hype-bg: #3a2e10;
+
+  /* ── Modal ───────────────────────────── */
+  --modal-backdrop: rgba(8, 6, 20, 0.75);
+  --modal-shadow: rgba(0, 0, 0, 0.85);
+
+  /* ── Scrollbar ───────────────────────── */
+  --scrollbar-thumb: #443a68;
+  --scrollbar-thumb-hover: #5e5288;
+
+  /* ── Misc ─────────────────────────────── */
+  --link-color: #b8a4e8;
+  --add-flip-bg: #1b6b2a;
+  --limit-ready-bg: #1a2e1a;
+
+  /* ── Style helper vars (Glass) ───────── */
+  --glass-body-from: #0a0a1e;
+  --glass-body-via: #1a1040;
+  --glass-body-to: #0a2040;
+  --glass-panel: rgba(180, 160, 255, 0.06);
+  --glass-elevated: rgba(180, 160, 255, 0.10);
+  --glass-hover: rgba(180, 160, 255, 0.13);
+  --glass-input: rgba(180, 160, 255, 0.08);
+  --glass-muted: rgba(180, 160, 255, 0.05);
+  --glass-border-card: rgba(180, 160, 255, 0.20);
+  --glass-border-main: rgba(180, 160, 255, 0.10);
+  --glass-border-section: rgba(180, 160, 255, 0.13);
+  --glass-border-input: rgba(180, 160, 255, 0.22);
+  --glass-scrollbar: rgba(180, 160, 255, 0.15);
+
+  /* ── Style helper vars (Neumorphism) ─── */
+  --neu-shadow-dark: #0a0818;
+  --neu-shadow-light: #2e2648;
+  --neu-accent-shadow: #5c30cc;
+
+  /* ── Style helper vars (Skeuomorphism) ── */
+  --skeu-body-from: #0e0c18;
+  --skeu-body-to: #12101e;
+  --skeu-card-from: #2e2648;
+  --skeu-card-mid: #1a1530;
+  --skeu-card-to: #141020;
+  --skeu-card-highlight: #443a68;
+  --skeu-card-shadow-edge: #0a0818;
+  --skeu-header-from: #2e2648;
+  --skeu-header-to: #1e1832;
+  --skeu-btn-from: #38305a;
+  --skeu-btn-to: #28204a;
+  --skeu-btn-active-from: #7c4dff;
+  --skeu-btn-active-to: #5c30cc;
+}

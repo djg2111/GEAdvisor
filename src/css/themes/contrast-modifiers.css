@@ -1,0 +1,89 @@
+﻿/* ─────────────────────────────────────────────────────────────────────────────
+ *  CONTRAST MODIFIERS (body[data-contrast])
+ *
+ *  Layered on top of any Mode × Colorway combination.
+ *  "soft"  — reduced contrast (lighter darks, softer lights)
+ *  "hard"  — maximum contrast (deeper darks, brighter lights)
+ *
+ *  IMPORTANT: Each override references ONLY sibling properties (never the
+ *  property being set) to avoid CSS custom-property dependency cycles.
+ *  The dependency graph is a strict DAG — no circular references.
+ *
+ *  Specificity is intentionally 0,3,1 (`body[mode][contrast][colorway]`)
+ *  so contrast modifiers always beat colorway selectors (0,2,1),
+ *  regardless of source order. [data-colorway] is always present on body.
+ *
+ *  Financial accent colours (--accent-green, --accent-teal, --accent-red,
+ *  --accent-blue-text, --accent-gold) are adjusted in hard contrast to
+ *  maintain WCAG AA ≥ 4.5:1 against shifted backgrounds.
+ * ───────────────────────────────────────────────────────────────────────────── */
+
+/* ── Soft contrast — dark modes ──────────────────────────────────────────── */
+body[data-mode="dark"][data-contrast="soft"][data-colorway] {
+  /* Lift base bg toward panel/elevated — compresses the dark range */
+  --bg-main:      color-mix(in srgb, var(--bg-panel) 65%, var(--bg-elevated));
+  --bg-filter:    var(--bg-muted);
+  /* Soften borders — blend section border toward elevated bg */
+  --border-main:  color-mix(in srgb, var(--border-section) 55%, var(--bg-elevated));
+  /* Pull text extremes inward — narrower brightness span */
+  --text-bright:  color-mix(in srgb, var(--text-main), white 15%);
+  --text-dimmed:  var(--text-muted);
+  /* Lighter modal scrim */
+  --modal-backdrop: rgba(0, 0, 0, 0.35);
+}
+
+/* ── Hard contrast — dark modes ──────────────────────────────────────────── */
+body[data-mode="dark"][data-contrast="hard"][data-colorway] {
+  /* Push backgrounds toward black — deepest blacks, vivid separation */
+  --bg-filter:   color-mix(in srgb, var(--bg-elevated) 55%, black);
+  --bg-main:     color-mix(in srgb, var(--bg-filter) 70%, black);
+  --bg-muted:    color-mix(in srgb, var(--bg-filter) 65%, black);
+  --bg-panel:    color-mix(in srgb, var(--bg-muted) 72%, black);
+  /* Full-white text ceiling */
+  --text-bright: #ffffff;
+  /* Harden borders */
+  --border-main: color-mix(in srgb, var(--border-section) 60%, black);
+  /* Stronger modal scrim */
+  --modal-backdrop: rgba(0, 0, 0, 0.75);
+  /* WCAG: vivify financial accent colours against deeper backgrounds.
+     References *-base vars (set by each colorway) to avoid circular deps. */
+  --accent-green:       color-mix(in srgb, var(--accent-green-bright), white 12%);
+  --accent-teal:        color-mix(in srgb, var(--accent-teal-base), white 10%);
+  --accent-red:         color-mix(in srgb, var(--accent-red-base), white 8%);
+  --accent-blue-text:   color-mix(in srgb, var(--accent-blue-text-base), white 10%);
+  --accent-gold:        color-mix(in srgb, var(--accent-gold-base), white 8%);
+}
+
+/* ── Soft contrast — light modes ─────────────────────────────────────────── */
+body[data-mode="light"][data-contrast="soft"][data-colorway] {
+  /* Push backgrounds toward white — flatter, airier feel */
+  --bg-main:     color-mix(in srgb, var(--bg-panel) 55%, white);
+  --bg-panel:    color-mix(in srgb, var(--bg-elevated) 60%, white);
+  /* Lighten borders */
+  --border-main: color-mix(in srgb, var(--border-section) 50%, white);
+  /* Reduce text intensity */
+  --text-main:   var(--text-muted);
+  --text-bright: color-mix(in srgb, var(--text-muted), black 25%);
+  /* Softer modal scrim */
+  --modal-backdrop: rgba(0, 0, 0, 0.15);
+}
+
+/* ── Hard contrast — light modes ─────────────────────────────────────────── */
+body[data-mode="light"][data-contrast="hard"][data-colorway] {
+  /* Push backgrounds brighter — near-white panels */
+  --bg-main:     color-mix(in srgb, var(--bg-panel) 50%, white);
+  --bg-panel:    #ffffff;
+  --bg-muted:    color-mix(in srgb, var(--bg-elevated) 60%, white);
+  /* Maximum text darkness */
+  --text-bright: #000000;
+  /* Harden borders */
+  --border-main: color-mix(in srgb, var(--border-section) 70%, var(--text-dimmed));
+  /* Stronger modal scrim */
+  --modal-backdrop: rgba(0, 0, 0, 0.40);
+  /* WCAG: darken financial accent colours against bright bg (≥ 4.5:1).
+     References *-base vars (set by each colorway) to avoid circular deps. */
+  --accent-green:       color-mix(in srgb, var(--accent-green-bright), black 18%);
+  --accent-teal:        color-mix(in srgb, var(--accent-teal-base), black 15%);
+  --accent-blue-text:   color-mix(in srgb, var(--accent-blue-text-base), black 12%);
+  --accent-gold:        color-mix(in srgb, var(--accent-gold-base), black 15%);
+}

@@ -1,0 +1,176 @@
+﻿/* \u2500\u2500 Popout button \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */
+
+.popout-btn {
+  all: unset;
+  cursor: pointer;
+  font-size: 14px;
+  line-height: 1;
+  color: var(--text-muted);
+  padding: 2px 4px;
+  border-radius: 3px;
+  flex-shrink: 0;
+  transition: color 0.15s, background 0.15s;
+}
+
+.popout-btn:hover {
+  color: var(--accent-blue-text);
+  background: rgba(86, 156, 214, 0.12);
+}
+
+/* ── Card action button group ──────────────────────────────────────────────── */
+
+.card-actions {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  flex-shrink: 0;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+/* ── Favourite button ──────────────────────────────────────────────────────── */
+
+.fav-btn {
+  all: unset;
+  cursor: pointer;
+  font-size: 15px;
+  line-height: 1;
+  color: var(--text-muted);
+  padding: 2px 4px;
+  border-radius: 3px;
+  flex-shrink: 0;
+  transition: color 0.15s, transform 0.15s;
+}
+
+.fav-btn:hover {
+  color: var(--accent-gold);
+  transform: scale(1.15);
+}
+
+/* Filled star when item is favourited. */
+.market-card.favorited .fav-btn,
+.modal-fav-btn:has(+ .item-modal-close) {
+  /* fallback — override via JS textContent ★ vs ☆ */
+}
+
+.market-card.favorited {
+  border-left: 2px solid var(--accent-gold);
+}
+
+/* Quick-add to portfolio button */
+
+.quick-add-btn {
+  all: unset;
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 1;
+  color: var(--text-muted);
+  padding: 1px 5px;
+  border-radius: 3px;
+  flex-shrink: 0;
+  transition: color 0.15s, background 0.15s;
+}
+
+.quick-add-btn:hover {
+  color: var(--accent-teal);
+  background: rgba(78, 201, 176, 0.12);
+}
+
+/* ── Alert bell button (inline on card) ────────────────────────────────────── */
+
+.alert-btn {
+  all: unset;
+  cursor: pointer;
+  font-size: 13px;
+  line-height: 1;
+  color: var(--text-muted);
+  padding: 2px 4px;
+  border-radius: 3px;
+  flex-shrink: 0;
+  opacity: 0.55;
+  transition: color 0.15s, opacity 0.15s, transform 0.15s;
+}
+
+.alert-btn:hover {
+  opacity: 1;
+  transform: scale(1.15);
+}
+
+.alert-btn.alert-active {
+  opacity: 1;
+  color: var(--accent-gold);
+  filter: drop-shadow(0 0 2px rgba(240, 192, 64, 0.5));
+}
+
+/* ── Inline card alert popover ─────────────────────────────────────────────── */
+
+.card-alert-popover {
+  display: none;
+  padding: 6px 10px;
+  background: var(--bg-muted);
+  border: 1px solid var(--border-section);
+  border-top: none;
+  border-radius: 0 0 4px 4px;
+  gap: 4px;
+}
+
+.card-alert-popover.open {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.card-alert-row {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.card-alert-row label {
+  font-size: 10px;
+  color: var(--text-muted);
+  white-space: nowrap;
+  min-width: 34px;
+}
+
+.card-alert-row input[type="number"] {
+  width: 80px;
+  padding: 2px 5px;
+  font-size: 10px;
+  background: var(--bg-input);
+  border: 1px solid var(--border-input);
+  color: var(--text-main);
+  border-radius: 3px;
+}
+
+.card-alert-row input[type="number"]::placeholder {
+  color: var(--text-muted);
+  opacity: 0.6;
+}
+
+/* ── External link buttons (Wiki / GE) ─────────────────────────────────────── */
+
+.ext-link {
+  all: unset;
+  cursor: pointer;
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1;
+  color: var(--text-muted);
+  padding: 2px 5px;
+  border-radius: 3px;
+  flex-shrink: 0;
+  text-decoration: none;
+  transition: color 0.15s, background 0.15s;
+}
+
+.ext-link.wiki-link:hover {
+  color: var(--accent-blue-text);
+  background: rgba(86, 156, 214, 0.12);
+}
+
+.ext-link.ge-link:hover {
+  color: var(--accent-gold);
+  background: rgba(240, 192, 64, 0.12);
+}

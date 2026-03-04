@@ -1,0 +1,55 @@
+﻿/* ── Predictive analytics badges on market cards ────────────────────────────── */
+
+.predictive-badges {
+  display: flex;
+  gap: 3px;
+  flex-wrap: wrap;
+  align-items: center;
+  margin-top: 2px;
+}
+
+.ema-badge,
+.predicted-badge,
+.vol-badge {
+  /* inherits sizing from shared badge base — only color overrides here */
+  cursor: help;
+}
+
+.ema-badge {
+  background: var(--badge-velocity-active-bg);
+  color: var(--accent-blue-text);
+}
+
+.ema-badge.up {
+  color: var(--accent-green-bright);
+  background: var(--badge-trend-up-bg);
+}
+
+.ema-badge.down {
+  color: var(--accent-red);
+  background: var(--badge-trend-down-bg);
+}
+
+.predicted-badge {
+  font-weight: 600;
+}
+
+.predicted-badge.up {
+  color: var(--accent-green-bright);
+  background: var(--badge-trend-up-bg);
+}
+
+.predicted-badge.down {
+  color: var(--accent-red);
+  background: var(--badge-trend-down-bg);
+}
+
+.predicted-badge.neutral {
+  color: var(--text-muted);
+  background: var(--badge-neutral-bg);
+}
+
+.vol-badge {
+  background: var(--badge-hype-vol-bg);
+  color: var(--accent-hype, var(--accent-gold));
+}

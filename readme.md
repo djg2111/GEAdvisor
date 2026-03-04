@@ -70,10 +70,10 @@ Uses a **RAG (Retrieval-Augmented Generation) pipeline** to combine live GE mark
 - **Price alerts** — set buy/sell thresholds via the inline 🔔 bell on any card or in the analytics modal; triggers native browser notifications and in-app toasts when prices cross your targets
 - **Export / Import** — back up favourites, portfolio, flip history, and all theme preferences (mode, style, colorway, contrast) to a JSON file; restore from any previous backup
 - **Quick-add** — one-click add from any market card to the portfolio form
-- **Four-axis theme system** — 2 Modes (Dark, Light) × 4 Styles (Basic, Glassmorphism, Neumorphism, Skeuomorphism) × 6 Colorways (Classic, OSRS, RS3 Modern, RS Lobby, Gruvbox, Solarized) × 3 Contrast levels (Normal, Soft, Hard) = 144 combinations, all via CSS custom properties with `color-mix()` contrast modifiers
+- **Four-axis theme system** — 2 Modes (Dark, Light) × 4 Styles (Basic, Glassmorphism, Neumorphism, Skeuomorphism) × 8 Colorways (Default, Classic, RS3 Modern, RS Lobby, Gruvbox, Solarized, Twilight Amethyst, OSRS Design) × 3 Contrast levels (Normal, Soft, Hard) = 192 combinations, all via CSS custom properties with non-circular `color-mix()` contrast modifiers (WCAG AA financial-text adjustments in hard contrast via `*-base` duplicate vars to avoid self-referencing cycles); glassmorphism uses `backdrop-filter: blur()` + translucent rgba panels; neumorphism uses canvas-matching backgrounds + paired box-shadows; skeuomorphism uses gradient textures + inner-shadow bevels
 - **Responsive desktop layout** — wider modals and expanded grids at ≥ 800 px
 - **Mobile-friendly** — analytics modal detail rows wrap cleanly on small screens, Top 20 header actions flow to a new line, sidebar layout auto-disables below 700 px
-- **Accessibility** — WCAG AA contrast-compliant muted text, `:focus-visible` keyboard focus ring on all interactive elements, `aria-labelledby` on analytics modal, ▲/▼ shape prefixes on profit/loss indicators for colour-blind users, 10 px minimum badge font size
+- **Accessibility** — WCAG AA contrast-compliant muted text, `:focus-visible` keyboard focus ring on all interactive elements, `aria-labelledby` on analytics modal, ▲/▼ shape prefixes on profit/loss indicators for colour-blind users, 11 px minimum badge font size (scaled for 110–125% Windows DPI), standardised green `--text-price` across all themes for consistent profit/value semantics
 - **Error recovery UI** — dismissible error banner with retry button for network/cache failures
 - **Persistent state** — all settings, chat history, favourites, sort preferences, compact-tiles preference, and portfolio data saved to localStorage
 - **Tabbed & sidebar layouts** — switch between compact tabbed view or full sidebar mode
@@ -129,6 +129,7 @@ Weird Gloop API → IndexedDB Cache → Deterministic Filtering → LLM Synthesi
 | **LLM** | `llmService.ts` | OpenAI-compatible chat client with anti-hallucination prompt |
 | **Portfolio** | `portfolioService.ts` | Active flips + completed history with P&L tracking |
 | **UI** | `uiService.ts` | All DOM manipulation — services are UI-agnostic |
+| **Styling** | `css/main.css` | Modular CSS entry point — `@import` cascade across `css/{base,themes,styles,layout,components}/` (51 files). Webpack `css-loader` resolves imports into a single bundle |
 | **Entry** | `index.ts` | Thin orchestrator (~50 lines): Alt1 detect → pipeline → UI |
 
 See [HANDOFF.md](HANDOFF.md) for exhaustive architecture documentation.

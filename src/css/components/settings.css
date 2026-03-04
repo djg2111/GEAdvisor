@@ -1,0 +1,114 @@
+﻿/* ── Settings panel ───────────────────────────────────────────────────────── */
+
+#settings-panel {
+  background: var(--bg-panel);
+  border-bottom: 2px solid var(--border-main);
+  padding: 6px 10px;
+  font-size: 12px;
+  flex-shrink: 0;
+}
+
+#settings-panel summary {
+  cursor: pointer;
+  user-select: none;
+  color: var(--text-accent);
+  font-weight: 600;
+  outline: none;
+}
+
+.settings-body {
+  margin-top: 6px;
+}
+
+.settings-body label {
+  display: block;
+  margin-bottom: 3px;
+  color: var(--text-muted);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.settings-row {
+  display: flex;
+  gap: 6px;
+}
+
+.settings-row input {
+  flex: 1;
+}
+
+.status-hint {
+  display: block;
+  margin-top: 4px;
+  font-size: 11px;
+  color: var(--accent-green);
+}
+
+.status-hint.error {
+  color: var(--accent-red);
+}
+
+/* ── Danger button ────────────────────────────────────────────────────────── */
+
+.danger-btn {
+  width: 100%;
+  font-size: 11px;
+  padding: 5px 10px;
+  background: var(--accent-red-bg);
+  border: 1px solid var(--accent-red-border);
+  color: var(--text-main);
+  border-radius: 3px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.danger-btn:hover {
+  background: var(--accent-red-border);
+  color: var(--text-bright);
+}
+
+.danger-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* ── Data management buttons ──────────────────────────────────────────────── */
+
+.data-mgmt .settings-row {
+  margin-top: 4px;
+}
+
+.data-mgmt button {
+  flex: 1;
+  font-size: 11px;
+  padding: 5px 8px;
+  background: var(--bg-input);
+  border: 1px solid var(--border-input);
+  color: var(--text-main);
+  border-radius: 3px;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.data-mgmt button:hover {
+  background: var(--bg-muted);
+  border-color: var(--accent-blue-text);
+  color: var(--accent-blue-text);
+}
+
+/* ── Settings field helpers ───────────────────────────────────────────────── */
+
+.settings-field {
+  margin-top: 6px;
+}
+
+.settings-field.hidden {
+  display: none;
+}
+
+.settings-body select,
+.settings-body input[type="text"] {
+  width: 100%;
+  margin-bottom: 6px;
+}

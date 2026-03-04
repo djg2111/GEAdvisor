@@ -1,0 +1,126 @@
+﻿/* ═════════════════════════════════════════════════════════════════════════════
+ *  LAYOUT MODES — driven by body[data-layout]
+ * ═════════════════════════════════════════════════════════════════════════════ */
+
+/* ── Tabbed layout (default — compact, in-game overlay) ───────────────────── */
+
+body[data-layout="tabbed"] #view-tabs {
+  display: flex;
+}
+
+body[data-layout="tabbed"] #app-content {
+  display: flex;
+  flex-direction: column;
+}
+
+body[data-layout="tabbed"] #market-view {
+  flex: 1 1 0;
+  display: none;                 /* hidden by default; .active-tab shows it */
+}
+
+body[data-layout="tabbed"] #advisor-view {
+  flex: 1 1 0;
+  display: none;
+}
+
+body[data-layout="tabbed"] #portfolio-view {
+  flex: 1 1 0;
+  display: none;
+}
+
+body[data-layout="tabbed"] #market-view.active-tab,
+body[data-layout="tabbed"] #advisor-view.active-tab,
+body[data-layout="tabbed"] #portfolio-view.active-tab {
+  display: flex;
+  flex-direction: column;
+}
+
+/* Market view in tabbed layout renders as a column */
+body[data-layout="tabbed"] #market-view.active-tab {
+  display: block;
+  overflow-y: auto;
+}
+
+/* Smooth tab transitions */
+body[data-layout="tabbed"] #market-view,
+body[data-layout="tabbed"] #advisor-view,
+body[data-layout="tabbed"] #portfolio-view {
+  opacity: 0;
+  transition: opacity 0.15s ease;
+}
+
+body[data-layout="tabbed"] #market-view.active-tab,
+body[data-layout="tabbed"] #advisor-view.active-tab,
+body[data-layout="tabbed"] #portfolio-view.active-tab {
+  opacity: 1;
+}
+
+/* ── Sidebar layout (side-by-side, second monitor) ────────────────────────── */
+/* Disable sidebar layout on small / mobile viewports — fall back to tabbed  */
+@media (max-width: 700px) {
+  body[data-layout="sidebar"] #view-tabs {
+    display: flex !important;    /* restore tabs on small screens */
+  }
+  body[data-layout="sidebar"] #app-content {
+    flex-direction: column !important;
+  }
+  body[data-layout="sidebar"] #market-view {
+    width: auto !important;
+    border-right: none !important;
+  }
+  body[data-layout="sidebar"] #advisor-view,
+  body[data-layout="sidebar"] #portfolio-view {
+    border-left: none !important;
+  }
+  /* Hide the sidebar button on mobile — it doesn't work well */
+  .layout-toggle #layout-sidebar-btn {
+    display: none;
+  }
+}
+
+body[data-layout="sidebar"] #view-tabs {
+  display: none;                 /* tabs not needed in sidebar mode */
+}
+
+body[data-layout="sidebar"] #app-content {
+  display: flex;
+  flex-direction: row;
+  gap: 1px;
+}
+
+body[data-layout="sidebar"] #market-view {
+  width: 360px;
+  flex-shrink: 0;
+  overflow-y: auto;
+  border-right: 2px solid var(--border-main);
+  display: block;
+}
+
+/* Force list-style column layout for market items in sidebar */
+body[data-layout="sidebar"] #market-items.tile,
+body[data-layout="sidebar"] #market-items.hybrid {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+body[data-layout="sidebar"] #market-items.tile .market-card-header,
+body[data-layout="sidebar"] #market-items.hybrid .market-card-header {
+  flex-direction: row;
+  text-align: left;
+}
+
+body[data-layout="sidebar"] #advisor-view {
+  flex: 1 1 0;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+body[data-layout="sidebar"] #portfolio-view {
+  flex: 1 1 0;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  border-left: 2px solid var(--border-main);
+}

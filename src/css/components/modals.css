@@ -1,0 +1,186 @@
+﻿/* ── Floating Item Detail Modal ────────────────────────────────────────────── */
+
+.item-modal-backdrop {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 500;
+  background: var(--modal-backdrop);
+  justify-content: center;
+  align-items: center;
+}
+
+.item-modal-backdrop.visible {
+  display: flex;
+}
+
+.item-modal {
+  background: var(--bg-main);
+  border: 1px solid var(--accent-blue-text);
+  border-radius: 6px;
+  width: 380px;
+  max-width: 92vw;
+  max-height: 85vh;
+  overflow-y: auto;
+  box-shadow: 0 8px 32px var(--modal-shadow);
+  animation: modal-in 0.15s ease-out;
+}
+
+@keyframes modal-in {
+  from { opacity: 0; transform: scale(0.95) translateY(8px); }
+  to   { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+.item-modal-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-bottom: 2px solid var(--border-main);
+}
+
+.item-modal-name {
+  flex: 1;
+  color: var(--text-accent);
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.item-modal-close {
+  all: unset;
+  cursor: pointer;
+  color: var(--text-muted);
+  font-size: 18px;
+  line-height: 1;
+  padding: 2px 6px;
+  border-radius: 3px;
+  flex-shrink: 0;
+  transition: color 0.15s, background 0.15s;
+}
+
+.item-modal-close:hover {
+  color: var(--accent-red);
+  background: var(--close-hover-bg);
+}
+
+.item-modal-body {
+  padding: 10px 12px;
+}
+
+.item-modal-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin-bottom: 8px;
+}
+
+/* (modal-sparkline removed — chart now in dedicated graph modal) */
+
+/* ── Graph Modal (deprecated — kept for backwards compat) ─────────────────── */
+
+.graph-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.15s ease;
+}
+.graph-modal-backdrop.visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.graph-modal {
+  background: var(--bg-main);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  width: 92%;
+  max-width: 520px;
+  max-height: 85vh;
+  overflow-y: auto;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.5);
+}
+
+.graph-modal-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--border);
+}
+.graph-modal-title {
+  flex: 1;
+  font-weight: 600;
+  font-size: 14px;
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.graph-modal-body {
+  padding: 12px;
+}
+
+.graph-modal-canvas {
+  display: block;
+  width: 100%;
+  height: 180px;
+  margin-bottom: 12px;
+  border-radius: 4px;
+  background: var(--bg-elevated);
+}
+
+.graph-history-status {
+  display: none;
+  text-align: center;
+  padding: 8px 4px;
+  font-size: 11px;
+  color: var(--text-muted, #888);
+}
+.graph-history-status.visible {
+  display: block;
+}
+.graph-history-status button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--accent-blue, #569cd6);
+  text-decoration: underline;
+  font-size: 11px;
+  padding: 0 2px;
+}
+.graph-history-status button:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.graph-stats {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.graph-stat-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 4px 0;
+  border-bottom: 1px solid var(--border);
+  font-size: 12px;
+}
+.graph-stat-row:last-child {
+  border-bottom: none;
+}
+.graph-stat-label {
+  color: var(--text-muted);
+}
+.graph-stat-value {
+  font-weight: 600;
+  color: var(--text);
+}

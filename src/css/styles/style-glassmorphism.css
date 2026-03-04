@@ -1,0 +1,93 @@
+﻿/* ═══════════════════════════════════════════════════════════════════════════
+ *  STYLE: Glassmorphism  (body[data-style="glass"])
+ *
+ *  Frosted-glass panels via backdrop-filter: blur(), highly translucent
+ *  rgba backgrounds, and crisp semi-transparent borders. Body gets a
+ *  gradient background that shows through the frosted panels.
+ * ═══════════════════════════════════════════════════════════════════════════ */
+
+body[data-style="glass"] {
+  background: linear-gradient(135deg, var(--glass-body-from) 0%, var(--glass-body-via) 50%, var(--glass-body-to) 100%);
+  --bg-main: var(--glass-panel);
+  --bg-panel: var(--glass-panel);
+  --bg-elevated: var(--glass-elevated);
+  --bg-hover: var(--glass-hover);
+  --bg-input: var(--glass-input);
+  --bg-muted: var(--glass-muted);
+  --bg-number-input: var(--glass-panel);
+  --bg-filter: var(--glass-muted);
+  --border-card: var(--glass-border-card);
+  --border-main: var(--glass-border-main);
+  --border-section: var(--glass-border-section);
+  --border-input: var(--glass-border-input);
+  --border-subtle: var(--glass-border-main);
+  --scrollbar-thumb: var(--glass-scrollbar);
+  --modal-backdrop: rgba(0, 0, 0, 0.45);
+}
+body[data-style="glass"] #app {
+  background: transparent;
+}
+
+/* ── Frosted panel treatment — backdrop-filter + rounded corners ─────────── */
+body[data-style="glass"] .market-card,
+body[data-style="glass"] .top20-section,
+body[data-style="glass"] .favorites-section,
+body[data-style="glass"] #settings-panel,
+body[data-style="glass"] #market-view,
+body[data-style="glass"] #view-tabs,
+body[data-style="glass"] .analytics-modal-content,
+body[data-style="glass"] .analytics-modal,
+body[data-style="glass"] .setup-guide-content,
+body[data-style="glass"] .setup-guide-modal,
+body[data-style="glass"] .item-modal,
+body[data-style="glass"] .graph-modal,
+body[data-style="glass"] .filter-bar,
+body[data-style="glass"] .flip-card,
+body[data-style="glass"] .completed-flip-card,
+body[data-style="glass"] .settings-group,
+body[data-style="glass"] #advisor-view,
+body[data-style="glass"] #portfolio-view {
+  backdrop-filter: blur(18px) saturate(1.2);
+  -webkit-backdrop-filter: blur(18px) saturate(1.2);
+}
+/* Cards: crisp semi-transparent border + subtle radius */
+body[data-style="glass"] .market-card {
+  border: 1px solid var(--glass-border-card);
+  border-radius: 8px;
+}
+/* Sections: frosted panels with luminous top edge */
+body[data-style="glass"] .top20-section,
+body[data-style="glass"] .favorites-section {
+  border: 1px solid var(--glass-border-section);
+  border-radius: 10px;
+}
+/* Settings fieldsets: subtle glass border */
+body[data-style="glass"] .settings-group {
+  border: 1px solid var(--glass-border-section);
+  border-radius: 8px;
+}
+/* Flip cards: glass treatment */
+body[data-style="glass"] .flip-card,
+body[data-style="glass"] .completed-flip-card {
+  border: 1px solid var(--glass-border-card);
+  border-radius: 6px;
+}
+/* Tab buttons: glass pill shape */
+body[data-style="glass"] .tab-btn {
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-radius: 6px;
+}
+/* Modal content: stronger blur for overlays */
+body[data-style="glass"] .analytics-modal-content,
+body[data-style="glass"] .setup-guide-content {
+  backdrop-filter: blur(24px) saturate(1.3);
+  -webkit-backdrop-filter: blur(24px) saturate(1.3);
+  border: 1px solid var(--glass-border-card);
+  border-radius: 12px;
+}
+/* Input fields: inner glow border on focus */
+body[data-style="glass"] input:focus,
+body[data-style="glass"] select:focus {
+  box-shadow: 0 0 0 1px var(--glass-border-input);
+}

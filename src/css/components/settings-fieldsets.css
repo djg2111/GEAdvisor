@@ -1,0 +1,19 @@
+﻿/* ══════════════════════════════════════════════════════════════════════════════
+   Settings group fieldsets
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+.settings-group {
+  border: 1px solid var(--border-main);
+  border-radius: 6px;
+  padding: 8px 10px 10px;
+  margin-bottom: 8px;
+}
+
+.settings-group-title {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-accent);
+  padding: 0 4px;
+}

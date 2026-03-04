@@ -1,0 +1,283 @@
+﻿/* ── Provider cost hints & setup guide ────────────────────────────────────── */
+
+.provider-cost-hint {
+  display: block;
+  margin: 2px 0 4px;
+  font-size: 11px;
+  line-height: 1.3;
+  color: var(--text-muted);
+}
+.provider-cost-hint.tier-free {
+  color: var(--accent-green);
+}
+.provider-cost-hint.tier-free-tier {
+  color: var(--accent-teal);
+}
+.provider-cost-hint.tier-low-cost {
+  color: var(--accent-blue-text);
+}
+.provider-cost-hint.tier-paid {
+  color: var(--text-muted);
+}
+.provider-cost-hint.tier-self-hosted {
+  color: var(--text-muted);
+}
+
+.setup-guide-btn {
+  display: inline-block;
+  margin-bottom: 6px;
+  padding: 4px 10px;
+  font-size: 11px;
+  background: transparent;
+  border: 1px dashed var(--accent-blue-text);
+  border-radius: 3px;
+  color: var(--accent-blue-text);
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+.setup-guide-btn:hover {
+  background: var(--accent-blue-text);
+  color: var(--bg-main);
+}
+.setup-guide-btn.hidden {
+  display: none;
+}
+
+/* ── Setup guide modal ────────────────────────────────────────────────────── */
+
+.setup-guide-backdrop {
+  position: fixed;
+  inset: 0;
+  background: var(--modal-backdrop);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10001;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.15s ease;
+}
+.setup-guide-backdrop.visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.setup-guide-modal {
+  position: relative;
+  background: var(--bg-main);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  width: 88vw;
+  max-width: 560px;
+  max-height: 80vh;
+  overflow-y: auto;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+  padding: 1.25rem;
+  box-sizing: border-box;
+  animation: setup-guide-in 0.18s ease-out;
+}
+@keyframes setup-guide-in {
+  from { opacity: 0; transform: scale(0.96) translateY(10px); }
+  to   { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+.setup-guide-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.75rem;
+}
+.setup-guide-header h3 {
+  margin: 0;
+  font-size: 16px;
+  color: var(--text-bright);
+}
+.setup-guide-close {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-size: 22px;
+  cursor: pointer;
+  padding: 0 4px;
+  line-height: 1;
+}
+.setup-guide-close:hover {
+  color: var(--text-bright);
+}
+
+.setup-guide-tier {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border-radius: 6px;
+  margin-bottom: 0.75rem;
+  font-size: 12px;
+  font-weight: 500;
+}
+.setup-guide-tier.tier-free {
+  background: var(--badge-tier-free-bg);
+  border: 1px solid var(--badge-tier-free-border);
+  color: var(--accent-green);
+}
+.setup-guide-tier.tier-free-tier {
+  background: var(--badge-tier-freetier-bg);
+  border: 1px solid var(--badge-tier-freetier-border);
+  color: var(--accent-teal);
+}
+.setup-guide-tier.tier-low-cost {
+  background: var(--badge-tier-lowcost-bg);
+  border: 1px solid var(--badge-tier-lowcost-border);
+  color: var(--accent-blue-text);
+}
+.setup-guide-tier.tier-paid {
+  background: var(--badge-tier-neutral-bg);
+  border: 1px solid var(--badge-tier-neutral-border);
+  color: var(--text-muted);
+}
+.setup-guide-tier.tier-self-hosted {
+  background: var(--badge-tier-neutral-bg);
+  border: 1px solid var(--badge-tier-neutral-border);
+  color: var(--text-muted);
+}
+
+.tier-badge {
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.setup-guide-steps {
+  margin: 0 0 0.75rem 0;
+  padding-left: 1.4rem;
+  font-size: 12px;
+  line-height: 1.7;
+  color: var(--text-main);
+}
+.setup-guide-steps li {
+  margin-bottom: 6px;
+}
+.setup-guide-steps a {
+  color: var(--accent-blue-text);
+  text-decoration: underline;
+}
+.setup-guide-steps a:hover {
+  color: var(--text-bright);
+}
+
+.setup-guide-note {
+  padding: 8px 12px;
+  border-radius: 6px;
+  background: var(--setup-note-bg);
+  border: 1px solid var(--setup-note-border);
+  font-size: 11px;
+  color: var(--accent-gold);
+  margin-bottom: 0.75rem;
+  line-height: 1.5;
+}
+
+.setup-guide-link {
+  display: inline-block;
+  margin-bottom: 1rem;
+  font-size: 12px;
+  color: var(--accent-blue-text);
+  text-decoration: none;
+  font-weight: 500;
+}
+.setup-guide-link:hover {
+  text-decoration: underline;
+  color: var(--text-bright);
+}
+
+/* ── Provider comparison table ────────────────────────────────────────────── */
+
+.setup-guide-comparison {
+  border-top: 1px solid var(--border);
+  padding-top: 0.75rem;
+}
+.setup-guide-comparison h4 {
+  margin: 0 0 8px;
+  font-size: 13px;
+  color: var(--text-bright);
+}
+
+.provider-comparison-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 11px;
+}
+.provider-comparison-table th {
+  text-align: left;
+  padding: 5px 8px;
+  border-bottom: 1px solid var(--border);
+  color: var(--text-muted);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-size: 10px;
+}
+.provider-comparison-table td {
+  padding: 6px 8px;
+  border-bottom: 1px solid var(--border-input);
+  color: var(--text-main);
+}
+.provider-comparison-table tr.active-row td {
+  background: var(--table-active-row-bg);
+  color: var(--text-bright);
+  font-weight: 500;
+}
+.provider-comparison-table tr:hover td {
+  background: var(--table-hover-row-bg);
+}
+
+.tier-badge-sm {
+  display: inline-block;
+  padding: 1px 6px;
+  border-radius: 3px;
+  font-size: 10px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.tier-badge-sm.tier-free {
+  background: var(--badge-tier-free-bg);
+  color: var(--accent-green);
+}
+.tier-badge-sm.tier-free-tier {
+  background: var(--badge-tier-freetier-bg);
+  color: var(--accent-teal);
+}
+.tier-badge-sm.tier-low-cost {
+  background: var(--badge-tier-lowcost-bg);
+  color: var(--accent-blue-text);
+}
+.tier-badge-sm.tier-paid {
+  background: var(--badge-tier-neutral-bg);
+  color: var(--text-muted);
+}
+
+select {
+  background: var(--bg-input);
+  border: 1px solid var(--border-input);
+  border-radius: 3px;
+  padding: 5px 8px;
+  color: var(--text-main);
+  font-family: inherit;
+  font-size: 12px;
+  outline: none;
+  transition: border-color 0.15s;
+  appearance: auto;
+}
+
+select option {
+  background: var(--dropdown-bg);
+  color: var(--text-main);
+}
+
+select option:hover,
+select option:checked {
+  background: var(--dropdown-hover-bg);
+  color: var(--text-bright);
+}
+
+select:focus {
+  border-color: var(--accent-focus);
+}

@@ -22,7 +22,7 @@
   - [4.10 UI Service](#410-ui-service-uiservicets)
   - [4.11 Entry Point](#411-entry-point-indexts)
   - [4.12 HTML Structure](#412-html-structure-indexhtml)
-  - [4.13 Stylesheet](#413-stylesheet-stylecss)
+  - [4.13 Stylesheet](#413-stylesheet-cssmain-css)
 - [5. localStorage Keys](#5-localstorage-keys)
 - [6. Key Types Reference](#6-key-types-reference)
 - [7. Build & Serve](#7-build--serve)
@@ -32,6 +32,7 @@
   - [Webpack config notes](#webpack-config-notes)
 - [8. Current Status](#8-current-status)
 - [9. Past Issues & Resolutions](#9-past-issues--resolutions)
+- [9.1 Known Issues (Open)](#91-known-issues-open)
 - [10. Potential Next Steps](#10-potential-next-steps-not-started)
 
 ---
@@ -82,7 +83,13 @@ alt1minimal/
     ├── icon.png               # App icon (asset/resource)
     ├── index.html             # Full UI: settings, tabbed layout (market / advisor / portfolio), search, favourites, filters
     ├── index.ts               # Lean entry point: alt1 detection → initDataPipeline() → initUI(), startup loading overlay
-    ├── style.css              # Four-axis theme system (2 modes × 4 styles × 6 colorways × 3 contrast levels), flexbox, cards, unified analytics modal, toasts, inline alert popovers, data-mgmt, compact-tiles toggle, responsive breakpoints (mobile ≤600px, sidebar-disable ≤700px, desktop ≥800px)
+    ├── css/                   # Modular CSS directory (entry: main.css)
+    │   ├── main.css           # @import cascade entry point (base → themes → contrast → styles → layout → components → responsive)
+    │   ├── base/              # reset.css, alt1-status.css
+    │   ├── themes/            # 16 colorway files, light-mode-overrides.css, contrast-modifiers.css
+    │   ├── styles/            # style-glassmorphism.css, style-neumorphism.css, style-skeuomorphism.css, micro-component-protection.css
+    │   ├── layout/            # app-shell.css, main-content.css, layout-modes.css, views.css, responsive.css
+    │   └── components/        # 26 component files (settings, market-cards, modals, chat, portfolio, etc.)
     ├── uiService.ts           # All DOM logic: settings, market render, search, favourites, portfolio, chat RAG, error recovery, price alerts, data export/import, CSV export, sortable flips table, unified analytics modal (~4265 lines)
     └── services/
         ├── index.ts               # Barrel re-export of all services + types + constants
@@ -388,8 +395,8 @@ All DOM manipulation isolated here — services remain UI-agnostic. ~4 600 lines
 ### 4.11 Entry Point (`index.ts`)
 
 Lean orchestrator (~80 lines) with startup overlay management:
-1. Imports `alt1`, static assets (`appconfig.json`, `icon.png`), `style.css`.
-2. **Early theme restoration** — reads all four theme axes (`ge-analyzer:mode`, `ge-analyzer:style`, `ge-analyzer:colorway`, `ge-analyzer:contrast`) from localStorage and applies them to `document.body.dataset` immediately (single synchronous batch write via `applyThemeBatch()`), so the startup overlay renders with the user's chosen theme.
+1. Imports `alt1`, static assets (`appconfig.json`, `icon.png`), `css/main.css` (modular CSS entry point).
+2. **Early theme restoration** — reads all four theme axes (`ge-analyzer:mode`, `ge-analyzer:style`, `ge-analyzer:colorway`, `ge-analyzer:contrast`) from localStorage, runs one-time colorway rename migration (gated by `ge-analyzer:colorway-v2`), and applies them to `document.body.dataset` immediately (single synchronous batch write via `applyThemeBatch()`), so the startup overlay renders with the user's chosen theme.
 3. Detects `window.alt1` — if present, calls `alt1.identifyAppUrl()`; if absent, shows "add app" link.
 4. Shows `#startup-overlay` and calls `setStartupStatus(msg, step?)` to update status + step counter (e.g. "Step 1 of 4").
 5. Calls `await initDataPipeline()` (Step 1/4: "Loading market data…").
@@ -426,35 +433,48 @@ Lean orchestrator (~80 lines) with startup overlay management:
       - `#portfolio-history-container` (hidden by default) — `#portfolio-stats` dashboard (4 `.stat-card`: Total Profit, Completed Flips, Avg Profit, Avg ROI) + `#completed-flips-list`.
 - `HtmlWebpackPlugin` injects the script tag automatically — no manual `<script>` tag in HTML.
 
-### 4.13 Stylesheet (`style.css`)
+### 4.13 Stylesheet (`css/main.css`)
 
-- **Four-axis theme system** (Mode × Style × Colorway × Contrast) using CSS custom properties — 2 modes × 4 styles × 6 colorways × 3 contrast levels = 144 combinations:
+The monolithic `style.css` has been refactored into a modular `src/css/` directory. The entry point `css/main.css` uses `@import` to compose 51 sub-modules in cascade order. Webpack's `css-loader` resolves all imports; `style-loader` injects the result into `<head>` at runtime. No PostCSS or additional tooling required.
+
+```
+css/
+├── main.css                         # @import cascade entry point
+├── base/                            # reset.css, alt1-status.css
+├── themes/                          # 12 colorway-{name}-{dark|light}.css + light-mode-overrides.css + contrast-modifiers.css
+├── styles/                          # style-glassmorphism/neumorphism/skeuomorphism.css + micro-component-protection.css
+├── layout/                          # app-shell.css, main-content.css, layout-modes.css, views.css, responsive.css
+└── components/                      # 26 files: settings, provider, inputs, tabs, market-panel, filters, startup, market-cards, highlights, search, detail-panel, card-actions, favourites, modals, analytics-modal, analytics-dividers, chat, portfolio, predictive-badges, completed-flips, scrollbar, toasts, alerts, accessibility, settings-fieldsets, layout-toggle
+```
+
+- **Four-axis theme system** (Mode × Style × Colorway × Contrast) using CSS custom properties — 2 modes × 4 styles × 8 colorways × 3 contrast levels = 192 combinations:
   - **Modes** (`body[data-mode]`) set the fundamental light/dark tone:
     - **Dark** (default) — dark backgrounds, light text.
     - **Light** (`body[data-mode="light"]`) — light backgrounds, dark text.
   - **Styles** (`body[data-style]`) define structural effects:
     - **Basic** (default — no `data-style` attribute) — standard flat UI.
-    - **Glassmorphism** (`body[data-style="glass"]`) — frosted glass panels, `backdrop-filter: blur(16px)`, semi-transparent backgrounds on a gradient body.
-    - **Neumorphism** (`body[data-style="neumorphism"]`) — soft UI with inset/outset `box-shadow`, transparent borders, extra tile spacing.
-    - **Skeuomorphism** (`body[data-style="skeuomorphism"]`) — textured gradients, embossed buttons, realistic drop shadows.
+    - **Glassmorphism** (`body[data-style="glass"]`) — frosted glass panels via `backdrop-filter: blur(18px) saturate(1.2)`, highly translucent rgba backgrounds, crisp semi-transparent borders. Covers cards, sections, modals, flip cards, settings groups, tabs. Modal overlays use stronger 24 px blur.
+    - **Neumorphism** (`body[data-style="neumorphism"]`) — elements share the canvas `--bg-main` background colour; shape conveyed entirely by paired `box-shadow` (one light, one dark) — outset = extruded, inset = indented. All visible borders set to `transparent`. Covers cards, sections, settings panel/groups, flip cards, inputs (inset wells), buttons (raised pillows), modals. Extra tile spacing for shadow breathing room.
+    - **Skeuomorphism** (`body[data-style="skeuomorphism"]`) — tactile realism: `linear-gradient` backgrounds for material texture, inner `box-shadow` for beveled edges, drop shadows for physical depth. Top border = highlight (light edge), bottom border = shadow edge. Covers cards, sections, settings, flip cards, buttons (with `:active` pressed state), inputs (carved inset fields), modals (heavy realistic frame). Light modes use softer shadow intensities.
   - **Colorways** (`body[data-colorway]`) define colour palettes + style helper vars (`--glass-*`, `--neu-*`, `--skeu-*`):
-    - **Classic** (default `:root`) — dark: `#1e1e1e` background; light: `#f5f5f5` background.
-    - **OSRS** (`body[data-colorway="osrs"]`) — dark: parchment tones, brown accents; light: warm cream, earthy tones.
+    - **Default** (default `:root`) — dark: `#1e1e1e` background; light: `#f5f5f5` background.
+    - **Classic** (`body[data-colorway="classic"]`) — dark: parchment tones, brown accents; light: warm cream, earthy tones. (Formerly "OSRS".)
     - **RS3 Modern** (`body[data-colorway="rs3-modern"]`) — dark: dark navy, blue accents; light: light slate, blue highlights.
     - **Solarized** (`body[data-colorway="solarized"]`) — dark: Ethan Schoonover’s dark palette (#002b36 base); light: warm cream (#fdf6e3 base).
-    - **RS Lobby** (`body[data-colorway="rs-lobby"]`) — inspired by the RuneScape in-game lobby UI. Dark: deep parchment browns (#1a140f base), gold accents; light: warm cream parchment (#f2ece2 base), earthy gold tones. A blend of OSRS and RS3 Modern aesthetics.
-    - **Gruvbox** (`body[data-colorway="gruvbox"]`) — morhetz/gruvbox “retro groove” palette. Dark: warm earthy tone (#282828 base), pastel accents (yellow #fabd2f, aqua #8ec07c, orange #fe8019); light: warm cream (#fbf1c7 base), muted accent counterparts.
-  - **Contrast** (`body[data-contrast]`) adjusts intensity via `color-mix(in srgb, ...)`:
+    - **RS Lobby** (`body[data-colorway="rs-lobby"]`) — inspired by the RuneScape in-game lobby UI. Dark: deep parchment browns (#1a140f base), gold accents; light: warm cream parchment (#f2ece2 base), earthy gold tones. A blend of Classic and RS3 Modern aesthetics.
+    - **Gruvbox** (`body[data-colorway="gruvbox"]`) — morhetz/gruvbox “retro groove” palette. Dark: warm earthy tone (#282828 base), pastel accents (yellow #fabd2f, aqua #8ec07c, orange #fe8019); light: warm cream (#fbf1c7 base), muted accent counterparts.    - **Twilight Amethyst** (`body[data-colorway="twilight-amethyst"]`) — deep indigo-violet palette. Dark: rich purple (#12101e base), lavender text (#cdc5e0), amethyst primary (#7c4dff); light: soft lilac (#f0ecfa base), deep violet text (#3a2e5a), amethyst accents. Glass helpers use purple-tinted translucent panels.  - **Contrast** (`body[data-contrast]`) adjusts intensity via non-circular `color-mix(in srgb, ...)` — each property override references only sibling properties (strict DAG, no self-referencing to avoid `guaranteed-invalid` cycles). Financial accent adjustments in hard contrast reference `*-base` duplicate vars (e.g. `--accent-teal-base`) set by each colorway, so the `color-mix()` never self-references the property being set. Selectors use specificity 0,3,1 (`body[data-mode][data-contrast][data-colorway]`) to reliably override colorway selectors (0,2,1), preventing stale cached `color-mix()` values when switching themes:
     - **Normal** — no adjustment.
-    - **Soft** — reduces contrast (muted backgrounds, softer text).
-    - **Hard** — increases contrast (deeper backgrounds, brighter text).
-  - CSS selectors use compound form: `body[data-mode="dark"][data-colorway="osrs"]`.
+    - **Soft** — reduces contrast (muted backgrounds, softer text). Dark: lifts `--bg-main` toward `--bg-panel`/`--bg-elevated`; light: pushes bgs toward white.
+    - **Hard** — increases contrast (deeper backgrounds, brighter text). Dark: pushes bgs toward black, `--text-bright: #fff`; light: `--bg-panel: #fff`, `--text-bright: #000`. Financial accent colours (`--accent-green`, `--accent-teal`, `--accent-red`, `--accent-blue-text`, `--accent-gold`) are adjusted via `color-mix()` referencing `*-base` vars to maintain WCAG AA ≥ 4.5:1 against shifted backgrounds.
+  - CSS selectors use compound form: `body[data-mode="dark"][data-colorway="classic"]`.
   - Legacy `ge-analyzer:theme` auto-migrates to `ge-analyzer:style` + `ge-analyzer:colorway`.
   - Legacy colorway values (`light`, `sol-dark`, `sol-light`) auto-migrate via `migrateColorwayToMode()` to mode + colorway pairs.
+  - Renamed colorway values (`classic`→`default`, `osrs`→`classic`) auto-migrate once via `migrateColorwayRename()`, gated by `ge-analyzer:colorway-v2` flag.
 - Font stack: Segoe UI / Consolas.
 - `html` and `body` both `width: 100%; height: 100%`.
 - **CSS custom-property alias tokens**: `:root` defines `--border: var(--border-main)` and `--text: var(--text-main)` as convenience aliases for legacy references. Prefer the canonical `--border-main` / `--text-main` in new CSS.
-- **Semantic badge background tokens**: `:root` defines `--badge-velocity-*-bg` (insta/active/slow/muted), `--badge-velocity-*-bg` (for trend badges), `--badge-tier-*-bg/border` (free/freetier/lowcost/neutral), `--table-active-row-bg`, `--detail-expanded-bg`, `--setup-note-bg`, `--table-hover-bg`, and `--predictive-badge-bg`. All have `body[data-mode="light"]` overrides with reduced opacity/different tints. Badge classes consume these tokens via `var()` — do not hard-code `rgba()` values.
+- **Semantic badge background tokens**: `:root` defines `--badge-velocity-*-bg` (insta/active/slow/muted), `--badge-trend-*-bg` (up/down), `--badge-tier-*-bg/border` (free/freetier/lowcost/neutral), `--table-active-row-bg`, `--detail-expanded-bg`, `--setup-note-bg`, `--table-hover-bg`, `--predictive-badge-bg`, `--close-hover-bg` (modal close button hover), `--win-glow` / `--loss-glow` (completed flip card background gradients, derived via `color-mix()` from `--accent-green-bright` / `--accent-red-dark`). All have `body[data-mode="light"]` overrides with boosted alpha values (0.18–0.22 for readability on white backgrounds). Badge classes consume these tokens via `var()` — do not hard-code `rgba()` values.
+- **`--text-price` standardised to green family**: All 12 colorway×mode combinations use greens (dark: #4ade80–#a0b800; light: #1a8a2a–#5a8a0e). Previously inconsistent (gold in Classic, olive in Solarized) — March 2026 fix.
 - **Consolidated light-mode selectors**: All 6 light-mode colorways share a single `body[data-mode="light"] { background: ... }` rule (plus `.view-btn.active { color: #fff }`) instead of 6 duplicate blocks. Similarly, skeuomorphism light-mode selectors are consolidated into `body[data-mode="light"][data-style="skeuomorphism"]` (not enumerated per-colorway).
 - **No `!important` on colour overrides**: `.hype-text`, `.buy-highlight`, `.sell-highlight`, `.profit-highlight`, `.risky-text` use doubled-selector specificity (`.market-card .hype-text, .hype-text.hype-text`) instead. Do not reintroduce `!important`.
 - **`#app` uses `height: 95%`** (manually set to fix Alt1 zoom-level scaling issues — do NOT change).
@@ -464,7 +484,7 @@ Lean orchestrator (~80 lines) with startup overlay management:
   - **List view**: Full-width stacked cards.
   - **Tile view**: CSS grid `repeat(auto-fill, minmax(130px, 1fr))`. Column flex-direction on header. Compact badge/sprite sizes. Predictive badges hidden when compact mode is enabled.
   - **Hybrid view**: CSS grid `repeat(auto-fill, minmax(200px, 1fr))`. Predictive badges hidden when compact mode is enabled.
-- **Card action buttons** (`.card-actions`): Horizontal flex row containing analytics (`.analytics-btn`), favourite (`.fav-btn`), alert (`.alert-btn`), quick-add (`.quick-add-btn`). Always stays horizontal even in tile view's column layout.
+- **Card action buttons** (`.card-actions`): Horizontal flex row containing analytics (`.popout-btn`), favourite (`.fav-btn`), alert (`.alert-btn`), quick-add (`.quick-add-btn`), Wiki link, GE link. Always stays horizontal even in tile view's column layout. **Micro-component protection**: per-style overrides prevent heavy shadows/blurs/gradients from swallowing icon-only buttons — glass suppresses `backdrop-filter`, neumorphism sets `box-shadow: none` (subtle hover only), skeuomorphism flattens to transparent bg (hover highlight).
 - **Favourite styling**: `.fav-btn` gold on hover (`#f0c040`), `.market-card.favorited` gets gold left border. `.fav-btn` uses scale(1.15) on hover.
 - **Quick-add button**: `.quick-add-btn` teal on hover (`#4ec9b0`).
 - **Favourites section**: `.favorites-section` with border, rounded corners, dark header (`#252526`), gold ★ title.
@@ -472,7 +492,7 @@ Lean orchestrator (~80 lines) with startup overlay management:
 - **Unified analytics modal** (March 2026): `.analytics-modal-backdrop` with centred `.analytics-modal` (90vw, max 920px, min 320px). Header with sprite (48×42, title tooltip with item ID), name (h2, `id="analytics-modal-title"`, referenced by `aria-labelledby`), current price, close button (✕). Scrollable `.analytics-content` body contains: `.analytics-badges` (velocity, hype, trend), `.analytics-actions` (favourite, quick-add, Wiki, GE), `.analytics-details-grid` (1fr, becomes 2-col at ≥ 480px; detail rows reordered: flip/profit first, then volume/liquidity; includes High Alch, always-visible Volume Spike, and "Predictive Analytics" sub-section wrapped in `.predictive-section` with `.analytics-section-divider` header, containing 30d EMA, Daily Volatility σ%, LR Slope, Predicted Price), alert inputs section, `.analytics-graph-section` with `.analytics-range-row` (7/30/90 days select), large `<canvas>` (480×140) via `drawGraphChart()`, `.analytics-stats-grid` (auto-fit minmax 140px) of `.analytics-stat-card` elements (trend, change, high, low, volatility, data points), and `.graph-history-status` strip with manual refresh button for sparse data. Lazy singleton (`ensureAnalyticsModal()`). Closes on backdrop click, ✕, or Escape. Responsive: reduced padding/font at ≤ 600px.
 - **Floating modal** _(deprecated)_: `.item-modal-backdrop` / `.item-modal` — retained in CSS for backwards compat but no longer created by any active code path.
 - **Graph modal** _(deprecated)_: `.graph-modal-backdrop` / `.graph-modal` — retained in CSS for backwards compat but no longer created by any active code path.
-- **Flip badges**: `.flip-badges` with flex-wrap. `.buy-badge`, `.sell-badge`, `.profit-badge`, `.hype-badge`. Shared badge base class sets sizing via CSS custom-property tokens (`--badge-font-sm`, `--badge-font-md`, `--badge-padding-sm`, `--badge-padding-md`, `--badge-radius`, `--badge-font-weight`). Profit badge visually promoted with `font-weight: 700` and `letter-spacing: 0.02em`. Tile/hybrid views use `--badge-font-sm` / `--badge-padding-sm` instead of hard-coded 9 px. `--accent-hype` separates hype/volume-spike colour from `--accent-gold`.
+- **Flip badges**: `.flip-badges` with flex-wrap. `.buy-badge`, `.sell-badge`, `.profit-badge`, `.hype-badge`. Shared badge base class sets sizing via CSS custom-property tokens (`--badge-font-sm`: 11px, `--badge-font-md`: 12px, `--badge-padding-sm`: 2px 6px, `--badge-padding-md`: 3px 7px, `--badge-radius`, `--badge-font-weight`). Sized for 110–125% Windows DPI scaling. Profit badge visually promoted with `font-weight: 700` and `letter-spacing: 0.02em`. Tile/hybrid views use `--badge-font-sm` / `--badge-padding-sm` instead of hard-coded 9 px. `--accent-hype` is the canonical hype/volume-spike colour token; `--accent-gold-hype` is defined per-colorway but `--accent-hype` is the consumption token used in `var()` references.
 - **Portfolio**: `.portfolio-form`, `.autocomplete-wrap`, `.flip-card` with countdown timer styling, `.flip-card-actions` horizontal button group (✓ + ✕).
 - **Portfolio sub-nav**: `.portfolio-sub-nav` / `.portfolio-sub-btn` tab-style toggle with blue active border.
 - **Portfolio stats dashboard**: `.portfolio-stats` flex row of `.stat-card` elements. `.stat-value.profit` (green) / `.stat-value.loss` (red).
@@ -494,7 +514,7 @@ Lean orchestrator (~80 lines) with startup overlay management:
 - Thin dark webkit scrollbar styling.
 - **Accessibility enhancements** (March 2026):
   - `:focus-visible` global keyboard focus ring (`outline: 2px solid var(--accent-primary)`) on all interactive elements.
-  - `--text-muted` raised to `#94a3b8` (Classic Dark) / `#839496` (Sol-dark) for WCAG AA 4.5:1 contrast compliance.
+  - `--text-muted` raised to `#94a3b8` (Default Dark) / `#839496` (Sol-dark) for WCAG AA 4.5:1 contrast compliance.
   - Badge minimum font size raised to 10 px (`--badge-font-sm`).
   - Analytics modal has `aria-labelledby="analytics-modal-title"` pointing to the item name heading.
   - Profit/loss indicators use ▲/▼ shape prefixes in addition to colour for colour-blind accessibility.
@@ -517,7 +537,8 @@ Lean orchestrator (~80 lines) with startup overlay management:
 | `ge-analyzer:view-mode` | Market panel view mode (`list`, `tile`, or `hybrid`) |
 | `ge-analyzer:layout` | Interface layout mode (`tabbed` or `sidebar`) |
 | `ge-analyzer:style` | Visual style (`basic`, `glass`, `neumorphism`, or `skeuomorphism`) — migrated from legacy `ge-analyzer:theme` |
-| `ge-analyzer:colorway` | Colour palette (`classic`, `osrs`, `rs3-modern`, `rs-lobby`, `gruvbox`, or `solarized`) — mode-agnostic; combined with `ge-analyzer:mode` for full palette resolution. Legacy values (`light`, `sol-dark`, `sol-light`) auto-migrate via `migrateColorwayToMode()` |
+| `ge-analyzer:colorway` | Colour palette (`default`, `classic`, `rs3-modern`, `rs-lobby`, `gruvbox`, `solarized`, or `twilight-amethyst`) — mode-agnostic; combined with `ge-analyzer:mode` for full palette resolution. Legacy values (`light`, `sol-dark`, `sol-light`) auto-migrate via `migrateColorwayToMode()`; renamed values (`classic`→`default`, `osrs`→`classic`) auto-migrate once via `migrateColorwayRename()` (gated by `ge-analyzer:colorway-v2` one-time flag) |
+| `ge-analyzer:colorway-v2` | One-time migration flag for colorway rename (`classic`→`default`, `osrs`→`classic`). Value `"1"` means migration has run |
 | `ge-analyzer:mode` | Appearance mode (`dark` or `light`) — sets `data-mode` on `<body>` |
 | `ge-analyzer:contrast` | Contrast level (`default`, `soft`, or `hard`) — sets `data-contrast` on `<body>`, layered via `color-mix()` |
 | `ge-analyzer:top20-sort` | Top 20 section sort key (`default`, `alpha`, `price-desc`, `profit-desc`) |
@@ -599,7 +620,7 @@ npx tsc --noEmit
 
 ### Webpack config notes
 - `HtmlWebpackPlugin` handles `index.html` emission — do NOT add HTML to `asset/resource` rules.
-- `style-loader` + `css-loader` handle `.css` imports (injected into `<head>` at runtime).
+- `style-loader` + `css-loader` handle `.css` imports (injected into `<head>` at runtime). The CSS entry point is `css/main.css`, which uses `@import` to compose 51 sub-modules — `css-loader` resolves all imports into a single bundle. No additional PostCSS plugins needed.
 - `ts-loader` compiles TypeScript.
 - `asset/resource` rule for images and JSON (excluding `.data.png` and `.fontmeta.json` which use alt1 loaders).
 - Library output: UMD as `window.TestApp`.
@@ -662,7 +683,7 @@ Everything below is **complete and verified** (builds with 0 errors):
 - [x] Chat history persistence (localStorage, max 50 messages, clear button)
 - [x] Multi-turn LLM conversation with RAG context
 - [x] Full HTML UI (settings panel, tabbed/sidebar layout, market/advisor/portfolio sections)
-- [x] Four-axis theme system — 2 modes × 4 styles × 6 colorways × 3 contrast levels (144 combinations), cards, tiles, grids, unified analytics modal, filters, chat, portfolio, velocity badges, external links, toast notifications, alert inputs, inline alert popovers, responsive desktop breakpoint)
+- [x] Four-axis theme system — 2 modes × 4 styles × 8 colorways × 3 contrast levels (192 combinations), cards, tiles, grids, unified analytics modal, filters, chat, portfolio, velocity badges, external links, toast notifications, alert inputs, inline alert popovers, responsive desktop breakpoint)
 - [x] Accessibility — WCAG AA muted-text contrast, `:focus-visible` keyboard ring, `aria-labelledby` on analytics modal, ▲/▼ shape profit/loss indicators, 10 px badge font floor, settings fieldset groups
 - [x] Error recovery UI (dismissible error banner with retry button, try/catch wrappers across pipeline and UI)
 - [x] Webpack build passes (`npm run build` — 0 errors, 0 warnings)
@@ -708,9 +729,21 @@ Everything below is **complete and verified** (builds with 0 errors):
 | Hard-coded `rgba()` on badge backgrounds bypassing theme system | 30+ badge/tier/table/detail backgrounds used raw `rgba()` values that didn't respond to mode/colorway changes | Tokenised all values into CSS custom properties (`--badge-velocity-*-bg`, `--badge-tier-*-bg/border`, `--table-active-row-bg`, `--detail-expanded-bg`, etc.) in `:root` with `body[data-mode="light"]` overrides |
 | Duplicate light-mode colorway CSS selectors | Each of 6 light-mode colorways had its own `background` rule and `.view-btn.active { color }` rule (12 rules total) with identical values | Consolidated into 2 rules: one `body[data-mode="light"]` background block and one `.view-btn.active` block. Also consolidated 18 skeuomorphism light-mode selectors (6 colorways × 3 elements) into 3 selectors |
 | `EXPORT_KEYS` missing `mode` and `contrast` | JSON export/import of settings only backed up `style` and `colorway` — `mode` (dark/light) and `contrast` (default/soft/hard) were lost on restore | Added `"ge-analyzer:mode"` and `"ge-analyzer:contrast"` to the `EXPORT_KEYS` array |
-| Four separate dataset writes on theme init causing 4 style recalcs | `bindTheme()` called `applyMode` + `applyStyle` + `applyColorway` + `applyContrast` sequentially, each writing one `dataset` property and triggering an intermediate layout | Added `applyThemeBatch()` that writes all 4 `dataset` properties in a single synchronous pass; `bindTheme()` now uses it for initial restore |
+| Four separate dataset writes on theme init causing 4 style recalcs | `bindTheme()` called `applyMode` + `applyStyle` + `applyColorway` + `applyContrast` sequentially, each writing one `dataset` property and triggering an intermediate layout | Added `applyThemeBatch()` that writes all 4 `dataset` properties in a single synchronous pass; `bindTheme()` now uses it for initial restore. `forceStyleInvalidation()` helper flushes the browser's `color-mix()` cache by temporarily removing `data-colorway` (breaks all colorway/contrast selector matches), forcing a synchronous `getComputedStyle` read, then restoring the attribute (called in `applyThemeBatch`, `applyMode`, `applyColorway`, `applyContrast`) |
 | Gruvbox Light `.view-btn.active` color was cream (#fbf1c7) instead of white | Individual colorway block set the active button text to the Gruvbox light base colour, making it nearly invisible on the accent background | Consolidated rule now uses `#ffffff` for all light-mode `.view-btn.active` |
 | `!important` on highlight colour classes | `.hype-text`, `.buy-highlight`, `.sell-highlight`, `.profit-highlight`, `.risky-text` used `!important` for colour overrides | Replaced with doubled-selector specificity (`.market-card .hype-text, .hype-text.hype-text`) |
+| Contrast modifiers breaking all colorways — colours falling back to browser defaults | Every `color-mix()` call in contrast modifier rules self-referenced the property being set (`--bg-main: color-mix(..., var(--bg-main), ...)`) creating CSS custom-property dependency cycles → `guaranteed-invalid` values | Rewrote all contrast modifier rules using strict DAG references: each property only mixes from sibling properties (e.g. `--bg-main` references `--bg-panel`/`--bg-elevated`, `--bg-panel` references `--bg-muted`). Added WCAG AA financial accent colour adjustments in hard contrast modes (March 2026) |
+| Light mode broken / very dark when contrast ≠ default after refresh | Contrast modifier selectors had specificity 0,2,1 — same as colorway selectors. Browser could cache stale `color-mix()` computed values from dark-mode variables, failing to invalidate them on `data-mode` / `data-colorway` attribute changes | Boosted contrast modifier selectors to 0,3,1 by appending `[data-colorway]` (always present on `body`). Added `forceStyleInvalidation()` helper that temporarily removes `data-colorway` + synchronous `getComputedStyle` read to flush cached values (March 2026) |
+| `migrateColorwayRename()` ran on every page load, silently converting valid "classic" → "default" | Migration had no one-time guard — the rename map mapped "classic" (a now-valid value) to "default", so the Classic (brown OSRS) colorway could never persist across page loads | Added `ge-analyzer:colorway-v2` localStorage flag; both `index.ts` inline migration and `migrateColorwayRename()` now run exactly once (March 2026) |
+| Hard contrast self-referencing accent vars causing `guaranteed-invalid` in Edge | Hard contrast modifier set `--accent-teal: color-mix(..., var(--accent-teal), ...)` (and same for `--accent-red`, `--accent-blue-text`, `--accent-gold`) — CSS dependency cycles. Edge may invalidate the entire declaration block, causing background/text properties in the same rule to also become `guaranteed-invalid`, falling back to dark `:root` defaults in light mode | Added `--accent-teal-base`, `--accent-red-base`, `--accent-blue-text-base`, `--accent-gold-base` to all 16 colorway files (duplicate of the main accent value). Contrast modifiers now reference `*-base` vars instead of self-referencing. Also improved `forceStyleInvalidation()` to remove/restore `data-colorway` (breaks real selector matches vs. old dummy attribute approach) (March 2026) |
+| Light mode + hard contrast broken after page refresh (but works in incognito) | `forceStyleInvalidation()` ran unconditionally on startup via `applyThemeBatch()`, even though the early restoration IIFE in `index.ts` already set the same dataset values. The function temporarily stripped `data-colorway` (leaving `data-mode="light"` active), creating a mixed dark-`:root` + light-badge intermediate state. The synchronous `getComputedStyle` flush resolved `color-mix()` expressions against dark `:root` variable values; Chrome's per-process style cache sometimes retained these stale inputs after restoration, breaking light-mode colours. Incognito's cold renderer process cache didn't exhibit the issue. | Initially fixed by skipping `forceStyleInvalidation()` when values were unchanged (startup no-op). However, this left stale dark `:root` `color-mix()` values in place on light-mode refresh (see next row). Superseded by mode-toggle approach (March 2026) |
+| Light mode colours broken after page refresh (any contrast level) | `style-loader` injects CSS when the webpack bundle executes (`<script defer>`). The early-restoration IIFE in `index.ts` ran as part of that same bundle, so by the time it set `data-mode="light"`, Chrome had already computed and cached all CSS custom properties from the dark `:root` defaults (the only matching rules when no `data-mode` attribute exists). Previous invalidation strategies (attribute stripping, mode-toggling) all ran too late. | **Resolved (March 2026):** Moved theme restoration to a raw **inline `<script>`** in `index.html` immediately after `<body>`. This script reads localStorage and sets all four `data-*` attributes before the webpack bundle (and `style-loader`) loads. Chrome's first style computation sees the correct `body[data-mode="light"]` selectors from the start — no stale cache to fight. The old IIFE in `index.ts` was removed. `forceStyleInvalidation()` (mode-toggle strategy) remains as a belt-and-suspenders measure for interactive theme changes. |
+| Glassmorphism, Neumorphism, Skeuomorphism visually incomplete | Style rules only covered a few elements (cards, sections); buttons, inputs, settings, flip cards, modals lacked thematic treatment. Neumorphism cards didn't match canvas bg. Skeuomorphism lacked inner-shadow bevels and `:active` pressed states | Comprehensive refactor: Glass now covers 20+ selectors with `backdrop-filter: blur(18px) saturate(1.2)` + crisp borders. Neumorphism sets `background: var(--bg-main)` on all themed elements + paired light/dark shadows on every component type. Skeuomorphism adds `linear-gradient` textures, full 4-edge bevel borders, inner shadows, `:active` pressed transforms, and carved inset inputs. Micro-component protection prevents icon buttons from being swallowed by heavy style effects (March 2026) |
+| Inconsistent `--text-price` colour across colorways | Classic (formerly OSRS) used gold (#d4a843), Solarized used olive (#859900), Gruvbox used lime (#b8bb26) — switching colorway could make "profit" look like a loss or neutral. Light-mode badge alphas too low (0.10–0.14) making badges nearly invisible on white backgrounds | Standardised `--text-price` to a green family across all 12 colorway×mode combos (dark: #4ade80–#a0b800; light: #1a8a2a–#5a8a0e). Boosted light-mode badge token alphas to 0.18–0.22. Added `--close-hover-bg`, `--win-glow`, `--loss-glow` tokens to replace last hard-coded `rgba()` values. Bumped badge sizing tokens (`--badge-font-sm`: 10→11px, `--badge-padding-sm`: 1px 5px→2px 6px). Consolidated `--accent-hype` as canonical consumption token (March 2026) |
+
+### 9.1 Known Issues (Open)
+
+No open issues at this time. The light-mode-on-refresh bug was resolved via the mode-toggle `forceStyleInvalidation()` strategy (March 2026) — see the past-issues table above.
 
 ---
 

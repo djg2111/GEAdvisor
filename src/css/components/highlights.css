@@ -1,0 +1,28 @@
+﻿/* ── Semantic text-colour highlight classes ──────────────────────────────────
+   Applied by JS on inline text. Doubled selector for specificity over
+   `.market-card .item-name`, `.detail-value` etc. — no !important needed. */
+
+.market-card .hype-text,
+.hype-text.hype-text {
+  color: var(--accent-hype);
+}
+
+.market-card .buy-highlight,
+.buy-highlight.buy-highlight {
+  color: var(--accent-blue-text);
+}
+
+.market-card .sell-highlight,
+.sell-highlight.sell-highlight {
+  color: var(--accent-teal);
+}
+
+.market-card .profit-highlight,
+.profit-highlight.profit-highlight {
+  color: var(--accent-teal);
+}
+
+.market-card .risky-text,
+.risky-text.risky-text {
+  color: var(--accent-red);
+}

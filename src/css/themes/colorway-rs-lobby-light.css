@@ -1,0 +1,108 @@
+﻿/* ─────────────────────────────────────────────────────────────────────────────
+ *  COLORWAY: RS Lobby — Light
+ *  Light-mode counterpart: warm cream/parchment base with gold highlights.
+ * ───────────────────────────────────────────────────────────────────────────── */
+
+body[data-mode="light"][data-colorway="rs-lobby"] {
+  --bg-main: #f2ece2;
+  --bg-panel: #faf6ee;
+  --bg-elevated: #f6f0e6;
+  --bg-hover: #ece4d6;
+  --dropdown-bg: #f6f0e6;
+  --dropdown-hover-bg: #ece4d6;
+  --bg-input: #eae2d4;
+  --bg-muted: #e0d8c8;
+  --bg-filter: #f0e8da;
+  --bg-number-input: #eae2d4;
+
+  --text-main: #3e3529;
+  --text-bright: #1a140f;
+  --text-accent: #8b6914;
+  --text-heading: #6b5010;
+  --text-price: #2a7a1a;
+  --text-muted: #7a6d5a;
+  --text-soft: #8a7e6c;
+  --text-dimmed: #b0a490;
+
+  --border-main: #d4c8b4;
+  --border-section: #c8bca8;
+  --border-card: #c0b49e;
+  --border-input: #b8ac96;
+  --border-subtle: #dcd0bc;
+  --border-hype: #c09020;
+  --border-hype-hover: #a07a10;
+
+  --accent-primary: #8b6914;
+  --accent-primary-hover: #a07a20;
+  --accent-primary-active: #6b5010;
+  --accent-focus: #8b6914;
+  --accent-blue-text: #506070;
+  --accent-green: #3a8a28;
+  --accent-green-bright: #2a7a1a;
+  --accent-teal: #4a7a6a;
+  --accent-gold: #c09020;
+  --accent-gold-hype: #a07a10;
+  --accent-red: #a32222;
+  --accent-red-dark: #7a1818;
+  --accent-red-bg: #fff0ec;
+  --accent-red-border: #d8a0a0;
+  --accent-red-border-hover: #c88080;
+  --accent-hype: #c88020;
+
+  /* Contrast base (referenced by contrast-modifiers) */
+  --accent-teal-base: #4a7a6a;
+  --accent-red-base: #a32222;
+  --accent-blue-text-base: #506070;
+  --accent-gold-base: #c09020;
+
+  --chat-user-bg: #f0e8d4;
+  --chat-error-bg: #fff0ec;
+  --badge-buy-bg: #e8e0ce;
+  --badge-sell-bg: #dcf0dc;
+  --badge-hype-bg: #f8f0d0;
+
+  --modal-backdrop: rgba(0, 0, 0, 0.25);
+  --modal-shadow: rgba(0, 0, 0, 0.15);
+  --scrollbar-thumb: #c0b49e;
+  --scrollbar-thumb-hover: #a09480;
+  --link-color: #8b6914;
+  --add-flip-bg: #d0e8c0;
+  --limit-ready-bg: #daf0d0;
+
+  /* Glass helpers */
+  --glass-body-from: #e0d8c8;
+  --glass-body-via: #ece4d6;
+  --glass-body-to: #d8ceb8;
+  --glass-panel: rgba(250, 244, 230, 0.55);
+  --glass-elevated: rgba(250, 244, 230, 0.65);
+  --glass-hover: rgba(250, 244, 230, 0.70);
+  --glass-input: rgba(250, 244, 230, 0.50);
+  --glass-muted: rgba(250, 244, 230, 0.40);
+  --glass-border-card: rgba(139, 105, 20, 0.14);
+  --glass-border-main: rgba(139, 105, 20, 0.08);
+  --glass-border-section: rgba(139, 105, 20, 0.10);
+  --glass-border-input: rgba(139, 105, 20, 0.16);
+  --glass-scrollbar: rgba(139, 105, 20, 0.12);
+
+  /* Neumorphism helpers */
+  --neu-shadow-dark: #c8bca8;
+  --neu-shadow-light: #ffffff;
+  --neu-accent-shadow: #6b5010;
+
+  /* Skeuomorphism helpers */
+  --skeu-body-from: #e0d8c8;
+  --skeu-body-to: #f2ece2;
+  --skeu-card-from: #faf6ee;
+  --skeu-card-mid: #f6f0e6;
+  --skeu-card-to: #ece4d6;
+  --skeu-card-highlight: #ffffff;
+  --skeu-card-shadow-edge: #b8ac96;
+  --skeu-header-from: #f6f0e6;
+  --skeu-header-to: #ece4d6;
+  --skeu-btn-from: #f2ece2;
+  --skeu-btn-to: #e0d8c8;
+  --skeu-btn-active-from: #8b6914;
+  --skeu-btn-active-to: #6b5010;
+}
+
+/* (light-mode view-btn.active consolidated — see below contrast modifiers) */

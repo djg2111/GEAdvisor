@@ -1,0 +1,107 @@
+﻿/* ─────────────────────────────────────────────────────────────────────────────
+ *  COLORWAY: RS3 Modern — Light
+ * ───────────────────────────────────────────────────────────────────────────── */
+
+body[data-mode="light"][data-colorway="rs3-modern"] {
+  --bg-main: #eef4fa;
+  --bg-panel: #f8fbff;
+  --bg-elevated: #f4f8fd;
+  --bg-hover: #e6eef6;
+  --dropdown-bg: #f4f8fd;
+  --dropdown-hover-bg: #e6eef6;
+  --bg-input: #e8f0f8;
+  --bg-muted: #dce8f2;
+  --bg-filter: #eaf2fa;
+  --bg-number-input: #e8f0f8;
+
+  --text-main: #1a2a3a;
+  --text-bright: #0a1420;
+  --text-accent: #0078d4;
+  --text-heading: #0060b0;
+  --text-price: #1a8a2a;
+  --text-muted: #5a7a94;
+  --text-soft: #7a94aa;
+  --text-dimmed: #a0b4c4;
+
+  --border-main: #d0dce8;
+  --border-section: #c8d8e8;
+  --border-card: #c0d0e0;
+  --border-input: #b8cad8;
+  --border-subtle: #dce8f2;
+  --border-hype: #d4a520;
+  --border-hype-hover: #b8920a;
+
+  --accent-primary: #0078d4;
+  --accent-primary-hover: #1888e0;
+  --accent-primary-active: #0060b0;
+  --accent-focus: #0078d4;
+  --accent-blue-text: #0078d4;
+  --accent-green: #248a3d;
+  --accent-green-bright: #1a7a2e;
+  --accent-teal: #1a8a7a;
+  --accent-gold: #d4a520;
+  --accent-gold-hype: #c09010;
+  --accent-red: #d13438;
+  --accent-red-dark: #a4262c;
+  --accent-red-bg: #fff0f0;
+  --accent-red-border: #e0a0a0;
+  --accent-red-border-hover: #d08080;
+  --accent-hype: #e08a00;
+
+  /* Contrast base (referenced by contrast-modifiers) */
+  --accent-teal-base: #1a8a7a;
+  --accent-red-base: #d13438;
+  --accent-blue-text-base: #0078d4;
+  --accent-gold-base: #d4a520;
+
+  --chat-user-bg: #dcecff;
+  --chat-error-bg: #fff0f0;
+  --badge-buy-bg: #dceaff;
+  --badge-sell-bg: #dcf4dc;
+  --badge-hype-bg: #fff8e0;
+
+  --modal-backdrop: rgba(0, 0, 0, 0.25);
+  --modal-shadow: rgba(0, 0, 0, 0.15);
+  --scrollbar-thumb: #b8cad8;
+  --scrollbar-thumb-hover: #98aec0;
+  --link-color: #0078d4;
+  --add-flip-bg: #d0f0d0;
+  --limit-ready-bg: #daf4da;
+
+  /* Glass helpers */
+  --glass-body-from: #d8e4f0;
+  --glass-body-via: #e4eef6;
+  --glass-body-to: #d0dce8;
+  --glass-panel: rgba(240, 248, 255, 0.55);
+  --glass-elevated: rgba(240, 248, 255, 0.65);
+  --glass-hover: rgba(240, 248, 255, 0.70);
+  --glass-input: rgba(240, 248, 255, 0.50);
+  --glass-muted: rgba(240, 248, 255, 0.40);
+  --glass-border-card: rgba(0, 120, 212, 0.12);
+  --glass-border-main: rgba(0, 120, 212, 0.08);
+  --glass-border-section: rgba(0, 120, 212, 0.10);
+  --glass-border-input: rgba(0, 120, 212, 0.15);
+  --glass-scrollbar: rgba(0, 120, 212, 0.10);
+
+  /* Neumorphism helpers */
+  --neu-shadow-dark: #c0d0e0;
+  --neu-shadow-light: #ffffff;
+  --neu-accent-shadow: #0060b0;
+
+  /* Skeuomorphism helpers */
+  --skeu-body-from: #dce8f2;
+  --skeu-body-to: #eef4fa;
+  --skeu-card-from: #f8fbff;
+  --skeu-card-mid: #f4f8fd;
+  --skeu-card-to: #eaf2fa;
+  --skeu-card-highlight: #ffffff;
+  --skeu-card-shadow-edge: #b8cad8;
+  --skeu-header-from: #f4f8fd;
+  --skeu-header-to: #eaf2fa;
+  --skeu-btn-from: #eef4fa;
+  --skeu-btn-to: #dce8f2;
+  --skeu-btn-active-from: #0078d4;
+  --skeu-btn-active-to: #0060b0;
+}
+
+/* (light-mode view-btn.active consolidated — see below contrast modifiers) */

@@ -1,0 +1,174 @@
+﻿/* ═══════════════════════════════════════════════════════════════════════════
+ *  STYLE: Skeuomorphism  (body[data-style="skeuomorphism"])
+ *
+ *  Tactile realism: linear-gradient backgrounds for material texture,
+ *  inner shadows for beveled edges, and drop shadows for physical depth.
+ *  Top border = highlight (light edge), bottom border = shadow edge.
+ * ═══════════════════════════════════════════════════════════════════════════ */
+
+body[data-style="skeuomorphism"] {
+  background: linear-gradient(180deg, var(--skeu-body-from) 0%, var(--skeu-body-to) 100%);
+}
+
+/* ── Cards: textured surface with bevel ──────────────────────────────────── */
+body[data-style="skeuomorphism"] .market-card {
+  background: linear-gradient(180deg, var(--skeu-card-from) 0%, var(--skeu-card-mid) 40%, var(--skeu-card-to) 100%);
+  border: 1px solid var(--skeu-card-shadow-edge);
+  border-top: 1px solid var(--skeu-card-highlight);
+  border-radius: 5px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.45),
+              inset 0 1px 0 rgba(255, 255, 255, 0.08),
+              inset 0 -1px 0 rgba(0, 0, 0, 0.15);
+}
+body[data-style="skeuomorphism"] .market-card:hover {
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.55),
+              inset 0 1px 0 rgba(255, 255, 255, 0.10),
+              inset 0 -1px 0 rgba(0, 0, 0, 0.18);
+}
+
+/* ── Sections: embossed panel frame ──────────────────────────────────────── */
+body[data-style="skeuomorphism"] .top20-section {
+  background: linear-gradient(180deg, var(--skeu-card-from) 0%, var(--skeu-body-to) 100%);
+  border: 1px solid var(--skeu-card-shadow-edge);
+  border-top: 1px solid var(--skeu-card-highlight);
+  border-radius: 6px;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.50),
+              inset 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+body[data-style="skeuomorphism"] .favorites-section {
+  background: linear-gradient(180deg, var(--skeu-card-from) 0%, var(--skeu-body-to) 100%);
+  border: 1px solid var(--skeu-card-shadow-edge);
+  border-top: 1px solid var(--skeu-card-highlight);
+  border-radius: 6px;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.45),
+              inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+body[data-style="skeuomorphism"] .top20-section #market-header {
+  background: linear-gradient(180deg, var(--skeu-header-from) 0%, var(--skeu-header-to) 100%);
+  border-bottom: 1px solid var(--skeu-card-shadow-edge);
+  border-radius: 5px 5px 0 0;
+}
+body[data-style="skeuomorphism"] #settings-panel {
+  background: linear-gradient(180deg, var(--skeu-header-from) 0%, var(--skeu-header-to) 100%);
+  border: 1px solid var(--skeu-card-shadow-edge);
+  border-top: 1px solid var(--skeu-card-highlight);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.40),
+              inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+body[data-style="skeuomorphism"] .settings-group {
+  background: linear-gradient(180deg, var(--skeu-card-mid) 0%, var(--skeu-card-to) 100%);
+  border: 1px solid var(--skeu-card-shadow-edge);
+  border-top: 1px solid color-mix(in srgb, var(--skeu-card-highlight), transparent 40%);
+  border-radius: 5px;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.15);
+}
+
+/* ── Buttons: beveled pushable surfaces ──────────────────────────────────── */
+body[data-style="skeuomorphism"] .view-btn,
+body[data-style="skeuomorphism"] .scan-btn,
+body[data-style="skeuomorphism"] .refresh-btn,
+body[data-style="skeuomorphism"] .tab-btn,
+body[data-style="skeuomorphism"] .data-mgmt button,
+body[data-style="skeuomorphism"] .danger-btn {
+  background: linear-gradient(180deg, var(--skeu-btn-from) 0%, var(--skeu-btn-to) 100%);
+  border: 1px solid var(--skeu-card-shadow-edge);
+  border-top: 1px solid var(--skeu-card-highlight);
+  border-radius: 4px;
+  box-shadow: 0 2px 3px rgba(0, 0, 0, 0.35),
+              inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+body[data-style="skeuomorphism"] .view-btn:hover,
+body[data-style="skeuomorphism"] .scan-btn:hover,
+body[data-style="skeuomorphism"] .refresh-btn:hover,
+body[data-style="skeuomorphism"] .tab-btn:hover,
+body[data-style="skeuomorphism"] .data-mgmt button:hover {
+  box-shadow: 0 3px 5px rgba(0, 0, 0, 0.40),
+              inset 0 1px 0 rgba(255, 255, 255, 0.10);
+}
+body[data-style="skeuomorphism"] .view-btn.active,
+body[data-style="skeuomorphism"] .tab-btn.active {
+  background: linear-gradient(180deg, var(--skeu-btn-active-from) 0%, var(--skeu-btn-active-to) 100%);
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.40),
+              inset 0 -1px 0 rgba(255, 255, 255, 0.06);
+  color: var(--text-bright);
+}
+body[data-style="skeuomorphism"] .view-btn:active,
+body[data-style="skeuomorphism"] .scan-btn:active,
+body[data-style="skeuomorphism"] .tab-btn:active {
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.35);
+  transform: translateY(1px);
+}
+
+/* ── Flip / portfolio cards ──────────────────────────────────────────────── */
+body[data-style="skeuomorphism"] .flip-card,
+body[data-style="skeuomorphism"] .completed-flip-card {
+  background: linear-gradient(180deg, var(--skeu-card-from) 0%, var(--skeu-card-mid) 50%, var(--skeu-card-to) 100%);
+  border: 1px solid var(--skeu-card-shadow-edge);
+  border-top: 1px solid var(--skeu-card-highlight);
+  border-radius: 5px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.35),
+              inset 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+
+/* ── Inputs: carved inset fields ─────────────────────────────────────────── */
+body[data-style="skeuomorphism"] input[type="text"],
+body[data-style="skeuomorphism"] input[type="password"],
+body[data-style="skeuomorphism"] input[type="number"],
+body[data-style="skeuomorphism"] select,
+body[data-style="skeuomorphism"] #market-search-input {
+  background: linear-gradient(180deg,
+    color-mix(in srgb, var(--skeu-card-to), black 8%) 0%,
+    var(--skeu-card-to) 100%);
+  border: 1px solid var(--skeu-card-shadow-edge);
+  border-radius: 4px;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.25),
+              inset 0 -1px 0 rgba(255, 255, 255, 0.05);
+}
+
+/* ── Modals: heavy realistic frame ───────────────────────────────────────── */
+body[data-style="skeuomorphism"] .analytics-modal-content,
+body[data-style="skeuomorphism"] .setup-guide-content {
+  background: linear-gradient(180deg, var(--skeu-card-from) 0%, var(--skeu-card-mid) 30%, var(--skeu-card-to) 100%);
+  border: 1px solid var(--skeu-card-shadow-edge);
+  border-top: 2px solid var(--skeu-card-highlight);
+  border-radius: 8px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.60),
+              0 2px 4px rgba(0, 0, 0, 0.30),
+              inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+
+/* Skeuomorphism — softer shadows & stronger highlights on light modes */
+body[data-mode="light"][data-style="skeuomorphism"] .market-card {
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.14),
+              inset 0 1px 0 rgba(255, 255, 255, 0.50),
+              inset 0 -1px 0 rgba(0, 0, 0, 0.05);
+}
+body[data-mode="light"][data-style="skeuomorphism"] .market-card:hover {
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.18),
+              inset 0 1px 0 rgba(255, 255, 255, 0.60),
+              inset 0 -1px 0 rgba(0, 0, 0, 0.06);
+}
+body[data-mode="light"][data-style="skeuomorphism"] .top20-section,
+body[data-mode="light"][data-style="skeuomorphism"] .favorites-section {
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.10),
+              inset 0 1px 0 rgba(255, 255, 255, 0.40);
+}
+body[data-mode="light"][data-style="skeuomorphism"] .flip-card,
+body[data-mode="light"][data-style="skeuomorphism"] .completed-flip-card {
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.10),
+              inset 0 1px 0 rgba(255, 255, 255, 0.45);
+}
+body[data-mode="light"][data-style="skeuomorphism"] input[type="text"],
+body[data-mode="light"][data-style="skeuomorphism"] input[type="password"],
+body[data-mode="light"][data-style="skeuomorphism"] input[type="number"],
+body[data-mode="light"][data-style="skeuomorphism"] select,
+body[data-mode="light"][data-style="skeuomorphism"] #market-search-input {
+  box-shadow: inset 0 2px 3px rgba(0, 0, 0, 0.10),
+              inset 0 -1px 0 rgba(255, 255, 255, 0.30);
+}
+body[data-mode="light"][data-style="skeuomorphism"] .analytics-modal-content,
+body[data-mode="light"][data-style="skeuomorphism"] .setup-guide-content {
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.18),
+              0 2px 4px rgba(0, 0, 0, 0.08),
+              inset 0 1px 0 rgba(255, 255, 255, 0.50);
+}

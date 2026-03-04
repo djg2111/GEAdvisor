@@ -1,0 +1,128 @@
+﻿/* ── Chat / Advisor panel ──────────────────────────────────────────────────── */
+
+#advisor-view {
+  display: flex;
+  flex-direction: column;
+  min-height: 120px;         /* never collapse so small that input disappears */
+  overflow: hidden;          /* contain children; chat-history scrolls internally */
+  padding: 8px 10px 10px;
+}
+
+#advisor-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-shrink: 0;
+  margin-bottom: 6px;
+}
+
+#advisor-view h2 {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-heading);
+  margin: 0;
+  flex-shrink: 0;
+}
+
+#clear-chat-btn {
+  font-size: 11px;
+  padding: 2px 8px;
+  border: 1px solid var(--border-input);
+  border-radius: 4px;
+  background: transparent;
+  color: var(--text-main);
+  cursor: pointer;
+  transition: background .15s, color .15s;
+}
+#clear-chat-btn:hover { background: var(--accent-red-dark); color: var(--text-bright); border-color: var(--accent-red-dark); }
+
+#chat-history {
+  flex: 1;
+  overflow-y: auto;
+  border: 2px solid var(--border-main);
+  border-radius: 4px;
+  background: var(--bg-panel);
+  padding: 8px;
+  margin-bottom: 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* ── Chat bubbles ─────────────────────────────────────────────────────────── */
+
+.chat-msg {
+  max-width: 92%;
+  padding: 6px 10px;
+  border-radius: 6px;
+  font-size: 12px;
+  line-height: 1.5;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
+
+.chat-msg.user {
+  align-self: flex-end;
+  background: var(--chat-user-bg);
+  color: var(--text-main);
+  border-bottom-right-radius: 2px;
+}
+
+.chat-msg.assistant {
+  align-self: flex-start;
+  background: var(--bg-muted);
+  color: var(--text-main);
+  border-bottom-left-radius: 2px;
+}
+
+.chat-msg.system {
+  align-self: center;
+  background: transparent;
+  color: var(--text-muted);
+  font-style: italic;
+  font-size: 11px;
+  text-align: center;
+}
+
+.chat-msg.error {
+  align-self: center;
+  background: var(--chat-error-bg);
+  color: var(--accent-red);
+  font-size: 11px;
+  text-align: center;
+}
+
+/* Thinking indicator */
+.chat-msg.thinking {
+  align-self: flex-start;
+  background: transparent;
+  color: var(--text-muted);
+  font-style: italic;
+  font-size: 12px;
+}
+
+.chat-msg.thinking::after {
+  content: "";
+  animation: dots 1.4s steps(4, end) infinite;
+}
+
+@keyframes dots {
+  0%   { content: ""; }
+  25%  { content: "."; }
+  50%  { content: ".."; }
+  75%  { content: "..."; }
+  100% { content: ""; }
+}
+
+/* ── Chat input row ───────────────────────────────────────────────────────── */
+
+#chat-input-row {
+  display: flex;
+  gap: 6px;
+  flex-shrink: 0;            /* never collapse — always visible */
+  padding-top: 2px;
+}
+
+#chat-input {
+  flex: 1;
+}

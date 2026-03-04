@@ -1,0 +1,76 @@
+﻿/* ═══════════════════════════════════════════════════════════════════════════
+ *  MICRO-COMPONENT PROTECTION
+ *
+ *  Small icon-only buttons (.card-actions, .flip-card-actions, .popout-btn,
+ *  .fav-btn, .alert-btn, .quick-add-btn, .ext-link, .flip-remove-btn,
+ *  .flip-complete-btn, #export-csv-btn, .data-mgmt button) must remain
+ *  legible and clickable regardless of active style. Heavy shadows, blurs,
+ *  and gradients are suppressed on these micro-targets.
+ * ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ── Glass: don't inherit parent's blur on micro-buttons ─────────────────── */
+body[data-style="glass"] .card-actions button,
+body[data-style="glass"] .card-actions a,
+body[data-style="glass"] .flip-card-actions button,
+body[data-style="glass"] #export-csv-btn {
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+
+/* ── Neumorphism: minimal shadow for icon buttons ────────────────────────── */
+body[data-style="neumorphism"] .popout-btn,
+body[data-style="neumorphism"] .fav-btn,
+body[data-style="neumorphism"] .alert-btn,
+body[data-style="neumorphism"] .quick-add-btn,
+body[data-style="neumorphism"] .flip-remove-btn,
+body[data-style="neumorphism"] .flip-complete-btn,
+body[data-style="neumorphism"] #export-csv-btn,
+body[data-style="neumorphism"] .ext-link {
+  box-shadow: none;
+  border: none;
+  background: transparent;
+}
+body[data-style="neumorphism"] .popout-btn:hover,
+body[data-style="neumorphism"] .fav-btn:hover,
+body[data-style="neumorphism"] .alert-btn:hover,
+body[data-style="neumorphism"] .quick-add-btn:hover,
+body[data-style="neumorphism"] .flip-remove-btn:hover,
+body[data-style="neumorphism"] .flip-complete-btn:hover,
+body[data-style="neumorphism"] #export-csv-btn:hover {
+  box-shadow: 2px 2px 4px var(--neu-shadow-dark),
+             -2px -2px 4px var(--neu-shadow-light);
+  border-radius: 4px;
+}
+
+/* ── Skeuomorphism: flatten micro-buttons to avoid visual clutter ────────── */
+body[data-style="skeuomorphism"] .popout-btn,
+body[data-style="skeuomorphism"] .fav-btn,
+body[data-style="skeuomorphism"] .alert-btn,
+body[data-style="skeuomorphism"] .quick-add-btn,
+body[data-style="skeuomorphism"] .ext-link {
+  background: transparent;
+  border: none;
+  box-shadow: none;
+}
+body[data-style="skeuomorphism"] .popout-btn:hover,
+body[data-style="skeuomorphism"] .fav-btn:hover,
+body[data-style="skeuomorphism"] .alert-btn:hover,
+body[data-style="skeuomorphism"] .quick-add-btn:hover {
+  background: color-mix(in srgb, var(--skeu-card-highlight), transparent 60%);
+  border-radius: 3px;
+}
+/* Flip action buttons keep a subtle bevel at small scale */
+body[data-style="skeuomorphism"] .flip-remove-btn,
+body[data-style="skeuomorphism"] .flip-complete-btn,
+body[data-style="skeuomorphism"] #export-csv-btn {
+  background: linear-gradient(180deg, var(--skeu-btn-from) 0%, var(--skeu-btn-to) 100%);
+  border: 1px solid var(--skeu-card-shadow-edge);
+  border-top: 1px solid color-mix(in srgb, var(--skeu-card-highlight), transparent 50%);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
+}
+body[data-style="skeuomorphism"] .flip-remove-btn:active,
+body[data-style="skeuomorphism"] .flip-complete-btn:active,
+body[data-style="skeuomorphism"] #export-csv-btn:active {
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.35);
+  transform: translateY(1px);
+}

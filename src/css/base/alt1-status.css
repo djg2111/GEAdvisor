@@ -1,0 +1,15 @@
+﻿/* ── Alt1 status banner ───────────────────────────────────────────────────── */
+
+#alt1-status {
+  padding: 4px 10px;
+  font-size: 11px;
+  text-align: center;
+}
+
+#alt1-status:empty {
+  display: none;
+}
+
+#alt1-status a {
+  color: var(--link-color);
+}
