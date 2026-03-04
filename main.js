@@ -134,6 +134,33 @@ ___CSS_LOADER_EXPORT___.push([module.id, `/* ───────────�
   --badge-radius: 3px;
   --badge-font-weight: 600;
 
+  /* ── Alias tokens (consumed by components that use short names) ── */
+  --border: var(--border-main);
+  --text: var(--text-main);
+
+  /* ── Semantic badge-bg tokens (theme-aware, replaces hard-coded rgba) ── */
+  --badge-velocity-insta-bg: rgba(39, 174, 96, 0.18);
+  --badge-velocity-active-bg: rgba(86, 156, 214, 0.18);
+  --badge-velocity-slow-bg: rgba(240, 192, 64, 0.18);
+  --badge-velocity-muted-bg: rgba(136, 136, 136, 0.18);
+  --badge-trend-up-bg: rgba(39, 174, 96, 0.18);
+  --badge-trend-down-bg: rgba(244, 71, 71, 0.18);
+  --badge-neutral-bg: rgba(136, 136, 136, 0.15);
+  --badge-hype-vol-bg: rgba(255, 171, 64, 0.15);
+  --badge-tier-free-bg: rgba(76, 175, 80, 0.12);
+  --badge-tier-free-border: rgba(76, 175, 80, 0.3);
+  --badge-tier-freetier-bg: rgba(78, 205, 196, 0.12);
+  --badge-tier-freetier-border: rgba(78, 205, 196, 0.3);
+  --badge-tier-lowcost-bg: rgba(100, 149, 237, 0.12);
+  --badge-tier-lowcost-border: rgba(100, 149, 237, 0.3);
+  --badge-tier-neutral-bg: rgba(180, 180, 180, 0.08);
+  --badge-tier-neutral-border: rgba(180, 180, 180, 0.2);
+  --table-active-row-bg: rgba(100, 149, 237, 0.08);
+  --table-hover-row-bg: rgba(255, 255, 255, 0.03);
+  --setup-note-bg: rgba(255, 215, 0, 0.08);
+  --setup-note-border: rgba(255, 215, 0, 0.2);
+  --detail-expanded-bg: rgba(0, 0, 0, 0.08);
+
   /* ── Misc ─────────────────────────────── */
   --link-color: #6cb4ee;
   --add-flip-bg: #1b6b2a;
@@ -376,6 +403,210 @@ body[data-mode="dark"][data-colorway="rs3-modern"] {
 }
 
 /* ─────────────────────────────────────────────────────────────────────────────
+ *  COLORWAY: RS Lobby — Dark
+ *  Inspired by the RuneScape in-game lobby UI — warm parchment browns,
+ *  gold accents, ridge-border aesthetic. A blend of OSRS + RS3 Modern.
+ * ───────────────────────────────────────────────────────────────────────────── */
+
+body[data-mode="dark"][data-colorway="rs-lobby"] {
+  --bg-main: #1a140f;
+  --bg-panel: #2a221b;
+  --bg-elevated: #3e3529;
+  --bg-hover: #4a3e30;
+  --dropdown-bg: #3e3529;
+  --dropdown-hover-bg: #4a3e30;
+  --bg-input: #1a1510;
+  --bg-muted: #2a221b;
+  --bg-filter: #15100c;
+  --bg-number-input: #1a1510;
+
+  --text-main: #bdae95;
+  --text-bright: #e0e0e0;
+  --text-accent: #c8b07a;
+  --text-heading: #eddca8;
+  --text-price: #86efac;
+  --text-muted: #8a7a68;
+  --text-soft: #a39682;
+  --text-dimmed: #5a4e3d;
+
+  --border-main: #4a3e30;
+  --border-section: #3a3228;
+  --border-card: #5a4e3d;
+  --border-input: #5a4a38;
+  --border-subtle: #3e3224;
+  --border-hype: #806830;
+  --border-hype-hover: #a08840;
+
+  --accent-primary: #7a654c;
+  --accent-primary-hover: #96805c;
+  --accent-primary-active: #5a4830;
+  --accent-focus: #c8b07a;
+  --accent-blue-text: #7192bc;
+  --accent-green: #539e30;
+  --accent-green-bright: #6bba48;
+  --accent-teal: #7192bc;
+  --accent-gold: #c8b07a;
+  --accent-gold-hype: #d98d26;
+  --accent-red: #a32222;
+  --accent-red-dark: #7a1818;
+  --accent-red-bg: #2a1510;
+  --accent-red-border: #8a3030;
+  --accent-red-border-hover: #a84040;
+  --accent-hype: #d98d26;
+
+  --chat-user-bg: #3a3020;
+  --chat-error-bg: #2a1510;
+  --badge-buy-bg: #2a2818;
+  --badge-sell-bg: #1e3010;
+  --badge-hype-bg: #3a3010;
+
+  --modal-backdrop: rgba(0, 0, 0, 0.75);
+  --modal-shadow: rgba(0, 0, 0, 0.9);
+  --scrollbar-thumb: #5a4a38;
+  --scrollbar-thumb-hover: #7a654c;
+  --link-color: #c8b07a;
+  --add-flip-bg: #2a3a1a;
+  --limit-ready-bg: #1e2a14;
+
+  /* Glass helpers */
+  --glass-body-from: #100c08;
+  --glass-body-via: #1a140f;
+  --glass-body-to: #150f0a;
+  --glass-panel: rgba(200, 176, 122, 0.06);
+  --glass-elevated: rgba(200, 176, 122, 0.10);
+  --glass-hover: rgba(200, 176, 122, 0.12);
+  --glass-input: rgba(200, 176, 122, 0.08);
+  --glass-muted: rgba(200, 176, 122, 0.05);
+  --glass-border-card: rgba(200, 176, 122, 0.18);
+  --glass-border-main: rgba(200, 176, 122, 0.10);
+  --glass-border-section: rgba(200, 176, 122, 0.12);
+  --glass-border-input: rgba(200, 176, 122, 0.20);
+  --glass-scrollbar: rgba(200, 176, 122, 0.14);
+
+  /* Neumorphism helpers */
+  --neu-shadow-dark: #100c08;
+  --neu-shadow-light: #4a3e30;
+  --neu-accent-shadow: #5a4830;
+
+  /* Skeuomorphism helpers */
+  --skeu-body-from: #15100c;
+  --skeu-body-to: #2a221b;
+  --skeu-card-from: #4a3e30;
+  --skeu-card-mid: #3e3529;
+  --skeu-card-to: #2a221b;
+  --skeu-card-highlight: #5a4e3d;
+  --skeu-card-shadow-edge: #100c08;
+  --skeu-header-from: #4a3e30;
+  --skeu-header-to: #3a3228;
+  --skeu-btn-from: #506270;
+  --skeu-btn-to: #34414a;
+  --skeu-btn-active-from: #c8b07a;
+  --skeu-btn-active-to: #96805c;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+ *  COLORWAY: Gruvbox — Dark
+ *  morhetz/gruvbox "retro groove" palette — warm earthy tones with pastel
+ *  accents. bg0 #282828, fg1 #ebdbb2, yellow #d79921, aqua #689d6a.
+ * ───────────────────────────────────────────────────────────────────────────── */
+
+body[data-mode="dark"][data-colorway="gruvbox"] {
+  --bg-main: #282828;
+  --bg-panel: #3c3836;
+  --bg-elevated: #504945;
+  --bg-hover: #665c54;
+  --dropdown-bg: #504945;
+  --dropdown-hover-bg: #665c54;
+  --bg-input: #32302f;
+  --bg-muted: #3c3836;
+  --bg-filter: #1d2021;
+  --bg-number-input: #32302f;
+
+  --text-main: #ebdbb2;
+  --text-bright: #fbf1c7;
+  --text-accent: #fabd2f;
+  --text-heading: #fe8019;
+  --text-price: #b8bb26;
+  --text-muted: #928374;
+  --text-soft: #a89984;
+  --text-dimmed: #7c6f64;
+
+  --border-main: #504945;
+  --border-section: #3c3836;
+  --border-card: #665c54;
+  --border-input: #665c54;
+  --border-subtle: #504945;
+  --border-hype: #d65d0e;
+  --border-hype-hover: #fe8019;
+
+  --accent-primary: #458588;
+  --accent-primary-hover: #83a598;
+  --accent-primary-active: #076678;
+  --accent-focus: #83a598;
+  --accent-blue-text: #83a598;
+  --accent-green: #98971a;
+  --accent-green-bright: #b8bb26;
+  --accent-teal: #689d6a;
+  --accent-gold: #d79921;
+  --accent-gold-hype: #fabd2f;
+  --accent-red: #fb4934;
+  --accent-red-dark: #cc241d;
+  --accent-red-bg: #3c1f1f;
+  --accent-red-border: #cc241d;
+  --accent-red-border-hover: #fb4934;
+  --accent-hype: #fe8019;
+
+  --chat-user-bg: #3c3836;
+  --chat-error-bg: #3c1f1f;
+  --badge-buy-bg: #2a3428;
+  --badge-sell-bg: #283428;
+  --badge-hype-bg: #3c3020;
+
+  --modal-backdrop: rgba(0, 0, 0, 0.75);
+  --modal-shadow: rgba(0, 0, 0, 0.9);
+  --scrollbar-thumb: #665c54;
+  --scrollbar-thumb-hover: #7c6f64;
+  --link-color: #83a598;
+  --add-flip-bg: #3a4a28;
+  --limit-ready-bg: #2a3a1e;
+
+  /* Glass helpers */
+  --glass-body-from: #1d2021;
+  --glass-body-via: #282828;
+  --glass-body-to: #1d2021;
+  --glass-panel: rgba(235, 219, 178, 0.05);
+  --glass-elevated: rgba(235, 219, 178, 0.08);
+  --glass-hover: rgba(235, 219, 178, 0.10);
+  --glass-input: rgba(235, 219, 178, 0.06);
+  --glass-muted: rgba(235, 219, 178, 0.04);
+  --glass-border-card: rgba(235, 219, 178, 0.15);
+  --glass-border-main: rgba(235, 219, 178, 0.08);
+  --glass-border-section: rgba(235, 219, 178, 0.10);
+  --glass-border-input: rgba(235, 219, 178, 0.18);
+  --glass-scrollbar: rgba(235, 219, 178, 0.12);
+
+  /* Neumorphism helpers */
+  --neu-shadow-dark: #1d2021;
+  --neu-shadow-light: #504945;
+  --neu-accent-shadow: #076678;
+
+  /* Skeuomorphism helpers */
+  --skeu-body-from: #1d2021;
+  --skeu-body-to: #282828;
+  --skeu-card-from: #504945;
+  --skeu-card-mid: #3c3836;
+  --skeu-card-to: #32302f;
+  --skeu-card-highlight: #665c54;
+  --skeu-card-shadow-edge: #1d2021;
+  --skeu-header-from: #504945;
+  --skeu-header-to: #3c3836;
+  --skeu-btn-from: #504945;
+  --skeu-btn-to: #3c3836;
+  --skeu-btn-active-from: #458588;
+  --skeu-btn-active-to: #076678;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
  *  COLORWAY: Classic — Light
  * ───────────────────────────────────────────────────────────────────────────── */
 
@@ -475,13 +706,8 @@ body[data-mode="light"][data-colorway="classic"] {
   --skeu-btn-active-to: #0055aa;
 }
 
-/* Classic Light — force light body background for basic style */
-body[data-mode="light"][data-colorway="classic"] {
-  background: #f5f5f5;
-}
-body[data-mode="light"][data-colorway="classic"] .view-btn.active {
-  color: #ffffff;
-}
+/* Light-mode colourway backgrounds are set via --bg-main (consumed by body { background: var(--bg-main) }).
+   Active view-btn text forced to white for all light colourways — consolidated here. */
 
 /* ─────────────────────────────────────────────────────────────────────────────
  *  COLORWAY: Solarized — Dark
@@ -683,13 +909,7 @@ body[data-mode="light"][data-colorway="solarized"] {
   --skeu-btn-active-to: #1a6daa;
 }
 
-/* Solarized Light — force warm body background for basic style */
-body[data-mode="light"][data-colorway="solarized"] {
-  background: #e6dec8;
-}
-body[data-mode="light"][data-colorway="solarized"] .view-btn.active {
-  color: #ffffff;
-}
+/* (light-mode view-btn.active consolidated — see below contrast modifiers) */
 
 /* ─────────────────────────────────────────────────────────────────────────────
  *  COLORWAY: OSRS — Light
@@ -791,13 +1011,7 @@ body[data-mode="light"][data-colorway="osrs"] {
   --skeu-btn-active-to: #6b3410;
 }
 
-/* OSRS Light — force warm background for basic style */
-body[data-mode="light"][data-colorway="osrs"] {
-  background: #f5ead4;
-}
-body[data-mode="light"][data-colorway="osrs"] .view-btn.active {
-  color: #ffffff;
-}
+/* (light-mode view-btn.active consolidated — see below contrast modifiers) */
 
 /* ─────────────────────────────────────────────────────────────────────────────
  *  COLORWAY: RS3 Modern — Light
@@ -899,12 +1113,247 @@ body[data-mode="light"][data-colorway="rs3-modern"] {
   --skeu-btn-active-to: #0060b0;
 }
 
-/* RS3 Modern Light — force light background for basic style */
-body[data-mode="light"][data-colorway="rs3-modern"] {
-  background: #eef4fa;
+/* (light-mode view-btn.active consolidated — see below contrast modifiers) */
+
+/* ─────────────────────────────────────────────────────────────────────────────
+ *  COLORWAY: RS Lobby — Light
+ *  Light-mode counterpart: warm cream/parchment base with gold highlights.
+ * ───────────────────────────────────────────────────────────────────────────── */
+
+body[data-mode="light"][data-colorway="rs-lobby"] {
+  --bg-main: #f2ece2;
+  --bg-panel: #faf6ee;
+  --bg-elevated: #f6f0e6;
+  --bg-hover: #ece4d6;
+  --dropdown-bg: #f6f0e6;
+  --dropdown-hover-bg: #ece4d6;
+  --bg-input: #eae2d4;
+  --bg-muted: #e0d8c8;
+  --bg-filter: #f0e8da;
+  --bg-number-input: #eae2d4;
+
+  --text-main: #3e3529;
+  --text-bright: #1a140f;
+  --text-accent: #8b6914;
+  --text-heading: #6b5010;
+  --text-price: #2a7a2a;
+  --text-muted: #7a6d5a;
+  --text-soft: #8a7e6c;
+  --text-dimmed: #b0a490;
+
+  --border-main: #d4c8b4;
+  --border-section: #c8bca8;
+  --border-card: #c0b49e;
+  --border-input: #b8ac96;
+  --border-subtle: #dcd0bc;
+  --border-hype: #c09020;
+  --border-hype-hover: #a07a10;
+
+  --accent-primary: #8b6914;
+  --accent-primary-hover: #a07a20;
+  --accent-primary-active: #6b5010;
+  --accent-focus: #8b6914;
+  --accent-blue-text: #506070;
+  --accent-green: #3a8a28;
+  --accent-green-bright: #2a7a1a;
+  --accent-teal: #4a7a6a;
+  --accent-gold: #c09020;
+  --accent-gold-hype: #a07a10;
+  --accent-red: #a32222;
+  --accent-red-dark: #7a1818;
+  --accent-red-bg: #fff0ec;
+  --accent-red-border: #d8a0a0;
+  --accent-red-border-hover: #c88080;
+  --accent-hype: #c88020;
+
+  --chat-user-bg: #f0e8d4;
+  --chat-error-bg: #fff0ec;
+  --badge-buy-bg: #e8e0ce;
+  --badge-sell-bg: #dcf0dc;
+  --badge-hype-bg: #f8f0d0;
+
+  --modal-backdrop: rgba(0, 0, 0, 0.25);
+  --modal-shadow: rgba(0, 0, 0, 0.15);
+  --scrollbar-thumb: #c0b49e;
+  --scrollbar-thumb-hover: #a09480;
+  --link-color: #8b6914;
+  --add-flip-bg: #d0e8c0;
+  --limit-ready-bg: #daf0d0;
+
+  /* Glass helpers */
+  --glass-body-from: #e0d8c8;
+  --glass-body-via: #ece4d6;
+  --glass-body-to: #d8ceb8;
+  --glass-panel: rgba(250, 244, 230, 0.55);
+  --glass-elevated: rgba(250, 244, 230, 0.65);
+  --glass-hover: rgba(250, 244, 230, 0.70);
+  --glass-input: rgba(250, 244, 230, 0.50);
+  --glass-muted: rgba(250, 244, 230, 0.40);
+  --glass-border-card: rgba(139, 105, 20, 0.14);
+  --glass-border-main: rgba(139, 105, 20, 0.08);
+  --glass-border-section: rgba(139, 105, 20, 0.10);
+  --glass-border-input: rgba(139, 105, 20, 0.16);
+  --glass-scrollbar: rgba(139, 105, 20, 0.12);
+
+  /* Neumorphism helpers */
+  --neu-shadow-dark: #c8bca8;
+  --neu-shadow-light: #ffffff;
+  --neu-accent-shadow: #6b5010;
+
+  /* Skeuomorphism helpers */
+  --skeu-body-from: #e0d8c8;
+  --skeu-body-to: #f2ece2;
+  --skeu-card-from: #faf6ee;
+  --skeu-card-mid: #f6f0e6;
+  --skeu-card-to: #ece4d6;
+  --skeu-card-highlight: #ffffff;
+  --skeu-card-shadow-edge: #b8ac96;
+  --skeu-header-from: #f6f0e6;
+  --skeu-header-to: #ece4d6;
+  --skeu-btn-from: #f2ece2;
+  --skeu-btn-to: #e0d8c8;
+  --skeu-btn-active-from: #8b6914;
+  --skeu-btn-active-to: #6b5010;
 }
-body[data-mode="light"][data-colorway="rs3-modern"] .view-btn.active {
+
+/* (light-mode view-btn.active consolidated — see below contrast modifiers) */
+
+/* ─────────────────────────────────────────────────────────────────────────────
+ *  COLORWAY: Gruvbox — Light
+ *  morhetz/gruvbox light palette — warm cream bg (#fbf1c7), dark fg (#3c3836),
+ *  same pastel accent family as Gruvbox Dark.
+ * ───────────────────────────────────────────────────────────────────────────── */
+
+body[data-mode="light"][data-colorway="gruvbox"] {
+  --bg-main: #fbf1c7;
+  --bg-panel: #ebdbb2;
+  --bg-elevated: #f2e5bc;
+  --bg-hover: #d5c4a1;
+  --dropdown-bg: #f2e5bc;
+  --dropdown-hover-bg: #d5c4a1;
+  --bg-input: #ebdbb2;
+  --bg-muted: #d5c4a1;
+  --bg-filter: #f9f0c0;
+  --bg-number-input: #ebdbb2;
+
+  --text-main: #3c3836;
+  --text-bright: #282828;
+  --text-accent: #b57614;
+  --text-heading: #af3a03;
+  --text-price: #79740e;
+  --text-muted: #7c6f64;
+  --text-soft: #928374;
+  --text-dimmed: #a89984;
+
+  --border-main: #d5c4a1;
+  --border-section: #bdae93;
+  --border-card: #bdae93;
+  --border-input: #a89984;
+  --border-subtle: #d5c4a1;
+  --border-hype: #af3a03;
+  --border-hype-hover: #d65d0e;
+
+  --accent-primary: #076678;
+  --accent-primary-hover: #458588;
+  --accent-primary-active: #054b5c;
+  --accent-focus: #076678;
+  --accent-blue-text: #076678;
+  --accent-green: #79740e;
+  --accent-green-bright: #98971a;
+  --accent-teal: #427b58;
+  --accent-gold: #b57614;
+  --accent-gold-hype: #d79921;
+  --accent-red: #cc241d;
+  --accent-red-dark: #9d0006;
+  --accent-red-bg: #f9e0de;
+  --accent-red-border: #cc241d;
+  --accent-red-border-hover: #9d0006;
+  --accent-hype: #af3a03;
+
+  --chat-user-bg: #ebdbb2;
+  --chat-error-bg: #f9e0de;
+  --badge-buy-bg: #e0dba8;
+  --badge-sell-bg: #dde0a0;
+  --badge-hype-bg: #eddca0;
+
+  --modal-backdrop: rgba(0, 0, 0, 0.25);
+  --modal-shadow: rgba(0, 0, 0, 0.15);
+  --scrollbar-thumb: #bdae93;
+  --scrollbar-thumb-hover: #a89984;
+  --link-color: #076678;
+  --add-flip-bg: #d0dca0;
+  --limit-ready-bg: #dae4b0;
+
+  /* Glass helpers */
+  --glass-body-from: #e8dcb0;
+  --glass-body-via: #f0e4c0;
+  --glass-body-to: #e0d4a8;
+  --glass-panel: rgba(251, 241, 199, 0.55);
+  --glass-elevated: rgba(251, 241, 199, 0.65);
+  --glass-hover: rgba(251, 241, 199, 0.70);
+  --glass-input: rgba(251, 241, 199, 0.50);
+  --glass-muted: rgba(251, 241, 199, 0.40);
+  --glass-border-card: rgba(60, 56, 54, 0.12);
+  --glass-border-main: rgba(60, 56, 54, 0.08);
+  --glass-border-section: rgba(60, 56, 54, 0.10);
+  --glass-border-input: rgba(60, 56, 54, 0.15);
+  --glass-scrollbar: rgba(60, 56, 54, 0.10);
+
+  /* Neumorphism helpers */
+  --neu-shadow-dark: #d5c4a1;
+  --neu-shadow-light: #fbf1c7;
+  --neu-accent-shadow: #054b5c;
+
+  /* Skeuomorphism helpers */
+  --skeu-body-from: #ebdbb2;
+  --skeu-body-to: #fbf1c7;
+  --skeu-card-from: #f2e5bc;
+  --skeu-card-mid: #ebdbb2;
+  --skeu-card-to: #e0d4a8;
+  --skeu-card-highlight: #fbf1c7;
+  --skeu-card-shadow-edge: #bdae93;
+  --skeu-header-from: #f2e5bc;
+  --skeu-header-to: #ebdbb2;
+  --skeu-btn-from: #f2e5bc;
+  --skeu-btn-to: #ebdbb2;
+  --skeu-btn-active-from: #076678;
+  --skeu-btn-active-to: #054b5c;
+}
+
+/* (light-mode view-btn.active consolidated — see rule below) */
+
+/* ─────────────────────────────────────────────────────────────────────────────
+ *  LIGHT-MODE: consolidated overrides
+ *  - .view-btn.active text forced white for all light colourways
+ *  - Badge/table tokens adjusted for light backgrounds
+ * ───────────────────────────────────────────────────────────────────────────── */
+
+body[data-mode="light"] .view-btn.active {
   color: #ffffff;
+}
+
+body[data-mode="light"] {
+  --badge-velocity-insta-bg: rgba(39, 174, 96, 0.14);
+  --badge-velocity-active-bg: rgba(0, 80, 180, 0.12);
+  --badge-velocity-slow-bg: rgba(200, 150, 0, 0.14);
+  --badge-velocity-muted-bg: rgba(100, 100, 100, 0.12);
+  --badge-trend-up-bg: rgba(39, 174, 96, 0.14);
+  --badge-trend-down-bg: rgba(200, 50, 50, 0.14);
+  --badge-neutral-bg: rgba(100, 100, 100, 0.10);
+  --badge-hype-vol-bg: rgba(200, 130, 0, 0.12);
+  --badge-tier-free-bg: rgba(39, 154, 39, 0.10);
+  --badge-tier-free-border: rgba(39, 154, 39, 0.25);
+  --badge-tier-freetier-bg: rgba(26, 154, 138, 0.10);
+  --badge-tier-freetier-border: rgba(26, 154, 138, 0.25);
+  --badge-tier-lowcost-bg: rgba(0, 80, 180, 0.10);
+  --badge-tier-lowcost-border: rgba(0, 80, 180, 0.25);
+  --badge-tier-neutral-bg: rgba(100, 100, 100, 0.06);
+  --badge-tier-neutral-border: rgba(100, 100, 100, 0.15);
+  --table-active-row-bg: rgba(0, 80, 180, 0.06);
+  --table-hover-row-bg: rgba(0, 0, 0, 0.02);
+  --setup-note-bg: rgba(180, 140, 0, 0.06);
+  --setup-note-border: rgba(180, 140, 0, 0.18);
+  --detail-expanded-bg: rgba(0, 0, 0, 0.04);
 }
 
 /* ─────────────────────────────────────────────────────────────────────────────
@@ -1094,23 +1543,14 @@ body[data-style="skeuomorphism"] .view-btn.active {
   box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.30);
   color: var(--text-bright);
 }
-/* Skeuomorphism — softer shadows on light modes */
-body[data-mode="light"][data-colorway="classic"][data-style="skeuomorphism"] .market-card,
-body[data-mode="light"][data-colorway="solarized"][data-style="skeuomorphism"] .market-card,
-body[data-mode="light"][data-colorway="osrs"][data-style="skeuomorphism"] .market-card,
-body[data-mode="light"][data-colorway="rs3-modern"][data-style="skeuomorphism"] .market-card {
+/* Skeuomorphism — softer shadows on light modes (consolidated) */
+body[data-mode="light"][data-style="skeuomorphism"] .market-card {
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.40);
 }
-body[data-mode="light"][data-colorway="classic"][data-style="skeuomorphism"] .market-card:hover,
-body[data-mode="light"][data-colorway="solarized"][data-style="skeuomorphism"] .market-card:hover,
-body[data-mode="light"][data-colorway="osrs"][data-style="skeuomorphism"] .market-card:hover,
-body[data-mode="light"][data-colorway="rs3-modern"][data-style="skeuomorphism"] .market-card:hover {
+body[data-mode="light"][data-style="skeuomorphism"] .market-card:hover {
   box-shadow: 0 3px 8px rgba(0, 0, 0, 0.20), inset 0 1px 0 rgba(255, 255, 255, 0.50);
 }
-body[data-mode="light"][data-colorway="classic"][data-style="skeuomorphism"] .top20-section,
-body[data-mode="light"][data-colorway="solarized"][data-style="skeuomorphism"] .top20-section,
-body[data-mode="light"][data-colorway="osrs"][data-style="skeuomorphism"] .top20-section,
-body[data-mode="light"][data-colorway="rs3-modern"][data-style="skeuomorphism"] .top20-section {
+body[data-mode="light"][data-style="skeuomorphism"] .top20-section {
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.30);
 }
 
@@ -1400,28 +1840,28 @@ body {
   font-weight: 500;
 }
 .setup-guide-tier.tier-free {
-  background: rgba(76, 175, 80, 0.12);
-  border: 1px solid rgba(76, 175, 80, 0.3);
+  background: var(--badge-tier-free-bg);
+  border: 1px solid var(--badge-tier-free-border);
   color: var(--accent-green);
 }
 .setup-guide-tier.tier-free-tier {
-  background: rgba(78, 205, 196, 0.12);
-  border: 1px solid rgba(78, 205, 196, 0.3);
+  background: var(--badge-tier-freetier-bg);
+  border: 1px solid var(--badge-tier-freetier-border);
   color: var(--accent-teal);
 }
 .setup-guide-tier.tier-low-cost {
-  background: rgba(100, 149, 237, 0.12);
-  border: 1px solid rgba(100, 149, 237, 0.3);
+  background: var(--badge-tier-lowcost-bg);
+  border: 1px solid var(--badge-tier-lowcost-border);
   color: var(--accent-blue-text);
 }
 .setup-guide-tier.tier-paid {
-  background: rgba(180, 180, 180, 0.08);
-  border: 1px solid rgba(180, 180, 180, 0.2);
+  background: var(--badge-tier-neutral-bg);
+  border: 1px solid var(--badge-tier-neutral-border);
   color: var(--text-muted);
 }
 .setup-guide-tier.tier-self-hosted {
-  background: rgba(180, 180, 180, 0.08);
-  border: 1px solid rgba(180, 180, 180, 0.2);
+  background: var(--badge-tier-neutral-bg);
+  border: 1px solid var(--badge-tier-neutral-border);
   color: var(--text-muted);
 }
 
@@ -1451,8 +1891,8 @@ body {
 .setup-guide-note {
   padding: 8px 12px;
   border-radius: 6px;
-  background: rgba(255, 215, 0, 0.08);
-  border: 1px solid rgba(255, 215, 0, 0.2);
+  background: var(--setup-note-bg);
+  border: 1px solid var(--setup-note-border);
   font-size: 11px;
   color: var(--accent-gold);
   margin-bottom: 0.75rem;
@@ -1505,12 +1945,12 @@ body {
   color: var(--text-main);
 }
 .provider-comparison-table tr.active-row td {
-  background: rgba(100, 149, 237, 0.08);
+  background: var(--table-active-row-bg);
   color: var(--text-bright);
   font-weight: 500;
 }
 .provider-comparison-table tr:hover td {
-  background: rgba(255, 255, 255, 0.03);
+  background: var(--table-hover-row-bg);
 }
 
 .tier-badge-sm {
@@ -1522,19 +1962,19 @@ body {
   white-space: nowrap;
 }
 .tier-badge-sm.tier-free {
-  background: rgba(76, 175, 80, 0.15);
+  background: var(--badge-tier-free-bg);
   color: var(--accent-green);
 }
 .tier-badge-sm.tier-free-tier {
-  background: rgba(78, 205, 196, 0.15);
+  background: var(--badge-tier-freetier-bg);
   color: var(--accent-teal);
 }
 .tier-badge-sm.tier-low-cost {
-  background: rgba(100, 149, 237, 0.15);
+  background: var(--badge-tier-lowcost-bg);
   color: var(--accent-blue-text);
 }
 .tier-badge-sm.tier-paid {
-  background: rgba(180, 180, 180, 0.1);
+  background: var(--badge-tier-neutral-bg);
   color: var(--text-muted);
 }
 
@@ -2060,6 +2500,13 @@ button:disabled {
   pointer-events: none;
 }
 
+/* Glass style: overlay must stay opaque to hide content behind it */
+body[data-style="glass"] .startup-overlay {
+  background: var(--glass-body-from, var(--bg-main, #1e1e1e));
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+}
+
 .startup-spinner {
   width: 36px;
   height: 36px;
@@ -2243,22 +2690,22 @@ button:disabled {
 }
 
 .velocity-insta {
-  background: rgba(39, 174, 96, 0.18);
+  background: var(--badge-velocity-insta-bg);
   color: var(--accent-green-bright);
 }
 
 .velocity-active {
-  background: rgba(86, 156, 214, 0.18);
+  background: var(--badge-velocity-active-bg);
   color: var(--accent-blue-text);
 }
 
 .velocity-slow {
-  background: rgba(240, 192, 64, 0.18);
+  background: var(--badge-velocity-slow-bg);
   color: var(--accent-gold);
 }
 
 .velocity-veryslow {
-  background: rgba(136, 136, 136, 0.18);
+  background: var(--badge-velocity-muted-bg);
   color: var(--text-muted);
 }
 
@@ -2271,12 +2718,12 @@ button:disabled {
 }
 
 .trend-downtrend {
-  background: rgba(244, 71, 71, 0.18);
+  background: var(--badge-trend-down-bg);
   color: var(--accent-red);
 }
 
 .trend-uptrend {
-  background: rgba(39, 174, 96, 0.18);
+  background: var(--badge-trend-up-bg);
   color: var(--accent-green-bright);
 }
 
@@ -2285,24 +2732,33 @@ button:disabled {
   50%      { opacity: 0.6; }
 }
 
-.hype-text {
-  color: var(--accent-gold-hype) !important;
+/* ── Semantic text-colour highlight classes ──────────────────────────────────
+   Applied by JS on inline text. Doubled selector for specificity over
+   \`.market-card .item-name\`, \`.detail-value\` etc. — no !important needed. */
+
+.market-card .hype-text,
+.hype-text.hype-text {
+  color: var(--accent-gold-hype);
 }
 
-.buy-highlight {
-  color: var(--accent-blue-text) !important;
+.market-card .buy-highlight,
+.buy-highlight.buy-highlight {
+  color: var(--accent-blue-text);
 }
 
-.sell-highlight {
-  color: var(--accent-teal) !important;
+.market-card .sell-highlight,
+.sell-highlight.sell-highlight {
+  color: var(--accent-teal);
 }
 
-.profit-highlight {
-  color: var(--accent-teal) !important;
+.market-card .profit-highlight,
+.profit-highlight.profit-highlight {
+  color: var(--accent-teal);
 }
 
-.risky-text {
-  color: var(--accent-red) !important;
+.market-card .risky-text,
+.risky-text.risky-text {
+  color: var(--accent-red);
 }
 
 /* ── Market search bar ────────────────────────────────────────────────────── */
@@ -2438,7 +2894,7 @@ button:disabled {
   max-height: 400px;
   padding: 6px 8px;
   border-top-color: var(--border-main);
-  background: rgba(0, 0, 0, 0.08);
+  background: var(--detail-expanded-bg);
   overflow-y: auto;
 }
 
@@ -3845,18 +4301,18 @@ button:disabled {
 }
 
 .ema-badge {
-  background: rgba(86, 156, 214, 0.18);
+  background: var(--badge-velocity-active-bg);
   color: var(--accent-blue-text);
 }
 
 .ema-badge.up {
   color: var(--accent-green-bright);
-  background: rgba(39, 174, 96, 0.15);
+  background: var(--badge-trend-up-bg);
 }
 
 .ema-badge.down {
   color: var(--accent-red);
-  background: rgba(244, 71, 71, 0.15);
+  background: var(--badge-trend-down-bg);
 }
 
 .predicted-badge {
@@ -3865,21 +4321,21 @@ button:disabled {
 
 .predicted-badge.up {
   color: var(--accent-green-bright);
-  background: rgba(39, 174, 96, 0.15);
+  background: var(--badge-trend-up-bg);
 }
 
 .predicted-badge.down {
   color: var(--accent-red);
-  background: rgba(244, 71, 71, 0.15);
+  background: var(--badge-trend-down-bg);
 }
 
 .predicted-badge.neutral {
   color: var(--text-muted);
-  background: rgba(136, 136, 136, 0.15);
+  background: var(--badge-neutral-bg);
 }
 
 .vol-badge {
-  background: rgba(255, 171, 64, 0.15);
+  background: var(--badge-hype-vol-bg);
   color: var(--accent-hype, var(--accent-gold));
 }
 
@@ -5401,15 +5857,14 @@ const SEED_ITEMS = [
     "White partyhat",
     "Christmas cracker",
     "Santa hat",
-    "Green h'ween mask",
-    "Red h'ween mask",
-    "Blue h'ween mask",
+    "Green hallowe'en mask",
+    "Red hallowe'en mask",
+    "Blue hallowe'en mask",
     "Easter egg",
     "Pumpkin",
     "Disk of returning",
     "Black Santa hat",
     "Fish mask",
-    "Golden cracker",
     // ── High-volume Skilling Supplies ─────────────────────────────────────
     "Raw shark",
     "Shark",
@@ -5422,27 +5877,27 @@ const SEED_ITEMS = [
     "Raw swordfish",
     "Swordfish",
     "Grimy dwarf weed",
-    "Dwarf weed",
+    "Clean dwarf weed",
     "Grimy lantadyme",
-    "Lantadyme",
+    "Clean lantadyme",
     "Grimy torstol",
-    "Torstol",
+    "Clean torstol",
     "Grimy snapdragon",
-    "Snapdragon",
+    "Clean snapdragon",
     "Grimy ranarr",
-    "Ranarr",
+    "Clean ranarr",
     "Grimy kwuarm",
-    "Kwuarm",
+    "Clean kwuarm",
     "Grimy cadantine",
-    "Cadantine",
+    "Clean cadantine",
     "Grimy avantoe",
-    "Avantoe",
+    "Clean avantoe",
     "Grimy toadflax",
-    "Toadflax",
+    "Clean toadflax",
     "Grimy irit",
-    "Irit",
+    "Clean irit",
     "Grimy spirit weed",
-    "Spirit weed",
+    "Clean spirit weed",
     "Magic logs",
     "Elder logs",
     "Yew logs",
@@ -5468,7 +5923,7 @@ const SEED_ITEMS = [
     "Pure essence",
     "Rune essence",
     "Flax",
-    "Bow string",
+    "Bowstring",
     "Uncut diamond",
     "Uncut ruby",
     "Uncut emerald",
@@ -5482,7 +5937,6 @@ const SEED_ITEMS = [
     "Vial of water",
     "Feather",
     // ── Potions & Consumables ─────────────────────────────────────────────
-    "Overload (4)",
     "Super restore (4)",
     "Prayer potion (4)",
     "Saradomin brew (4)",
@@ -5503,7 +5957,6 @@ const SEED_ITEMS = [
     "Super defence (4)",
     "Super magic potion (4)",
     "Super ranging potion (4)",
-    "Adrenaline potion (4)",
     "Rocktail soup",
     "Sailfish soup",
     "Summer pie",
@@ -5533,7 +5986,7 @@ const SEED_ITEMS = [
     "Dragonfire shield",
     "Abyssal whip",
     "Dark bow",
-    "Dragon rider lance",
+    "Dragon Rider lance",
     "Noxious scythe",
     "Noxious staff",
     "Noxious longbow",
@@ -5582,10 +6035,8 @@ const SEED_ITEMS = [
     "Ring of death",
     "Luck of the Dwarves",
     // ── Summoning & Misc ──────────────────────────────────────────────────
-    "Spirit shard",
+    "Spirit shards",
     "Pouch",
-    "Crimson charm",
-    "Blue charm",
     "Pack yak pouch",
     "Water talisman",
     "Fire talisman",
@@ -5604,14 +6055,10 @@ const SEED_ITEMS = [
     "Iron bar",
     "Bronze bar",
     "Gold bar",
-    "Banite bar",
+    "Bane bar",
     "Elder rune bar",
-    "Orichalcite bar",
-    "Drakolith bar",
-    "Phasmatite bar",
+    "Orikalkum bar",
     "Necronium bar",
-    "Light animica bar",
-    "Dark animica bar",
     "Hydrix",
     "Uncut dragonstone",
     "Dragonstone",
@@ -5621,7 +6068,7 @@ const SEED_ITEMS = [
     "Dragon bones",
     "Frost dragon bones",
     "Dinosaur bones",
-    "Reinforced dinosaur bones",
+    "Reinforced dragon bones",
     "Dagannoth bones",
     "Infernal ashes",
     "Dragon arrowheads",
@@ -5795,14 +6242,19 @@ async function initDataPipeline() {
         }
         const itemsWithSufficientHistory = [...grouped.values()].filter((c) => c >= 2).length;
         if (records.length > 0 && itemsWithSufficientHistory < records.length * 0.3) {
+            // The /last90d API only supports 1 item per request, so re-seeding
+            // all 7 000+ items would take too long.  Limit to SEED_ITEMS that
+            // actually lack sufficient history — keeps startup under ~30 s.
+            const namesToSeed = SEED_ITEMS.filter((name) => (grouped.get(name) ?? 0) < 2);
             console.log(`[initDataPipeline] History health check: only ${itemsWithSufficientHistory}/${records.length} items ` +
-                `have ≥ 2 days of history — re-seeding…`);
-            const api = new _weirdGloopService__WEBPACK_IMPORTED_MODULE_1__.WeirdGloopService();
-            const namesToSeed = records.map((r) => r.name);
-            const historyMap = await api.fetchHistoricalPrices(namesToSeed, 30);
-            if (historyMap.size > 0) {
-                await cache.bulkInsertHistory(historyMap);
-                console.log(`[initDataPipeline] Re-seeded ${historyMap.size} items with historical data.`);
+                `have ≥ 2 days of history — re-seeding ${namesToSeed.length} seed items…`);
+            if (namesToSeed.length > 0) {
+                const api = new _weirdGloopService__WEBPACK_IMPORTED_MODULE_1__.WeirdGloopService();
+                const historyMap = await api.fetchHistoricalPrices(namesToSeed, 30);
+                if (historyMap.size > 0) {
+                    await cache.bulkInsertHistory(historyMap);
+                    console.log(`[initDataPipeline] Re-seeded ${historyMap.size} items with historical data.`);
+                }
             }
         }
         else {
@@ -5857,10 +6309,21 @@ async function fetchGECatalogue() {
 /**
  * Run a **non-blocking** full-market background scan.
  *
- * Fetches latest prices + history for **every** item in the GE catalogue
- * (~7 000 items) in batches of 100, with a 500 ms delay between batches to
- * avoid rate-limiting.  Each batch is bulk-inserted into IndexedDB immediately
- * so progress persists even if the user closes the app mid-scan.
+ * Fetches latest prices for **every** item in the GE catalogue (~7 000
+ * items) in batches of 100, with adaptive delays between batches to avoid
+ * rate-limiting.  Each batch is bulk-inserted into IndexedDB immediately so
+ * progress persists even if the user closes the app mid-scan.
+ *
+ * When `deepHistory` is `true`, 90-day price history is also fetched per
+ * item (the `/last90d` endpoint only accepts 1 item per request, so this
+ * is significantly slower).  When `false` (default), history is loaded on
+ * demand when the user opens the analytics modal.
+ *
+ * **History-only optimisation**: If `deepHistory` is requested and the
+ * cache already contains fresh prices for ≥ 90 % of the catalogue (fetched
+ * within the last hour), the scan skips price/enrichment fetches entirely
+ * and only fetches history — avoiding ~2–3 min of redundant API calls when
+ * the user re-runs the scan just to add deep history.
  *
  * The UI remains fully interactive during the scan because the function
  * yields control back to the browser between batches via `setTimeout`.
@@ -5868,8 +6331,7 @@ async function fetchGECatalogue() {
  * @param catalogue       - Pre-fetched GE catalogue entries.
  * @param onProgress      - Called after every batch with `(done, total)`.
  * @param signal          - Optional `AbortSignal` to cancel the scan early.
- * @param deepHistory     - When `true`, fetches 90-day history instead of
- *                          the default 30-day window (~3–5× slower).
+ * @param deepHistory     - When `true`, also fetches 90-day history per item.
  * @returns The total number of items successfully fetched and persisted.
  */
 // Optional deep history during full scan – March 2026
@@ -5882,6 +6344,24 @@ async function runFullMarketScan(catalogue, onProgress, signal, deepHistory = fa
     const api = new _weirdGloopService__WEBPACK_IMPORTED_MODULE_1__.WeirdGloopService();
     const wiki = new _wikiService__WEBPACK_IMPORTED_MODULE_2__.WikiService();
     await cache.open();
+    // ── History-only optimisation ─────────────────────────────────────────
+    // If the user wants deep history and prices are already fresh, skip the
+    // price + enrichment fetches and only pull history.
+    const FRESH_THRESHOLD_MS = 60 * 60 * 1000; // 1 hour
+    let historyOnly = false;
+    if (deepHistory) {
+        const existing = await cache.getAll();
+        if (existing.length > 0) {
+            const now = Date.now();
+            const freshCount = existing.filter((r) => r.fetchedAt && (now - r.fetchedAt) < FRESH_THRESHOLD_MS).length;
+            const coverage = freshCount / catalogue.length;
+            if (coverage >= 0.9) {
+                historyOnly = true;
+                console.log(`[FullMarketScan] Prices already fresh for ${freshCount}/${catalogue.length} items ` +
+                    `(${(coverage * 100).toFixed(0)}%) — switching to history-only mode.`);
+            }
+        }
+    }
     const BATCH_SIZE = 100;
     const BASE_DELAY_MS = 1500; // default pause between batches
     const MAX_DELAY_MS = 30000; // ceiling for adaptive backoff
@@ -5898,38 +6378,10 @@ async function runFullMarketScan(catalogue, onProgress, signal, deepHistory = fa
         }
         const batchNames = allNames.slice(i, i + BATCH_SIZE);
         try {
-            // Fetch latest prices for this batch.
-            const prices = await api.fetchLatestPrices(batchNames);
-            if (prices.size > 0) {
-                // Successful fetch — reset adaptive delay.
-                consecutiveEmpty = 0;
-                currentDelay = BASE_DELAY_MS;
-                // Enrich with buy limits + alch values (best-effort).
-                const names = Array.from(prices.keys());
+            if (historyOnly) {
+                // ── History-only mode: skip prices/enrichment, just fetch history ──
                 try {
-                    const [limits, alchs] = await Promise.all([
-                        wiki.getBulkBuyLimits(names),
-                        wiki.getBulkHighAlchValues(names),
-                    ]);
-                    for (const [name, record] of prices) {
-                        const limit = limits.get(name);
-                        if (limit !== undefined)
-                            record.buyLimit = limit;
-                        const alch = alchs.get(name);
-                        if (alch !== undefined)
-                            record.highAlch = alch;
-                    }
-                }
-                catch {
-                    // Non-critical — continue without enrichment.
-                }
-                // Persist to IndexedDB immediately.
-                await cache.bulkInsert(prices);
-                // Fetch history for this batch (best-effort).
-                // Optional deep history during full scan – March 2026
-                const historyDays = deepHistory ? 90 : 30;
-                try {
-                    const historyMap = await api.fetchHistoricalPrices(names, historyDays);
+                    const historyMap = await api.fetchHistoricalPrices(batchNames, 90);
                     if (historyMap.size > 0) {
                         await cache.bulkInsertHistory(historyMap);
                     }
@@ -5939,12 +6391,58 @@ async function runFullMarketScan(catalogue, onProgress, signal, deepHistory = fa
                 }
             }
             else {
-                // Batch returned 0 results — likely rate-limited.  Back off.
-                consecutiveEmpty++;
-                currentDelay = Math.min(BASE_DELAY_MS * Math.pow(2, consecutiveEmpty), MAX_DELAY_MS);
-                console.warn(`[FullMarketScan] Batch ${i / BATCH_SIZE + 1} returned 0 results ` +
-                    `(${consecutiveEmpty} consecutive). Next delay: ${(currentDelay / 1000).toFixed(1)}s`);
-            }
+                // ── Normal mode: fetch prices + enrichment + optional history ──
+                const prices = await api.fetchLatestPrices(batchNames);
+                if (prices.size > 0) {
+                    // Successful fetch — reset adaptive delay.
+                    consecutiveEmpty = 0;
+                    currentDelay = BASE_DELAY_MS;
+                    // Enrich with buy limits + alch values (best-effort).
+                    const names = Array.from(prices.keys());
+                    try {
+                        const [limits, alchs] = await Promise.all([
+                            wiki.getBulkBuyLimits(names),
+                            wiki.getBulkHighAlchValues(names),
+                        ]);
+                        for (const [name, record] of prices) {
+                            const limit = limits.get(name);
+                            if (limit !== undefined)
+                                record.buyLimit = limit;
+                            const alch = alchs.get(name);
+                            if (alch !== undefined)
+                                record.highAlch = alch;
+                        }
+                    }
+                    catch {
+                        // Non-critical — continue without enrichment.
+                    }
+                    // Persist to IndexedDB immediately.
+                    await cache.bulkInsert(prices);
+                    // Fetch history only when the user explicitly opted in to deep
+                    // history.  The /last90d endpoint only accepts 1 item per request,
+                    // so fetching history for every item in a normal scan would add
+                    // ~24 minutes.  Without deep history, individual item histories are
+                    // fetched on demand when the user opens the analytics modal.
+                    if (deepHistory) {
+                        try {
+                            const historyMap = await api.fetchHistoricalPrices(names, 90);
+                            if (historyMap.size > 0) {
+                                await cache.bulkInsertHistory(historyMap);
+                            }
+                        }
+                        catch {
+                            // Non-critical — skip history for this batch.
+                        }
+                    }
+                }
+                else {
+                    // Batch returned 0 results — likely rate-limited.  Back off.
+                    consecutiveEmpty++;
+                    currentDelay = Math.min(BASE_DELAY_MS * Math.pow(2, consecutiveEmpty), MAX_DELAY_MS);
+                    console.warn(`[FullMarketScan] Batch ${i / BATCH_SIZE + 1} returned 0 results ` +
+                        `(${consecutiveEmpty} consecutive). Next delay: ${(currentDelay / 1000).toFixed(1)}s`);
+                }
+            } // end normal mode
         }
         catch (err) {
             consecutiveEmpty++;
@@ -7002,14 +7500,15 @@ class MarketAnalyzerService {
             // ── Sparse-data fallback: fetch from Weird Gloop API ──────────────
             // If most items have ≤ 1 day of local history, pull from the API so
             // sparklines can render immediately after install / cache clear.
-            // Capped at 500 items to avoid rate-limit avalanche after full scans.
-            // Uses batched pipe-delimited WeirdGloopService – March 2026
+            // Capped at 200 items since the API only accepts 1 item per request.
             const allItems = await this.cache.getAll();
             const itemNames = allItems.map((r) => r.name);
             const sparse = itemNames.length > 0 &&
                 itemNames.filter((n) => (map.get(n)?.length ?? 0) >= 2).length < itemNames.length * 0.3;
             if (sparse && itemNames.length > 0) {
-                const SPARSE_CAP = 500;
+                // The /last90d API only supports 1 item per request, so cap the
+                // fallback to keep UI responsive (~40 s at 200 ms/item).
+                const SPARSE_CAP = 200;
                 const namesToFetch = itemNames.length > SPARSE_CAP
                     ? itemNames.slice(0, SPARSE_CAP)
                     : itemNames;
@@ -7032,16 +7531,16 @@ class MarketAnalyzerService {
      * Fetch historical prices from the Weird Gloop API and extract daily
      * closing prices for the last {@link days} days.
      *
-     * Delegates to {@link WeirdGloopService.fetchHistoricalPrices} which uses
-     * pipe-delimited batched requests (50 items per HTTP call) dispatched
-     * sequentially with rate-limit-safe pauses.  Results are also persisted
-     * to IndexedDB so subsequent calls hit the cache instead.
+     * Delegates to {@link WeirdGloopService.fetchHistoricalPrices} which sends
+     * individual per-item requests (the `/last90d` endpoint only supports 1
+     * item) with rate-limit-safe pauses.  Results are also persisted to
+     * IndexedDB so subsequent calls hit the cache instead.
      *
      * @param itemNames - Canonical RS3 item names.
      * @param days      - Number of recent days to extract from the 90-day window.
      * @returns A `Map<itemName, number[]>` of chronological daily prices.
      */
-    // Batched pipe-delimited history via WeirdGloopService – March 2026
+    // Individual per-item history via WeirdGloopService — March 2026
     async fetchAPIHistory(itemNames, days) {
         const result = new Map();
         const todayStr = new Date().toISOString().slice(0, 10);
@@ -7531,11 +8030,11 @@ class WeirdGloopService {
     }
     /**
      * Fetch up to 90 days of historical daily prices for every item in
-     * {@link itemNames}.  Items are batched into pipe-delimited requests of
-     * {@link HISTORY_BATCH_SIZE} (default 50) and dispatched **sequentially**
-     * to avoid rate-limiting.
+     * {@link itemNames}.  The `/last90d` endpoint only accepts **one item per
+     * request**, so items are dispatched individually with
+     * {@link HISTORY_ITEM_DELAY_MS} pauses between requests.
      *
-     * Individual batch failures are logged but do **not** reject the returned
+     * Individual failures are logged but do **not** reject the returned
      * promise — successfully fetched histories are always returned.
      *
      * @param itemNames - Canonical RS3 item names.
@@ -7547,44 +8046,77 @@ class WeirdGloopService {
     async fetchHistoricalPrices(itemNames, days = 30) {
         if (itemNames.length === 0)
             return new Map();
-        // Batch history requests using pipe-delimited names — March 2026
-        const HISTORY_BATCH_SIZE = 50;
+        // The /last90d endpoint only supports 1 item per request — individual
+        // fetches with pacing to respect rate limits.
         const cutoff = Date.now() - days * 24 * 60 * 60 * 1000;
         const result = new Map();
-        const batches = this.chunkArray(itemNames, HISTORY_BATCH_SIZE);
-        console.log(`[WeirdGloopService] Fetching last90d history for ${itemNames.length} items in ` +
-            `${batches.length} batch(es) of up to ${HISTORY_BATCH_SIZE} (keeping last ${days} days)…`);
-        for (let idx = 0; idx < batches.length; idx++) {
-            const batch = batches[idx];
-            const nameParam = batch.map((n) => encodeURIComponent(n)).join("|");
-            const url = `https://api.weirdgloop.org/exchange/history/rs/last90d?name=${nameParam}`;
+        let skippedNotFound = 0; // API returned {success:false} or {error:…}
+        let skippedNoData = 0; // Response OK but no matching array for name
+        let skippedEmpty = 0; // Array present but all entries outside date range
+        let skippedRetry = 0; // All retries exhausted (null response)
+        console.log(`[WeirdGloopService] Fetching last90d history for ${itemNames.length} item(s) ` +
+            `(keeping last ${days} days)…`);
+        for (let idx = 0; idx < itemNames.length; idx++) {
+            const name = itemNames[idx];
+            const url = `https://api.weirdgloop.org/exchange/history/rs/last90d?name=${encodeURIComponent(name)}`;
             try {
                 const resp = await WeirdGloopService.fetchWithRetry(url);
                 if (!resp) {
-                    console.warn(`[WeirdGloopService] History batch ${idx + 1} — all retries exhausted.`);
+                    skippedRetry++;
+                    console.warn(`[WeirdGloopService] History for "${name}" — all retries exhausted.`);
                     continue;
                 }
                 const json = await resp.json();
-                for (const name of batch) {
-                    const entries = json[name];
-                    if (!Array.isArray(entries))
-                        continue;
-                    const filtered = entries
-                        .filter((e) => e.timestamp >= cutoff)
-                        .sort((a, b) => a.timestamp - b.timestamp);
-                    if (filtered.length > 0)
-                        result.set(name, filtered);
+                // Detect API-level error responses (e.g. "Item(s) not found",
+                // stealth rate limits) that return 200 OK with an error body.
+                if (json.success === false || json.error) {
+                    skippedNotFound++;
+                    continue;
+                }
+                // Exact key lookup; fall back to case-insensitive search in case
+                // the API returns a slightly different casing than requested.
+                let entries = json[name];
+                if (!Array.isArray(entries)) {
+                    const lc = name.toLowerCase();
+                    for (const key of Object.keys(json)) {
+                        if (key.toLowerCase() === lc && Array.isArray(json[key])) {
+                            entries = json[key];
+                            break;
+                        }
+                    }
+                }
+                if (!Array.isArray(entries)) {
+                    skippedNoData++;
+                    continue;
+                }
+                const filtered = entries
+                    .filter((e) => e.timestamp >= cutoff)
+                    .sort((a, b) => a.timestamp - b.timestamp);
+                if (filtered.length > 0) {
+                    result.set(name, filtered);
+                }
+                else {
+                    skippedEmpty++;
                 }
             }
             catch (err) {
-                console.error(`[WeirdGloopService] History batch ${idx + 1} failed:`, err);
+                console.error(`[WeirdGloopService] History for "${name}" failed:`, err);
             }
-            // Pause between sequential batches to stay under rate limit.
-            if (idx < batches.length - 1) {
-                await WeirdGloopService.sleep(WeirdGloopService.HISTORY_GROUP_DELAY_MS);
+            // Pause between requests to stay under rate limit.
+            if (idx < itemNames.length - 1) {
+                await WeirdGloopService.sleep(WeirdGloopService.HISTORY_ITEM_DELAY_MS);
+            }
+            // Log progress every 50 items.
+            if ((idx + 1) % 50 === 0) {
+                console.log(`[WeirdGloopService] History progress: ${idx + 1}/${itemNames.length} ` +
+                    `(${result.size} fetched so far)…`);
             }
         }
         console.log(`[WeirdGloopService] Historical data fetched for ${result.size} / ${itemNames.length} items.`);
+        if (skippedNotFound + skippedNoData + skippedEmpty + skippedRetry > 0) {
+            console.log(`[WeirdGloopService] Skipped: ${skippedNotFound} not-found, ${skippedNoData} no-data, ` +
+                `${skippedEmpty} empty-after-filter, ${skippedRetry} retry-exhausted.`);
+        }
         return result;
     }
     // ─── Private Helpers ──────────────────────────────────────────────────
@@ -7677,8 +8209,8 @@ class WeirdGloopService {
 WeirdGloopService.MAX_RETRIES = 4;
 /** Base delay (ms) for exponential backoff — doubled on each retry. */
 WeirdGloopService.BACKOFF_BASE_MS = 2000;
-/** Small pause (ms) between sequential history batches. */
-WeirdGloopService.HISTORY_GROUP_DELAY_MS = 1000;
+/** Pause (ms) between sequential individual history requests. */
+WeirdGloopService.HISTORY_ITEM_DELAY_MS = 200;
 
 
 /***/ },
@@ -8742,6 +9274,9 @@ function bindLayoutToggle() {
  * Migrates from legacy keys if present.
  * Sets `document.body.dataset.mode`, `.style`, `.colorway`, `.contrast`
  * which activate the matching CSS override blocks.
+ *
+ * On init, all four axes are written in a single batch via `requestAnimationFrame`
+ * to coalesce into one style recalc instead of four sequential reflows.
  */
 function bindTheme() {
     migrateThemeKey();
@@ -8750,10 +9285,8 @@ function bindTheme() {
     const savedStyle = localStorage.getItem(LS_STYLE) ?? "basic";
     const savedColorway = localStorage.getItem(LS_COLORWAY) ?? "classic";
     const savedContrast = localStorage.getItem(LS_CONTRAST) ?? "default";
-    applyMode(savedMode);
-    applyStyle(savedStyle);
-    applyColorway(savedColorway);
-    applyContrast(savedContrast);
+    // Batch all four dataset writes — only one style recalc on init
+    applyThemeBatch(savedMode, savedStyle, savedColorway, savedContrast);
     // Mode toggle buttons
     els.modeDarkBtn.addEventListener("click", () => applyMode("dark"));
     els.modeLightBtn.addEventListener("click", () => applyMode("light"));
@@ -8835,6 +9368,29 @@ function applyColorway(colorway) {
 function applyContrast(contrast) {
     document.body.dataset.contrast = contrast;
     localStorage.setItem(LS_CONTRAST, contrast);
+    els.contrastSelect.value = contrast;
+}
+/**
+ * Apply all four theme axes in a single synchronous pass to minimise
+ * style recalculations during initialisation and data-import restores.
+ * Writes all four `dataset` properties before the browser can trigger
+ * an intermediate layout, producing one composite style recalc.
+ */
+function applyThemeBatch(mode, style, colorway, contrast) {
+    const ds = document.body.dataset;
+    ds.mode = mode;
+    ds.style = style;
+    ds.colorway = colorway;
+    ds.contrast = contrast;
+    localStorage.setItem(LS_MODE, mode);
+    localStorage.setItem(LS_STYLE, style);
+    localStorage.setItem(LS_COLORWAY, colorway);
+    localStorage.setItem(LS_CONTRAST, contrast);
+    // Sync UI controls
+    els.modeDarkBtn.classList.toggle("active", mode === "dark");
+    els.modeLightBtn.classList.toggle("active", mode === "light");
+    els.styleSelect.value = style;
+    els.colorwaySelect.value = colorway;
     els.contrastSelect.value = contrast;
 }
 /** Apply a layout mode to the document and persist the choice. */
@@ -9026,8 +9582,10 @@ const EXPORT_KEYS = [
     "ge-analyzer:favorites",
     "ge-analyzer:portfolio",
     "ge-analyzer:portfolio-history",
+    "ge-analyzer:mode",
     "ge-analyzer:style",
     "ge-analyzer:colorway",
+    "ge-analyzer:contrast",
 ];
 /**
  * Wire click handlers for the Export Data / Import Data buttons and the

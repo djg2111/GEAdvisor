@@ -55,12 +55,14 @@
 						<option value="classic">Classic</option>
 						<option value="osrs">OSRS</option>
 						<option value="rs3-modern">RS3 Modern</option>
+						<option value="rs-lobby">RS Lobby</option>
+						<option value="gruvbox">Gruvbox</option>
 						<option value="solarized">Solarized</option>
 					</select>
 
 					<label for="contrast-select">Contrast</label>
 					<select id="contrast-select">
-						<option value="default">Default</option>
+						<option value="default">Normal</option>
 						<option value="soft">Soft</option>
 						<option value="hard">Hard</option>
 					</select>
@@ -104,7 +106,8 @@
 						<!-- Options populated dynamically per provider -->
 					</datalist>
 
-					<!-- API key -->
+					<!-- API key — wrapped in <form> to suppress Chrome DOM warning -->
+					<form autocomplete="off" style="display:contents" onsubmit="return false">
 					<label for="api-key-input">API Key</label>
 					<div class="settings-row">
 						<input
@@ -117,6 +120,7 @@
 						<button id="save-key-btn" type="button">Save</button>
 					</div>
 					<span id="key-status" class="status-hint"></span>
+					</form>
 				</fieldset>
 
 				<!-- ═══ Data group ═══ -->
@@ -258,8 +262,8 @@
 				<div id="market-header">
 					<h2>Top 20 Markets</h2>
 					<div class="market-header-actions">
-						<button id="full-market-scan-btn" class="scan-btn" type="button" title="Scan all ~7,000 GE items in the background">🔍 Scan Full Market</button>
-						<label class="deep-history-label" title="Fetch 90-day history for every item (slower, ~3–5× longer)">
+						<button id="full-market-scan-btn" class="scan-btn" type="button" title="Fetch current prices, buy limits, and alch values for all ~7,000 GE items (~2–3 min). History for individual items is loaded on demand when you open their analytics modal.">🔍 Scan Full Market</button>
+						<label class="deep-history-label" title="Also fetch 90-day price history for every item during the scan. Much slower (~20+ min) because the API only allows one item per request. Leave unchecked to load history on demand instead.">
 							<input type="checkbox" id="deep-history-checkbox" />
 							<span>90d history</span>
 						</label>
