@@ -1454,6 +1454,8 @@ button:disabled {
   align-items: center;
   justify-content: space-between;
   margin-bottom: 6px;
+  flex-wrap: wrap;
+  gap: 4px;
 }
 
 #market-header h2 {
@@ -1461,12 +1463,14 @@ button:disabled {
   font-weight: 600;
   color: var(--text-heading);
   margin: 0;
+  white-space: nowrap;
 }
 
 .market-header-actions {
   display: flex;
   align-items: center;
   gap: 4px;
+  flex-wrap: wrap;
 }
 
 /* ── Per-section sort selects ─────────────────────────────────────────────── */
@@ -2806,10 +2810,11 @@ button:disabled {
 
 @media (max-width: 600px) {
   .analytics-modal {
-    padding: 1rem;
+    padding: 0.75rem;
     gap: 0.75rem;
     border-radius: 8px;
     min-width: 280px;
+    width: 96vw;
   }
 
   .analytics-modal-name {
@@ -2818,6 +2823,25 @@ button:disabled {
 
   .analytics-modal-price {
     font-size: 13px;
+  }
+
+  /* Detail rows: stack label above value on narrow screens */
+  .analytics-details-grid .detail-row,
+  .detail-row {
+    flex-wrap: wrap;
+    gap: 2px 8px;
+  }
+
+  .detail-label {
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+
+  .detail-value {
+    flex: 0 1 auto;
+    min-width: 60px;
+    word-break: break-word;
+    overflow-wrap: anywhere;
   }
 
   .analytics-stat-card {
@@ -2834,6 +2858,31 @@ button:disabled {
 
   .analytics-graph-section .graph-modal-canvas {
     height: 160px;
+  }
+
+  /* Top 20 header: let actions wrap to next line */
+  #market-header {
+    gap: 2px 6px;
+  }
+
+  .market-header-actions {
+    gap: 3px;
+    flex: 1 1 100%;
+    justify-content: flex-start;
+  }
+
+  .scan-btn {
+    font-size: 9px;
+    padding: 2px 6px;
+  }
+
+  .section-sort-select {
+    font-size: 9px;
+    padding: 3px 4px;
+  }
+
+  .deep-history-label {
+    font-size: 9px;
   }
 }
 
@@ -3787,6 +3836,27 @@ body[data-layout="tabbed"] #portfolio-view.active-tab {
 }
 
 /* ── Sidebar layout (side-by-side, second monitor) ────────────────────────── */
+/* Disable sidebar layout on small / mobile viewports — fall back to tabbed  */
+@media (max-width: 700px) {
+  body[data-layout="sidebar"] #view-tabs {
+    display: flex !important;    /* restore tabs on small screens */
+  }
+  body[data-layout="sidebar"] #app-content {
+    flex-direction: column !important;
+  }
+  body[data-layout="sidebar"] #market-view {
+    width: auto !important;
+    border-right: none !important;
+  }
+  body[data-layout="sidebar"] #advisor-view,
+  body[data-layout="sidebar"] #portfolio-view {
+    border-left: none !important;
+  }
+  /* Hide the sidebar button on mobile — it doesn't work well */
+  .layout-toggle #layout-sidebar-btn {
+    display: none;
+  }
+}
 
 body[data-layout="sidebar"] #view-tabs {
   display: none;                 /* tabs not needed in sidebar mode */
@@ -11592,26 +11662,6 @@ function formatVolume(vol) {
 }
 
 
-/***/ },
-
-/***/ "./appconfig.json"
-/*!************************!*\
-  !*** ./appconfig.json ***!
-  \************************/
-(module, __unused_webpack_exports, __webpack_require__) {
-
-module.exports = __webpack_require__.p + "appconfig.json";
-
-/***/ },
-
-/***/ "./icon.png"
-/*!******************!*\
-  !*** ./icon.png ***!
-  \******************/
-(module, __unused_webpack_exports, __webpack_require__) {
-
-module.exports = __webpack_require__.p + "icon.png";
-
 /***/ }
 
 /******/ 	});
@@ -11626,6 +11676,12 @@ module.exports = __webpack_require__.p + "icon.png";
 /******/ 		if (cachedModule !== undefined) {
 /******/ 			return cachedModule.exports;
 /******/ 		}
+/******/ 		// Check if module exists (development only)
+/******/ 		if (__webpack_modules__[moduleId] === undefined) {
+/******/ 			var e = new Error("Cannot find module '" + moduleId + "'");
+/******/ 			e.code = 'MODULE_NOT_FOUND';
+/******/ 			throw e;
+/******/ 		}
 /******/ 		// Create a new module (and put it into the cache)
 /******/ 		var module = __webpack_module_cache__[moduleId] = {
 /******/ 			id: moduleId,
@@ -11634,12 +11690,6 @@ module.exports = __webpack_require__.p + "icon.png";
 /******/ 		};
 /******/ 	
 /******/ 		// Execute the module function
-/******/ 		if (!(moduleId in __webpack_modules__)) {
-/******/ 			delete __webpack_module_cache__[moduleId];
-/******/ 			var e = new Error("Cannot find module '" + moduleId + "'");
-/******/ 			e.code = 'MODULE_NOT_FOUND';
-/******/ 			throw e;
-/******/ 		}
 /******/ 		__webpack_modules__[moduleId](module, module.exports, __webpack_require__);
 /******/ 	
 /******/ 		// Return the exports of the module
@@ -11671,18 +11721,6 @@ module.exports = __webpack_require__.p + "icon.png";
 /******/ 		};
 /******/ 	})();
 /******/ 	
-/******/ 	/* webpack/runtime/global */
-/******/ 	(() => {
-/******/ 		__webpack_require__.g = (function() {
-/******/ 			if (typeof globalThis === 'object') return globalThis;
-/******/ 			try {
-/******/ 				return this || new Function('return this')();
-/******/ 			} catch (e) {
-/******/ 				if (typeof window === 'object') return window;
-/******/ 			}
-/******/ 		})();
-/******/ 	})();
-/******/ 	
 /******/ 	/* webpack/runtime/hasOwnProperty shorthand */
 /******/ 	(() => {
 /******/ 		__webpack_require__.o = (obj, prop) => (Object.prototype.hasOwnProperty.call(obj, prop))
@@ -11697,29 +11735,6 @@ module.exports = __webpack_require__.p + "icon.png";
 /******/ 			}
 /******/ 			Object.defineProperty(exports, '__esModule', { value: true });
 /******/ 		};
-/******/ 	})();
-/******/ 	
-/******/ 	/* webpack/runtime/publicPath */
-/******/ 	(() => {
-/******/ 		var scriptUrl;
-/******/ 		if (__webpack_require__.g.importScripts) scriptUrl = __webpack_require__.g.location + "";
-/******/ 		var document = __webpack_require__.g.document;
-/******/ 		if (!scriptUrl && document) {
-/******/ 			if (document.currentScript && document.currentScript.tagName.toUpperCase() === 'SCRIPT')
-/******/ 				scriptUrl = document.currentScript.src;
-/******/ 			if (!scriptUrl) {
-/******/ 				var scripts = document.getElementsByTagName("script");
-/******/ 				if(scripts.length) {
-/******/ 					var i = scripts.length - 1;
-/******/ 					while (i > -1 && (!scriptUrl || !/^http(s?):/.test(scriptUrl))) scriptUrl = scripts[i--].src;
-/******/ 				}
-/******/ 			}
-/******/ 		}
-/******/ 		// When supporting browsers where an automatic publicPath is not supported you must specify an output.publicPath manually via configuration
-/******/ 		// or pass an empty string ("") and set the __webpack_public_path__ variable from your code to use your own logic.
-/******/ 		if (!scriptUrl) throw new Error("Automatic publicPath is not supported in this browser");
-/******/ 		scriptUrl = scriptUrl.replace(/^blob:/, "").replace(/#.*$/, "").replace(/\?.*$/, "").replace(/\/[^\/]+$/, "/");
-/******/ 		__webpack_require__.p = scriptUrl;
 /******/ 	})();
 /******/ 	
 /******/ 	/* webpack/runtime/nonce */
@@ -11737,9 +11752,7 @@ var __webpack_exports__ = {};
 __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _services__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./services */ "./services/index.ts");
 /* harmony import */ var _uiService__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./uiService */ "./uiService.ts");
-/* harmony import */ var _appconfig_json__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./appconfig.json */ "./appconfig.json");
-/* harmony import */ var _icon_png__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./icon.png */ "./icon.png");
-/* harmony import */ var _style_css__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./style.css */ "./style.css");
+/* harmony import */ var _style_css__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./style.css */ "./style.css");
 /**
  * @module index
  * Application entry point.
