@@ -9,11 +9,14 @@
 /* ═══════════════════════════════════════════════════════════════════════════
  *  THEME SYSTEM — Two-axis: Colorway × Style
  *
- *  Colorways (body[data-colorway]):  classic | osrs | rs3-modern | light | sol-dark | sol-light
- *  Styles   (body[data-style]):     basic | glass | neumorphism | skeuomorphism
+ *  Mode     (body[data-mode]):       dark | light
+ *  Colorway (body[data-colorway]):   classic | osrs | rs3-modern | solarized
+ *  Contrast (body[data-contrast]):   default | soft | hard
+ *  Style    (body[data-style]):      basic | glass | neumorphism | skeuomorphism
  *
- *  Colorways set ALL colour variables + per-style helper vars.
- *  Styles apply structural overrides (shadows, filters, gradients)
+ *  Mode × Colorway sets ALL colour variables + per-style helper vars.
+ *  Contrast applies brightness adjustments on top.
+ *  Style applies structural overrides (shadows, filters, gradients)
  *  using the helper vars so every combination works automatically.
  * ═══════════════════════════════════════════════════════════════════════════ */
 
@@ -98,6 +101,33 @@
   --badge-radius: 3px;
   --badge-font-weight: 600;
 
+  /* ── Alias tokens (consumed by components that use short names) ── */
+  --border: var(--border-main);
+  --text: var(--text-main);
+
+  /* ── Semantic badge-bg tokens (theme-aware, replaces hard-coded rgba) ── */
+  --badge-velocity-insta-bg: rgba(39, 174, 96, 0.18);
+  --badge-velocity-active-bg: rgba(86, 156, 214, 0.18);
+  --badge-velocity-slow-bg: rgba(240, 192, 64, 0.18);
+  --badge-velocity-muted-bg: rgba(136, 136, 136, 0.18);
+  --badge-trend-up-bg: rgba(39, 174, 96, 0.18);
+  --badge-trend-down-bg: rgba(244, 71, 71, 0.18);
+  --badge-neutral-bg: rgba(136, 136, 136, 0.15);
+  --badge-hype-vol-bg: rgba(255, 171, 64, 0.15);
+  --badge-tier-free-bg: rgba(76, 175, 80, 0.12);
+  --badge-tier-free-border: rgba(76, 175, 80, 0.3);
+  --badge-tier-freetier-bg: rgba(78, 205, 196, 0.12);
+  --badge-tier-freetier-border: rgba(78, 205, 196, 0.3);
+  --badge-tier-lowcost-bg: rgba(100, 149, 237, 0.12);
+  --badge-tier-lowcost-border: rgba(100, 149, 237, 0.3);
+  --badge-tier-neutral-bg: rgba(180, 180, 180, 0.08);
+  --badge-tier-neutral-border: rgba(180, 180, 180, 0.2);
+  --table-active-row-bg: rgba(100, 149, 237, 0.08);
+  --table-hover-row-bg: rgba(255, 255, 255, 0.03);
+  --setup-note-bg: rgba(255, 215, 0, 0.08);
+  --setup-note-border: rgba(255, 215, 0, 0.2);
+  --detail-expanded-bg: rgba(0, 0, 0, 0.08);
+
   /* ── Misc ─────────────────────────────── */
   --link-color: #6cb4ee;
   --add-flip-bg: #1b6b2a;
@@ -143,7 +173,7 @@
  *  COLORWAY: OSRS Brown
  * ───────────────────────────────────────────────────────────────────────────── */
 
-body[data-colorway="osrs"] {
+body[data-mode="dark"][data-colorway="osrs"] {
   --bg-main: #382b1f;
   --bg-panel: #4a3a2a;
   --bg-elevated: #56452f;
@@ -240,10 +270,10 @@ body[data-colorway="osrs"] {
 }
 
 /* ─────────────────────────────────────────────────────────────────────────────
- *  COLORWAY: RS3 Modern Blue
+ *  COLORWAY: RS3 Modern — Dark
  * ───────────────────────────────────────────────────────────────────────────── */
 
-body[data-colorway="rs3-modern"] {
+body[data-mode="dark"][data-colorway="rs3-modern"] {
   --bg-main: #0f1722;
   --bg-panel: #1c2836;
   --bg-elevated: #1e2d3e;
@@ -340,10 +370,214 @@ body[data-colorway="rs3-modern"] {
 }
 
 /* ─────────────────────────────────────────────────────────────────────────────
- *  COLORWAY: Light
+ *  COLORWAY: RS Lobby — Dark
+ *  Inspired by the RuneScape in-game lobby UI — warm parchment browns,
+ *  gold accents, ridge-border aesthetic. A blend of OSRS + RS3 Modern.
  * ───────────────────────────────────────────────────────────────────────────── */
 
-body[data-colorway="light"] {
+body[data-mode="dark"][data-colorway="rs-lobby"] {
+  --bg-main: #1a140f;
+  --bg-panel: #2a221b;
+  --bg-elevated: #3e3529;
+  --bg-hover: #4a3e30;
+  --dropdown-bg: #3e3529;
+  --dropdown-hover-bg: #4a3e30;
+  --bg-input: #1a1510;
+  --bg-muted: #2a221b;
+  --bg-filter: #15100c;
+  --bg-number-input: #1a1510;
+
+  --text-main: #bdae95;
+  --text-bright: #e0e0e0;
+  --text-accent: #c8b07a;
+  --text-heading: #eddca8;
+  --text-price: #86efac;
+  --text-muted: #8a7a68;
+  --text-soft: #a39682;
+  --text-dimmed: #5a4e3d;
+
+  --border-main: #4a3e30;
+  --border-section: #3a3228;
+  --border-card: #5a4e3d;
+  --border-input: #5a4a38;
+  --border-subtle: #3e3224;
+  --border-hype: #806830;
+  --border-hype-hover: #a08840;
+
+  --accent-primary: #7a654c;
+  --accent-primary-hover: #96805c;
+  --accent-primary-active: #5a4830;
+  --accent-focus: #c8b07a;
+  --accent-blue-text: #7192bc;
+  --accent-green: #539e30;
+  --accent-green-bright: #6bba48;
+  --accent-teal: #7192bc;
+  --accent-gold: #c8b07a;
+  --accent-gold-hype: #d98d26;
+  --accent-red: #a32222;
+  --accent-red-dark: #7a1818;
+  --accent-red-bg: #2a1510;
+  --accent-red-border: #8a3030;
+  --accent-red-border-hover: #a84040;
+  --accent-hype: #d98d26;
+
+  --chat-user-bg: #3a3020;
+  --chat-error-bg: #2a1510;
+  --badge-buy-bg: #2a2818;
+  --badge-sell-bg: #1e3010;
+  --badge-hype-bg: #3a3010;
+
+  --modal-backdrop: rgba(0, 0, 0, 0.75);
+  --modal-shadow: rgba(0, 0, 0, 0.9);
+  --scrollbar-thumb: #5a4a38;
+  --scrollbar-thumb-hover: #7a654c;
+  --link-color: #c8b07a;
+  --add-flip-bg: #2a3a1a;
+  --limit-ready-bg: #1e2a14;
+
+  /* Glass helpers */
+  --glass-body-from: #100c08;
+  --glass-body-via: #1a140f;
+  --glass-body-to: #150f0a;
+  --glass-panel: rgba(200, 176, 122, 0.06);
+  --glass-elevated: rgba(200, 176, 122, 0.10);
+  --glass-hover: rgba(200, 176, 122, 0.12);
+  --glass-input: rgba(200, 176, 122, 0.08);
+  --glass-muted: rgba(200, 176, 122, 0.05);
+  --glass-border-card: rgba(200, 176, 122, 0.18);
+  --glass-border-main: rgba(200, 176, 122, 0.10);
+  --glass-border-section: rgba(200, 176, 122, 0.12);
+  --glass-border-input: rgba(200, 176, 122, 0.20);
+  --glass-scrollbar: rgba(200, 176, 122, 0.14);
+
+  /* Neumorphism helpers */
+  --neu-shadow-dark: #100c08;
+  --neu-shadow-light: #4a3e30;
+  --neu-accent-shadow: #5a4830;
+
+  /* Skeuomorphism helpers */
+  --skeu-body-from: #15100c;
+  --skeu-body-to: #2a221b;
+  --skeu-card-from: #4a3e30;
+  --skeu-card-mid: #3e3529;
+  --skeu-card-to: #2a221b;
+  --skeu-card-highlight: #5a4e3d;
+  --skeu-card-shadow-edge: #100c08;
+  --skeu-header-from: #4a3e30;
+  --skeu-header-to: #3a3228;
+  --skeu-btn-from: #506270;
+  --skeu-btn-to: #34414a;
+  --skeu-btn-active-from: #c8b07a;
+  --skeu-btn-active-to: #96805c;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+ *  COLORWAY: Gruvbox — Dark
+ *  morhetz/gruvbox "retro groove" palette — warm earthy tones with pastel
+ *  accents. bg0 #282828, fg1 #ebdbb2, yellow #d79921, aqua #689d6a.
+ * ───────────────────────────────────────────────────────────────────────────── */
+
+body[data-mode="dark"][data-colorway="gruvbox"] {
+  --bg-main: #282828;
+  --bg-panel: #3c3836;
+  --bg-elevated: #504945;
+  --bg-hover: #665c54;
+  --dropdown-bg: #504945;
+  --dropdown-hover-bg: #665c54;
+  --bg-input: #32302f;
+  --bg-muted: #3c3836;
+  --bg-filter: #1d2021;
+  --bg-number-input: #32302f;
+
+  --text-main: #ebdbb2;
+  --text-bright: #fbf1c7;
+  --text-accent: #fabd2f;
+  --text-heading: #fe8019;
+  --text-price: #b8bb26;
+  --text-muted: #928374;
+  --text-soft: #a89984;
+  --text-dimmed: #7c6f64;
+
+  --border-main: #504945;
+  --border-section: #3c3836;
+  --border-card: #665c54;
+  --border-input: #665c54;
+  --border-subtle: #504945;
+  --border-hype: #d65d0e;
+  --border-hype-hover: #fe8019;
+
+  --accent-primary: #458588;
+  --accent-primary-hover: #83a598;
+  --accent-primary-active: #076678;
+  --accent-focus: #83a598;
+  --accent-blue-text: #83a598;
+  --accent-green: #98971a;
+  --accent-green-bright: #b8bb26;
+  --accent-teal: #689d6a;
+  --accent-gold: #d79921;
+  --accent-gold-hype: #fabd2f;
+  --accent-red: #fb4934;
+  --accent-red-dark: #cc241d;
+  --accent-red-bg: #3c1f1f;
+  --accent-red-border: #cc241d;
+  --accent-red-border-hover: #fb4934;
+  --accent-hype: #fe8019;
+
+  --chat-user-bg: #3c3836;
+  --chat-error-bg: #3c1f1f;
+  --badge-buy-bg: #2a3428;
+  --badge-sell-bg: #283428;
+  --badge-hype-bg: #3c3020;
+
+  --modal-backdrop: rgba(0, 0, 0, 0.75);
+  --modal-shadow: rgba(0, 0, 0, 0.9);
+  --scrollbar-thumb: #665c54;
+  --scrollbar-thumb-hover: #7c6f64;
+  --link-color: #83a598;
+  --add-flip-bg: #3a4a28;
+  --limit-ready-bg: #2a3a1e;
+
+  /* Glass helpers */
+  --glass-body-from: #1d2021;
+  --glass-body-via: #282828;
+  --glass-body-to: #1d2021;
+  --glass-panel: rgba(235, 219, 178, 0.05);
+  --glass-elevated: rgba(235, 219, 178, 0.08);
+  --glass-hover: rgba(235, 219, 178, 0.10);
+  --glass-input: rgba(235, 219, 178, 0.06);
+  --glass-muted: rgba(235, 219, 178, 0.04);
+  --glass-border-card: rgba(235, 219, 178, 0.15);
+  --glass-border-main: rgba(235, 219, 178, 0.08);
+  --glass-border-section: rgba(235, 219, 178, 0.10);
+  --glass-border-input: rgba(235, 219, 178, 0.18);
+  --glass-scrollbar: rgba(235, 219, 178, 0.12);
+
+  /* Neumorphism helpers */
+  --neu-shadow-dark: #1d2021;
+  --neu-shadow-light: #504945;
+  --neu-accent-shadow: #076678;
+
+  /* Skeuomorphism helpers */
+  --skeu-body-from: #1d2021;
+  --skeu-body-to: #282828;
+  --skeu-card-from: #504945;
+  --skeu-card-mid: #3c3836;
+  --skeu-card-to: #32302f;
+  --skeu-card-highlight: #665c54;
+  --skeu-card-shadow-edge: #1d2021;
+  --skeu-header-from: #504945;
+  --skeu-header-to: #3c3836;
+  --skeu-btn-from: #504945;
+  --skeu-btn-to: #3c3836;
+  --skeu-btn-active-from: #458588;
+  --skeu-btn-active-to: #076678;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+ *  COLORWAY: Classic — Light
+ * ───────────────────────────────────────────────────────────────────────────── */
+
+body[data-mode="light"][data-colorway="classic"] {
   --bg-main: #f5f5f5;
   --bg-panel: #ffffff;
   --bg-elevated: #fafafa;
@@ -439,19 +673,14 @@ body[data-colorway="light"] {
   --skeu-btn-active-to: #0055aa;
 }
 
-/* Light colorway — force light body background for basic style */
-body[data-colorway="light"] {
-  background: #f5f5f5;
-}
-body[data-colorway="light"] .view-btn.active {
-  color: #ffffff;
-}
+/* Light-mode colourway backgrounds are set via --bg-main (consumed by body { background: var(--bg-main) }).
+   Active view-btn text forced to white for all light colourways — consolidated here. */
 
 /* ─────────────────────────────────────────────────────────────────────────────
- *  COLORWAY: Solarized Dark
+ *  COLORWAY: Solarized — Dark
  * ───────────────────────────────────────────────────────────────────────────── */
 
-body[data-colorway="sol-dark"] {
+body[data-mode="dark"][data-colorway="solarized"] {
   --bg-main: #002b36;
   --bg-panel: #073642;
   --bg-elevated: #0a3f4c;
@@ -548,10 +777,10 @@ body[data-colorway="sol-dark"] {
 }
 
 /* ─────────────────────────────────────────────────────────────────────────────
- *  COLORWAY: Solarized Light
+ *  COLORWAY: Solarized — Light
  * ───────────────────────────────────────────────────────────────────────────── */
 
-body[data-colorway="sol-light"] {
+body[data-mode="light"][data-colorway="solarized"] {
   --bg-main: #e6dec8;
   --bg-panel: #f0e9d6;
   --bg-elevated: #f5efdc;
@@ -647,12 +876,496 @@ body[data-colorway="sol-light"] {
   --skeu-btn-active-to: #1a6daa;
 }
 
-/* Solarized Light — force warm body background for basic style */
-body[data-colorway="sol-light"] {
-  background: #e6dec8;
+/* (light-mode view-btn.active consolidated — see below contrast modifiers) */
+
+/* ─────────────────────────────────────────────────────────────────────────────
+ *  COLORWAY: OSRS — Light
+ * ───────────────────────────────────────────────────────────────────────────── */
+
+body[data-mode="light"][data-colorway="osrs"] {
+  --bg-main: #f5ead4;
+  --bg-panel: #fff6e6;
+  --bg-elevated: #fdf2dc;
+  --bg-hover: #f0e2c8;
+  --dropdown-bg: #fdf2dc;
+  --dropdown-hover-bg: #f0e2c8;
+  --bg-input: #f0e4cc;
+  --bg-muted: #e8dcc0;
+  --bg-filter: #f0e8d0;
+  --bg-number-input: #f0e4cc;
+
+  --text-main: #4a3520;
+  --text-bright: #2c1a08;
+  --text-accent: #8b4513;
+  --text-heading: #a05a14;
+  --text-price: #3a6e1e;
+  --text-muted: #8a7560;
+  --text-soft: #a08a70;
+  --text-dimmed: #c0aa88;
+
+  --border-main: #e0d0b0;
+  --border-section: #d8c8a4;
+  --border-card: #d0c098;
+  --border-input: #c8b890;
+  --border-subtle: #e0d4b8;
+  --border-hype: #d4a520;
+  --border-hype-hover: #b8920a;
+
+  --accent-primary: #8b4513;
+  --accent-primary-hover: #a0522d;
+  --accent-primary-active: #6b3410;
+  --accent-focus: #cd853f;
+  --accent-blue-text: #8b5e3c;
+  --accent-green: #5a8a1e;
+  --accent-green-bright: #3a7a10;
+  --accent-teal: #6b8e6b;
+  --accent-gold: #c8960a;
+  --accent-gold-hype: #b07808;
+  --accent-red: #cc3333;
+  --accent-red-dark: #8b0000;
+  --accent-red-bg: #fff0e8;
+  --accent-red-border: #e0a090;
+  --accent-red-border-hover: #d08070;
+  --accent-hype: #c87e10;
+
+  --chat-user-bg: #f5e8d0;
+  --chat-error-bg: #fff0e8;
+  --badge-buy-bg: #e8e0c8;
+  --badge-sell-bg: #e0f0d0;
+  --badge-hype-bg: #f8f0c8;
+
+  --modal-backdrop: rgba(0, 0, 0, 0.25);
+  --modal-shadow: rgba(0, 0, 0, 0.15);
+  --scrollbar-thumb: #c8b890;
+  --scrollbar-thumb-hover: #a89a78;
+  --link-color: #8b4513;
+  --add-flip-bg: #d8eac0;
+  --limit-ready-bg: #e0f0d0;
+
+  /* Glass helpers */
+  --glass-body-from: #e8dcc0;
+  --glass-body-via: #f0e4cc;
+  --glass-body-to: #e0d4b0;
+  --glass-panel: rgba(255, 240, 210, 0.55);
+  --glass-elevated: rgba(255, 240, 210, 0.65);
+  --glass-hover: rgba(255, 240, 210, 0.70);
+  --glass-input: rgba(255, 240, 210, 0.50);
+  --glass-muted: rgba(255, 240, 210, 0.40);
+  --glass-border-card: rgba(139, 69, 19, 0.15);
+  --glass-border-main: rgba(139, 69, 19, 0.08);
+  --glass-border-section: rgba(139, 69, 19, 0.10);
+  --glass-border-input: rgba(139, 69, 19, 0.18);
+  --glass-scrollbar: rgba(139, 69, 19, 0.12);
+
+  /* Neumorphism helpers */
+  --neu-shadow-dark: #d0c098;
+  --neu-shadow-light: #fff8ea;
+  --neu-accent-shadow: #6b3410;
+
+  /* Skeuomorphism helpers */
+  --skeu-body-from: #e0d4b0;
+  --skeu-body-to: #f5ead4;
+  --skeu-card-from: #fff6e6;
+  --skeu-card-mid: #faf0da;
+  --skeu-card-to: #f0e4cc;
+  --skeu-card-highlight: #fff8ea;
+  --skeu-card-shadow-edge: #c8b890;
+  --skeu-header-from: #faf0da;
+  --skeu-header-to: #f0e8d0;
+  --skeu-btn-from: #f5ead4;
+  --skeu-btn-to: #e8dcc0;
+  --skeu-btn-active-from: #8b4513;
+  --skeu-btn-active-to: #6b3410;
 }
-body[data-colorway="sol-light"] .view-btn.active {
+
+/* (light-mode view-btn.active consolidated — see below contrast modifiers) */
+
+/* ─────────────────────────────────────────────────────────────────────────────
+ *  COLORWAY: RS3 Modern — Light
+ * ───────────────────────────────────────────────────────────────────────────── */
+
+body[data-mode="light"][data-colorway="rs3-modern"] {
+  --bg-main: #eef4fa;
+  --bg-panel: #f8fbff;
+  --bg-elevated: #f4f8fd;
+  --bg-hover: #e6eef6;
+  --dropdown-bg: #f4f8fd;
+  --dropdown-hover-bg: #e6eef6;
+  --bg-input: #e8f0f8;
+  --bg-muted: #dce8f2;
+  --bg-filter: #eaf2fa;
+  --bg-number-input: #e8f0f8;
+
+  --text-main: #1a2a3a;
+  --text-bright: #0a1420;
+  --text-accent: #0078d4;
+  --text-heading: #0060b0;
+  --text-price: #248a3d;
+  --text-muted: #5a7a94;
+  --text-soft: #7a94aa;
+  --text-dimmed: #a0b4c4;
+
+  --border-main: #d0dce8;
+  --border-section: #c8d8e8;
+  --border-card: #c0d0e0;
+  --border-input: #b8cad8;
+  --border-subtle: #dce8f2;
+  --border-hype: #d4a520;
+  --border-hype-hover: #b8920a;
+
+  --accent-primary: #0078d4;
+  --accent-primary-hover: #1888e0;
+  --accent-primary-active: #0060b0;
+  --accent-focus: #0078d4;
+  --accent-blue-text: #0078d4;
+  --accent-green: #248a3d;
+  --accent-green-bright: #1a7a2e;
+  --accent-teal: #1a8a7a;
+  --accent-gold: #d4a520;
+  --accent-gold-hype: #c09010;
+  --accent-red: #d13438;
+  --accent-red-dark: #a4262c;
+  --accent-red-bg: #fff0f0;
+  --accent-red-border: #e0a0a0;
+  --accent-red-border-hover: #d08080;
+  --accent-hype: #e08a00;
+
+  --chat-user-bg: #dcecff;
+  --chat-error-bg: #fff0f0;
+  --badge-buy-bg: #dceaff;
+  --badge-sell-bg: #dcf4dc;
+  --badge-hype-bg: #fff8e0;
+
+  --modal-backdrop: rgba(0, 0, 0, 0.25);
+  --modal-shadow: rgba(0, 0, 0, 0.15);
+  --scrollbar-thumb: #b8cad8;
+  --scrollbar-thumb-hover: #98aec0;
+  --link-color: #0078d4;
+  --add-flip-bg: #d0f0d0;
+  --limit-ready-bg: #daf4da;
+
+  /* Glass helpers */
+  --glass-body-from: #d8e4f0;
+  --glass-body-via: #e4eef6;
+  --glass-body-to: #d0dce8;
+  --glass-panel: rgba(240, 248, 255, 0.55);
+  --glass-elevated: rgba(240, 248, 255, 0.65);
+  --glass-hover: rgba(240, 248, 255, 0.70);
+  --glass-input: rgba(240, 248, 255, 0.50);
+  --glass-muted: rgba(240, 248, 255, 0.40);
+  --glass-border-card: rgba(0, 120, 212, 0.12);
+  --glass-border-main: rgba(0, 120, 212, 0.08);
+  --glass-border-section: rgba(0, 120, 212, 0.10);
+  --glass-border-input: rgba(0, 120, 212, 0.15);
+  --glass-scrollbar: rgba(0, 120, 212, 0.10);
+
+  /* Neumorphism helpers */
+  --neu-shadow-dark: #c0d0e0;
+  --neu-shadow-light: #ffffff;
+  --neu-accent-shadow: #0060b0;
+
+  /* Skeuomorphism helpers */
+  --skeu-body-from: #dce8f2;
+  --skeu-body-to: #eef4fa;
+  --skeu-card-from: #f8fbff;
+  --skeu-card-mid: #f4f8fd;
+  --skeu-card-to: #eaf2fa;
+  --skeu-card-highlight: #ffffff;
+  --skeu-card-shadow-edge: #b8cad8;
+  --skeu-header-from: #f4f8fd;
+  --skeu-header-to: #eaf2fa;
+  --skeu-btn-from: #eef4fa;
+  --skeu-btn-to: #dce8f2;
+  --skeu-btn-active-from: #0078d4;
+  --skeu-btn-active-to: #0060b0;
+}
+
+/* (light-mode view-btn.active consolidated — see below contrast modifiers) */
+
+/* ─────────────────────────────────────────────────────────────────────────────
+ *  COLORWAY: RS Lobby — Light
+ *  Light-mode counterpart: warm cream/parchment base with gold highlights.
+ * ───────────────────────────────────────────────────────────────────────────── */
+
+body[data-mode="light"][data-colorway="rs-lobby"] {
+  --bg-main: #f2ece2;
+  --bg-panel: #faf6ee;
+  --bg-elevated: #f6f0e6;
+  --bg-hover: #ece4d6;
+  --dropdown-bg: #f6f0e6;
+  --dropdown-hover-bg: #ece4d6;
+  --bg-input: #eae2d4;
+  --bg-muted: #e0d8c8;
+  --bg-filter: #f0e8da;
+  --bg-number-input: #eae2d4;
+
+  --text-main: #3e3529;
+  --text-bright: #1a140f;
+  --text-accent: #8b6914;
+  --text-heading: #6b5010;
+  --text-price: #2a7a2a;
+  --text-muted: #7a6d5a;
+  --text-soft: #8a7e6c;
+  --text-dimmed: #b0a490;
+
+  --border-main: #d4c8b4;
+  --border-section: #c8bca8;
+  --border-card: #c0b49e;
+  --border-input: #b8ac96;
+  --border-subtle: #dcd0bc;
+  --border-hype: #c09020;
+  --border-hype-hover: #a07a10;
+
+  --accent-primary: #8b6914;
+  --accent-primary-hover: #a07a20;
+  --accent-primary-active: #6b5010;
+  --accent-focus: #8b6914;
+  --accent-blue-text: #506070;
+  --accent-green: #3a8a28;
+  --accent-green-bright: #2a7a1a;
+  --accent-teal: #4a7a6a;
+  --accent-gold: #c09020;
+  --accent-gold-hype: #a07a10;
+  --accent-red: #a32222;
+  --accent-red-dark: #7a1818;
+  --accent-red-bg: #fff0ec;
+  --accent-red-border: #d8a0a0;
+  --accent-red-border-hover: #c88080;
+  --accent-hype: #c88020;
+
+  --chat-user-bg: #f0e8d4;
+  --chat-error-bg: #fff0ec;
+  --badge-buy-bg: #e8e0ce;
+  --badge-sell-bg: #dcf0dc;
+  --badge-hype-bg: #f8f0d0;
+
+  --modal-backdrop: rgba(0, 0, 0, 0.25);
+  --modal-shadow: rgba(0, 0, 0, 0.15);
+  --scrollbar-thumb: #c0b49e;
+  --scrollbar-thumb-hover: #a09480;
+  --link-color: #8b6914;
+  --add-flip-bg: #d0e8c0;
+  --limit-ready-bg: #daf0d0;
+
+  /* Glass helpers */
+  --glass-body-from: #e0d8c8;
+  --glass-body-via: #ece4d6;
+  --glass-body-to: #d8ceb8;
+  --glass-panel: rgba(250, 244, 230, 0.55);
+  --glass-elevated: rgba(250, 244, 230, 0.65);
+  --glass-hover: rgba(250, 244, 230, 0.70);
+  --glass-input: rgba(250, 244, 230, 0.50);
+  --glass-muted: rgba(250, 244, 230, 0.40);
+  --glass-border-card: rgba(139, 105, 20, 0.14);
+  --glass-border-main: rgba(139, 105, 20, 0.08);
+  --glass-border-section: rgba(139, 105, 20, 0.10);
+  --glass-border-input: rgba(139, 105, 20, 0.16);
+  --glass-scrollbar: rgba(139, 105, 20, 0.12);
+
+  /* Neumorphism helpers */
+  --neu-shadow-dark: #c8bca8;
+  --neu-shadow-light: #ffffff;
+  --neu-accent-shadow: #6b5010;
+
+  /* Skeuomorphism helpers */
+  --skeu-body-from: #e0d8c8;
+  --skeu-body-to: #f2ece2;
+  --skeu-card-from: #faf6ee;
+  --skeu-card-mid: #f6f0e6;
+  --skeu-card-to: #ece4d6;
+  --skeu-card-highlight: #ffffff;
+  --skeu-card-shadow-edge: #b8ac96;
+  --skeu-header-from: #f6f0e6;
+  --skeu-header-to: #ece4d6;
+  --skeu-btn-from: #f2ece2;
+  --skeu-btn-to: #e0d8c8;
+  --skeu-btn-active-from: #8b6914;
+  --skeu-btn-active-to: #6b5010;
+}
+
+/* (light-mode view-btn.active consolidated — see below contrast modifiers) */
+
+/* ─────────────────────────────────────────────────────────────────────────────
+ *  COLORWAY: Gruvbox — Light
+ *  morhetz/gruvbox light palette — warm cream bg (#fbf1c7), dark fg (#3c3836),
+ *  same pastel accent family as Gruvbox Dark.
+ * ───────────────────────────────────────────────────────────────────────────── */
+
+body[data-mode="light"][data-colorway="gruvbox"] {
+  --bg-main: #fbf1c7;
+  --bg-panel: #ebdbb2;
+  --bg-elevated: #f2e5bc;
+  --bg-hover: #d5c4a1;
+  --dropdown-bg: #f2e5bc;
+  --dropdown-hover-bg: #d5c4a1;
+  --bg-input: #ebdbb2;
+  --bg-muted: #d5c4a1;
+  --bg-filter: #f9f0c0;
+  --bg-number-input: #ebdbb2;
+
+  --text-main: #3c3836;
+  --text-bright: #282828;
+  --text-accent: #b57614;
+  --text-heading: #af3a03;
+  --text-price: #79740e;
+  --text-muted: #7c6f64;
+  --text-soft: #928374;
+  --text-dimmed: #a89984;
+
+  --border-main: #d5c4a1;
+  --border-section: #bdae93;
+  --border-card: #bdae93;
+  --border-input: #a89984;
+  --border-subtle: #d5c4a1;
+  --border-hype: #af3a03;
+  --border-hype-hover: #d65d0e;
+
+  --accent-primary: #076678;
+  --accent-primary-hover: #458588;
+  --accent-primary-active: #054b5c;
+  --accent-focus: #076678;
+  --accent-blue-text: #076678;
+  --accent-green: #79740e;
+  --accent-green-bright: #98971a;
+  --accent-teal: #427b58;
+  --accent-gold: #b57614;
+  --accent-gold-hype: #d79921;
+  --accent-red: #cc241d;
+  --accent-red-dark: #9d0006;
+  --accent-red-bg: #f9e0de;
+  --accent-red-border: #cc241d;
+  --accent-red-border-hover: #9d0006;
+  --accent-hype: #af3a03;
+
+  --chat-user-bg: #ebdbb2;
+  --chat-error-bg: #f9e0de;
+  --badge-buy-bg: #e0dba8;
+  --badge-sell-bg: #dde0a0;
+  --badge-hype-bg: #eddca0;
+
+  --modal-backdrop: rgba(0, 0, 0, 0.25);
+  --modal-shadow: rgba(0, 0, 0, 0.15);
+  --scrollbar-thumb: #bdae93;
+  --scrollbar-thumb-hover: #a89984;
+  --link-color: #076678;
+  --add-flip-bg: #d0dca0;
+  --limit-ready-bg: #dae4b0;
+
+  /* Glass helpers */
+  --glass-body-from: #e8dcb0;
+  --glass-body-via: #f0e4c0;
+  --glass-body-to: #e0d4a8;
+  --glass-panel: rgba(251, 241, 199, 0.55);
+  --glass-elevated: rgba(251, 241, 199, 0.65);
+  --glass-hover: rgba(251, 241, 199, 0.70);
+  --glass-input: rgba(251, 241, 199, 0.50);
+  --glass-muted: rgba(251, 241, 199, 0.40);
+  --glass-border-card: rgba(60, 56, 54, 0.12);
+  --glass-border-main: rgba(60, 56, 54, 0.08);
+  --glass-border-section: rgba(60, 56, 54, 0.10);
+  --glass-border-input: rgba(60, 56, 54, 0.15);
+  --glass-scrollbar: rgba(60, 56, 54, 0.10);
+
+  /* Neumorphism helpers */
+  --neu-shadow-dark: #d5c4a1;
+  --neu-shadow-light: #fbf1c7;
+  --neu-accent-shadow: #054b5c;
+
+  /* Skeuomorphism helpers */
+  --skeu-body-from: #ebdbb2;
+  --skeu-body-to: #fbf1c7;
+  --skeu-card-from: #f2e5bc;
+  --skeu-card-mid: #ebdbb2;
+  --skeu-card-to: #e0d4a8;
+  --skeu-card-highlight: #fbf1c7;
+  --skeu-card-shadow-edge: #bdae93;
+  --skeu-header-from: #f2e5bc;
+  --skeu-header-to: #ebdbb2;
+  --skeu-btn-from: #f2e5bc;
+  --skeu-btn-to: #ebdbb2;
+  --skeu-btn-active-from: #076678;
+  --skeu-btn-active-to: #054b5c;
+}
+
+/* (light-mode view-btn.active consolidated — see rule below) */
+
+/* ─────────────────────────────────────────────────────────────────────────────
+ *  LIGHT-MODE: consolidated overrides
+ *  - .view-btn.active text forced white for all light colourways
+ *  - Badge/table tokens adjusted for light backgrounds
+ * ───────────────────────────────────────────────────────────────────────────── */
+
+body[data-mode="light"] .view-btn.active {
   color: #ffffff;
+}
+
+body[data-mode="light"] {
+  --badge-velocity-insta-bg: rgba(39, 174, 96, 0.14);
+  --badge-velocity-active-bg: rgba(0, 80, 180, 0.12);
+  --badge-velocity-slow-bg: rgba(200, 150, 0, 0.14);
+  --badge-velocity-muted-bg: rgba(100, 100, 100, 0.12);
+  --badge-trend-up-bg: rgba(39, 174, 96, 0.14);
+  --badge-trend-down-bg: rgba(200, 50, 50, 0.14);
+  --badge-neutral-bg: rgba(100, 100, 100, 0.10);
+  --badge-hype-vol-bg: rgba(200, 130, 0, 0.12);
+  --badge-tier-free-bg: rgba(39, 154, 39, 0.10);
+  --badge-tier-free-border: rgba(39, 154, 39, 0.25);
+  --badge-tier-freetier-bg: rgba(26, 154, 138, 0.10);
+  --badge-tier-freetier-border: rgba(26, 154, 138, 0.25);
+  --badge-tier-lowcost-bg: rgba(0, 80, 180, 0.10);
+  --badge-tier-lowcost-border: rgba(0, 80, 180, 0.25);
+  --badge-tier-neutral-bg: rgba(100, 100, 100, 0.06);
+  --badge-tier-neutral-border: rgba(100, 100, 100, 0.15);
+  --table-active-row-bg: rgba(0, 80, 180, 0.06);
+  --table-hover-row-bg: rgba(0, 0, 0, 0.02);
+  --setup-note-bg: rgba(180, 140, 0, 0.06);
+  --setup-note-border: rgba(180, 140, 0, 0.18);
+  --detail-expanded-bg: rgba(0, 0, 0, 0.04);
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+ *  CONTRAST MODIFIERS (body[data-contrast])
+ *
+ *  Layered on top of any Mode × Colorway combination.
+ *  "soft"  — reduced contrast (lighter darks, softer lights)
+ *  "hard"  — maximum contrast (deeper darks, brighter lights)
+ * ───────────────────────────────────────────────────────────────────────────── */
+
+/* ── Soft contrast — dark modes ─────────────────────── */
+body[data-mode="dark"][data-contrast="soft"] {
+  --bg-main: color-mix(in srgb, var(--bg-panel) 70%, var(--bg-main));
+  --border-main: color-mix(in srgb, var(--border-main) 60%, var(--bg-panel));
+  --text-main: color-mix(in srgb, var(--text-main) 80%, var(--text-muted));
+  --text-bright: color-mix(in srgb, var(--text-bright) 85%, var(--text-main));
+}
+
+/* ── Hard contrast — dark modes ─────────────────────── */
+body[data-mode="dark"][data-contrast="hard"] {
+  --bg-main: color-mix(in srgb, var(--bg-main) 80%, black);
+  --bg-panel: color-mix(in srgb, var(--bg-panel) 85%, black);
+  --bg-muted: color-mix(in srgb, var(--bg-muted) 80%, black);
+  --text-main: color-mix(in srgb, var(--text-main) 80%, white);
+  --text-bright: #ffffff;
+  --border-main: color-mix(in srgb, var(--border-main) 65%, black);
+}
+
+/* ── Soft contrast — light modes ────────────────────── */
+body[data-mode="light"][data-contrast="soft"] {
+  --bg-main: color-mix(in srgb, var(--bg-main) 70%, white);
+  --bg-panel: color-mix(in srgb, var(--bg-panel) 80%, white);
+  --border-main: color-mix(in srgb, var(--border-main) 50%, white);
+  --text-main: color-mix(in srgb, var(--text-main) 70%, var(--text-muted));
+  --text-bright: color-mix(in srgb, var(--text-bright) 75%, var(--text-main));
+}
+
+/* ── Hard contrast — light modes ────────────────────── */
+body[data-mode="light"][data-contrast="hard"] {
+  --bg-main: color-mix(in srgb, var(--bg-main) 85%, white);
+  --bg-panel: #ffffff;
+  --bg-muted: color-mix(in srgb, var(--bg-muted) 80%, white);
+  --text-main: color-mix(in srgb, var(--text-main) 85%, black);
+  --text-bright: #000000;
+  --border-main: color-mix(in srgb, var(--border-main) 80%, var(--text-dimmed));
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
@@ -797,17 +1510,14 @@ body[data-style="skeuomorphism"] .view-btn.active {
   box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.30);
   color: var(--text-bright);
 }
-/* Skeuomorphism — softer shadows on light colorways */
-body[data-colorway="light"][data-style="skeuomorphism"] .market-card,
-body[data-colorway="sol-light"][data-style="skeuomorphism"] .market-card {
+/* Skeuomorphism — softer shadows on light modes (consolidated) */
+body[data-mode="light"][data-style="skeuomorphism"] .market-card {
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.40);
 }
-body[data-colorway="light"][data-style="skeuomorphism"] .market-card:hover,
-body[data-colorway="sol-light"][data-style="skeuomorphism"] .market-card:hover {
+body[data-mode="light"][data-style="skeuomorphism"] .market-card:hover {
   box-shadow: 0 3px 8px rgba(0, 0, 0, 0.20), inset 0 1px 0 rgba(255, 255, 255, 0.50);
 }
-body[data-colorway="light"][data-style="skeuomorphism"] .top20-section,
-body[data-colorway="sol-light"][data-style="skeuomorphism"] .top20-section {
+body[data-mode="light"][data-style="skeuomorphism"] .top20-section {
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.30);
 }
 
@@ -1097,28 +1807,28 @@ body {
   font-weight: 500;
 }
 .setup-guide-tier.tier-free {
-  background: rgba(76, 175, 80, 0.12);
-  border: 1px solid rgba(76, 175, 80, 0.3);
+  background: var(--badge-tier-free-bg);
+  border: 1px solid var(--badge-tier-free-border);
   color: var(--accent-green);
 }
 .setup-guide-tier.tier-free-tier {
-  background: rgba(78, 205, 196, 0.12);
-  border: 1px solid rgba(78, 205, 196, 0.3);
+  background: var(--badge-tier-freetier-bg);
+  border: 1px solid var(--badge-tier-freetier-border);
   color: var(--accent-teal);
 }
 .setup-guide-tier.tier-low-cost {
-  background: rgba(100, 149, 237, 0.12);
-  border: 1px solid rgba(100, 149, 237, 0.3);
+  background: var(--badge-tier-lowcost-bg);
+  border: 1px solid var(--badge-tier-lowcost-border);
   color: var(--accent-blue-text);
 }
 .setup-guide-tier.tier-paid {
-  background: rgba(180, 180, 180, 0.08);
-  border: 1px solid rgba(180, 180, 180, 0.2);
+  background: var(--badge-tier-neutral-bg);
+  border: 1px solid var(--badge-tier-neutral-border);
   color: var(--text-muted);
 }
 .setup-guide-tier.tier-self-hosted {
-  background: rgba(180, 180, 180, 0.08);
-  border: 1px solid rgba(180, 180, 180, 0.2);
+  background: var(--badge-tier-neutral-bg);
+  border: 1px solid var(--badge-tier-neutral-border);
   color: var(--text-muted);
 }
 
@@ -1148,8 +1858,8 @@ body {
 .setup-guide-note {
   padding: 8px 12px;
   border-radius: 6px;
-  background: rgba(255, 215, 0, 0.08);
-  border: 1px solid rgba(255, 215, 0, 0.2);
+  background: var(--setup-note-bg);
+  border: 1px solid var(--setup-note-border);
   font-size: 11px;
   color: var(--accent-gold);
   margin-bottom: 0.75rem;
@@ -1202,12 +1912,12 @@ body {
   color: var(--text-main);
 }
 .provider-comparison-table tr.active-row td {
-  background: rgba(100, 149, 237, 0.08);
+  background: var(--table-active-row-bg);
   color: var(--text-bright);
   font-weight: 500;
 }
 .provider-comparison-table tr:hover td {
-  background: rgba(255, 255, 255, 0.03);
+  background: var(--table-hover-row-bg);
 }
 
 .tier-badge-sm {
@@ -1219,19 +1929,19 @@ body {
   white-space: nowrap;
 }
 .tier-badge-sm.tier-free {
-  background: rgba(76, 175, 80, 0.15);
+  background: var(--badge-tier-free-bg);
   color: var(--accent-green);
 }
 .tier-badge-sm.tier-free-tier {
-  background: rgba(78, 205, 196, 0.15);
+  background: var(--badge-tier-freetier-bg);
   color: var(--accent-teal);
 }
 .tier-badge-sm.tier-low-cost {
-  background: rgba(100, 149, 237, 0.15);
+  background: var(--badge-tier-lowcost-bg);
   color: var(--accent-blue-text);
 }
 .tier-badge-sm.tier-paid {
-  background: rgba(180, 180, 180, 0.1);
+  background: var(--badge-tier-neutral-bg);
   color: var(--text-muted);
 }
 
@@ -1421,6 +2131,8 @@ button:disabled {
   align-items: center;
   justify-content: space-between;
   margin-bottom: 6px;
+  flex-wrap: wrap;
+  gap: 4px;
 }
 
 #market-header h2 {
@@ -1428,12 +2140,14 @@ button:disabled {
   font-weight: 600;
   color: var(--text-heading);
   margin: 0;
+  white-space: nowrap;
 }
 
 .market-header-actions {
   display: flex;
   align-items: center;
   gap: 4px;
+  flex-wrap: wrap;
 }
 
 /* ── Per-section sort selects ─────────────────────────────────────────────── */
@@ -1745,7 +2459,7 @@ button:disabled {
   align-items: center;
   justify-content: center;
   gap: 14px;
-  background: var(--bg, #1e1e1e);
+  background: var(--bg-main, #1e1e1e);
   transition: opacity 0.4s ease;
 }
 .startup-overlay.fade-out {
@@ -1753,11 +2467,18 @@ button:disabled {
   pointer-events: none;
 }
 
+/* Glass style: overlay must stay opaque to hide content behind it */
+body[data-style="glass"] .startup-overlay {
+  background: var(--glass-body-from, var(--bg-main, #1e1e1e));
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+}
+
 .startup-spinner {
   width: 36px;
   height: 36px;
-  border: 3px solid var(--border, #333);
-  border-top-color: var(--accent-blue, #569cd6);
+  border: 3px solid var(--border-main, #333);
+  border-top-color: var(--accent-primary, #569cd6);
   border-radius: 50%;
   animation: startup-spin 0.8s linear infinite;
 }
@@ -1936,22 +2657,22 @@ button:disabled {
 }
 
 .velocity-insta {
-  background: rgba(39, 174, 96, 0.18);
+  background: var(--badge-velocity-insta-bg);
   color: var(--accent-green-bright);
 }
 
 .velocity-active {
-  background: rgba(86, 156, 214, 0.18);
+  background: var(--badge-velocity-active-bg);
   color: var(--accent-blue-text);
 }
 
 .velocity-slow {
-  background: rgba(240, 192, 64, 0.18);
+  background: var(--badge-velocity-slow-bg);
   color: var(--accent-gold);
 }
 
 .velocity-veryslow {
-  background: rgba(136, 136, 136, 0.18);
+  background: var(--badge-velocity-muted-bg);
   color: var(--text-muted);
 }
 
@@ -1964,12 +2685,12 @@ button:disabled {
 }
 
 .trend-downtrend {
-  background: rgba(244, 71, 71, 0.18);
+  background: var(--badge-trend-down-bg);
   color: var(--accent-red);
 }
 
 .trend-uptrend {
-  background: rgba(39, 174, 96, 0.18);
+  background: var(--badge-trend-up-bg);
   color: var(--accent-green-bright);
 }
 
@@ -1978,24 +2699,33 @@ button:disabled {
   50%      { opacity: 0.6; }
 }
 
-.hype-text {
-  color: var(--accent-gold-hype) !important;
+/* ── Semantic text-colour highlight classes ──────────────────────────────────
+   Applied by JS on inline text. Doubled selector for specificity over
+   `.market-card .item-name`, `.detail-value` etc. — no !important needed. */
+
+.market-card .hype-text,
+.hype-text.hype-text {
+  color: var(--accent-gold-hype);
 }
 
-.buy-highlight {
-  color: var(--accent-blue-text) !important;
+.market-card .buy-highlight,
+.buy-highlight.buy-highlight {
+  color: var(--accent-blue-text);
 }
 
-.sell-highlight {
-  color: var(--accent-teal) !important;
+.market-card .sell-highlight,
+.sell-highlight.sell-highlight {
+  color: var(--accent-teal);
 }
 
-.profit-highlight {
-  color: var(--accent-teal) !important;
+.market-card .profit-highlight,
+.profit-highlight.profit-highlight {
+  color: var(--accent-teal);
 }
 
-.risky-text {
-  color: var(--accent-red) !important;
+.market-card .risky-text,
+.risky-text.risky-text {
+  color: var(--accent-red);
 }
 
 /* ── Market search bar ────────────────────────────────────────────────────── */
@@ -2131,7 +2861,7 @@ button:disabled {
   max-height: 400px;
   padding: 6px 8px;
   border-top-color: var(--border-main);
-  background: rgba(0, 0, 0, 0.08);
+  background: var(--detail-expanded-bg);
   overflow-y: auto;
 }
 
@@ -2773,10 +3503,11 @@ button:disabled {
 
 @media (max-width: 600px) {
   .analytics-modal {
-    padding: 1rem;
+    padding: 0.75rem;
     gap: 0.75rem;
     border-radius: 8px;
     min-width: 280px;
+    width: 96vw;
   }
 
   .analytics-modal-name {
@@ -2785,6 +3516,25 @@ button:disabled {
 
   .analytics-modal-price {
     font-size: 13px;
+  }
+
+  /* Detail rows: stack label above value on narrow screens */
+  .analytics-details-grid .detail-row,
+  .detail-row {
+    flex-wrap: wrap;
+    gap: 2px 8px;
+  }
+
+  .detail-label {
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+
+  .detail-value {
+    flex: 0 1 auto;
+    min-width: 60px;
+    word-break: break-word;
+    overflow-wrap: anywhere;
   }
 
   .analytics-stat-card {
@@ -2801,6 +3551,31 @@ button:disabled {
 
   .analytics-graph-section .graph-modal-canvas {
     height: 160px;
+  }
+
+  /* Top 20 header: let actions wrap to next line */
+  #market-header {
+    gap: 2px 6px;
+  }
+
+  .market-header-actions {
+    gap: 3px;
+    flex: 1 1 100%;
+    justify-content: flex-start;
+  }
+
+  .scan-btn {
+    font-size: 9px;
+    padding: 2px 6px;
+  }
+
+  .section-sort-select {
+    font-size: 9px;
+    padding: 3px 4px;
+  }
+
+  .deep-history-label {
+    font-size: 9px;
   }
 }
 
@@ -3493,18 +4268,18 @@ button:disabled {
 }
 
 .ema-badge {
-  background: rgba(86, 156, 214, 0.18);
+  background: var(--badge-velocity-active-bg);
   color: var(--accent-blue-text);
 }
 
 .ema-badge.up {
   color: var(--accent-green-bright);
-  background: rgba(39, 174, 96, 0.15);
+  background: var(--badge-trend-up-bg);
 }
 
 .ema-badge.down {
   color: var(--accent-red);
-  background: rgba(244, 71, 71, 0.15);
+  background: var(--badge-trend-down-bg);
 }
 
 .predicted-badge {
@@ -3513,21 +4288,21 @@ button:disabled {
 
 .predicted-badge.up {
   color: var(--accent-green-bright);
-  background: rgba(39, 174, 96, 0.15);
+  background: var(--badge-trend-up-bg);
 }
 
 .predicted-badge.down {
   color: var(--accent-red);
-  background: rgba(244, 71, 71, 0.15);
+  background: var(--badge-trend-down-bg);
 }
 
 .predicted-badge.neutral {
   color: var(--text-muted);
-  background: rgba(136, 136, 136, 0.15);
+  background: var(--badge-neutral-bg);
 }
 
 .vol-badge {
-  background: rgba(255, 171, 64, 0.15);
+  background: var(--badge-hype-vol-bg);
   color: var(--accent-hype, var(--accent-gold));
 }
 
@@ -3754,6 +4529,27 @@ body[data-layout="tabbed"] #portfolio-view.active-tab {
 }
 
 /* ── Sidebar layout (side-by-side, second monitor) ────────────────────────── */
+/* Disable sidebar layout on small / mobile viewports — fall back to tabbed  */
+@media (max-width: 700px) {
+  body[data-layout="sidebar"] #view-tabs {
+    display: flex !important;    /* restore tabs on small screens */
+  }
+  body[data-layout="sidebar"] #app-content {
+    flex-direction: column !important;
+  }
+  body[data-layout="sidebar"] #market-view {
+    width: auto !important;
+    border-right: none !important;
+  }
+  body[data-layout="sidebar"] #advisor-view,
+  body[data-layout="sidebar"] #portfolio-view {
+    border-left: none !important;
+  }
+  /* Hide the sidebar button on mobile — it doesn't work well */
+  .layout-toggle #layout-sidebar-btn {
+    display: none;
+  }
+}
 
 body[data-layout="sidebar"] #view-tabs {
   display: none;                 /* tabs not needed in sidebar mode */

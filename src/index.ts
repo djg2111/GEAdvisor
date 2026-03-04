@@ -21,6 +21,20 @@ import "./icon.png";
 // ── Stylesheet (Webpack style-loader injects into <head>) ───────────────────
 import "./style.css";
 
+// ── Early theme restoration ─────────────────────────────────────────────────
+// Apply all four persisted theme axes before any content renders so the
+// startup overlay matches the user's chosen appearance settings.
+(() => {
+  const mode     = localStorage.getItem("ge-analyzer:mode")     ?? "dark";
+  const style    = localStorage.getItem("ge-analyzer:style")    ?? "basic";
+  const colorway = localStorage.getItem("ge-analyzer:colorway") ?? "classic";
+  const contrast = localStorage.getItem("ge-analyzer:contrast") ?? "default";
+  document.body.dataset.mode     = mode;
+  document.body.dataset.style    = style;
+  document.body.dataset.colorway = colorway;
+  document.body.dataset.contrast = contrast;
+})();
+
 // ── Alt1 environment detection ──────────────────────────────────────────────
 const alt1Status = document.getElementById("alt1-status");
 

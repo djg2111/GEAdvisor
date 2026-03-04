@@ -82,7 +82,7 @@ alt1minimal/
     ├── icon.png               # App icon (asset/resource)
     ├── index.html             # Full UI: settings, tabbed layout (market / advisor / portfolio), search, favourites, filters
     ├── index.ts               # Lean entry point: alt1 detection → initDataPipeline() → initUI(), startup loading overlay
-    ├── style.css              # Two-axis theme system (4 styles × 6 colorways), flexbox, cards, unified analytics modal, toasts, inline alert popovers, data-mgmt, compact-tiles toggle, responsive desktop breakpoint
+    ├── style.css              # Four-axis theme system (2 modes × 4 styles × 6 colorways × 3 contrast levels), flexbox, cards, unified analytics modal, toasts, inline alert popovers, data-mgmt, compact-tiles toggle, responsive breakpoints (mobile ≤600px, sidebar-disable ≤700px, desktop ≥800px)
     ├── uiService.ts           # All DOM logic: settings, market render, search, favourites, portfolio, chat RAG, error recovery, price alerts, data export/import, CSV export, sortable flips table, unified analytics modal (~4265 lines)
     └── services/
         ├── index.ts               # Barrel re-export of all services + types + constants
@@ -106,14 +106,14 @@ alt1minimal/
 Called once at startup from `index.ts`:
 1. Opens IndexedDB (`ge-analyzer-cache` database, version 2).
 2. Checks staleness via cursor on `fetchedAt` index descending — if newest record > 24h old, cache is stale.
-3. If stale: fetches ~100 curated seed items from the Weird Gloop API → enriches with buy limits from the RS Wiki Cargo API → bulk-inserts into IndexedDB (both `prices` and `price-history` stores).
+3. If stale: fetches ~230 curated seed items from the Weird Gloop API → enriches with buy limits from the RS Wiki Cargo API → bulk-inserts into IndexedDB (both `prices` and `price-history` stores).
 4. **Health check A** (runs on every startup): If >50% of cached records are missing `highAlch` or `buyLimit`, re-enriches them via `WikiService` and persists via `bulkInsert`.
-5. **Health check B** (runs on every startup): If <30% of cached items have ≥2 days of price history, re-seeds history via `WeirdGloopService.fetchHistoricalPrices` and persists via `bulkInsertHistory`.
+5. **Health check B** (runs on every startup): If <30% of cached items have ≥2 days of price history, re-seeds history for **SEED_ITEMS only** (not all cached items) via `WeirdGloopService.fetchHistoricalPrices` and persists via `bulkInsertHistory`. Capped to ~230 seed items to keep startup under ~60 s since the `/last90d` endpoint only accepts 1 item per request.
 6. Re-reads all cached records after health checks, then returns `StoredPriceRecord[]`.
 
-**Seed items** (~100): Curated list of heavily-traded RS3 items including rares, skilling supplies, potions, runes, PvM drops, summoning materials, and alchables. Defined as `SEED_ITEMS` array in `initDataPipeline.ts`.
+**Seed items** (~230): Curated list of heavily-traded RS3 items including rares, skilling supplies, potions, runes, PvM drops, summoning materials, and alchables. Defined as `SEED_ITEMS` array in `initDataPipeline.ts`. Names must match the canonical RS Wiki titles exactly (the `/last90d` API is case-sensitive and returns `{"success":false}` for unknown items). Common pitfalls cleaned up in March 2026: untradeable items (Overload, Adrenaline potion, charms), mis-named items ("h'ween" → "hallowe'en", "Banite bar" → "Bane bar"), clean herbs require "Clean " prefix (not bare herb name), "Bow string" → "Bowstring", case-sensitive "Dragon Rider lance" (capital R).
 
-**`runFullMarketScan(catalogue, onProgress?, signal?, deepHistory?)`**: Non-blocking background scan of all ~7,000 items in batches of 100 with **adaptive inter-batch delay** (1 500 ms baseline). Consecutive empty batches double the delay up to a 30 s ceiling; delay resets to 1 500 ms on a successful batch. Fetches latest prices + buy limits + high alch values + history (30-day by default, 90-day when `deepHistory=true`) per batch, bulk-inserts into IndexedDB immediately (resume-safe). Supports `AbortSignal` for user cancellation. Progress callback `(done, total)` drives the UI progress bar.
+**`runFullMarketScan(catalogue, onProgress?, signal?, deepHistory?)`**: Non-blocking background scan of all ~7,000 items in batches of 100 with **adaptive inter-batch delay** (1 500 ms baseline). Consecutive empty batches double the delay up to a 30 s ceiling; delay resets to 1 500 ms on a successful batch. Fetches latest prices + buy limits + high alch values per batch, bulk-inserts into IndexedDB immediately (resume-safe). History is **only** fetched when `deepHistory=true` (90-day per item via individual `/last90d` requests — significantly slower). When `deepHistory=false` (default), history is loaded on demand when the user opens the analytics modal. **History-only optimisation**: if `deepHistory` is requested and ≥ 90% of the catalogue already has prices fetched within the last hour, the scan skips price/enrichment entirely and only fetches history. Supports `AbortSignal` for user cancellation. Progress callback `(done, total)` drives the UI progress bar.
 
 **`fetchGECatalogue()`**: Fetches the full RS Wiki `Module:GEIDs/data.json` (~7,000 GE-tradeable items, ~215KB). Returns a sorted `GECatalogueEntry[]` used for the market search bar.
 
@@ -129,8 +129,8 @@ Called once at startup from `index.ts`:
 
 - **`fetchWithRetry(url, maxRetries?)`** — private static helper. On HTTP 429 or network `TypeError`, retries up to `MAX_RETRIES` (4) times with exponential backoff: delay = `BACKOFF_BASE_MS` (2 000 ms) × 2^attempt. Non-retryable HTTP errors return `null`.
 - **`fetchLatestPrices(itemNames)`** — sequential batch dispatch (one request at a time, 300 ms pause between batches). Each batch uses `fetchWithRetry`. Returns `Map<string, WeirdGloopPriceRecord>`.
-- **`fetchHistoricalPrices(itemNames, days)`** — pipe-delimited batched requests of up to 50 items each, dispatched **sequentially** with `HISTORY_GROUP_DELAY_MS` (1 000 ms) pauses between batches. Each batch uses `fetchWithRetry`. Previously used individual per-item requests in concurrent groups of 10, which caused 429 rate-limiting during full scans.
-- **Static constants**: `MAX_RETRIES = 4`, `BACKOFF_BASE_MS = 2_000`, `HISTORY_GROUP_DELAY_MS = 1_000`.
+- **`fetchHistoricalPrices(itemNames, days)`** — individual per-item requests dispatched **sequentially** with `HISTORY_ITEM_DELAY_MS` (200 ms) pauses. The `/last90d` endpoint only accepts 1 item per request (pipe-delimited batching returns an API error). Each request uses `fetchWithRetry`. Progress logged every 50 items.
+- **Static constants**: `MAX_RETRIES = 4`, `BACKOFF_BASE_MS = 2_000`, `HISTORY_ITEM_DELAY_MS = 200`.
 
 ### 4.3 Cache Service (`cacheService.ts`)
 
@@ -144,7 +144,7 @@ Called once at startup from `index.ts`:
 
 ### 4.4 Market Analyzer Service (`marketAnalyzerService.ts`)
 
-Pure math on local data with one network fallback — when the local IndexedDB price-history store is sparse (< 30% of items have ≥ 2 days), `buildPriceHistoryMap()` delegates to `WeirdGloopService.fetchHistoricalPrices` (pipe-delimited batched requests of 50, with 1 000 ms pauses) and persists results to IndexedDB. Capped at 500 items to avoid rate-limit avalanche after full scans.
+Pure math on local data with one network fallback — when the local IndexedDB price-history store is sparse (fewer than 400 items have ≥ 2 days of multi-day history), `buildPriceHistoryMap()` delegates to `WeirdGloopService.fetchHistoricalPrices` (individual per-item requests with 200 ms pauses) and persists results to IndexedDB. The threshold uses an absolute count (not a ratio) because `bulkInsert` writes a today-snapshot for every price record — after a full market scan all ~7,000 items have ≥ 1 history row, making percentage thresholds unreachable. After seeds (~230) + one fallback round (200) the count exceeds 400 and subsequent startups skip the ~40 s API call. Capped at 200 items since the `/last90d` API only accepts 1 item per request.
 
 **TTL-cached scoring maps**: `getOrBuildMaps(days)` maintains in-memory caches of `avgVolumeMap` and `priceHistoryMap` with a 10-minute TTL (`MAP_CACHE_TTL_MS`). All three public entry points (`getTopItems`, `searchItems`, `getItemsByNames`) call `getOrBuildMaps(30)` instead of rebuilding maps from IndexedDB each time. `invalidateMapCache()` clears both maps manually; in practice this is rarely needed since all major data-update paths (full scan, force reload, retry) construct a new `MarketAnalyzerService` instance.
 
@@ -268,7 +268,7 @@ Manages active flips **and** completed flip history:
 
 ### 4.10 UI Service (`uiService.ts`)
 
-All DOM manipulation isolated here — services remain UI-agnostic. ~2480 lines.
+All DOM manipulation isolated here — services remain UI-agnostic. ~4 600 lines.
 
 `initUI()` flow:
 1. Resolves all DOM elements by ID (~50 refs, throws if missing).
@@ -310,7 +310,7 @@ All DOM manipulation isolated here — services remain UI-agnostic. ~2480 lines.
 - Lazy singleton — created once via `ensureAnalyticsModal()`, reused for all items.
 - Closes on backdrop click, ✕ button, or Escape key.
 - Keyboard accessible: `role="dialog"`, `aria-modal="true"`, focus trapped to close button on open.
-- Responsive: `90vw` width (max 920 px, min 320 px), two-column detail grid at ≥ 600 px, reduced padding/font on mobile.
+- Responsive: `90vw` width (max 920 px, min 320 px), two-column detail grid at ≥ 480 px, reduced padding/font on mobile (≤ 600 px). Detail rows use `flex-wrap` + `overflow-wrap: anywhere` on narrow viewports so long values don’t break character-by-character.
 
 **Price alert system**:
 - **Inline card popover**: Each card has a 🔔 bell button in `.card-actions` that toggles a `.card-alert-popover` with compact Buy ≤ / Sell ≥ number inputs. Only one popover is open at a time per item list. Bell glows gold (`.alert-active`) when thresholds are set.
@@ -389,11 +389,12 @@ All DOM manipulation isolated here — services remain UI-agnostic. ~2480 lines.
 
 Lean orchestrator (~80 lines) with startup overlay management:
 1. Imports `alt1`, static assets (`appconfig.json`, `icon.png`), `style.css`.
-2. Detects `window.alt1` — if present, calls `alt1.identifyAppUrl()`; if absent, shows "add app" link.
-3. Shows `#startup-overlay` and calls `setStartupStatus(msg, step?)` to update status + step counter (e.g. "Step 1 of 4").
-4. Calls `await initDataPipeline()` (Step 1/4: "Loading market data…").
-5. Calls `await initUI(onStatus)` — `onStatus` callback drives Steps 2–4 (Ranking → Favourites → Catalogue).
-6. `dismissOverlay()` fades and removes the overlay after boot completes.
+2. **Early theme restoration** — reads all four theme axes (`ge-analyzer:mode`, `ge-analyzer:style`, `ge-analyzer:colorway`, `ge-analyzer:contrast`) from localStorage and applies them to `document.body.dataset` immediately (single synchronous batch write via `applyThemeBatch()`), so the startup overlay renders with the user's chosen theme.
+3. Detects `window.alt1` — if present, calls `alt1.identifyAppUrl()`; if absent, shows "add app" link.
+4. Shows `#startup-overlay` and calls `setStartupStatus(msg, step?)` to update status + step counter (e.g. "Step 1 of 4").
+5. Calls `await initDataPipeline()` (Step 1/4: "Loading market data…").
+6. Calls `await initUI(onStatus)` — `onStatus` callback drives Steps 2–4 (Ranking → Favourites → Catalogue).
+7. `dismissOverlay()` fades and removes the overlay after boot completes.
 
 ### 4.12 HTML Structure (`index.html`)
 
@@ -427,22 +428,35 @@ Lean orchestrator (~80 lines) with startup overlay management:
 
 ### 4.13 Stylesheet (`style.css`)
 
-- **Two-axis theme system** (Style × Colorway) using CSS custom properties — 4 styles × 6 colorways = 24 combinations:
+- **Four-axis theme system** (Mode × Style × Colorway × Contrast) using CSS custom properties — 2 modes × 4 styles × 6 colorways × 3 contrast levels = 144 combinations:
+  - **Modes** (`body[data-mode]`) set the fundamental light/dark tone:
+    - **Dark** (default) — dark backgrounds, light text.
+    - **Light** (`body[data-mode="light"]`) — light backgrounds, dark text.
   - **Styles** (`body[data-style]`) define structural effects:
     - **Basic** (default — no `data-style` attribute) — standard flat UI.
     - **Glassmorphism** (`body[data-style="glass"]`) — frosted glass panels, `backdrop-filter: blur(16px)`, semi-transparent backgrounds on a gradient body.
     - **Neumorphism** (`body[data-style="neumorphism"]`) — soft UI with inset/outset `box-shadow`, transparent borders, extra tile spacing.
     - **Skeuomorphism** (`body[data-style="skeuomorphism"]`) — textured gradients, embossed buttons, realistic drop shadows.
   - **Colorways** (`body[data-colorway]`) define colour palettes + style helper vars (`--glass-*`, `--neu-*`, `--skeu-*`):
-    - **Classic Dark** (default `:root`) — `#1e1e1e` background, `#d4d4d4` text.
-    - **OSRS Brown** (`body[data-colorway="osrs"]`) — parchment tones, brown accents.
-    - **RS3 Modern Blue** (`body[data-colorway="rs3-modern"]`) — dark navy, blue accents.
-    - **Light** (`body[data-colorway="light"]`) — light backgrounds, dark text, clean high-contrast.
-    - **Solarized Dark** (`body[data-colorway="sol-dark"]`) — Ethan Schoonover’s dark palette (#002b36 base), teal/blue accents.
-    - **Solarized Light** (`body[data-colorway="sol-light"]`) — warm cream (#fdf6e3 base), same accent family as Solarized Dark.
-  - Legacy `ge-analyzer:theme` key auto-migrates to `ge-analyzer:style` + `ge-analyzer:colorway` on first load.
+    - **Classic** (default `:root`) — dark: `#1e1e1e` background; light: `#f5f5f5` background.
+    - **OSRS** (`body[data-colorway="osrs"]`) — dark: parchment tones, brown accents; light: warm cream, earthy tones.
+    - **RS3 Modern** (`body[data-colorway="rs3-modern"]`) — dark: dark navy, blue accents; light: light slate, blue highlights.
+    - **Solarized** (`body[data-colorway="solarized"]`) — dark: Ethan Schoonover’s dark palette (#002b36 base); light: warm cream (#fdf6e3 base).
+    - **RS Lobby** (`body[data-colorway="rs-lobby"]`) — inspired by the RuneScape in-game lobby UI. Dark: deep parchment browns (#1a140f base), gold accents; light: warm cream parchment (#f2ece2 base), earthy gold tones. A blend of OSRS and RS3 Modern aesthetics.
+    - **Gruvbox** (`body[data-colorway="gruvbox"]`) — morhetz/gruvbox “retro groove” palette. Dark: warm earthy tone (#282828 base), pastel accents (yellow #fabd2f, aqua #8ec07c, orange #fe8019); light: warm cream (#fbf1c7 base), muted accent counterparts.
+  - **Contrast** (`body[data-contrast]`) adjusts intensity via `color-mix(in srgb, ...)`:
+    - **Normal** — no adjustment.
+    - **Soft** — reduces contrast (muted backgrounds, softer text).
+    - **Hard** — increases contrast (deeper backgrounds, brighter text).
+  - CSS selectors use compound form: `body[data-mode="dark"][data-colorway="osrs"]`.
+  - Legacy `ge-analyzer:theme` auto-migrates to `ge-analyzer:style` + `ge-analyzer:colorway`.
+  - Legacy colorway values (`light`, `sol-dark`, `sol-light`) auto-migrate via `migrateColorwayToMode()` to mode + colorway pairs.
 - Font stack: Segoe UI / Consolas.
 - `html` and `body` both `width: 100%; height: 100%`.
+- **CSS custom-property alias tokens**: `:root` defines `--border: var(--border-main)` and `--text: var(--text-main)` as convenience aliases for legacy references. Prefer the canonical `--border-main` / `--text-main` in new CSS.
+- **Semantic badge background tokens**: `:root` defines `--badge-velocity-*-bg` (insta/active/slow/muted), `--badge-velocity-*-bg` (for trend badges), `--badge-tier-*-bg/border` (free/freetier/lowcost/neutral), `--table-active-row-bg`, `--detail-expanded-bg`, `--setup-note-bg`, `--table-hover-bg`, and `--predictive-badge-bg`. All have `body[data-mode="light"]` overrides with reduced opacity/different tints. Badge classes consume these tokens via `var()` — do not hard-code `rgba()` values.
+- **Consolidated light-mode selectors**: All 6 light-mode colorways share a single `body[data-mode="light"] { background: ... }` rule (plus `.view-btn.active { color: #fff }`) instead of 6 duplicate blocks. Similarly, skeuomorphism light-mode selectors are consolidated into `body[data-mode="light"][data-style="skeuomorphism"]` (not enumerated per-colorway).
+- **No `!important` on colour overrides**: `.hype-text`, `.buy-highlight`, `.sell-highlight`, `.profit-highlight`, `.risky-text` use doubled-selector specificity (`.market-card .hype-text, .hype-text.hype-text`) instead. Do not reintroduce `!important`.
 - **`#app` uses `height: 95%`** (manually set to fix Alt1 zoom-level scaling issues — do NOT change).
 - **Market panel**: `flex: 0 1 auto`, `max-height: 30%` in non-tabbed layout.
 - **Chat panel**: `flex: 1 1 0`, `min-height: 120px`.
@@ -473,7 +487,9 @@ Lean orchestrator (~80 lines) with startup overlay management:
 - **Toast notifications**: `#toast-container` (fixed top-right, z-index 900). `.toast` with `.toast-buy` (teal border) and `.toast-sell` (gold border) variants. Slide-in/fade-out transitions.
 - **Alert inputs**: `.alert-inputs` panel in the item modal — two number inputs for buy/sell thresholds, themed via CSS variables.
 - **Responsive desktop breakpoint**: `@media (min-width: 800px)` — wider modal (480 px), wider grid columns for tile/hybrid, increased padding on main sections.
-- **Layout modes**: `body[data-layout="tabbed"]` hides non-active tabs, `body[data-layout="sidebar"]` shows all sections side-by-side.
+- **Mobile breakpoint**: `@media (max-width: 600px)` — analytics modal detail-row flex-wrap/overflow-wrap, smaller scan-btn/sort-select/deep-history text, Top 20 `.market-header-actions` wraps to new line.
+- **Sidebar disable breakpoint**: `@media (max-width: 700px)` — sidebar layout reverts to tabbed (all `body[data-layout="sidebar"]` overrides neutralized), Sidebar button hidden.
+- **Layout modes**: `body[data-layout="tabbed"]` hides non-active tabs, `body[data-layout="sidebar"]` shows all sections side-by-side (desktop-only, ≥ 701 px).
 - Chat bubbles: user (blue `#264f78`), assistant (dark `#333`), system (italic gray), error (red `#3b1a1a`), thinking (animated dots via CSS `@keyframes`).
 - Thin dark webkit scrollbar styling.
 - **Accessibility enhancements** (March 2026):
@@ -501,7 +517,9 @@ Lean orchestrator (~80 lines) with startup overlay management:
 | `ge-analyzer:view-mode` | Market panel view mode (`list`, `tile`, or `hybrid`) |
 | `ge-analyzer:layout` | Interface layout mode (`tabbed` or `sidebar`) |
 | `ge-analyzer:style` | Visual style (`basic`, `glass`, `neumorphism`, or `skeuomorphism`) — migrated from legacy `ge-analyzer:theme` |
-| `ge-analyzer:colorway` | Colour palette (`classic`, `osrs`, `rs3-modern`, `light`, `sol-dark`, or `sol-light`) — migrated from legacy `ge-analyzer:theme` |
+| `ge-analyzer:colorway` | Colour palette (`classic`, `osrs`, `rs3-modern`, `rs-lobby`, `gruvbox`, or `solarized`) — mode-agnostic; combined with `ge-analyzer:mode` for full palette resolution. Legacy values (`light`, `sol-dark`, `sol-light`) auto-migrate via `migrateColorwayToMode()` |
+| `ge-analyzer:mode` | Appearance mode (`dark` or `light`) — sets `data-mode` on `<body>` |
+| `ge-analyzer:contrast` | Contrast level (`default`, `soft`, or `hard`) — sets `data-contrast` on `<body>`, layered via `color-mix()` |
 | `ge-analyzer:top20-sort` | Top 20 section sort key (`default`, `alpha`, `price-desc`, `profit-desc`) |
 | `ge-analyzer:search-sort` | Search results sort key |
 | `ge-analyzer:fav-sort` | Favourites section sort key |
@@ -595,7 +613,7 @@ Everything below is **complete and verified** (builds with 0 errors):
 
 - [x] Weird Gloop API service (batched sequential fetching with `fetchWithRetry` exponential backoff)
 - [x] IndexedDB cache service v2 (TTL-based staleness, bulk insert, prices + price-history stores)
-- [x] Data pipeline orchestrator (seed list of ~100 items, buy-limit enrichment from wiki)
+- [x] Data pipeline orchestrator (seed list of ~230 items, buy-limit enrichment from wiki)
 - [x] Startup health checks — re-enriches missing `highAlch`/`buyLimit` (>50% threshold) and re-seeds sparse history (<30% coverage) on every launch (March 2026)
 - [x] Full GE catalogue fetch (~7,000 items from `Module:GEIDs/data.json`)
 - [x] Market analyzer service (scoring, filtering, ranking, LLM formatting, runtime overrides)
@@ -644,7 +662,7 @@ Everything below is **complete and verified** (builds with 0 errors):
 - [x] Chat history persistence (localStorage, max 50 messages, clear button)
 - [x] Multi-turn LLM conversation with RAG context
 - [x] Full HTML UI (settings panel, tabbed/sidebar layout, market/advisor/portfolio sections)
-- [x] Two-axis theme system — 4 styles × 6 colorways (24 combinations), cards, tiles, grids, unified analytics modal, filters, chat, portfolio, velocity badges, external links, toast notifications, alert inputs, inline alert popovers, responsive desktop breakpoint)
+- [x] Four-axis theme system — 2 modes × 4 styles × 6 colorways × 3 contrast levels (144 combinations), cards, tiles, grids, unified analytics modal, filters, chat, portfolio, velocity badges, external links, toast notifications, alert inputs, inline alert popovers, responsive desktop breakpoint)
 - [x] Accessibility — WCAG AA muted-text contrast, `:focus-visible` keyboard ring, `aria-labelledby` on analytics modal, ▲/▼ shape profit/loss indicators, 10 px badge font floor, settings fieldset groups
 - [x] Error recovery UI (dismissible error banner with retry button, try/catch wrappers across pipeline and UI)
 - [x] Webpack build passes (`npm run build` — 0 errors, 0 warnings)
@@ -674,8 +692,9 @@ Everything below is **complete and verified** (builds with 0 errors):
 | Graph modal showing no data / stuck on "Loading price history…" | Full market scan fetches current prices but not deep history; `fetchItemHistory` always hit the API directly (no cache) | Implemented `ensureItemHistory()` cache-first flow: checks IndexedDB for ≥ 7 data points, fetches via `WeirdGloopService.fetchHistoricalPrices` on demand, persists via `bulkInsertHistory`, dynamic loading text + error toast (March 2026) |
 | API 429 rate-limiting during full market scan | Concurrent `Promise.allSettled` dispatch in `fetchLatestPrices` overwhelmed the Weird Gloop API after ~2 batches | Switched to sequential batch dispatch with 300 ms pauses; added `fetchWithRetry()` with exponential backoff (MAX_RETRIES=4, base 2 s); increased `runFullMarketScan` inter-batch delay from 500 ms to 1 500 ms with adaptive doubling (ceiling 30 s) on consecutive empty batches (March 2026) |
 | Graph modal showing no data for low-volume items with no fallback action | Users had no way to manually trigger history fetch when automatic cache had insufficient data | Added `.graph-history-status` strip with Refresh button: calls `ensureItemHistory()`, re-renders graph on success, toast on failure. Only visible when < 7 data points (March 2026) |
-| Full market scan history fetches hitting 429 rate limits after first batch | `fetchHistoricalPrices` used individual per-item HTTP requests (100 requests per 100-item batch in concurrent groups of 10), exhausting the API rate limit | Rewrote to use **pipe-delimited batched requests** of 50 items each, dispatched sequentially with 1 000 ms pauses — reduces 100 requests to 2 per scan batch (March 2026) |
-| Post-scan `refreshMarketPanel` triggering 30 K+ 429 errors | `marketAnalyzerService.fetchAPIHistory` had its own per-item fetch loop (no retry, no delay, CONCURRENCY=10); after a 7 059-item scan the sparse-data fallback tried to fetch history for all ~1 849 cached items individually | Replaced bespoke `fetchAPIHistory` with delegation to `WeirdGloopService.fetchHistoricalPrices` (batched pipe-delimited, sequential, 1 s pauses). Also capped sparse fallback at 500 items and persisted results to IndexedDB (March 2026) |
+| Full market scan history fetches hitting 429 rate limits after first batch | `fetchHistoricalPrices` used individual per-item HTTP requests (100 requests per 100-item batch in concurrent groups of 10), exhausting the API rate limit | Rewrote to use **pipe-delimited batched requests** of 50 items each (March 2026), then reverted to **individual per-item requests** with 200 ms pauses after discovering the `/last90d` endpoint only accepts 1 item (`"Too many names"` error); health check re-seeding capped to SEED_ITEMS (~230), sparse fallback capped at 200 (March 2026) |
+| Health check B re-seeding returning 0 items despite valid API | 28 SEED_ITEMS had wrong names or were untradeable — API returned `{success:false}` which the parser silently skipped | **Wave 1**: removed 9 non-existent items (Overload, Adrenaline potion, charms, Golden cracker, non-existent bars), renamed 7 (hallowe'en masks, Bane bar, Orikalkum bar, Spirit shards, Reinforced dragon bones). **Wave 2**: renamed 11 clean herbs ("Dwarf weed" → "Clean dwarf weed" etc.), "Bow string" → "Bowstring", "Dragon rider lance" → "Dragon Rider lance" (case-sensitive). Added diagnostic skip-reason counters and case-insensitive key fallback in `fetchHistoricalPrices` (March 2026) |
+| Post-scan `refreshMarketPanel` triggering 30 K+ 429 errors | `marketAnalyzerService.fetchAPIHistory` had its own per-item fetch loop (no retry, no delay, CONCURRENCY=10); after a 7 059-item scan the sparse-data fallback tried to fetch history for all ~1 849 cached items individually | Replaced bespoke `fetchAPIHistory` with delegation to `WeirdGloopService.fetchHistoricalPrices` (individual per-item requests, 200 ms pauses). Sparse fallback capped at 200 items and results persisted to IndexedDB (March 2026) |
 | CORS failures on Firefox but not Chrome | `fetchWithRetry()` in `weirdGloopService.ts` and `fetchBuyLimitBatch`/`fetchAlchValueBatch` in `wikiService.ts` set a custom `User-Agent` header. Firefox sends it (non-safelisted → triggers CORS preflight), but the APIs only allow `accept` in `Access-Control-Allow-Headers`. Chrome silently strips `User-Agent` so no preflight occurs | Removed the custom `User-Agent` header from all browser `fetch()` calls in both services — browser sends its own `User-Agent` automatically. Never set non-safelisted headers in browser `fetch()` (March 2026) |
 | High Alch values showing "Unknown" for all items | `getBulkHighAlchValues` regex matched only `alchvalue = <number>`, but most `Module:Exchange/<Item>` Lua sources only have a `value` field (base item value); `alchvalue` is rarely present | Added fallback: if no explicit `alchvalue`, compute High Alch as `floor(value × 0.6)` from the base `value` field. Also skip items with `alchable = false`. Added `VALUE_RE` and `ALCHABLE_FALSE_RE` regexes (March 2026) |
 | High Alch showing "Unknown" instead of "Not Alchable" for non-alchable items | `highAlch` was `number \| undefined` — no way to distinguish "not yet fetched" from "item cannot be alched" | Switched primary data source to `Module:GEHighAlchs/data.json?action=raw` bulk endpoint (single HTTP request for all alchable items). Changed `highAlch` type to `number \| false \| undefined`: `false` = explicitly not alchable, `undefined` = not yet determined. UI now shows "Not Alchable" for `false`, LLM format shows "Not Alchable" / "N/A" accordingly. Per-item `Module:Exchange` parsing retained as fallback (March 2026) |
@@ -685,6 +704,13 @@ Everything below is **complete and verified** (builds with 0 errors):
 | LLM giving contradictory/spotty advice (e.g. "high volatility (0.0%)", "negative slope (+0.0)") | Core knowledge was only 4 rules; system prompt had no data interpretation guidance; `formatForLLM` omitted trade velocity, high alch, and data-sufficiency markers | Expanded `RS3_ECONOMIC_RULES` to 8 laws (item categories, flipping strategy, gp/hr formulas, common pitfalls). Added `DATA_FIELD_LEGEND` explaining every metric. System prompt now has 12 analytical reasoning rules including the "slope ±0.0 + volatility 0% = insufficient data" case. `formatForLLM` now includes High Alch, Velocity tier, and `[LIMITED DATA]` tag when < 3 history points (March 2026) |
 
 | Volume preset filter (Low / High) barely changing Top 20 results | `minVolume` / `maxVolume` filters applied against `effectivePlayerVolume` (clamped by buy limits), not raw GE volume. Most expensive items have small buy limits (2–10), giving effectivePlayerVolume of 12–60 — well below the "Low" cap of 1 000. So virtually the same items appeared in both "Any" and "Low" | Changed `scoreAndFilter` to filter `minVolume`/`maxVolume` against **global daily GE volume** (`globalVol`) instead of `effectivePlayerVolume`. Bumped "Low" threshold from 1 000 → 5 000. `effectivePlayerVolume` still used for **scoring** (`tradedValue`), just not for filtering (March 2026) |
+| Undefined `--border` / `--text` CSS custom properties | 12 rules referenced `var(--border)` and `var(--text)` but `:root` only defined `--border-main` and `--text-main`. Properties resolved to `unset` / browser default, causing invisible or miscolored borders and text in some selectors | Added `--border: var(--border-main)` and `--text: var(--text-main)` alias tokens to `:root` |
+| Hard-coded `rgba()` on badge backgrounds bypassing theme system | 30+ badge/tier/table/detail backgrounds used raw `rgba()` values that didn't respond to mode/colorway changes | Tokenised all values into CSS custom properties (`--badge-velocity-*-bg`, `--badge-tier-*-bg/border`, `--table-active-row-bg`, `--detail-expanded-bg`, etc.) in `:root` with `body[data-mode="light"]` overrides |
+| Duplicate light-mode colorway CSS selectors | Each of 6 light-mode colorways had its own `background` rule and `.view-btn.active { color }` rule (12 rules total) with identical values | Consolidated into 2 rules: one `body[data-mode="light"]` background block and one `.view-btn.active` block. Also consolidated 18 skeuomorphism light-mode selectors (6 colorways × 3 elements) into 3 selectors |
+| `EXPORT_KEYS` missing `mode` and `contrast` | JSON export/import of settings only backed up `style` and `colorway` — `mode` (dark/light) and `contrast` (default/soft/hard) were lost on restore | Added `"ge-analyzer:mode"` and `"ge-analyzer:contrast"` to the `EXPORT_KEYS` array |
+| Four separate dataset writes on theme init causing 4 style recalcs | `bindTheme()` called `applyMode` + `applyStyle` + `applyColorway` + `applyContrast` sequentially, each writing one `dataset` property and triggering an intermediate layout | Added `applyThemeBatch()` that writes all 4 `dataset` properties in a single synchronous pass; `bindTheme()` now uses it for initial restore |
+| Gruvbox Light `.view-btn.active` color was cream (#fbf1c7) instead of white | Individual colorway block set the active button text to the Gruvbox light base colour, making it nearly invisible on the accent background | Consolidated rule now uses `#ffffff` for all light-mode `.view-btn.active` |
+| `!important` on highlight colour classes | `.hype-text`, `.buy-highlight`, `.sell-highlight`, `.profit-highlight`, `.risky-text` used `!important` for colour overrides | Replaced with doubled-selector specificity (`.market-card .hype-text, .hype-text.hype-text`) |
 
 ---
 
@@ -693,7 +719,7 @@ These were discussed or implied but never started:
 - ~~**Improved wiki title mapping**~~: ✅ Implemented then removed — two-step MediaWiki search → extract strategy was replaced by curated `coreKnowledge.ts` (March 2026). WikiService now only fetches structured data (buy limits, alch values).
 - ~~**Error recovery UI**~~: ✅ Implemented — dismissible error banner with retry button, try/catch wrappers across pipeline and UI.
 - ~~**Item detail links**~~: ✅ Implemented — Wiki and GE Database links on every card and in the detail modal.
-- ~~**Responsive mobile layout**~~: ✅ Implemented — `@media (min-width: 800px)` desktop breakpoint with wider modals, expanded grids.
+- ~~**Responsive mobile layout**~~: ✅ Implemented — `@media (max-width: 600px)` mobile modal/header fixes, `@media (max-width: 700px)` sidebar auto-disable, `@media (min-width: 800px)` desktop breakpoint with wider modals, expanded grids.
 - ~~**Favourites sorting**~~: ✅ Implemented — per-section sort dropdowns on Favourites, Top 20, and Search Results.
 - ~~**Portfolio profit tracking**~~: ✅ Implemented — completed flips with actual sell price, realised profit, stats dashboard (see §4.9).
 - **Alt1 overlay integration**: Capture game state, integrate with Alt1's screen-reading capabilities.

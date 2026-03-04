@@ -62,8 +62,14 @@ const LS_THEME = "ge-analyzer:theme";
 /** `localStorage` key for persisted style preference (basic/glass/neumorphism/skeuomorphism). */
 const LS_STYLE = "ge-analyzer:style";
 
-/** `localStorage` key for persisted colorway preference (classic/osrs/rs3-modern/light). */
+/** `localStorage` key for persisted colorway preference (classic/osrs/rs3-modern/solarized). */
 const LS_COLORWAY = "ge-analyzer:colorway";
+
+/** `localStorage` key for persisted mode preference (dark/light). */
+const LS_MODE = "ge-analyzer:mode";
+
+/** `localStorage` key for persisted contrast preference (default/soft/hard). */
+const LS_CONTRAST = "ge-analyzer:contrast";
 
 /** `localStorage` key for serialised LLM chat history. */
 const LS_CHAT_HISTORY = "ge-analyzer:chat-history";
@@ -89,8 +95,27 @@ type LayoutMode = "tabbed" | "sidebar";
 /** Available visual styles (structural effects). */
 type StyleMode = "basic" | "glass" | "neumorphism" | "skeuomorphism";
 
-/** Available colorways (colour palettes). */
-type ColorwayMode = "classic" | "osrs" | "rs3-modern" | "light" | "sol-dark" | "sol-light";
+/** Available colorways (colour palettes — mode-agnostic). */
+type ColorwayMode = "classic" | "osrs" | "rs3-modern" | "solarized" | "rs-lobby" | "gruvbox";
+
+/** Available appearance modes (dark / light). */
+type AppMode = "dark" | "light";
+
+/** Available contrast levels. */
+type ContrastMode = "default" | "soft" | "hard";
+
+/**
+ * Legacy colorway values mapped to the new mode+colorway system.
+ * Used for one-time migration of persisted settings.
+ */
+const LEGACY_COLORWAY_MAP: Record<string, { mode: AppMode; colorway: ColorwayMode }> = {
+  classic:      { mode: "dark",  colorway: "classic" },
+  osrs:         { mode: "dark",  colorway: "osrs" },
+  "rs3-modern": { mode: "dark",  colorway: "rs3-modern" },
+  light:        { mode: "light", colorway: "classic" },
+  "sol-dark":   { mode: "dark",  colorway: "solarized" },
+  "sol-light":  { mode: "light", colorway: "solarized" },
+};
 
 // ─── Detail-row label text & tooltip descriptions ───────────────────────────
 
@@ -308,6 +333,9 @@ let els: {
   layoutSidebarBtn: HTMLButtonElement;
   styleSelect: HTMLSelectElement;
   colorwaySelect: HTMLSelectElement;
+  modeDarkBtn: HTMLButtonElement;
+  modeLightBtn: HTMLButtonElement;
+  contrastSelect: HTMLSelectElement;
   tabMarketBtn: HTMLButtonElement;
   tabAdvisorBtn: HTMLButtonElement;
   viewTabs: HTMLElement;
@@ -950,21 +978,32 @@ function bindLayoutToggle(): void {
   els.layoutSidebarBtn.addEventListener("click", () => applyLayout("sidebar"));
 }
 
-// ─── Theme (Style × Colorway) ───────────────────────────────────────────────
+// ─── Theme (Mode × Style × Colorway × Contrast) ────────────────────────────
 
 /**
- * Restore persisted theme preferences and bind both dropdowns.
- * Migrates from the legacy single `ge-analyzer:theme` key if present.
- * Sets `document.body.dataset.style` and `document.body.dataset.colorway`
+ * Restore persisted theme preferences and bind all appearance controls.
+ * Migrates from legacy keys if present.
+ * Sets `document.body.dataset.mode`, `.style`, `.colorway`, `.contrast`
  * which activate the matching CSS override blocks.
+ *
+ * On init, all four axes are written in a single batch via `requestAnimationFrame`
+ * to coalesce into one style recalc instead of four sequential reflows.
  */
 function bindTheme(): void {
   migrateThemeKey();
+  migrateColorwayToMode();
 
+  const savedMode = (localStorage.getItem(LS_MODE) as AppMode | null) ?? "dark";
   const savedStyle = (localStorage.getItem(LS_STYLE) as StyleMode | null) ?? "basic";
   const savedColorway = (localStorage.getItem(LS_COLORWAY) as ColorwayMode | null) ?? "classic";
-  applyStyle(savedStyle);
-  applyColorway(savedColorway);
+  const savedContrast = (localStorage.getItem(LS_CONTRAST) as ContrastMode | null) ?? "default";
+
+  // Batch all four dataset writes — only one style recalc on init
+  applyThemeBatch(savedMode, savedStyle, savedColorway, savedContrast);
+
+  // Mode toggle buttons
+  els.modeDarkBtn.addEventListener("click", () => applyMode("dark"));
+  els.modeLightBtn.addEventListener("click", () => applyMode("light"));
 
   els.styleSelect.addEventListener("change", () => {
     applyStyle(els.styleSelect.value as StyleMode);
@@ -972,21 +1011,19 @@ function bindTheme(): void {
   els.colorwaySelect.addEventListener("change", () => {
     applyColorway(els.colorwaySelect.value as ColorwayMode);
   });
+  els.contrastSelect.addEventListener("change", () => {
+    applyContrast(els.contrastSelect.value as ContrastMode);
+  });
 }
 
 /**
  * Migrate from the legacy single `ge-analyzer:theme` key to the new
- * two-axis `ge-analyzer:style` + `ge-analyzer:colorway` keys.
- * Runs once — removes the old key after migration.
+ * multi-axis keys. Runs once — removes the old key after migration.
  */
 function migrateThemeKey(): void {
   const legacy = localStorage.getItem(LS_THEME);
   if (!legacy) return;
 
-  const COLORWAY_MAP: Record<string, ColorwayMode> = {
-    classic: "classic", osrs: "osrs", "rs3-modern": "rs3-modern",
-    glass: "classic", neumorphism: "classic", minimalism: "light", skeuomorphism: "classic",
-  };
   const STYLE_MAP: Record<string, StyleMode> = {
     classic: "basic", osrs: "basic", "rs3-modern": "basic",
     glass: "glass", neumorphism: "neumorphism", minimalism: "basic", skeuomorphism: "skeuomorphism",
@@ -995,10 +1032,42 @@ function migrateThemeKey(): void {
   if (!localStorage.getItem(LS_STYLE)) {
     localStorage.setItem(LS_STYLE, STYLE_MAP[legacy] ?? "basic");
   }
+  // Map legacy theme → mode + colorway (handled by migrateColorwayToMode next)
   if (!localStorage.getItem(LS_COLORWAY)) {
-    localStorage.setItem(LS_COLORWAY, COLORWAY_MAP[legacy] ?? "classic");
+    const COLORWAY_TMP: Record<string, string> = {
+      classic: "classic", osrs: "osrs", "rs3-modern": "rs3-modern",
+      glass: "classic", neumorphism: "classic", minimalism: "light", skeuomorphism: "classic",
+    };
+    localStorage.setItem(LS_COLORWAY, COLORWAY_TMP[legacy] ?? "classic");
   }
   localStorage.removeItem(LS_THEME);
+}
+
+/**
+ * Migrate old colorway values ("light", "sol-dark", "sol-light") to the
+ * new mode + colorway system. E.g. "sol-light" → mode=light, colorway=solarized.
+ * Runs once — only acts if no `LS_MODE` key is set yet.
+ */
+function migrateColorwayToMode(): void {
+  if (localStorage.getItem(LS_MODE)) return; // already migrated
+  const oldColorway = localStorage.getItem(LS_COLORWAY);
+  if (!oldColorway) return;
+
+  const mapping = LEGACY_COLORWAY_MAP[oldColorway];
+  if (mapping) {
+    localStorage.setItem(LS_MODE, mapping.mode);
+    localStorage.setItem(LS_COLORWAY, mapping.colorway);
+  } else {
+    localStorage.setItem(LS_MODE, "dark");
+  }
+}
+
+/** Apply an appearance mode (dark/light) and persist the choice. */
+function applyMode(mode: AppMode): void {
+  document.body.dataset.mode = mode;
+  localStorage.setItem(LS_MODE, mode);
+  els.modeDarkBtn.classList.toggle("active", mode === "dark");
+  els.modeLightBtn.classList.toggle("active", mode === "light");
 }
 
 /** Apply a style to the document and persist the choice. */
@@ -1013,6 +1082,44 @@ function applyColorway(colorway: ColorwayMode): void {
   document.body.dataset.colorway = colorway;
   localStorage.setItem(LS_COLORWAY, colorway);
   els.colorwaySelect.value = colorway;
+}
+
+/** Apply a contrast level to the document and persist the choice. */
+function applyContrast(contrast: ContrastMode): void {
+  document.body.dataset.contrast = contrast;
+  localStorage.setItem(LS_CONTRAST, contrast);
+  els.contrastSelect.value = contrast;
+}
+
+/**
+ * Apply all four theme axes in a single synchronous pass to minimise
+ * style recalculations during initialisation and data-import restores.
+ * Writes all four `dataset` properties before the browser can trigger
+ * an intermediate layout, producing one composite style recalc.
+ */
+function applyThemeBatch(
+  mode: AppMode,
+  style: StyleMode,
+  colorway: ColorwayMode,
+  contrast: ContrastMode,
+): void {
+  const ds = document.body.dataset;
+  ds.mode = mode;
+  ds.style = style;
+  ds.colorway = colorway;
+  ds.contrast = contrast;
+
+  localStorage.setItem(LS_MODE, mode);
+  localStorage.setItem(LS_STYLE, style);
+  localStorage.setItem(LS_COLORWAY, colorway);
+  localStorage.setItem(LS_CONTRAST, contrast);
+
+  // Sync UI controls
+  els.modeDarkBtn.classList.toggle("active", mode === "dark");
+  els.modeLightBtn.classList.toggle("active", mode === "light");
+  els.styleSelect.value = style;
+  els.colorwaySelect.value = colorway;
+  els.contrastSelect.value = contrast;
 }
 
 /** Apply a layout mode to the document and persist the choice. */
@@ -1226,8 +1333,10 @@ const EXPORT_KEYS = [
   "ge-analyzer:favorites",
   "ge-analyzer:portfolio",
   "ge-analyzer:portfolio-history",
+  "ge-analyzer:mode",
   "ge-analyzer:style",
   "ge-analyzer:colorway",
+  "ge-analyzer:contrast",
 ] as const;
 
 /**
@@ -1447,6 +1556,8 @@ function bindMarketFilters(): void {
     els.marketSearchInput.value = "";
     isSearchActive = false;
     latestSearchResults = [];
+    els.searchResults.innerHTML = "";
+    els.searchLoading.style.display = "none";
     await refreshMarketPanel();
   });
 
@@ -4459,6 +4570,9 @@ function resolveElements(): void {
     layoutSidebarBtn: q<HTMLButtonElement>("layout-sidebar-btn"),
     styleSelect: q<HTMLSelectElement>("style-select"),
     colorwaySelect: q<HTMLSelectElement>("colorway-select"),
+    modeDarkBtn: q<HTMLButtonElement>("mode-dark-btn"),
+    modeLightBtn: q<HTMLButtonElement>("mode-light-btn"),
+    contrastSelect: q<HTMLSelectElement>("contrast-select"),
     tabMarketBtn: q<HTMLButtonElement>("tab-market-btn"),
     tabAdvisorBtn: q<HTMLButtonElement>("tab-advisor-btn"),
     viewTabs: q("view-tabs"),

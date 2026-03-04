@@ -38,15 +38,15 @@ const SEED_ITEMS: string[] = [
   "White partyhat",
   "Christmas cracker",
   "Santa hat",
-  "Green h'ween mask",
-  "Red h'ween mask",
-  "Blue h'ween mask",
+  "Green hallowe'en mask",
+  "Red hallowe'en mask",
+  "Blue hallowe'en mask",
   "Easter egg",
   "Pumpkin",
   "Disk of returning",
   "Black Santa hat",
   "Fish mask",
-  "Golden cracker",
+
 
   // ── High-volume Skilling Supplies ─────────────────────────────────────
   "Raw shark",
@@ -60,27 +60,27 @@ const SEED_ITEMS: string[] = [
   "Raw swordfish",
   "Swordfish",
   "Grimy dwarf weed",
-  "Dwarf weed",
+  "Clean dwarf weed",
   "Grimy lantadyme",
-  "Lantadyme",
+  "Clean lantadyme",
   "Grimy torstol",
-  "Torstol",
+  "Clean torstol",
   "Grimy snapdragon",
-  "Snapdragon",
+  "Clean snapdragon",
   "Grimy ranarr",
-  "Ranarr",
+  "Clean ranarr",
   "Grimy kwuarm",
-  "Kwuarm",
+  "Clean kwuarm",
   "Grimy cadantine",
-  "Cadantine",
+  "Clean cadantine",
   "Grimy avantoe",
-  "Avantoe",
+  "Clean avantoe",
   "Grimy toadflax",
-  "Toadflax",
+  "Clean toadflax",
   "Grimy irit",
-  "Irit",
+  "Clean irit",
   "Grimy spirit weed",
-  "Spirit weed",
+  "Clean spirit weed",
   "Magic logs",
   "Elder logs",
   "Yew logs",
@@ -106,7 +106,7 @@ const SEED_ITEMS: string[] = [
   "Pure essence",
   "Rune essence",
   "Flax",
-  "Bow string",
+  "Bowstring",
   "Uncut diamond",
   "Uncut ruby",
   "Uncut emerald",
@@ -121,7 +121,7 @@ const SEED_ITEMS: string[] = [
   "Feather",
 
   // ── Potions & Consumables ─────────────────────────────────────────────
-  "Overload (4)",
+
   "Super restore (4)",
   "Prayer potion (4)",
   "Saradomin brew (4)",
@@ -142,7 +142,7 @@ const SEED_ITEMS: string[] = [
   "Super defence (4)",
   "Super magic potion (4)",
   "Super ranging potion (4)",
-  "Adrenaline potion (4)",
+
   "Rocktail soup",
   "Sailfish soup",
   "Summer pie",
@@ -174,7 +174,7 @@ const SEED_ITEMS: string[] = [
   "Dragonfire shield",
   "Abyssal whip",
   "Dark bow",
-  "Dragon rider lance",
+  "Dragon Rider lance",
   "Noxious scythe",
   "Noxious staff",
   "Noxious longbow",
@@ -224,10 +224,9 @@ const SEED_ITEMS: string[] = [
   "Luck of the Dwarves",
 
   // ── Summoning & Misc ──────────────────────────────────────────────────
-  "Spirit shard",
+  "Spirit shards",
   "Pouch",
-  "Crimson charm",
-  "Blue charm",
+
   "Pack yak pouch",
   "Water talisman",
   "Fire talisman",
@@ -247,14 +246,10 @@ const SEED_ITEMS: string[] = [
   "Iron bar",
   "Bronze bar",
   "Gold bar",
-  "Banite bar",
+  "Bane bar",
   "Elder rune bar",
-  "Orichalcite bar",
-  "Drakolith bar",
-  "Phasmatite bar",
+  "Orikalkum bar",
   "Necronium bar",
-  "Light animica bar",
-  "Dark animica bar",
   "Hydrix",
   "Uncut dragonstone",
   "Dragonstone",
@@ -264,7 +259,7 @@ const SEED_ITEMS: string[] = [
   "Dragon bones",
   "Frost dragon bones",
   "Dinosaur bones",
-  "Reinforced dinosaur bones",
+  "Reinforced dragon bones",
   "Dagannoth bones",
   "Infernal ashes",
   "Dragon arrowheads",
@@ -454,18 +449,23 @@ export async function initDataPipeline(): Promise<StoredPriceRecord[]> {
     const itemsWithSufficientHistory = [...grouped.values()].filter((c) => c >= 2).length;
 
     if (records.length > 0 && itemsWithSufficientHistory < records.length * 0.3) {
+      // The /last90d API only supports 1 item per request, so re-seeding
+      // all 7 000+ items would take too long.  Limit to SEED_ITEMS that
+      // actually lack sufficient history — keeps startup under ~30 s.
+      const namesToSeed = SEED_ITEMS.filter((name) => (grouped.get(name) ?? 0) < 2);
       console.log(
         `[initDataPipeline] History health check: only ${itemsWithSufficientHistory}/${records.length} items ` +
-        `have ≥ 2 days of history — re-seeding…`
+        `have ≥ 2 days of history — re-seeding ${namesToSeed.length} seed items…`
       );
-      const api = new WeirdGloopService();
-      const namesToSeed = records.map((r) => r.name);
-      const historyMap = await api.fetchHistoricalPrices(namesToSeed, 30);
-      if (historyMap.size > 0) {
-        await cache.bulkInsertHistory(historyMap);
-        console.log(
-          `[initDataPipeline] Re-seeded ${historyMap.size} items with historical data.`
-        );
+      if (namesToSeed.length > 0) {
+        const api = new WeirdGloopService();
+        const historyMap = await api.fetchHistoricalPrices(namesToSeed, 30);
+        if (historyMap.size > 0) {
+          await cache.bulkInsertHistory(historyMap);
+          console.log(
+            `[initDataPipeline] Re-seeded ${historyMap.size} items with historical data.`
+          );
+        }
       }
     } else {
       console.log(
@@ -536,10 +536,21 @@ export type ScanProgressCallback = (done: number, total: number) => void;
 /**
  * Run a **non-blocking** full-market background scan.
  *
- * Fetches latest prices + history for **every** item in the GE catalogue
- * (~7 000 items) in batches of 100, with a 500 ms delay between batches to
- * avoid rate-limiting.  Each batch is bulk-inserted into IndexedDB immediately
- * so progress persists even if the user closes the app mid-scan.
+ * Fetches latest prices for **every** item in the GE catalogue (~7 000
+ * items) in batches of 100, with adaptive delays between batches to avoid
+ * rate-limiting.  Each batch is bulk-inserted into IndexedDB immediately so
+ * progress persists even if the user closes the app mid-scan.
+ *
+ * When `deepHistory` is `true`, 90-day price history is also fetched per
+ * item (the `/last90d` endpoint only accepts 1 item per request, so this
+ * is significantly slower).  When `false` (default), history is loaded on
+ * demand when the user opens the analytics modal.
+ *
+ * **History-only optimisation**: If `deepHistory` is requested and the
+ * cache already contains fresh prices for ≥ 90 % of the catalogue (fetched
+ * within the last hour), the scan skips price/enrichment fetches entirely
+ * and only fetches history — avoiding ~2–3 min of redundant API calls when
+ * the user re-runs the scan just to add deep history.
  *
  * The UI remains fully interactive during the scan because the function
  * yields control back to the browser between batches via `setTimeout`.
@@ -547,8 +558,7 @@ export type ScanProgressCallback = (done: number, total: number) => void;
  * @param catalogue       - Pre-fetched GE catalogue entries.
  * @param onProgress      - Called after every batch with `(done, total)`.
  * @param signal          - Optional `AbortSignal` to cancel the scan early.
- * @param deepHistory     - When `true`, fetches 90-day history instead of
- *                          the default 30-day window (~3–5× slower).
+ * @param deepHistory     - When `true`, also fetches 90-day history per item.
  * @returns The total number of items successfully fetched and persisted.
  */
 // Optional deep history during full scan – March 2026
@@ -568,6 +578,30 @@ export async function runFullMarketScan(
   const wiki = new WikiService();
 
   await cache.open();
+
+  // ── History-only optimisation ─────────────────────────────────────────
+  // If the user wants deep history and prices are already fresh, skip the
+  // price + enrichment fetches and only pull history.
+  const FRESH_THRESHOLD_MS = 60 * 60 * 1000; // 1 hour
+  let historyOnly = false;
+
+  if (deepHistory) {
+    const existing = await cache.getAll();
+    if (existing.length > 0) {
+      const now = Date.now();
+      const freshCount = existing.filter(
+        (r) => r.fetchedAt && (now - r.fetchedAt) < FRESH_THRESHOLD_MS
+      ).length;
+      const coverage = freshCount / catalogue.length;
+      if (coverage >= 0.9) {
+        historyOnly = true;
+        console.log(
+          `[FullMarketScan] Prices already fresh for ${freshCount}/${catalogue.length} items ` +
+          `(${(coverage * 100).toFixed(0)}%) — switching to history-only mode.`
+        );
+      }
+    }
+  }
 
   const BATCH_SIZE = 100;
   const BASE_DELAY_MS = 1_500;         // default pause between batches
@@ -589,7 +623,18 @@ export async function runFullMarketScan(
     const batchNames = allNames.slice(i, i + BATCH_SIZE);
 
     try {
-      // Fetch latest prices for this batch.
+      if (historyOnly) {
+        // ── History-only mode: skip prices/enrichment, just fetch history ──
+        try {
+          const historyMap = await api.fetchHistoricalPrices(batchNames, 90);
+          if (historyMap.size > 0) {
+            await cache.bulkInsertHistory(historyMap);
+          }
+        } catch {
+          // Non-critical — skip history for this batch.
+        }
+      } else {
+      // ── Normal mode: fetch prices + enrichment + optional history ──
       const prices: Map<string, WeirdGloopPriceRecord> = await api.fetchLatestPrices(batchNames);
 
       if (prices.size > 0) {
@@ -617,16 +662,20 @@ export async function runFullMarketScan(
         // Persist to IndexedDB immediately.
         await cache.bulkInsert(prices);
 
-        // Fetch history for this batch (best-effort).
-        // Optional deep history during full scan – March 2026
-        const historyDays = deepHistory ? 90 : 30;
-        try {
-          const historyMap = await api.fetchHistoricalPrices(names, historyDays);
-          if (historyMap.size > 0) {
-            await cache.bulkInsertHistory(historyMap);
+        // Fetch history only when the user explicitly opted in to deep
+        // history.  The /last90d endpoint only accepts 1 item per request,
+        // so fetching history for every item in a normal scan would add
+        // ~24 minutes.  Without deep history, individual item histories are
+        // fetched on demand when the user opens the analytics modal.
+        if (deepHistory) {
+          try {
+            const historyMap = await api.fetchHistoricalPrices(names, 90);
+            if (historyMap.size > 0) {
+              await cache.bulkInsertHistory(historyMap);
+            }
+          } catch {
+            // Non-critical — skip history for this batch.
           }
-        } catch {
-          // Non-critical — skip history for this batch.
         }
       } else {
         // Batch returned 0 results — likely rate-limited.  Back off.
@@ -640,6 +689,7 @@ export async function runFullMarketScan(
           `(${consecutiveEmpty} consecutive). Next delay: ${(currentDelay / 1000).toFixed(1)}s`
         );
       }
+      } // end normal mode
     } catch (err) {
       consecutiveEmpty++;
       currentDelay = Math.min(

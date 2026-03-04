@@ -45,7 +45,7 @@ Uses a **RAG (Retrieval-Augmented Generation) pipeline** to combine live GE mark
 - **Per-section sorting** — independent sort controls (Default, A–Z, Price ↓, Profit ↓) on Top 20, Search Results, and Favourites
 - **Dynamic filters** — volume and price filters with themed custom slider controls
 - **Full GE search** — search all ~7,000 tradeable items with on-demand price fetching
-- **Full market background scan** — scan all ~7,000 items with progress bar and cancel support; optional **90-day deep history** checkbox for complete sparklines on every item
+- **Full market background scan** — scan all ~7,000 items with progress bar and cancel support; prices-only by default for speed (~2–3 min), with an optional **90-day deep history** checkbox that also fetches per-item history for complete sparklines (significantly slower)
 - **Rate-limit resilience** — automatic retry with exponential backoff on API 429s and network errors; adaptive inter-batch delays during full scans
 - **Startup data recovery** — automatic health checks on every launch re-enrich missing buy limits and high alch values, and re-seed sparse price history, recovering from prior failed fetches
 - **External links** — quick Wiki and GE Database links on every card and in the analytics modal
@@ -68,10 +68,11 @@ Uses a **RAG (Retrieval-Augmented Generation) pipeline** to combine live GE mark
 ### Extras
 - **Favourites** — star any item for quick access in a dedicated collapsible panel with its own sort control
 - **Price alerts** — set buy/sell thresholds via the inline 🔔 bell on any card or in the analytics modal; triggers native browser notifications and in-app toasts when prices cross your targets
-- **Export / Import** — back up favourites, portfolio, flip history, and style/colorway preferences to a JSON file; restore from any previous backup
+- **Export / Import** — back up favourites, portfolio, flip history, and all theme preferences (mode, style, colorway, contrast) to a JSON file; restore from any previous backup
 - **Quick-add** — one-click add from any market card to the portfolio form
-- **Two-axis theme system** — 4 Styles (Basic, Glassmorphism, Neumorphism, Skeuomorphism) × 6 Colorways (Classic Dark, OSRS Brown, RS3 Modern Blue, Light, Solarized Dark, Solarized Light) = 24 combinations, all via CSS custom properties
+- **Four-axis theme system** — 2 Modes (Dark, Light) × 4 Styles (Basic, Glassmorphism, Neumorphism, Skeuomorphism) × 6 Colorways (Classic, OSRS, RS3 Modern, RS Lobby, Gruvbox, Solarized) × 3 Contrast levels (Normal, Soft, Hard) = 144 combinations, all via CSS custom properties with `color-mix()` contrast modifiers
 - **Responsive desktop layout** — wider modals and expanded grids at ≥ 800 px
+- **Mobile-friendly** — analytics modal detail rows wrap cleanly on small screens, Top 20 header actions flow to a new line, sidebar layout auto-disables below 700 px
 - **Accessibility** — WCAG AA contrast-compliant muted text, `:focus-visible` keyboard focus ring on all interactive elements, `aria-labelledby` on analytics modal, ▲/▼ shape prefixes on profit/loss indicators for colour-blind users, 10 px minimum badge font size
 - **Error recovery UI** — dismissible error banner with retry button for network/cache failures
 - **Persistent state** — all settings, chat history, favourites, sort preferences, compact-tiles preference, and portfolio data saved to localStorage

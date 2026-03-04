@@ -44,8 +44,8 @@ export class WeirdGloopService {
   private static readonly MAX_RETRIES = 4;
   /** Base delay (ms) for exponential backoff — doubled on each retry. */
   private static readonly BACKOFF_BASE_MS = 2_000;
-  /** Small pause (ms) between sequential history batches. */
-  private static readonly HISTORY_GROUP_DELAY_MS = 1_000;
+  /** Pause (ms) between sequential individual history requests. */
+  private static readonly HISTORY_ITEM_DELAY_MS = 200;
 
   /**
    * Create a new service instance.
@@ -108,11 +108,11 @@ export class WeirdGloopService {
 
   /**
    * Fetch up to 90 days of historical daily prices for every item in
-   * {@link itemNames}.  Items are batched into pipe-delimited requests of
-   * {@link HISTORY_BATCH_SIZE} (default 50) and dispatched **sequentially**
-   * to avoid rate-limiting.
+   * {@link itemNames}.  The `/last90d` endpoint only accepts **one item per
+   * request**, so items are dispatched individually with
+   * {@link HISTORY_ITEM_DELAY_MS} pauses between requests.
    *
-   * Individual batch failures are logged but do **not** reject the returned
+   * Individual failures are logged but do **not** reject the returned
    * promise — successfully fetched histories are always returned.
    *
    * @param itemNames - Canonical RS3 item names.
@@ -127,53 +127,93 @@ export class WeirdGloopService {
   ): Promise<Map<string, WeirdGloopHistoryEntry[]>> {
     if (itemNames.length === 0) return new Map();
 
-    // Batch history requests using pipe-delimited names — March 2026
-    const HISTORY_BATCH_SIZE = 50;
+    // The /last90d endpoint only supports 1 item per request — individual
+    // fetches with pacing to respect rate limits.
     const cutoff = Date.now() - days * 24 * 60 * 60 * 1000;
     const result = new Map<string, WeirdGloopHistoryEntry[]>();
-    const batches = this.chunkArray(itemNames, HISTORY_BATCH_SIZE);
+    let skippedNotFound = 0;   // API returned {success:false} or {error:…}
+    let skippedNoData = 0;     // Response OK but no matching array for name
+    let skippedEmpty = 0;      // Array present but all entries outside date range
+    let skippedRetry = 0;      // All retries exhausted (null response)
 
     console.log(
-      `[WeirdGloopService] Fetching last90d history for ${itemNames.length} items in ` +
-      `${batches.length} batch(es) of up to ${HISTORY_BATCH_SIZE} (keeping last ${days} days)…`
+      `[WeirdGloopService] Fetching last90d history for ${itemNames.length} item(s) ` +
+      `(keeping last ${days} days)…`
     );
 
-    for (let idx = 0; idx < batches.length; idx++) {
-      const batch = batches[idx];
-      const nameParam = batch.map((n) => encodeURIComponent(n)).join("|");
-      const url = `https://api.weirdgloop.org/exchange/history/rs/last90d?name=${nameParam}`;
+    for (let idx = 0; idx < itemNames.length; idx++) {
+      const name = itemNames[idx];
+      const url = `https://api.weirdgloop.org/exchange/history/rs/last90d?name=${encodeURIComponent(name)}`;
 
       try {
         const resp = await WeirdGloopService.fetchWithRetry(url);
         if (!resp) {
-          console.warn(`[WeirdGloopService] History batch ${idx + 1} — all retries exhausted.`);
+          skippedRetry++;
+          console.warn(`[WeirdGloopService] History for "${name}" — all retries exhausted.`);
           continue;
         }
         const json: WeirdGloopHistoryResponse = await resp.json();
 
-        for (const name of batch) {
-          const entries = json[name];
-          if (!Array.isArray(entries)) continue;
+        // Detect API-level error responses (e.g. "Item(s) not found",
+        // stealth rate limits) that return 200 OK with an error body.
+        if ((json as any).success === false || (json as any).error) {
+          skippedNotFound++;
+          continue;
+        }
 
-          const filtered = entries
-            .filter((e) => e.timestamp >= cutoff)
-            .sort((a, b) => a.timestamp - b.timestamp);
+        // Exact key lookup; fall back to case-insensitive search in case
+        // the API returns a slightly different casing than requested.
+        let entries = json[name];
+        if (!Array.isArray(entries)) {
+          const lc = name.toLowerCase();
+          for (const key of Object.keys(json)) {
+            if (key.toLowerCase() === lc && Array.isArray(json[key])) {
+              entries = json[key];
+              break;
+            }
+          }
+        }
+        if (!Array.isArray(entries)) {
+          skippedNoData++;
+          continue;
+        }
 
-          if (filtered.length > 0) result.set(name, filtered);
+        const filtered = entries
+          .filter((e) => e.timestamp >= cutoff)
+          .sort((a, b) => a.timestamp - b.timestamp);
+
+        if (filtered.length > 0) {
+          result.set(name, filtered);
+        } else {
+          skippedEmpty++;
         }
       } catch (err) {
-        console.error(`[WeirdGloopService] History batch ${idx + 1} failed:`, err);
+        console.error(`[WeirdGloopService] History for "${name}" failed:`, err);
       }
 
-      // Pause between sequential batches to stay under rate limit.
-      if (idx < batches.length - 1) {
-        await WeirdGloopService.sleep(WeirdGloopService.HISTORY_GROUP_DELAY_MS);
+      // Pause between requests to stay under rate limit.
+      if (idx < itemNames.length - 1) {
+        await WeirdGloopService.sleep(WeirdGloopService.HISTORY_ITEM_DELAY_MS);
+      }
+
+      // Log progress every 50 items.
+      if ((idx + 1) % 50 === 0) {
+        console.log(
+          `[WeirdGloopService] History progress: ${idx + 1}/${itemNames.length} ` +
+          `(${result.size} fetched so far)…`
+        );
       }
     }
 
     console.log(
       `[WeirdGloopService] Historical data fetched for ${result.size} / ${itemNames.length} items.`
     );
+    if (skippedNotFound + skippedNoData + skippedEmpty + skippedRetry > 0) {
+      console.log(
+        `[WeirdGloopService] Skipped: ${skippedNotFound} not-found, ${skippedNoData} no-data, ` +
+        `${skippedEmpty} empty-after-filter, ${skippedRetry} retry-exhausted.`
+      );
+    }
     return result;
   }
 

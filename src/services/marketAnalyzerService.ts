@@ -673,22 +673,45 @@ export class MarketAnalyzerService {
       }
 
       // ── Sparse-data fallback: fetch from Weird Gloop API ──────────────
-      // If most items have ≤ 1 day of local history, pull from the API so
+      // If very few items have multi-day history, pull from the API so
       // sparklines can render immediately after install / cache clear.
-      // Capped at 500 items to avoid rate-limit avalanche after full scans.
-      // Uses batched pipe-delimited WeirdGloopService – March 2026
-      const allItems = await this.cache.getAll();
-      const itemNames = allItems.map((r) => r.name);
-      const sparse = itemNames.length > 0 &&
-        itemNames.filter((n) => (map.get(n)?.length ?? 0) >= 2).length < itemNames.length * 0.3;
+      //
+      // Why an absolute threshold (not a ratio): `bulkInsert` writes a
+      // today-snapshot for every price record, so after a full market scan
+      // *all* ~7 000 items have ≥1 history row — but only items with
+      // dedicated history fetches (seeds + prior fallback runs) have ≥2.
+      // A percentage-based check against 7 000 items would never be
+      // satisfied and the fallback would re-fetch on every startup.
+      //
+      // Threshold of 400 means: after seeds (~230 items) + one fallback
+      // round (200 items) the condition is met and subsequent startups
+      // skip the ~40 s API call.
+      // Capped at 200 items since the API only accepts 1 item per request.
+      const itemsWithSufficient = [...grouped.values()]  // items with ≥2 non-today rows
+        .filter((entries) => entries.length >= 2).length;
+      const sparse = itemsWithSufficient < 400;
 
-      if (sparse && itemNames.length > 0) {
-        const SPARSE_CAP = 500;
-        const namesToFetch = itemNames.length > SPARSE_CAP
-          ? itemNames.slice(0, SPARSE_CAP)
-          : itemNames;
+      if (!sparse) {
         console.log(
-          `[MarketAnalyzer] Local price history is sparse — fetching ${namesToFetch.length} items from Weird Gloop API…`
+          `[MarketAnalyzer] History coverage OK: ${itemsWithSufficient} items have ≥ 2 days — skipping API fallback.`
+        );
+      }
+
+      if (sparse) {
+        // The /last90d API only supports 1 item per request, so cap the
+        // fallback to keep UI responsive (~40 s at 200 ms/item).
+        // Fetch items that are in the price cache but have no/sparse history.
+        const allItems = await this.cache.getAll();
+        const allNames = allItems.map((r) => r.name);
+        // Prioritise items with 0–1 history rows.
+        const needsHistory = allNames.filter((n) => (map.get(n)?.length ?? 0) < 2);
+        const SPARSE_CAP = 200;
+        const namesToFetch = needsHistory.length > SPARSE_CAP
+          ? needsHistory.slice(0, SPARSE_CAP)
+          : needsHistory;
+        console.log(
+          `[MarketAnalyzer] Local price history is sparse (only ${itemsWithSufficient} items have ≥ 2 days, need 400) ` +
+          `— fetching ${namesToFetch.length} items from Weird Gloop API…`
         );
         const apiMap = await this.fetchAPIHistory(namesToFetch, days);
         // Merge: API data fills in gaps; local data takes precedence when present.
@@ -708,16 +731,16 @@ export class MarketAnalyzerService {
    * Fetch historical prices from the Weird Gloop API and extract daily
    * closing prices for the last {@link days} days.
    *
-   * Delegates to {@link WeirdGloopService.fetchHistoricalPrices} which uses
-   * pipe-delimited batched requests (50 items per HTTP call) dispatched
-   * sequentially with rate-limit-safe pauses.  Results are also persisted
-   * to IndexedDB so subsequent calls hit the cache instead.
+   * Delegates to {@link WeirdGloopService.fetchHistoricalPrices} which sends
+   * individual per-item requests (the `/last90d` endpoint only supports 1
+   * item) with rate-limit-safe pauses.  Results are also persisted to
+   * IndexedDB so subsequent calls hit the cache instead.
    *
    * @param itemNames - Canonical RS3 item names.
    * @param days      - Number of recent days to extract from the 90-day window.
    * @returns A `Map<itemName, number[]>` of chronological daily prices.
    */
-  // Batched pipe-delimited history via WeirdGloopService – March 2026
+  // Individual per-item history via WeirdGloopService — March 2026
   private async fetchAPIHistory(
     itemNames: string[],
     days: number,
