@@ -110,6 +110,21 @@ body[data-layout="sidebar"] #market-items.hybrid .market-card-header {
   text-align: left;
 }
 
+/* ── Sidebar: contain filter popover within sidebar width ──────────────── */
+body[data-layout="sidebar"] #search-section {
+  position: relative;
+}
+
+body[data-layout="sidebar"] .search-filter-wrapper {
+  position: static;
+}
+
+body[data-layout="sidebar"] .search-filter-popover {
+  width: auto;
+  left: 0;
+  right: 0;
+}
+
 body[data-layout="sidebar"] #advisor-view {
   flex: 1 1 0;
   display: flex;
