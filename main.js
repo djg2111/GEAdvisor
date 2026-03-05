@@ -3130,6 +3130,212 @@ ___CSS_LOADER_EXPORT___.push([module.id, `/* ── Webkit scrollbar styling ─
 
 /***/ },
 
+/***/ "../node_modules/css-loader/dist/cjs.js!./css/components/search-filters.css"
+/*!**********************************************************************************!*\
+  !*** ../node_modules/css-loader/dist/cjs.js!./css/components/search-filters.css ***!
+  \**********************************************************************************/
+(module, __webpack_exports__, __webpack_require__) {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var _node_modules_css_loader_dist_runtime_noSourceMaps_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../../node_modules/css-loader/dist/runtime/noSourceMaps.js */ "../node_modules/css-loader/dist/runtime/noSourceMaps.js");
+/* harmony import */ var _node_modules_css_loader_dist_runtime_noSourceMaps_js__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_node_modules_css_loader_dist_runtime_noSourceMaps_js__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../../node_modules/css-loader/dist/runtime/api.js */ "../node_modules/css-loader/dist/runtime/api.js");
+/* harmony import */ var _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(_node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1__);
+// Imports
+
+
+var ___CSS_LOADER_EXPORT___ = _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1___default()((_node_modules_css_loader_dist_runtime_noSourceMaps_js__WEBPACK_IMPORTED_MODULE_0___default()));
+// Module
+___CSS_LOADER_EXPORT___.push([module.id, `/* ── Search filter popover ─────────────────────────────────────────────────── */
+
+.search-filter-btn,
+.browse-all-btn {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 11px;
+  padding: 4px 8px;
+  background: var(--bg-muted);
+  border: 1px solid var(--border-input);
+  color: var(--text-main);
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+  white-space: nowrap;
+  position: relative;
+}
+
+.search-filter-btn:hover,
+.browse-all-btn:hover {
+  background: var(--accent-primary);
+  color: var(--text-bright);
+}
+
+.search-filter-btn.has-active-filters {
+  border-color: var(--accent-primary);
+  color: var(--accent-primary);
+}
+
+.search-filter-btn.has-active-filters:hover {
+  color: var(--text-bright);
+}
+
+/* Active-filter count badge */
+.filter-count-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 15px;
+  height: 15px;
+  padding: 0 4px;
+  font-size: 9px;
+  font-weight: 700;
+  line-height: 1;
+  background: var(--accent-primary);
+  color: var(--text-bright);
+  border-radius: 8px;
+}
+
+/* ── Popover panel ────────────────────────────────────────────────────────── */
+
+.search-filter-popover {
+  display: none;
+  position: absolute;
+  top: 100%;
+  left: 0;
+  z-index: 200;
+  width: 320px;
+  max-height: 400px;
+  overflow-y: auto;
+  margin-top: 4px;
+  padding: 8px 10px;
+  background: var(--bg-panel);
+  border: 1px solid var(--border-section);
+  border-radius: 6px;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.35);
+}
+
+.search-filter-popover.open {
+  display: block;
+}
+
+/* ── Filter group (one per category) ──────────────────────────────────────── */
+
+.search-filter-group {
+  margin-bottom: 8px;
+}
+
+.search-filter-group:last-child {
+  margin-bottom: 0;
+}
+
+.search-filter-group-title {
+  display: block;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-muted);
+  margin-bottom: 4px;
+  padding-bottom: 3px;
+  border-bottom: 1px solid var(--border-section);
+}
+
+/* ── Checkbox tags (pill layout) ──────────────────────────────────────────── */
+
+.search-filter-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.search-filter-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 10px;
+  padding: 2px 7px;
+  background: var(--bg-muted);
+  border: 1px solid var(--border-input);
+  color: var(--text-soft);
+  border-radius: 10px;
+  cursor: pointer;
+  transition: background 0.12s, border-color 0.12s, color 0.12s;
+  user-select: none;
+}
+
+.search-filter-tag:hover {
+  border-color: var(--accent-primary);
+  color: var(--text-main);
+}
+
+.search-filter-tag input[type="checkbox"] {
+  display: none;
+}
+
+.search-filter-tag.checked {
+  background: var(--accent-primary);
+  border-color: var(--accent-primary);
+  color: var(--text-bright);
+}
+
+/* ── Footer actions ───────────────────────────────────────────────────────── */
+
+.search-filter-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 6px;
+  margin-top: 8px;
+  padding-top: 6px;
+  border-top: 1px solid var(--border-section);
+}
+
+.search-filter-actions button {
+  font-size: 10px;
+  padding: 3px 10px;
+  border-radius: 3px;
+  border: 1px solid var(--border-input);
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.search-filter-clear-btn {
+  background: var(--bg-muted);
+  color: var(--text-muted);
+}
+
+.search-filter-clear-btn:hover {
+  background: var(--bg-input);
+  color: var(--text-main);
+}
+
+.search-filter-apply-btn {
+  background: var(--accent-primary);
+  color: var(--text-bright);
+  border-color: var(--accent-primary);
+}
+
+.search-filter-apply-btn:hover {
+  filter: brightness(1.15);
+}
+
+/* ── Wrapper for positioning context ──────────────────────────────────────── */
+
+.search-filter-wrapper {
+  position: relative;
+  flex-shrink: 0;
+}
+`, ""]);
+// Exports
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (___CSS_LOADER_EXPORT___);
+
+
+/***/ },
+
 /***/ "../node_modules/css-loader/dist/cjs.js!./css/components/search.css"
 /*!**************************************************************************!*\
   !*** ../node_modules/css-loader/dist/cjs.js!./css/components/search.css ***!
@@ -4207,22 +4413,24 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _node_modules_css_loader_dist_cjs_js_components_market_cards_css__WEBPACK_IMPORTED_MODULE_39__ = __webpack_require__(/*! -!../../node_modules/css-loader/dist/cjs.js!./components/market-cards.css */ "../node_modules/css-loader/dist/cjs.js!./css/components/market-cards.css");
 /* harmony import */ var _node_modules_css_loader_dist_cjs_js_components_highlights_css__WEBPACK_IMPORTED_MODULE_40__ = __webpack_require__(/*! -!../../node_modules/css-loader/dist/cjs.js!./components/highlights.css */ "../node_modules/css-loader/dist/cjs.js!./css/components/highlights.css");
 /* harmony import */ var _node_modules_css_loader_dist_cjs_js_components_search_css__WEBPACK_IMPORTED_MODULE_41__ = __webpack_require__(/*! -!../../node_modules/css-loader/dist/cjs.js!./components/search.css */ "../node_modules/css-loader/dist/cjs.js!./css/components/search.css");
-/* harmony import */ var _node_modules_css_loader_dist_cjs_js_components_detail_panel_css__WEBPACK_IMPORTED_MODULE_42__ = __webpack_require__(/*! -!../../node_modules/css-loader/dist/cjs.js!./components/detail-panel.css */ "../node_modules/css-loader/dist/cjs.js!./css/components/detail-panel.css");
-/* harmony import */ var _node_modules_css_loader_dist_cjs_js_components_card_actions_css__WEBPACK_IMPORTED_MODULE_43__ = __webpack_require__(/*! -!../../node_modules/css-loader/dist/cjs.js!./components/card-actions.css */ "../node_modules/css-loader/dist/cjs.js!./css/components/card-actions.css");
-/* harmony import */ var _node_modules_css_loader_dist_cjs_js_components_favourites_css__WEBPACK_IMPORTED_MODULE_44__ = __webpack_require__(/*! -!../../node_modules/css-loader/dist/cjs.js!./components/favourites.css */ "../node_modules/css-loader/dist/cjs.js!./css/components/favourites.css");
-/* harmony import */ var _node_modules_css_loader_dist_cjs_js_components_modals_css__WEBPACK_IMPORTED_MODULE_45__ = __webpack_require__(/*! -!../../node_modules/css-loader/dist/cjs.js!./components/modals.css */ "../node_modules/css-loader/dist/cjs.js!./css/components/modals.css");
-/* harmony import */ var _node_modules_css_loader_dist_cjs_js_components_analytics_modal_css__WEBPACK_IMPORTED_MODULE_46__ = __webpack_require__(/*! -!../../node_modules/css-loader/dist/cjs.js!./components/analytics-modal.css */ "../node_modules/css-loader/dist/cjs.js!./css/components/analytics-modal.css");
-/* harmony import */ var _node_modules_css_loader_dist_cjs_js_components_analytics_dividers_css__WEBPACK_IMPORTED_MODULE_47__ = __webpack_require__(/*! -!../../node_modules/css-loader/dist/cjs.js!./components/analytics-dividers.css */ "../node_modules/css-loader/dist/cjs.js!./css/components/analytics-dividers.css");
-/* harmony import */ var _node_modules_css_loader_dist_cjs_js_components_chat_css__WEBPACK_IMPORTED_MODULE_48__ = __webpack_require__(/*! -!../../node_modules/css-loader/dist/cjs.js!./components/chat.css */ "../node_modules/css-loader/dist/cjs.js!./css/components/chat.css");
-/* harmony import */ var _node_modules_css_loader_dist_cjs_js_components_portfolio_css__WEBPACK_IMPORTED_MODULE_49__ = __webpack_require__(/*! -!../../node_modules/css-loader/dist/cjs.js!./components/portfolio.css */ "../node_modules/css-loader/dist/cjs.js!./css/components/portfolio.css");
-/* harmony import */ var _node_modules_css_loader_dist_cjs_js_components_predictive_badges_css__WEBPACK_IMPORTED_MODULE_50__ = __webpack_require__(/*! -!../../node_modules/css-loader/dist/cjs.js!./components/predictive-badges.css */ "../node_modules/css-loader/dist/cjs.js!./css/components/predictive-badges.css");
-/* harmony import */ var _node_modules_css_loader_dist_cjs_js_components_completed_flips_css__WEBPACK_IMPORTED_MODULE_51__ = __webpack_require__(/*! -!../../node_modules/css-loader/dist/cjs.js!./components/completed-flips.css */ "../node_modules/css-loader/dist/cjs.js!./css/components/completed-flips.css");
-/* harmony import */ var _node_modules_css_loader_dist_cjs_js_components_scrollbar_css__WEBPACK_IMPORTED_MODULE_52__ = __webpack_require__(/*! -!../../node_modules/css-loader/dist/cjs.js!./components/scrollbar.css */ "../node_modules/css-loader/dist/cjs.js!./css/components/scrollbar.css");
-/* harmony import */ var _node_modules_css_loader_dist_cjs_js_components_toasts_css__WEBPACK_IMPORTED_MODULE_53__ = __webpack_require__(/*! -!../../node_modules/css-loader/dist/cjs.js!./components/toasts.css */ "../node_modules/css-loader/dist/cjs.js!./css/components/toasts.css");
-/* harmony import */ var _node_modules_css_loader_dist_cjs_js_components_alerts_css__WEBPACK_IMPORTED_MODULE_54__ = __webpack_require__(/*! -!../../node_modules/css-loader/dist/cjs.js!./components/alerts.css */ "../node_modules/css-loader/dist/cjs.js!./css/components/alerts.css");
-/* harmony import */ var _node_modules_css_loader_dist_cjs_js_components_accessibility_css__WEBPACK_IMPORTED_MODULE_55__ = __webpack_require__(/*! -!../../node_modules/css-loader/dist/cjs.js!./components/accessibility.css */ "../node_modules/css-loader/dist/cjs.js!./css/components/accessibility.css");
-/* harmony import */ var _node_modules_css_loader_dist_cjs_js_layout_responsive_css__WEBPACK_IMPORTED_MODULE_56__ = __webpack_require__(/*! -!../../node_modules/css-loader/dist/cjs.js!./layout/responsive.css */ "../node_modules/css-loader/dist/cjs.js!./css/layout/responsive.css");
+/* harmony import */ var _node_modules_css_loader_dist_cjs_js_components_search_filters_css__WEBPACK_IMPORTED_MODULE_42__ = __webpack_require__(/*! -!../../node_modules/css-loader/dist/cjs.js!./components/search-filters.css */ "../node_modules/css-loader/dist/cjs.js!./css/components/search-filters.css");
+/* harmony import */ var _node_modules_css_loader_dist_cjs_js_components_detail_panel_css__WEBPACK_IMPORTED_MODULE_43__ = __webpack_require__(/*! -!../../node_modules/css-loader/dist/cjs.js!./components/detail-panel.css */ "../node_modules/css-loader/dist/cjs.js!./css/components/detail-panel.css");
+/* harmony import */ var _node_modules_css_loader_dist_cjs_js_components_card_actions_css__WEBPACK_IMPORTED_MODULE_44__ = __webpack_require__(/*! -!../../node_modules/css-loader/dist/cjs.js!./components/card-actions.css */ "../node_modules/css-loader/dist/cjs.js!./css/components/card-actions.css");
+/* harmony import */ var _node_modules_css_loader_dist_cjs_js_components_favourites_css__WEBPACK_IMPORTED_MODULE_45__ = __webpack_require__(/*! -!../../node_modules/css-loader/dist/cjs.js!./components/favourites.css */ "../node_modules/css-loader/dist/cjs.js!./css/components/favourites.css");
+/* harmony import */ var _node_modules_css_loader_dist_cjs_js_components_modals_css__WEBPACK_IMPORTED_MODULE_46__ = __webpack_require__(/*! -!../../node_modules/css-loader/dist/cjs.js!./components/modals.css */ "../node_modules/css-loader/dist/cjs.js!./css/components/modals.css");
+/* harmony import */ var _node_modules_css_loader_dist_cjs_js_components_analytics_modal_css__WEBPACK_IMPORTED_MODULE_47__ = __webpack_require__(/*! -!../../node_modules/css-loader/dist/cjs.js!./components/analytics-modal.css */ "../node_modules/css-loader/dist/cjs.js!./css/components/analytics-modal.css");
+/* harmony import */ var _node_modules_css_loader_dist_cjs_js_components_analytics_dividers_css__WEBPACK_IMPORTED_MODULE_48__ = __webpack_require__(/*! -!../../node_modules/css-loader/dist/cjs.js!./components/analytics-dividers.css */ "../node_modules/css-loader/dist/cjs.js!./css/components/analytics-dividers.css");
+/* harmony import */ var _node_modules_css_loader_dist_cjs_js_components_chat_css__WEBPACK_IMPORTED_MODULE_49__ = __webpack_require__(/*! -!../../node_modules/css-loader/dist/cjs.js!./components/chat.css */ "../node_modules/css-loader/dist/cjs.js!./css/components/chat.css");
+/* harmony import */ var _node_modules_css_loader_dist_cjs_js_components_portfolio_css__WEBPACK_IMPORTED_MODULE_50__ = __webpack_require__(/*! -!../../node_modules/css-loader/dist/cjs.js!./components/portfolio.css */ "../node_modules/css-loader/dist/cjs.js!./css/components/portfolio.css");
+/* harmony import */ var _node_modules_css_loader_dist_cjs_js_components_predictive_badges_css__WEBPACK_IMPORTED_MODULE_51__ = __webpack_require__(/*! -!../../node_modules/css-loader/dist/cjs.js!./components/predictive-badges.css */ "../node_modules/css-loader/dist/cjs.js!./css/components/predictive-badges.css");
+/* harmony import */ var _node_modules_css_loader_dist_cjs_js_components_completed_flips_css__WEBPACK_IMPORTED_MODULE_52__ = __webpack_require__(/*! -!../../node_modules/css-loader/dist/cjs.js!./components/completed-flips.css */ "../node_modules/css-loader/dist/cjs.js!./css/components/completed-flips.css");
+/* harmony import */ var _node_modules_css_loader_dist_cjs_js_components_scrollbar_css__WEBPACK_IMPORTED_MODULE_53__ = __webpack_require__(/*! -!../../node_modules/css-loader/dist/cjs.js!./components/scrollbar.css */ "../node_modules/css-loader/dist/cjs.js!./css/components/scrollbar.css");
+/* harmony import */ var _node_modules_css_loader_dist_cjs_js_components_toasts_css__WEBPACK_IMPORTED_MODULE_54__ = __webpack_require__(/*! -!../../node_modules/css-loader/dist/cjs.js!./components/toasts.css */ "../node_modules/css-loader/dist/cjs.js!./css/components/toasts.css");
+/* harmony import */ var _node_modules_css_loader_dist_cjs_js_components_alerts_css__WEBPACK_IMPORTED_MODULE_55__ = __webpack_require__(/*! -!../../node_modules/css-loader/dist/cjs.js!./components/alerts.css */ "../node_modules/css-loader/dist/cjs.js!./css/components/alerts.css");
+/* harmony import */ var _node_modules_css_loader_dist_cjs_js_components_accessibility_css__WEBPACK_IMPORTED_MODULE_56__ = __webpack_require__(/*! -!../../node_modules/css-loader/dist/cjs.js!./components/accessibility.css */ "../node_modules/css-loader/dist/cjs.js!./css/components/accessibility.css");
+/* harmony import */ var _node_modules_css_loader_dist_cjs_js_layout_responsive_css__WEBPACK_IMPORTED_MODULE_57__ = __webpack_require__(/*! -!../../node_modules/css-loader/dist/cjs.js!./layout/responsive.css */ "../node_modules/css-loader/dist/cjs.js!./css/layout/responsive.css");
 // Imports
+
 
 
 
@@ -4321,21 +4529,22 @@ ___CSS_LOADER_EXPORT___.i(_node_modules_css_loader_dist_cjs_js_components_startu
 ___CSS_LOADER_EXPORT___.i(_node_modules_css_loader_dist_cjs_js_components_market_cards_css__WEBPACK_IMPORTED_MODULE_39__["default"]);
 ___CSS_LOADER_EXPORT___.i(_node_modules_css_loader_dist_cjs_js_components_highlights_css__WEBPACK_IMPORTED_MODULE_40__["default"]);
 ___CSS_LOADER_EXPORT___.i(_node_modules_css_loader_dist_cjs_js_components_search_css__WEBPACK_IMPORTED_MODULE_41__["default"]);
-___CSS_LOADER_EXPORT___.i(_node_modules_css_loader_dist_cjs_js_components_detail_panel_css__WEBPACK_IMPORTED_MODULE_42__["default"]);
-___CSS_LOADER_EXPORT___.i(_node_modules_css_loader_dist_cjs_js_components_card_actions_css__WEBPACK_IMPORTED_MODULE_43__["default"]);
-___CSS_LOADER_EXPORT___.i(_node_modules_css_loader_dist_cjs_js_components_favourites_css__WEBPACK_IMPORTED_MODULE_44__["default"]);
-___CSS_LOADER_EXPORT___.i(_node_modules_css_loader_dist_cjs_js_components_modals_css__WEBPACK_IMPORTED_MODULE_45__["default"]);
-___CSS_LOADER_EXPORT___.i(_node_modules_css_loader_dist_cjs_js_components_analytics_modal_css__WEBPACK_IMPORTED_MODULE_46__["default"]);
-___CSS_LOADER_EXPORT___.i(_node_modules_css_loader_dist_cjs_js_components_analytics_dividers_css__WEBPACK_IMPORTED_MODULE_47__["default"]);
-___CSS_LOADER_EXPORT___.i(_node_modules_css_loader_dist_cjs_js_components_chat_css__WEBPACK_IMPORTED_MODULE_48__["default"]);
-___CSS_LOADER_EXPORT___.i(_node_modules_css_loader_dist_cjs_js_components_portfolio_css__WEBPACK_IMPORTED_MODULE_49__["default"]);
-___CSS_LOADER_EXPORT___.i(_node_modules_css_loader_dist_cjs_js_components_predictive_badges_css__WEBPACK_IMPORTED_MODULE_50__["default"]);
-___CSS_LOADER_EXPORT___.i(_node_modules_css_loader_dist_cjs_js_components_completed_flips_css__WEBPACK_IMPORTED_MODULE_51__["default"]);
-___CSS_LOADER_EXPORT___.i(_node_modules_css_loader_dist_cjs_js_components_scrollbar_css__WEBPACK_IMPORTED_MODULE_52__["default"]);
-___CSS_LOADER_EXPORT___.i(_node_modules_css_loader_dist_cjs_js_components_toasts_css__WEBPACK_IMPORTED_MODULE_53__["default"]);
-___CSS_LOADER_EXPORT___.i(_node_modules_css_loader_dist_cjs_js_components_alerts_css__WEBPACK_IMPORTED_MODULE_54__["default"]);
-___CSS_LOADER_EXPORT___.i(_node_modules_css_loader_dist_cjs_js_components_accessibility_css__WEBPACK_IMPORTED_MODULE_55__["default"]);
-___CSS_LOADER_EXPORT___.i(_node_modules_css_loader_dist_cjs_js_layout_responsive_css__WEBPACK_IMPORTED_MODULE_56__["default"]);
+___CSS_LOADER_EXPORT___.i(_node_modules_css_loader_dist_cjs_js_components_search_filters_css__WEBPACK_IMPORTED_MODULE_42__["default"]);
+___CSS_LOADER_EXPORT___.i(_node_modules_css_loader_dist_cjs_js_components_detail_panel_css__WEBPACK_IMPORTED_MODULE_43__["default"]);
+___CSS_LOADER_EXPORT___.i(_node_modules_css_loader_dist_cjs_js_components_card_actions_css__WEBPACK_IMPORTED_MODULE_44__["default"]);
+___CSS_LOADER_EXPORT___.i(_node_modules_css_loader_dist_cjs_js_components_favourites_css__WEBPACK_IMPORTED_MODULE_45__["default"]);
+___CSS_LOADER_EXPORT___.i(_node_modules_css_loader_dist_cjs_js_components_modals_css__WEBPACK_IMPORTED_MODULE_46__["default"]);
+___CSS_LOADER_EXPORT___.i(_node_modules_css_loader_dist_cjs_js_components_analytics_modal_css__WEBPACK_IMPORTED_MODULE_47__["default"]);
+___CSS_LOADER_EXPORT___.i(_node_modules_css_loader_dist_cjs_js_components_analytics_dividers_css__WEBPACK_IMPORTED_MODULE_48__["default"]);
+___CSS_LOADER_EXPORT___.i(_node_modules_css_loader_dist_cjs_js_components_chat_css__WEBPACK_IMPORTED_MODULE_49__["default"]);
+___CSS_LOADER_EXPORT___.i(_node_modules_css_loader_dist_cjs_js_components_portfolio_css__WEBPACK_IMPORTED_MODULE_50__["default"]);
+___CSS_LOADER_EXPORT___.i(_node_modules_css_loader_dist_cjs_js_components_predictive_badges_css__WEBPACK_IMPORTED_MODULE_51__["default"]);
+___CSS_LOADER_EXPORT___.i(_node_modules_css_loader_dist_cjs_js_components_completed_flips_css__WEBPACK_IMPORTED_MODULE_52__["default"]);
+___CSS_LOADER_EXPORT___.i(_node_modules_css_loader_dist_cjs_js_components_scrollbar_css__WEBPACK_IMPORTED_MODULE_53__["default"]);
+___CSS_LOADER_EXPORT___.i(_node_modules_css_loader_dist_cjs_js_components_toasts_css__WEBPACK_IMPORTED_MODULE_54__["default"]);
+___CSS_LOADER_EXPORT___.i(_node_modules_css_loader_dist_cjs_js_components_alerts_css__WEBPACK_IMPORTED_MODULE_55__["default"]);
+___CSS_LOADER_EXPORT___.i(_node_modules_css_loader_dist_cjs_js_components_accessibility_css__WEBPACK_IMPORTED_MODULE_56__["default"]);
+___CSS_LOADER_EXPORT___.i(_node_modules_css_loader_dist_cjs_js_layout_responsive_css__WEBPACK_IMPORTED_MODULE_57__["default"]);
 // Module
 ___CSS_LOADER_EXPORT___.push([module.id, `/* ═══════════════════════════════════════════════════════════════════════════
  *  GE Market Analyzer — CSS Module Entry Point
@@ -9655,6 +9864,23 @@ class MarketAnalyzerService {
         return sorted.slice(0, 50);
     }
     /**
+     * Return **all** cached items as fully-scored {@link RankedItem} objects.
+     * Used for filter-only browsing when no search query is active.
+     * Results are capped at {@link maxResults} to keep DOM rendering fast.
+     *
+     * @param maxResults - Maximum items to return (default 200).
+     * @returns All cached items ranked by `tradedValue`.
+     */
+    async getAllScored(maxResults = 200) {
+        const allRecords = await this.cache.getAll();
+        if (allRecords.length === 0)
+            return [];
+        const { avgVolumeMap, priceHistoryMap } = await this.getOrBuildMaps(30);
+        const scored = this.scoreAndFilter(allRecords, 0, 0, 0, avgVolumeMap, priceHistoryMap);
+        const sorted = this.sortDescending(scored);
+        return sorted.slice(0, maxResults);
+    }
+    /**
      * Look up cached items by an exact set of names and return fully-scored
      * {@link RankedItem} objects.  Used to render the user's favourites list.
      *
@@ -11300,6 +11526,12 @@ let latestLLMContext = "";
 let latestTopItems = [];
 /** The latest search results, cached for re-sorting without re-fetching. */
 let latestSearchResults = [];
+/** Unfiltered search results before category filters are applied. */
+let unfilteredSearchResults = [];
+/** Currently active search filter tags (set of filter IDs). */
+const activeSearchFilters = new Set();
+/** Cached Nature rune price for alch profit calculations. Updated on each market refresh. */
+let cachedNatureRunePrice = 500;
 /** Currently active view mode for the market panel. */
 let currentView = "list";
 /** Whether compact-tiles mode is enabled (hides predictive badges in tile/hybrid view). */
@@ -11321,6 +11553,98 @@ let allCachedItems = [];
  * Used by the market search to find items beyond the seeded cache.
  */
 let geCatalogue = [];
+/** Case-insensitive keyword helper. */
+function nameHasAny(name, keywords) {
+    const lower = name.toLowerCase();
+    return keywords.some((k) => lower.includes(k.toLowerCase()));
+}
+const SEARCH_FILTER_GROUPS = [
+    {
+        title: "Skills",
+        filters: [
+            { id: "sk-herblore", label: "Herblore", match: (n) => nameHasAny(n, [
+                    "potion", "flask", "overload", "brew", "super restore", "prayer renewal", "saradomin brew", "weapon poison", "antifire", "aggression",
+                    "grimy", "clean ", "unfinished potion", "vial of", "extreme", "supreme overload"
+                ]) },
+            { id: "sk-smithing", label: "Smithing", match: (n) => nameHasAny(n, [
+                    " bar", " ore", "arrowhead", "dart tip", "plate", "chainbody", "gauntlets", " anvil", "bane ", "elder rune", "orikalkum", "necronium", "phasmatite", "banite", "luminite", "drakolith", "rune bar", "adamant", "mithril"
+                ]) },
+            { id: "sk-crafting", label: "Crafting", match: (n) => nameHasAny(n, [
+                    "dragonhide", "d'hide", "leather", " gem", "uncut ", "emerald", "ruby", "sapphire", "diamond", "onyx", "hydrix", "dragonstone", "amulet", "necklace", "bracelet", "ring of", "gold bar", "silver bar", "battlestaff"
+                ]) },
+            { id: "sk-cooking", label: "Cooking", match: (n) => nameHasAny(n, [
+                    "raw ", "cooked ", "shark", "rocktail", "sailfish", "lobster", "swordfish", "monkfish", "tuna", "trout", "salmon", "pie", "cake", "bread", "soup", "manta ray"
+                ]) },
+            { id: "sk-fletching", label: "Fletching", match: (n) => nameHasAny(n, [
+                    "bow", "arrow shaft", "bowstring", "headless arrow", " bolt", "crossbow", "javelin", "dart", "longbow", "shortbow"
+                ]) },
+            { id: "sk-runecrafting", label: "Runecrafting", match: (n) => nameHasAny(n, [
+                    " rune", "pure essence", "rune essence", "talisman", "tiara"
+                ]) },
+            { id: "sk-farming", label: "Farming", match: (n) => nameHasAny(n, [
+                    "seed", "sapling", "compost", "plant cure", "herb seed", "allotment", "snapdragon seed", "torstol seed", "magic seed", "yew seed", "papaya", "coconut", "pineapple"
+                ]) },
+            { id: "sk-woodcutting", label: "Woodcutting", match: (n) => nameHasAny(n, [" logs", " log"]) },
+            { id: "sk-construction", label: "Construction", match: (n) => nameHasAny(n, [
+                    "plank", "limestone", "marble block", "gold leaf", "mahogany", "teak", "oak plank", "mahogany plank"
+                ]) },
+            { id: "sk-summoning", label: "Summoning", match: (n) => nameHasAny(n, [
+                    "pouch", "spirit shard", "charm", "spirit gem", "summoning", "water talisman", "potato cactus", "tortoise shell", "honeycomb"
+                ]) },
+            { id: "sk-prayer", label: "Prayer", match: (n) => nameHasAny(n, [
+                    "bone", "ashes", "ectoplasm", "dragon bone", "frost dragon", "big bone", "dagannoth", "airut", "dinosaur"
+                ]) },
+            { id: "sk-divination", label: "Divination", match: (n) => nameHasAny(n, [
+                    "energy", "sign of", "divine ", "porters", "incandescent", "luminous", "brilliant", "vibrant"
+                ]) },
+            { id: "sk-invention", label: "Invention", match: (n) => nameHasAny(n, [
+                    "augment", "divine charge", "simple parts", "component", "flexible", "tensile", "enhancing", "powerful", "precise"
+                ]) },
+            { id: "sk-archaeology", label: "Archaeology", match: (n) => nameHasAny(n, [
+                    "soil", "material", "chronotes", "artefact", "restored", "mattock"
+                ]) },
+        ],
+    },
+    {
+        title: "Item Type",
+        filters: [
+            { id: "tp-weapon", label: "Weapons", match: (n) => nameHasAny(n, [
+                    "sword", "scimitar", "mace", "warhammer", "lance", "halberd", "whip", "staff", "wand", "crossbow", "shortbow", "longbow", "godsword", "maul", "rapier", "spear", "claw", "dagger", "2h", "battleaxe"
+                ]) },
+            { id: "tp-armour", label: "Armour", match: (n) => nameHasAny(n, [
+                    "platebody", "platelegs", "plateskirt", "chainbody", "full helm", "med helm", "kiteshield", "sq shield", "boots", "gloves", "helmet", "chestplate", "greaves", "coif", "shield", "cowl"
+                ]) },
+            { id: "tp-food", label: "Food", match: (n) => nameHasAny(n, [
+                    "shark", "rocktail", "sailfish", "lobster", "swordfish", "monkfish", "tuna", "manta ray", "cavefish", "baron shark", "blue blubber", "great white"
+                ]) },
+            { id: "tp-potions", label: "Potions", match: (n) => nameHasAny(n, [
+                    "potion", "flask", "overload", "brew", "prayer renewal", "super restore", "weapon poison", "antifire", "aggression", "adrenaline", "extreme", "supreme"
+                ]) },
+            { id: "tp-runes", label: "Runes", match: (n) => nameHasAny(n, [" rune", "rune essence", "pure essence"]) },
+            { id: "tp-resources", label: "Resources", match: (n) => nameHasAny(n, [
+                    " ore", " bar", " log", " logs", "herb", "seed", "hide", "wool", "flax", "bowstring", "feather", "limpwurt", "white berries", "mort myre", "jangerberries"
+                ]) },
+            { id: "tp-rare", label: "Rares", match: (n) => nameHasAny(n, [
+                    "partyhat", "cracker", "santa hat", "h'ween mask", "halloween mask", "disk of returning", "pumpkin", "easter egg"
+                ]) },
+            { id: "tp-teleport", label: "Teleports", match: (n) => nameHasAny(n, [
+                    "teleport", "tablet", "ring of duelling", "ring of wealth", "glory", "combat bracelet", "skills necklace", "games necklace"
+                ]) },
+            { id: "tp-salvage", label: "Salvage / Alchables", match: (n) => nameHasAny(n, ["salvage", "junk", "alch"]) },
+        ],
+    },
+    {
+        title: "Market Signals",
+        filters: [
+            { id: "ms-uptrend", label: "\u25b2 Uptrend", match: (_n, item) => item?.priceTrend === "Uptrend" },
+            { id: "ms-downtrend", label: "\u25bc Downtrend", match: (_n, item) => item?.priceTrend === "Downtrend" },
+            { id: "ms-instaflip", label: "\u26a1 Insta-Flip", match: (_n, item) => item?.tradeVelocity === "Insta-Flip" },
+            { id: "ms-hype", label: "\ud83d\udd25 Volume Spike", match: (_n, item) => (item?.volumeSpikeMultiplier ?? 0) > 0 },
+            { id: "ms-highalch", label: "\ud83e\uddea Alch Profit", match: (_n, item) => typeof item?.highAlch === "number" && item.highAlch > (item.price + cachedNatureRunePrice) },
+            { id: "ms-risky", label: "\u26a0 Risky", match: (_n, item) => item?.isRisky === true },
+        ],
+    },
+];
 // ─── Public API ─────────────────────────────────────────────────────────────
 /**
  * Bootstrap the entire UI.  Call once from the entry point after the DOM is
@@ -11335,6 +11659,7 @@ async function initUI(onStatus) {
     bindChatEvents();
     bindViewToggle();
     bindMarketFilters();
+    bindSearchFilters();
     bindForceReload();
     bindLayoutToggle();
     bindTheme();
@@ -12315,6 +12640,11 @@ async function refreshMarketPanel() {
         latestMarketSummary = analyzer.formatForLLM(latestTopItems);
         applySortOrder(latestTopItems, els.top20SortSelect.value);
         renderMarketItems(latestTopItems);
+        // Refresh cached Nature rune price for alch-profit filter.
+        cache.getByName("Nature rune").then((rec) => {
+            if (rec?.price)
+                cachedNatureRunePrice = rec.price;
+        }).catch(() => { });
         // Build broader LLM context asynchronously (top 200, no filters).
         // Non-blocking — chat uses whatever is ready; falls back to the
         // narrow summary until this completes.
@@ -12413,6 +12743,7 @@ function bindMarketFilters() {
         els.marketSearchInput.value = "";
         isSearchActive = false;
         latestSearchResults = [];
+        unfilteredSearchResults = [];
         els.searchResults.innerHTML = "";
         els.searchLoading.style.display = "none";
         await refreshMarketPanel();
@@ -12461,7 +12792,8 @@ function bindMarketFilters() {
                 }
                 // 4. Now all matched items should be in cache — score them.
                 const results = await analyzer.searchItems(query);
-                latestSearchResults = results;
+                unfilteredSearchResults = results;
+                latestSearchResults = applySearchCategoryFilters(results);
                 applySortOrder(latestSearchResults, els.searchSortSelect.value);
                 renderSearchResults(latestSearchResults);
                 if (results.length === 0) {
@@ -12476,12 +12808,194 @@ function bindMarketFilters() {
             els.searchLoading.style.display = "none";
         }
         else if (query.length === 0) {
-            isSearchActive = false;
-            latestSearchResults = [];
-            els.searchResults.innerHTML = "";
-            els.searchLoading.style.display = "none";
+            // If filters are active, switch to browse-all mode instead of clearing.
+            if (activeSearchFilters.size > 0) {
+                loadBrowseAll();
+            }
+            else {
+                isSearchActive = false;
+                latestSearchResults = [];
+                unfilteredSearchResults = [];
+                els.searchResults.innerHTML = "";
+                els.searchLoading.style.display = "none";
+            }
         }
     }, 300));
+}
+// ─── Search category filter popover ─────────────────────────────────────────
+/**
+ * Apply the active search category filters to a result set.
+ * When multiple filters within the SAME group are active, items matching ANY
+ * of them pass (OR). Across groups the logic is AND.
+ */
+function applySearchCategoryFilters(items) {
+    if (activeSearchFilters.size === 0)
+        return items;
+    // Group active filter IDs by their parent group.
+    const activeByGroup = new Map();
+    for (const group of SEARCH_FILTER_GROUPS) {
+        const active = group.filters.filter((f) => activeSearchFilters.has(f.id));
+        if (active.length > 0)
+            activeByGroup.set(group.title, active);
+    }
+    if (activeByGroup.size === 0)
+        return items;
+    return items.filter((item) => {
+        for (const [, filters] of activeByGroup) {
+            // Within a group: OR (match any).
+            const anyMatch = filters.some((f) => f.match(item.name, item));
+            if (!anyMatch)
+                return false; // Across groups: AND.
+        }
+        return true;
+    });
+}
+/** Update the filter button badge to reflect active count. */
+function updateFilterBadge() {
+    const count = activeSearchFilters.size;
+    const existing = els.searchFilterBtn.querySelector(".filter-count-badge");
+    if (existing)
+        existing.remove();
+    if (count > 0) {
+        els.searchFilterBtn.classList.add("has-active-filters");
+        const badge = document.createElement("span");
+        badge.className = "filter-count-badge";
+        badge.textContent = String(count);
+        els.searchFilterBtn.appendChild(badge);
+    }
+    else {
+        els.searchFilterBtn.classList.remove("has-active-filters");
+    }
+}
+/** Re-apply filters to current unfiltered results and re-render. */
+function refilterSearchResults() {
+    // If no search query active and filters changed, auto-load all items.
+    const query = els.marketSearchInput.value.trim();
+    if (query.length === 0 && activeSearchFilters.size > 0 && unfilteredSearchResults.length === 0) {
+        loadBrowseAll();
+        return;
+    }
+    // If filters were all cleared and there's no search query, clear results.
+    if (query.length === 0 && activeSearchFilters.size === 0) {
+        isSearchActive = false;
+        latestSearchResults = [];
+        unfilteredSearchResults = [];
+        els.searchResults.innerHTML = "";
+        els.searchLoading.style.display = "none";
+        updateFilterBadge();
+        return;
+    }
+    latestSearchResults = applySearchCategoryFilters(unfilteredSearchResults);
+    applySortOrder(latestSearchResults, els.searchSortSelect.value);
+    if (latestSearchResults.length > 0 || unfilteredSearchResults.length > 0) {
+        renderSearchResults(latestSearchResults);
+    }
+    updateFilterBadge();
+}
+/**
+ * Load all cached items into the search results for filter-only browsing.
+ * Called when the user activates filters without a search query, or clicks
+ * "Browse All".
+ */
+async function loadBrowseAll() {
+    isSearchActive = true;
+    els.searchLoading.textContent = "Loading all items…";
+    els.searchLoading.style.display = "";
+    els.searchResults.innerHTML = "";
+    try {
+        const all = await analyzer.getAllScored(500);
+        unfilteredSearchResults = all;
+        latestSearchResults = applySearchCategoryFilters(all);
+        applySortOrder(latestSearchResults, els.searchSortSelect.value);
+        renderSearchResults(latestSearchResults);
+        els.searchLoading.style.display = "none";
+    }
+    catch (err) {
+        console.error("[UIService] Browse all failed:", err);
+        els.searchLoading.textContent = "Failed to load items.";
+    }
+    updateFilterBadge();
+}
+/**
+ * Build the search filter popover DOM and bind toggle/clear/apply events.
+ */
+function bindSearchFilters() {
+    const popover = els.searchFilterPopover;
+    // Build popover content.
+    for (const group of SEARCH_FILTER_GROUPS) {
+        const section = document.createElement("div");
+        section.className = "search-filter-group";
+        const title = document.createElement("span");
+        title.className = "search-filter-group-title";
+        title.textContent = group.title;
+        section.appendChild(title);
+        const tags = document.createElement("div");
+        tags.className = "search-filter-tags";
+        for (const filter of group.filters) {
+            const tag = document.createElement("label");
+            tag.className = "search-filter-tag";
+            tag.dataset.filterId = filter.id;
+            const cb = document.createElement("input");
+            cb.type = "checkbox";
+            const text = document.createTextNode(filter.label);
+            tag.appendChild(cb);
+            tag.appendChild(text);
+            cb.addEventListener("change", () => {
+                if (cb.checked) {
+                    activeSearchFilters.add(filter.id);
+                    tag.classList.add("checked");
+                }
+                else {
+                    activeSearchFilters.delete(filter.id);
+                    tag.classList.remove("checked");
+                }
+                refilterSearchResults();
+            });
+            tags.appendChild(tag);
+        }
+        section.appendChild(tags);
+        popover.appendChild(section);
+    }
+    // Footer actions.
+    const actions = document.createElement("div");
+    actions.className = "search-filter-actions";
+    const clearBtn = document.createElement("button");
+    clearBtn.type = "button";
+    clearBtn.className = "search-filter-clear-btn";
+    clearBtn.textContent = "Clear All";
+    clearBtn.addEventListener("click", () => {
+        activeSearchFilters.clear();
+        popover.querySelectorAll(".search-filter-tag.checked").forEach((t) => {
+            t.classList.remove("checked");
+            const cb = t.querySelector("input");
+            if (cb)
+                cb.checked = false;
+        });
+        refilterSearchResults();
+    });
+    actions.appendChild(clearBtn);
+    popover.appendChild(actions);
+    // Toggle popover on button click.
+    els.searchFilterBtn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        popover.classList.toggle("open");
+    });
+    // Close popover when clicking outside.
+    document.addEventListener("click", (e) => {
+        if (!popover.contains(e.target) && e.target !== els.searchFilterBtn) {
+            popover.classList.remove("open");
+        }
+    });
+    // Close on Escape.
+    document.addEventListener("keydown", (e) => {
+        if (e.key === "Escape")
+            popover.classList.remove("open");
+    });
+    // Browse All button — loads all cached items into search results.
+    els.browseAllBtn.addEventListener("click", () => {
+        els.marketSearchInput.value = "";
+        loadBrowseAll();
+    });
 }
 /**
  * Wire bi-directional sync between a range slider and its companion number
@@ -15152,6 +15666,9 @@ function resolveElements() {
         historyRangeSelect: q("history-range-select"),
         completedFlipsFilter: q("completed-flips-filter"),
         exportCsvBtn: q("export-csv-btn"),
+        searchFilterBtn: q("search-filter-btn"),
+        searchFilterPopover: q("search-filter-popover"),
+        browseAllBtn: q("browse-all-btn"),
     };
 }
 // ─── Formatting utilities ───────────────────────────────────────────────────
