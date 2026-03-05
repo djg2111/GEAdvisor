@@ -80,6 +80,12 @@ const LS_FAVORITES = "ge-analyzer:favorites";
 /** `localStorage` key for “deep history” checkbox preference (boolean string). */
 const LS_DEEP_HISTORY = "ge-analyzer:deep-history";
 
+/** `localStorage` key for contrast auto-correction toggle (boolean string). */
+const LS_CONTRAST_AUTO = "ge-analyzer:contrast-auto-correct";
+
+/** WCAG AA minimum contrast ratio for normal text. */
+const WCAG_AA_RATIO = 4.5;
+
 /** Maximum number of messages (user + assistant) persisted to localStorage. */
 const MAX_SAVED_MESSAGES = 50;
 
@@ -336,6 +342,7 @@ let els: {
   modeDarkBtn: HTMLButtonElement;
   modeLightBtn: HTMLButtonElement;
   contrastSelect: HTMLSelectElement;
+  contrastAutoToggle: HTMLInputElement;
   tabMarketBtn: HTMLButtonElement;
   tabAdvisorBtn: HTMLButtonElement;
   viewTabs: HTMLElement;
@@ -1329,6 +1336,14 @@ function bindTheme(): void {
   els.contrastSelect.addEventListener("change", () => {
     applyContrast(els.contrastSelect.value as ContrastMode);
   });
+
+  // ── Contrast auto-correction toggle ──────────────────────────────────
+  els.contrastAutoToggle.checked = contrastAutoEnabled;
+  els.contrastAutoToggle.addEventListener("change", () => {
+    contrastAutoEnabled = els.contrastAutoToggle.checked;
+    localStorage.setItem(LS_CONTRAST_AUTO, contrastAutoEnabled ? "true" : "false");
+    ensureContrastCompliance();
+  });
 }
 
 /**
@@ -1437,6 +1452,252 @@ function forceStyleInvalidation(): void {
   void getComputedStyle(document.body).getPropertyValue("--bg-main");
 }
 
+
+// â”€â”€â”€ WCAG Contrast Auto-Correction â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+
+/** Whether contrast auto-correction is currently enabled. */
+let contrastAutoEnabled =
+  localStorage.getItem(LS_CONTRAST_AUTO) !== "false";
+
+/**
+ * Parse a CSS color value (hex, rgb(), rgba(), or a resolved `color-mix()`)
+ * into an `[r, g, b]` tuple. Falls back to `[0, 0, 0]` for unparseable values.
+ *
+ * `getComputedStyle` resolves `color-mix()` and named colors into
+ * `rgb(â€¦)` or `rgba(â€¦)` in all modern browsers, so that is the primary
+ * fast path here. Hex (3/4/6/8 digit) is handled as a secondary path.
+ */
+function parseCssColor(raw: string): [number, number, number] {
+  const trimmed = raw.trim();
+
+  // Fast path: rgb(r, g, b) / rgba(r, g, b, a)
+  const rgbMatch = trimmed.match(
+    /^rgba?\(\s*(\d+(?:\.\d+)?)[,\s]+(\d+(?:\.\d+)?)[,\s]+(\d+(?:\.\d+)?)/,
+  );
+  if (rgbMatch) {
+    return [
+      Math.round(Number(rgbMatch[1])),
+      Math.round(Number(rgbMatch[2])),
+      Math.round(Number(rgbMatch[3])),
+    ];
+  }
+
+  // Secondary path: 3/4/6/8-digit hex
+  const hexMatch = trimmed.match(/^#([0-9a-f]{3,8})$/i);
+  if (hexMatch) {
+    let hex = hexMatch[1];
+    if (hex.length === 3 || hex.length === 4) {
+      hex = hex[0] + hex[0] + hex[1] + hex[1] + hex[2] + hex[2];
+    }
+    return [
+      parseInt(hex.slice(0, 2), 16),
+      parseInt(hex.slice(2, 4), 16),
+      parseInt(hex.slice(4, 6), 16),
+    ];
+  }
+
+  return [0, 0, 0];
+}
+
+/**
+ * Linearise an 8-bit sRGB channel value to its linear-light equivalent
+ * per the IEC 61966-2-1 transfer function (used in WCAG relative luminance).
+ */
+function linearize(c8: number): number {
+  const c = c8 / 255;
+  return c <= 0.04045 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);
+}
+
+/**
+ * Calculate WCAG 2.x relative luminance.
+ * Formula: L = 0.2126R + 0.7152G + 0.0722B with linearised sRGB values.
+ */
+function relativeLuminance([r, g, b]: [number, number, number]): number {
+  return 0.2126 * linearize(r) + 0.7152 * linearize(g) + 0.0722 * linearize(b);
+}
+
+/**
+ * Calculate the WCAG 2.x contrast ratio between two colours.
+ * Returns a value between 1 (identical) and 21 (black on white).
+ * Formula: (L1 + 0.05) / (L2 + 0.05) where L1 >= L2.
+ */
+function contrastRatio(
+  a: [number, number, number],
+  b: [number, number, number],
+): number {
+  const lA = relativeLuminance(a);
+  const lB = relativeLuminance(b);
+  const lighter = Math.max(lA, lB);
+  const darker = Math.min(lA, lB);
+  return (lighter + 0.05) / (darker + 0.05);
+}
+
+/**
+ * Blend a colour toward a target by a normalised `amount` (0-1).
+ * Returns a new `[r, g, b]` tuple.
+ */
+function blendToward(
+  color: [number, number, number],
+  target: [number, number, number],
+  amount: number,
+): [number, number, number] {
+  const t = Math.max(0, Math.min(1, amount));
+  return [
+    Math.round(color[0] + (target[0] - color[0]) * t),
+    Math.round(color[1] + (target[1] - color[1]) * t),
+    Math.round(color[2] + (target[2] - color[2]) * t),
+  ];
+}
+
+/**
+ * Resolve the effective opaque background for the glass style.
+ *
+ * Glass uses translucent `--glass-panel` over the gradient body. Using
+ * `--glass-body-via` (the middle gradient stop) composited with the panel
+ * alpha gives a practical worst-case approximation.
+ */
+function resolveGlassBackground(): [number, number, number] {
+  const cs = getComputedStyle(document.body);
+  const bodyVia = parseCssColor(cs.getPropertyValue("--glass-body-via"));
+  const panelRaw = cs.getPropertyValue("--glass-panel").trim();
+  const alphaMatch = panelRaw.match(
+    /rgba?\(\s*(\d+(?:\.\d+)?)[,\s]+(\d+(?:\.\d+)?)[,\s]+(\d+(?:\.\d+)?)[,\s/]+(\d*\.?\d+)/,
+  );
+  if (!alphaMatch) return bodyVia;
+  const pr = Math.round(Number(alphaMatch[1]));
+  const pg = Math.round(Number(alphaMatch[2]));
+  const pb = Math.round(Number(alphaMatch[3]));
+  const pa = Number(alphaMatch[4]);
+  return [
+    Math.round(pr * pa + bodyVia[0] * (1 - pa)),
+    Math.round(pg * pa + bodyVia[1] * (1 - pa)),
+    Math.round(pb * pa + bodyVia[2] * (1 - pa)),
+  ];
+}
+
+/**
+ * Ensure `--neu-shadow-dark` and `--neu-shadow-light` produce a visible
+ * luminance delta against `--bg-main` so neumorphism shapes remain
+ * perceptible. Minimum luminance delta: 0.03.
+ */
+function ensureNeuShadowVisibility(): void {
+  const cs = getComputedStyle(document.body);
+  const bgMain = parseCssColor(cs.getPropertyValue("--bg-main"));
+  const neuDark = parseCssColor(cs.getPropertyValue("--neu-shadow-dark"));
+  const neuLight = parseCssColor(cs.getPropertyValue("--neu-shadow-light"));
+
+  const bgL = relativeLuminance(bgMain);
+  const darkL = relativeLuminance(neuDark);
+  const lightL = relativeLuminance(neuLight);
+  const MIN_DELTA = 0.03;
+
+  const bs = document.body.style;
+  if (Math.abs(bgL - darkL) < MIN_DELTA) {
+    const nudged = blendToward(neuDark, [0, 0, 0], 0.35);
+    bs.setProperty("--neu-shadow-dark", `rgb(${nudged[0]},${nudged[1]},${nudged[2]})`);
+  }
+  if (Math.abs(lightL - bgL) < MIN_DELTA) {
+    const nudged = blendToward(neuLight, [255, 255, 255], 0.25);
+    bs.setProperty("--neu-shadow-light", `rgb(${nudged[0]},${nudged[1]},${nudged[2]})`);
+  }
+}
+
+/**
+ * Run the WCAG AA contrast compliance check and auto-correct if the
+ * current `--text-main` / `--bg-main` combination falls below 4.5:1.
+ *
+ * For **glass**, the effective opaque background is computed by
+ * alpha-compositing `--glass-panel` over `--glass-body-via`.
+ *
+ * For **neumorphism**, shadow visibility is also checked.
+ *
+ * Overrides are written to `document.body.style` so they take precedence
+ * over CSS files while remaining removable on the next theme change.
+ * Updates the live contrast ratio display in settings.
+ */
+function ensureContrastCompliance(): void {
+  const bs = document.body.style;
+  bs.removeProperty("--text-main");
+  bs.removeProperty("--text-bright");
+  bs.removeProperty("--neu-shadow-dark");
+  bs.removeProperty("--neu-shadow-light");
+
+  void getComputedStyle(document.body).getPropertyValue("--text-main");
+
+  const cs = getComputedStyle(document.body);
+  const style = (document.body.dataset.style ?? "basic") as StyleMode;
+  const mode = (document.body.dataset.mode ?? "dark") as AppMode;
+
+  let bgRgb: [number, number, number];
+  if (style === "glass") {
+    bgRgb = resolveGlassBackground();
+  } else {
+    bgRgb = parseCssColor(cs.getPropertyValue("--bg-main"));
+  }
+
+  const textMainRgb = parseCssColor(cs.getPropertyValue("--text-main"));
+  const textBrightRgb = parseCssColor(cs.getPropertyValue("--text-bright"));
+
+  const ratio = contrastRatio(textMainRgb, bgRgb);
+  const ratioBright = contrastRatio(textBrightRgb, bgRgb);
+
+  updateContrastDisplay(ratio);
+
+  if (!contrastAutoEnabled) return;
+
+  const target: [number, number, number] = mode === "dark" ? [255, 255, 255] : [0, 0, 0];
+
+  if (ratio < WCAG_AA_RATIO) {
+    let lo = 0;
+    let hi = 1;
+    let corrected = textMainRgb;
+    for (let i = 0; i < 16; i++) {
+      const mid = (lo + hi) / 2;
+      const candidate = blendToward(textMainRgb, target, mid);
+      if (contrastRatio(candidate, bgRgb) >= WCAG_AA_RATIO) {
+        corrected = candidate;
+        hi = mid;
+      } else {
+        lo = mid;
+      }
+    }
+    bs.setProperty("--text-main", `rgb(${corrected[0]},${corrected[1]},${corrected[2]})`);
+    updateContrastDisplay(contrastRatio(corrected, bgRgb));
+  }
+
+  if (ratioBright < WCAG_AA_RATIO) {
+    let lo = 0;
+    let hi = 1;
+    let corrected = textBrightRgb;
+    for (let i = 0; i < 16; i++) {
+      const mid = (lo + hi) / 2;
+      const candidate = blendToward(textBrightRgb, target, mid);
+      if (contrastRatio(candidate, bgRgb) >= WCAG_AA_RATIO) {
+        corrected = candidate;
+        hi = mid;
+      } else {
+        lo = mid;
+      }
+    }
+    bs.setProperty("--text-bright", `rgb(${corrected[0]},${corrected[1]},${corrected[2]})`);
+  }
+
+  if (style === "neumorphism") {
+    ensureNeuShadowVisibility();
+  }
+}
+
+/**
+ * Update the live contrast ratio badge in the Appearance settings group.
+ */
+function updateContrastDisplay(ratio: number): void {
+  const badge = document.getElementById("contrast-ratio-display");
+  if (!badge) return;
+  const rounded = ratio.toFixed(2);
+  const passes = ratio >= WCAG_AA_RATIO;
+  badge.textContent = `Contrast: ${rounded}:1 ${passes ? "\u2705 AA" : "\u26A0\uFE0F Fail"}`;
+  badge.style.color = passes ? "var(--accent-green)" : "var(--accent-red)";
+}
 /** Apply an appearance mode (dark/light) and persist the choice. */
 function applyMode(mode: AppMode): void {
   document.body.dataset.mode = mode;
@@ -1444,6 +1705,7 @@ function applyMode(mode: AppMode): void {
   els.modeDarkBtn.classList.toggle("active", mode === "dark");
   els.modeLightBtn.classList.toggle("active", mode === "light");
   forceStyleInvalidation();
+  ensureContrastCompliance();
 }
 
 /** Apply a style to the document and persist the choice. */
@@ -1451,6 +1713,7 @@ function applyStyle(style: StyleMode): void {
   document.body.dataset.style = style;
   localStorage.setItem(LS_STYLE, style);
   els.styleSelect.value = style;
+  ensureContrastCompliance();
 }
 
 /** Apply a colorway to the document and persist the choice. */
@@ -1459,6 +1722,7 @@ function applyColorway(colorway: ColorwayMode): void {
   localStorage.setItem(LS_COLORWAY, colorway);
   els.colorwaySelect.value = colorway;
   forceStyleInvalidation();
+  ensureContrastCompliance();
 }
 
 /** Apply a contrast level to the document and persist the choice. */
@@ -1467,6 +1731,7 @@ function applyContrast(contrast: ContrastMode): void {
   localStorage.setItem(LS_CONTRAST, contrast);
   els.contrastSelect.value = contrast;
   forceStyleInvalidation();
+  ensureContrastCompliance();
 }
 
 /**
@@ -1512,6 +1777,7 @@ function applyThemeBatch(
   // Always flush — the mode-toggle strategy is safe even when values
   // haven't changed, unlike the old strip-all-attributes approach.
   forceStyleInvalidation();
+  ensureContrastCompliance();
 }
 
 /** Apply a layout mode to the document and persist the choice. */
@@ -1747,6 +2013,7 @@ const EXPORT_KEYS = [
   "ge-analyzer:style",
   "ge-analyzer:colorway",
   "ge-analyzer:contrast",
+  "ge-analyzer:contrast-auto-correct",
 ] as const;
 
 /**
@@ -5234,6 +5501,7 @@ function resolveElements(): void {
     modeDarkBtn: q<HTMLButtonElement>("mode-dark-btn"),
     modeLightBtn: q<HTMLButtonElement>("mode-light-btn"),
     contrastSelect: q<HTMLSelectElement>("contrast-select"),
+    contrastAutoToggle: q<HTMLInputElement>("contrast-auto-toggle"),
     tabMarketBtn: q<HTMLButtonElement>("tab-market-btn"),
     tabAdvisorBtn: q<HTMLButtonElement>("tab-advisor-btn"),
     viewTabs: q("view-tabs"),

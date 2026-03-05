@@ -756,6 +756,26 @@ No open issues at this time.
 
 - **Alt1 overlay integration**: Capture game state, integrate with Alt1's screen-reading capabilities.
 
+### Analytical Metrics
+
+- **Potential Profit per Limit (4H Profit)**: While we calculate profit per item, a "Potential Profit per Window" metric (`estFlipProfit * buyLimit`) would help users prioritize items that offer the highest total return per trading slot.
+
+- **Return on Investment (ROI) Percentage**: Adding a simple `(estFlipProfit / recBuyPrice) * 100` to the market cards would allow users to compare the efficiency of low-cost, high-margin items (like runes) against high-cost, low-margin items (like armor).
+
+- **Volatility-Adjusted Margins**: We currently penalize `tradedValue` by 10% if volatility is high. We could also use this volatility to suggest wider margins for "risky" items, as they require a larger "safety buffer" against price swings.
+
+- **High Alchemy Safety Margin**: We already fetch `highAlch` values. Including a "Risk-to-Alch" ratio would show how much value an item could lose before hitting its absolute price floor, which is highly valuable for "zero-risk" flipping.
+
+### Feature Enhancements
+
+- **GP per Hour Estimates**: `coreKnowledge.ts` mentions a GP/HR formula. Implementing this in the UI based on `tradeVelocity` (estimating "time to fill" for each tier) would provide a more concrete expectation for the user.
+
+- **Theme Contrast Auto-Correction**: Given the complexity of the 192-combination theme system, include a "Theme Debugger" or an automated check to ensure WCAG AA compliance is maintained when users create custom contrast/style combinations.
+
+- **Buy Limit Reset Notifications**: Since we already track active flips in the `PortfolioService`, adding a native notification when an item's 4-hour buy limit is expected to reset would improve user retention.
+
+- **Capital Allocation Advisor**: A feature that suggests how to distribute a user's total "cash stack" across their Favourites list to maximize total projected profit.
+
 ---
 
 ## 12. Package Dependencies

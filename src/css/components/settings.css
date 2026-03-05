@@ -112,3 +112,42 @@
   width: 100%;
   margin-bottom: 6px;
 }
+
+/* ── Contrast auto-correction debugger ────────────────────────────────────── */
+
+.contrast-debugger {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: 6px;
+  padding: 5px 8px;
+  border-radius: 4px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-subtle);
+}
+
+.contrast-auto-label {
+  display: flex !important;
+  align-items: center;
+  gap: 5px;
+  font-size: 11px;
+  color: var(--text-muted);
+  text-transform: none !important;
+  letter-spacing: 0 !important;
+  cursor: pointer;
+  margin-bottom: 0 !important;
+}
+
+.contrast-auto-label input[type="checkbox"] {
+  margin: 0;
+  accent-color: var(--accent-primary);
+}
+
+.contrast-ratio-badge {
+  font-size: 11px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  color: var(--text-muted);
+}
