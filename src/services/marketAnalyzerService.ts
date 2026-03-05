@@ -290,7 +290,7 @@ export class MarketAnalyzerService {
     const { avgVolumeMap, priceHistoryMap } = await this.getOrBuildMaps(30);
     const scored = this.scoreAndFilter(allRecords, 0, 0, 0, avgVolumeMap, priceHistoryMap);
     const sorted = this.sortDescending(scored);
-    return sorted.slice(0, maxResults);
+    return maxResults > 0 ? sorted.slice(0, maxResults) : sorted;
   }
 
   /**

@@ -82,6 +82,7 @@
 @import "./components/toasts.css";
 @import "./components/alerts.css";
 @import "./components/accessibility.css";
+@import "./components/back-to-top.css";
 
 /* ── 8. Responsive overrides (must come last to win specificity) ────────────── */
 @import "./layout/responsive.css";
