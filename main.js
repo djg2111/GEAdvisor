@@ -1331,9 +1331,15 @@ ___CSS_LOADER_EXPORT___.push([module.id, `/* ── Filter bar ─────�
 
 .filter-bar {
   display: flex;
-  gap: 4px;
-  margin-bottom: 6px;
+  gap: 6px;
+  margin-bottom: 0;
   flex-wrap: wrap;
+}
+
+/* Contextual spacing when filter bar lives inside a bordered section */
+.top20-section .filter-bar {
+  padding: 6px 10px;
+  border-bottom: 1px solid var(--border-section);
 }
 
 .filter-bar select {
@@ -1445,9 +1451,17 @@ ___CSS_LOADER_EXPORT___.push([module.id, `/* ── Filter bar ─────�
 /* ── Custom filter precision controls ─────────────────────────────────────── */
 
 .custom-filter-group {
+  margin-bottom: 0;
+  padding: 6px 10px;
+  background: var(--bg-filter);
+  border-bottom: 1px solid var(--border-section);
+  border-radius: 0;
+}
+
+/* Standalone context (outside a bordered section) */
+:not(.top20-section) > .custom-filter-group {
   margin-bottom: 6px;
   padding: 4px 6px;
-  background: var(--bg-filter);
   border: 2px solid var(--border-main);
   border-radius: 3px;
 }
