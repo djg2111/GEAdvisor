@@ -124,6 +124,29 @@ __webpack_require__.r(__webpack_exports__);
 var ___CSS_LOADER_EXPORT___ = _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1___default()((_node_modules_css_loader_dist_runtime_noSourceMaps_js__WEBPACK_IMPORTED_MODULE_0___default()));
 // Module
 ___CSS_LOADER_EXPORT___.push([module.id, `/* ══════════════════════════════════════════════════════════════════════════════
+   Skip-to-content link  (WCAG 2.4.1 Bypass Blocks)
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+.skip-link {
+  position: absolute;
+  top: -100%;
+  left: 0;
+  z-index: 10000;
+  padding: 8px 16px;
+  background: var(--accent-primary);
+  color: #fff;
+  font-weight: 700;
+  font-size: 14px;
+  text-decoration: none;
+  border-radius: 0 0 4px 0;
+  transition: top 0.15s ease;
+}
+
+.skip-link:focus {
+  top: 0;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
    Global keyboard focus ring (accessibility)
    ══════════════════════════════════════════════════════════════════════════════ */
 
@@ -141,6 +164,22 @@ ___CSS_LOADER_EXPORT___.push([module.id, `/* ═══════════�
 .tab-btn:focus-visible {
   outline-offset: 1px;
   border-radius: 3px;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   Screen-reader only utility (visually hidden, announced by AT)
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
 }
 `, ""]);
 // Exports
@@ -1760,6 +1799,259 @@ button:disabled {
   background: var(--bg-input);
   color: var(--text-dimmed);
   cursor: not-allowed;
+}
+`, ""]);
+// Exports
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (___CSS_LOADER_EXPORT___);
+
+
+/***/ },
+
+/***/ "../node_modules/css-loader/dist/cjs.js!./css/components/interactive-chart.css"
+/*!*************************************************************************************!*\
+  !*** ../node_modules/css-loader/dist/cjs.js!./css/components/interactive-chart.css ***!
+  \*************************************************************************************/
+(module, __webpack_exports__, __webpack_require__) {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var _node_modules_css_loader_dist_runtime_noSourceMaps_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../../node_modules/css-loader/dist/runtime/noSourceMaps.js */ "../node_modules/css-loader/dist/runtime/noSourceMaps.js");
+/* harmony import */ var _node_modules_css_loader_dist_runtime_noSourceMaps_js__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_node_modules_css_loader_dist_runtime_noSourceMaps_js__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../../node_modules/css-loader/dist/runtime/api.js */ "../node_modules/css-loader/dist/runtime/api.js");
+/* harmony import */ var _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(_node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1__);
+// Imports
+
+
+var ___CSS_LOADER_EXPORT___ = _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1___default()((_node_modules_css_loader_dist_runtime_noSourceMaps_js__WEBPACK_IMPORTED_MODULE_0___default()));
+// Module
+___CSS_LOADER_EXPORT___.push([module.id, `/* ═══════════════════════════════════════════════════════════════════════════
+ *  Interactive Chart — dual-canvas overlay + floating tooltip
+ *
+ *  Base canvas: static grid, price line, EMA, area gradient (redrawn on data change)
+ *  Interaction canvas: crosshairs + highlight dot (redrawn on mousemove)
+ *  Tooltip: absolutely-positioned <div> shown on hover
+ * ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ── Container (stacks both canvases + tooltip) ─────────────────────────────── */
+.chart-container {
+  position: relative;
+  width: 100%;
+  margin-bottom: 14px;
+  cursor: crosshair;
+  touch-action: pan-y;        /* allow vertical page scroll, capture horizontal */
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+/* ── Canvas wrapper (aligns interaction canvas exactly over the base canvas) ── */
+.chart-canvas-wrap {
+  position: relative;
+  width: 100%;
+}
+
+/* ── Base canvas (static layer) ─────────────────────────────────────────────── */
+.chart-container .chart-base-canvas {
+  display: block;
+  width: 100%;
+  border-radius: 4px;
+  background: var(--bg-elevated);
+}
+
+/* ── Interaction overlay canvas ─────────────────────────────────────────────── */
+.chart-container .chart-interaction-canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;       /* events pass through to container */
+  border-radius: 4px;
+}
+
+/* ── Floating tooltip ───────────────────────────────────────────────────────── */
+.chart-tooltip {
+  position: absolute;
+  display: none;
+  pointer-events: none;
+  z-index: 20;
+  background: var(--bg-main, #1e1e1e);
+  border: 1px solid var(--accent-primary, #569cd6);
+  border-radius: 6px;
+  padding: 8px 10px;
+  font-size: 11px;
+  line-height: 1.5;
+  color: var(--text-main, #ccc);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.45);
+  white-space: nowrap;
+  max-width: 240px;
+  transition: opacity 0.08s ease;
+}
+
+.chart-tooltip.visible {
+  display: block;
+}
+
+/* Tooltip data rows */
+.chart-tooltip-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.chart-tooltip-label {
+  color: var(--text-muted, #888);
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.chart-tooltip-value {
+  font-weight: 600;
+  color: var(--text-bright, #fff);
+}
+
+.chart-tooltip-value.up {
+  color: var(--accent-green-bright, #4ec9b0);
+}
+
+.chart-tooltip-value.down {
+  color: var(--accent-red, #f44747);
+}
+
+/* ── Zoom hint badge (sits below the canvas, never overlaps data) ───────────── */
+.chart-zoom-hint {
+  text-align: right;
+  font-size: 9px;
+  color: var(--text-muted, #666);
+  padding: 2px 6px 0;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+}
+
+.chart-container:hover .chart-zoom-hint {
+  opacity: 0.85;
+}
+
+/* ── Layer toggle pill strip ────────────────────────────────────────────────── */
+.chart-layer-toggles {
+  display: flex;
+  gap: 5px;
+  padding: 4px 2px 6px;
+  flex-wrap: wrap;
+}
+
+.chart-layer-pill {
+  --pill-color: #888;
+  appearance: none;
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 10px;
+  padding: 2px 9px 2px 22px;
+  font-size: 10px;
+  font-family: "Segoe UI", sans-serif;
+  line-height: 1.4;
+  cursor: pointer;
+  background: var(--bg-elevated, #2a2a2a);
+  color: var(--text-muted, #888);
+  transition: background 0.15s, color 0.15s, border-color 0.15s, opacity 0.15s;
+  opacity: 0.6;
+  position: relative;
+}
+
+/* Swatch indicator (line/bar preview matching graph style) */
+.chart-layer-pill::before {
+  content: "";
+  position: absolute;
+  left: 7px;
+  top: 50%;
+  width: 10px;
+  height: 2px;
+  background: var(--text-muted, #888);
+  border-radius: 1px;
+  transform: translateY(-50%);
+  transition: background 0.15s;
+}
+
+/* Dashed swatch for EMA */
+.chart-layer-pill[data-layer="ema"]::before {
+  background: repeating-linear-gradient(
+    90deg,
+    var(--text-muted, #888) 0px, var(--text-muted, #888) 3px,
+    transparent 3px, transparent 5px
+  );
+  height: 2px;
+}
+
+/* Bar swatch for Volume */
+.chart-layer-pill[data-layer="volume"]::before {
+  width: 10px;
+  height: 8px;
+  border-radius: 1px 1px 0 0;
+}
+
+/* Dot swatch for Dots */
+.chart-layer-pill[data-layer="dots"]::before {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+}
+
+.chart-layer-pill:hover {
+  opacity: 0.85;
+}
+
+.chart-layer-pill.active {
+  opacity: 1;
+  color: var(--pill-color);
+  border-color: var(--pill-color);
+  background: rgba(255,255,255,0.06);
+}
+
+/* Active swatch colours */
+.chart-layer-pill.active::before {
+  background: var(--pill-color);
+}
+
+.chart-layer-pill.active[data-layer="ema"]::before {
+  background: repeating-linear-gradient(
+    90deg,
+    var(--pill-color) 0px, var(--pill-color) 3px,
+    transparent 3px, transparent 5px
+  );
+}
+
+.chart-layer-pill.active[data-layer="volume"]::before {
+  background: var(--pill-color);
+  opacity: 0.6;
+}
+
+/* Light mode adjustments */
+body[data-mode="light"] .chart-layer-pill {
+  border-color: rgba(0,0,0,0.15);
+  background: var(--bg-elevated, #f0f0f0);
+}
+
+body[data-mode="light"] .chart-layer-pill.active {
+  background: rgba(0,0,0,0.06);
+}
+
+/* ── Responsive heights (match existing graph-modal-canvas sizing) ──────────── */
+.graph-modal-body .chart-base-canvas,
+.analytics-graph-section .chart-base-canvas {
+  height: 200px;
+}
+
+@media (min-width: 480px) {
+  .analytics-graph-section .chart-base-canvas {
+    height: 220px;
+  }
+}
+
+@media (max-width: 600px) {
+  .analytics-graph-section .chart-base-canvas {
+    height: 160px;
+  }
 }
 `, ""]);
 // Exports
@@ -3725,6 +4017,45 @@ ___CSS_LOADER_EXPORT___.push([module.id, `/* ── Settings panel ────�
   width: 100%;
   margin-bottom: 6px;
 }
+
+/* ── Contrast auto-correction debugger ────────────────────────────────────── */
+
+.contrast-debugger {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: 6px;
+  padding: 5px 8px;
+  border-radius: 4px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-subtle);
+}
+
+.contrast-auto-label {
+  display: flex !important;
+  align-items: center;
+  gap: 5px;
+  font-size: 11px;
+  color: var(--text-muted);
+  text-transform: none !important;
+  letter-spacing: 0 !important;
+  cursor: pointer;
+  margin-bottom: 0 !important;
+}
+
+.contrast-auto-label input[type="checkbox"] {
+  margin: 0;
+  accent-color: var(--accent-primary);
+}
+
+.contrast-ratio-badge {
+  font-size: 11px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  color: var(--text-muted);
+}
 `, ""]);
 // Exports
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (___CSS_LOADER_EXPORT___);
@@ -4504,17 +4835,19 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _node_modules_css_loader_dist_cjs_js_components_modals_css__WEBPACK_IMPORTED_MODULE_46__ = __webpack_require__(/*! -!../../node_modules/css-loader/dist/cjs.js!./components/modals.css */ "../node_modules/css-loader/dist/cjs.js!./css/components/modals.css");
 /* harmony import */ var _node_modules_css_loader_dist_cjs_js_components_analytics_modal_css__WEBPACK_IMPORTED_MODULE_47__ = __webpack_require__(/*! -!../../node_modules/css-loader/dist/cjs.js!./components/analytics-modal.css */ "../node_modules/css-loader/dist/cjs.js!./css/components/analytics-modal.css");
 /* harmony import */ var _node_modules_css_loader_dist_cjs_js_components_analytics_dividers_css__WEBPACK_IMPORTED_MODULE_48__ = __webpack_require__(/*! -!../../node_modules/css-loader/dist/cjs.js!./components/analytics-dividers.css */ "../node_modules/css-loader/dist/cjs.js!./css/components/analytics-dividers.css");
-/* harmony import */ var _node_modules_css_loader_dist_cjs_js_components_chat_css__WEBPACK_IMPORTED_MODULE_49__ = __webpack_require__(/*! -!../../node_modules/css-loader/dist/cjs.js!./components/chat.css */ "../node_modules/css-loader/dist/cjs.js!./css/components/chat.css");
-/* harmony import */ var _node_modules_css_loader_dist_cjs_js_components_portfolio_css__WEBPACK_IMPORTED_MODULE_50__ = __webpack_require__(/*! -!../../node_modules/css-loader/dist/cjs.js!./components/portfolio.css */ "../node_modules/css-loader/dist/cjs.js!./css/components/portfolio.css");
-/* harmony import */ var _node_modules_css_loader_dist_cjs_js_components_predictive_badges_css__WEBPACK_IMPORTED_MODULE_51__ = __webpack_require__(/*! -!../../node_modules/css-loader/dist/cjs.js!./components/predictive-badges.css */ "../node_modules/css-loader/dist/cjs.js!./css/components/predictive-badges.css");
-/* harmony import */ var _node_modules_css_loader_dist_cjs_js_components_completed_flips_css__WEBPACK_IMPORTED_MODULE_52__ = __webpack_require__(/*! -!../../node_modules/css-loader/dist/cjs.js!./components/completed-flips.css */ "../node_modules/css-loader/dist/cjs.js!./css/components/completed-flips.css");
-/* harmony import */ var _node_modules_css_loader_dist_cjs_js_components_scrollbar_css__WEBPACK_IMPORTED_MODULE_53__ = __webpack_require__(/*! -!../../node_modules/css-loader/dist/cjs.js!./components/scrollbar.css */ "../node_modules/css-loader/dist/cjs.js!./css/components/scrollbar.css");
-/* harmony import */ var _node_modules_css_loader_dist_cjs_js_components_toasts_css__WEBPACK_IMPORTED_MODULE_54__ = __webpack_require__(/*! -!../../node_modules/css-loader/dist/cjs.js!./components/toasts.css */ "../node_modules/css-loader/dist/cjs.js!./css/components/toasts.css");
-/* harmony import */ var _node_modules_css_loader_dist_cjs_js_components_alerts_css__WEBPACK_IMPORTED_MODULE_55__ = __webpack_require__(/*! -!../../node_modules/css-loader/dist/cjs.js!./components/alerts.css */ "../node_modules/css-loader/dist/cjs.js!./css/components/alerts.css");
-/* harmony import */ var _node_modules_css_loader_dist_cjs_js_components_accessibility_css__WEBPACK_IMPORTED_MODULE_56__ = __webpack_require__(/*! -!../../node_modules/css-loader/dist/cjs.js!./components/accessibility.css */ "../node_modules/css-loader/dist/cjs.js!./css/components/accessibility.css");
-/* harmony import */ var _node_modules_css_loader_dist_cjs_js_components_back_to_top_css__WEBPACK_IMPORTED_MODULE_57__ = __webpack_require__(/*! -!../../node_modules/css-loader/dist/cjs.js!./components/back-to-top.css */ "../node_modules/css-loader/dist/cjs.js!./css/components/back-to-top.css");
-/* harmony import */ var _node_modules_css_loader_dist_cjs_js_layout_responsive_css__WEBPACK_IMPORTED_MODULE_58__ = __webpack_require__(/*! -!../../node_modules/css-loader/dist/cjs.js!./layout/responsive.css */ "../node_modules/css-loader/dist/cjs.js!./css/layout/responsive.css");
+/* harmony import */ var _node_modules_css_loader_dist_cjs_js_components_interactive_chart_css__WEBPACK_IMPORTED_MODULE_49__ = __webpack_require__(/*! -!../../node_modules/css-loader/dist/cjs.js!./components/interactive-chart.css */ "../node_modules/css-loader/dist/cjs.js!./css/components/interactive-chart.css");
+/* harmony import */ var _node_modules_css_loader_dist_cjs_js_components_chat_css__WEBPACK_IMPORTED_MODULE_50__ = __webpack_require__(/*! -!../../node_modules/css-loader/dist/cjs.js!./components/chat.css */ "../node_modules/css-loader/dist/cjs.js!./css/components/chat.css");
+/* harmony import */ var _node_modules_css_loader_dist_cjs_js_components_portfolio_css__WEBPACK_IMPORTED_MODULE_51__ = __webpack_require__(/*! -!../../node_modules/css-loader/dist/cjs.js!./components/portfolio.css */ "../node_modules/css-loader/dist/cjs.js!./css/components/portfolio.css");
+/* harmony import */ var _node_modules_css_loader_dist_cjs_js_components_predictive_badges_css__WEBPACK_IMPORTED_MODULE_52__ = __webpack_require__(/*! -!../../node_modules/css-loader/dist/cjs.js!./components/predictive-badges.css */ "../node_modules/css-loader/dist/cjs.js!./css/components/predictive-badges.css");
+/* harmony import */ var _node_modules_css_loader_dist_cjs_js_components_completed_flips_css__WEBPACK_IMPORTED_MODULE_53__ = __webpack_require__(/*! -!../../node_modules/css-loader/dist/cjs.js!./components/completed-flips.css */ "../node_modules/css-loader/dist/cjs.js!./css/components/completed-flips.css");
+/* harmony import */ var _node_modules_css_loader_dist_cjs_js_components_scrollbar_css__WEBPACK_IMPORTED_MODULE_54__ = __webpack_require__(/*! -!../../node_modules/css-loader/dist/cjs.js!./components/scrollbar.css */ "../node_modules/css-loader/dist/cjs.js!./css/components/scrollbar.css");
+/* harmony import */ var _node_modules_css_loader_dist_cjs_js_components_toasts_css__WEBPACK_IMPORTED_MODULE_55__ = __webpack_require__(/*! -!../../node_modules/css-loader/dist/cjs.js!./components/toasts.css */ "../node_modules/css-loader/dist/cjs.js!./css/components/toasts.css");
+/* harmony import */ var _node_modules_css_loader_dist_cjs_js_components_alerts_css__WEBPACK_IMPORTED_MODULE_56__ = __webpack_require__(/*! -!../../node_modules/css-loader/dist/cjs.js!./components/alerts.css */ "../node_modules/css-loader/dist/cjs.js!./css/components/alerts.css");
+/* harmony import */ var _node_modules_css_loader_dist_cjs_js_components_accessibility_css__WEBPACK_IMPORTED_MODULE_57__ = __webpack_require__(/*! -!../../node_modules/css-loader/dist/cjs.js!./components/accessibility.css */ "../node_modules/css-loader/dist/cjs.js!./css/components/accessibility.css");
+/* harmony import */ var _node_modules_css_loader_dist_cjs_js_components_back_to_top_css__WEBPACK_IMPORTED_MODULE_58__ = __webpack_require__(/*! -!../../node_modules/css-loader/dist/cjs.js!./components/back-to-top.css */ "../node_modules/css-loader/dist/cjs.js!./css/components/back-to-top.css");
+/* harmony import */ var _node_modules_css_loader_dist_cjs_js_layout_responsive_css__WEBPACK_IMPORTED_MODULE_59__ = __webpack_require__(/*! -!../../node_modules/css-loader/dist/cjs.js!./layout/responsive.css */ "../node_modules/css-loader/dist/cjs.js!./css/layout/responsive.css");
 // Imports
+
 
 
 
@@ -4622,16 +4955,17 @@ ___CSS_LOADER_EXPORT___.i(_node_modules_css_loader_dist_cjs_js_components_favour
 ___CSS_LOADER_EXPORT___.i(_node_modules_css_loader_dist_cjs_js_components_modals_css__WEBPACK_IMPORTED_MODULE_46__["default"]);
 ___CSS_LOADER_EXPORT___.i(_node_modules_css_loader_dist_cjs_js_components_analytics_modal_css__WEBPACK_IMPORTED_MODULE_47__["default"]);
 ___CSS_LOADER_EXPORT___.i(_node_modules_css_loader_dist_cjs_js_components_analytics_dividers_css__WEBPACK_IMPORTED_MODULE_48__["default"]);
-___CSS_LOADER_EXPORT___.i(_node_modules_css_loader_dist_cjs_js_components_chat_css__WEBPACK_IMPORTED_MODULE_49__["default"]);
-___CSS_LOADER_EXPORT___.i(_node_modules_css_loader_dist_cjs_js_components_portfolio_css__WEBPACK_IMPORTED_MODULE_50__["default"]);
-___CSS_LOADER_EXPORT___.i(_node_modules_css_loader_dist_cjs_js_components_predictive_badges_css__WEBPACK_IMPORTED_MODULE_51__["default"]);
-___CSS_LOADER_EXPORT___.i(_node_modules_css_loader_dist_cjs_js_components_completed_flips_css__WEBPACK_IMPORTED_MODULE_52__["default"]);
-___CSS_LOADER_EXPORT___.i(_node_modules_css_loader_dist_cjs_js_components_scrollbar_css__WEBPACK_IMPORTED_MODULE_53__["default"]);
-___CSS_LOADER_EXPORT___.i(_node_modules_css_loader_dist_cjs_js_components_toasts_css__WEBPACK_IMPORTED_MODULE_54__["default"]);
-___CSS_LOADER_EXPORT___.i(_node_modules_css_loader_dist_cjs_js_components_alerts_css__WEBPACK_IMPORTED_MODULE_55__["default"]);
-___CSS_LOADER_EXPORT___.i(_node_modules_css_loader_dist_cjs_js_components_accessibility_css__WEBPACK_IMPORTED_MODULE_56__["default"]);
-___CSS_LOADER_EXPORT___.i(_node_modules_css_loader_dist_cjs_js_components_back_to_top_css__WEBPACK_IMPORTED_MODULE_57__["default"]);
-___CSS_LOADER_EXPORT___.i(_node_modules_css_loader_dist_cjs_js_layout_responsive_css__WEBPACK_IMPORTED_MODULE_58__["default"]);
+___CSS_LOADER_EXPORT___.i(_node_modules_css_loader_dist_cjs_js_components_interactive_chart_css__WEBPACK_IMPORTED_MODULE_49__["default"]);
+___CSS_LOADER_EXPORT___.i(_node_modules_css_loader_dist_cjs_js_components_chat_css__WEBPACK_IMPORTED_MODULE_50__["default"]);
+___CSS_LOADER_EXPORT___.i(_node_modules_css_loader_dist_cjs_js_components_portfolio_css__WEBPACK_IMPORTED_MODULE_51__["default"]);
+___CSS_LOADER_EXPORT___.i(_node_modules_css_loader_dist_cjs_js_components_predictive_badges_css__WEBPACK_IMPORTED_MODULE_52__["default"]);
+___CSS_LOADER_EXPORT___.i(_node_modules_css_loader_dist_cjs_js_components_completed_flips_css__WEBPACK_IMPORTED_MODULE_53__["default"]);
+___CSS_LOADER_EXPORT___.i(_node_modules_css_loader_dist_cjs_js_components_scrollbar_css__WEBPACK_IMPORTED_MODULE_54__["default"]);
+___CSS_LOADER_EXPORT___.i(_node_modules_css_loader_dist_cjs_js_components_toasts_css__WEBPACK_IMPORTED_MODULE_55__["default"]);
+___CSS_LOADER_EXPORT___.i(_node_modules_css_loader_dist_cjs_js_components_alerts_css__WEBPACK_IMPORTED_MODULE_56__["default"]);
+___CSS_LOADER_EXPORT___.i(_node_modules_css_loader_dist_cjs_js_components_accessibility_css__WEBPACK_IMPORTED_MODULE_57__["default"]);
+___CSS_LOADER_EXPORT___.i(_node_modules_css_loader_dist_cjs_js_components_back_to_top_css__WEBPACK_IMPORTED_MODULE_58__["default"]);
+___CSS_LOADER_EXPORT___.i(_node_modules_css_loader_dist_cjs_js_layout_responsive_css__WEBPACK_IMPORTED_MODULE_59__["default"]);
 // Module
 ___CSS_LOADER_EXPORT___.push([module.id, `/* ═══════════════════════════════════════════════════════════════════════════
  *  GE Market Analyzer — CSS Module Entry Point
@@ -11431,6 +11765,10 @@ const LS_CHAT_HISTORY = "ge-analyzer:chat-history";
 const LS_FAVORITES = "ge-analyzer:favorites";
 /** `localStorage` key for “deep history” checkbox preference (boolean string). */
 const LS_DEEP_HISTORY = "ge-analyzer:deep-history";
+/** `localStorage` key for contrast auto-correction toggle (boolean string). */
+const LS_CONTRAST_AUTO = "ge-analyzer:contrast-auto-correct";
+/** WCAG AA minimum contrast ratio for normal text. */
+const WCAG_AA_RATIO = 4.5;
 /** Maximum number of messages (user + assistant) persisted to localStorage. */
 const MAX_SAVED_MESSAGES = 50;
 /** GE buy-limit window duration in milliseconds (4 hours). */
@@ -11497,6 +11835,40 @@ const DETAIL_TIPS = {
     "LR Slope": "Linear-regression slope of the price series (gp per day). Positive = upward drift, negative = declining.",
     "Predicted Price": "Next-day price predicted by linear regression of the historical price series.",
 };
+/**
+ * Tooltip descriptions for the chart stat cards shown below the price graph.
+ * Each key matches a stat label (with `${range}` interpolated at call time).
+ */
+const STAT_TIPS = {
+    "Trend": "Overall price direction over the selected time window. Uptrend (>+5%), Downtrend (>\u22125%), or Stable.",
+    "Change": "Absolute gp change and percentage change between the oldest and most recent price in the range.",
+    "Current Price": "The latest mid-price reported by the Grand Exchange API.",
+    "High": "Highest recorded daily price within the selected time window.",
+    "Low": "Lowest recorded daily price within the selected time window.",
+    "Volatility": "Price range as a percentage of the lowest price \u2014 higher values mean wider swings and more risk.",
+    "Data Points": "Number of daily price snapshots available in the selected window. More points = more reliable trend data.",
+};
+/**
+ * Build a single stat-card HTML string with a tooltip `title` attribute.
+ * Works for both `.graph-stat-row` (graph modal) and `.analytics-stat-card`
+ * (analytics modal) — the caller picks the wrapper class.
+ *
+ * @param cls      - CSS class for the card div (e.g. `"graph-stat-row"` or `"analytics-stat-card"`).
+ * @param label    - Display text for the label span.
+ * @param value    - Display text for the value span.
+ * @param tipKey   - Key into {@link STAT_TIPS} (without range prefix).
+ * @param style    - Optional inline style for the value span.
+ */
+function statCardHtml(cls, label, value, tipKey, style) {
+    const labelCls = cls === "analytics-stat-card" ? "analytics-stat-label" : "graph-stat-label";
+    const valueCls = cls === "analytics-stat-card" ? "analytics-stat-value" : "graph-stat-value";
+    const tip = STAT_TIPS[tipKey] ?? "";
+    const styleAttr = style ? ` style="${style}"` : "";
+    return (`<div class="${cls}" title="${tip}">` +
+        `<span class="${labelCls}">${label}</span>` +
+        `<span class="${valueCls}"${styleAttr}>${value}</span>` +
+        `</div>`);
+}
 // ─── Favorites helpers ──────────────────────────────────────────────────────
 /**
  * Load the persisted favourites list, auto-migrating from the legacy
@@ -12149,6 +12521,7 @@ function ensureSetupGuideModal() {
     modal.className = "setup-guide-modal";
     modal.setAttribute("role", "dialog");
     modal.setAttribute("aria-modal", "true");
+    modal.setAttribute("aria-label", "API key setup guide");
     backdrop.appendChild(modal);
     document.body.appendChild(backdrop);
     document.addEventListener("keydown", (e) => {
@@ -12449,6 +12822,13 @@ function bindTheme() {
     els.contrastSelect.addEventListener("change", () => {
         applyContrast(els.contrastSelect.value);
     });
+    // ── Contrast auto-correction toggle ──────────────────────────────────
+    els.contrastAutoToggle.checked = contrastAutoEnabled;
+    els.contrastAutoToggle.addEventListener("change", () => {
+        contrastAutoEnabled = els.contrastAutoToggle.checked;
+        localStorage.setItem(LS_CONTRAST_AUTO, contrastAutoEnabled ? "true" : "false");
+        ensureContrastCompliance();
+    });
 }
 /**
  * Migrate from the legacy single `ge-analyzer:theme` key to the new
@@ -12552,6 +12932,219 @@ function forceStyleInvalidation() {
     ds.mode = currentMode;
     void getComputedStyle(document.body).getPropertyValue("--bg-main");
 }
+// â”€â”€â”€ WCAG Contrast Auto-Correction â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+/** Whether contrast auto-correction is currently enabled. */
+let contrastAutoEnabled = localStorage.getItem(LS_CONTRAST_AUTO) !== "false";
+/**
+ * Parse a CSS color value (hex, rgb(), rgba(), or a resolved `color-mix()`)
+ * into an `[r, g, b]` tuple. Falls back to `[0, 0, 0]` for unparseable values.
+ *
+ * `getComputedStyle` resolves `color-mix()` and named colors into
+ * `rgb(â€¦)` or `rgba(â€¦)` in all modern browsers, so that is the primary
+ * fast path here. Hex (3/4/6/8 digit) is handled as a secondary path.
+ */
+function parseCssColor(raw) {
+    const trimmed = raw.trim();
+    // Fast path: rgb(r, g, b) / rgba(r, g, b, a)
+    const rgbMatch = trimmed.match(/^rgba?\(\s*(\d+(?:\.\d+)?)[,\s]+(\d+(?:\.\d+)?)[,\s]+(\d+(?:\.\d+)?)/);
+    if (rgbMatch) {
+        return [
+            Math.round(Number(rgbMatch[1])),
+            Math.round(Number(rgbMatch[2])),
+            Math.round(Number(rgbMatch[3])),
+        ];
+    }
+    // Secondary path: 3/4/6/8-digit hex
+    const hexMatch = trimmed.match(/^#([0-9a-f]{3,8})$/i);
+    if (hexMatch) {
+        let hex = hexMatch[1];
+        if (hex.length === 3 || hex.length === 4) {
+            hex = hex[0] + hex[0] + hex[1] + hex[1] + hex[2] + hex[2];
+        }
+        return [
+            parseInt(hex.slice(0, 2), 16),
+            parseInt(hex.slice(2, 4), 16),
+            parseInt(hex.slice(4, 6), 16),
+        ];
+    }
+    return [0, 0, 0];
+}
+/**
+ * Linearise an 8-bit sRGB channel value to its linear-light equivalent
+ * per the IEC 61966-2-1 transfer function (used in WCAG relative luminance).
+ */
+function linearize(c8) {
+    const c = c8 / 255;
+    return c <= 0.04045 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);
+}
+/**
+ * Calculate WCAG 2.x relative luminance.
+ * Formula: L = 0.2126R + 0.7152G + 0.0722B with linearised sRGB values.
+ */
+function relativeLuminance([r, g, b]) {
+    return 0.2126 * linearize(r) + 0.7152 * linearize(g) + 0.0722 * linearize(b);
+}
+/**
+ * Calculate the WCAG 2.x contrast ratio between two colours.
+ * Returns a value between 1 (identical) and 21 (black on white).
+ * Formula: (L1 + 0.05) / (L2 + 0.05) where L1 >= L2.
+ */
+function contrastRatio(a, b) {
+    const lA = relativeLuminance(a);
+    const lB = relativeLuminance(b);
+    const lighter = Math.max(lA, lB);
+    const darker = Math.min(lA, lB);
+    return (lighter + 0.05) / (darker + 0.05);
+}
+/**
+ * Blend a colour toward a target by a normalised `amount` (0-1).
+ * Returns a new `[r, g, b]` tuple.
+ */
+function blendToward(color, target, amount) {
+    const t = Math.max(0, Math.min(1, amount));
+    return [
+        Math.round(color[0] + (target[0] - color[0]) * t),
+        Math.round(color[1] + (target[1] - color[1]) * t),
+        Math.round(color[2] + (target[2] - color[2]) * t),
+    ];
+}
+/**
+ * Resolve the effective opaque background for the glass style.
+ *
+ * Glass uses translucent `--glass-panel` over the gradient body. Using
+ * `--glass-body-via` (the middle gradient stop) composited with the panel
+ * alpha gives a practical worst-case approximation.
+ */
+function resolveGlassBackground() {
+    const cs = getComputedStyle(document.body);
+    const bodyVia = parseCssColor(cs.getPropertyValue("--glass-body-via"));
+    const panelRaw = cs.getPropertyValue("--glass-panel").trim();
+    const alphaMatch = panelRaw.match(/rgba?\(\s*(\d+(?:\.\d+)?)[,\s]+(\d+(?:\.\d+)?)[,\s]+(\d+(?:\.\d+)?)[,\s/]+(\d*\.?\d+)/);
+    if (!alphaMatch)
+        return bodyVia;
+    const pr = Math.round(Number(alphaMatch[1]));
+    const pg = Math.round(Number(alphaMatch[2]));
+    const pb = Math.round(Number(alphaMatch[3]));
+    const pa = Number(alphaMatch[4]);
+    return [
+        Math.round(pr * pa + bodyVia[0] * (1 - pa)),
+        Math.round(pg * pa + bodyVia[1] * (1 - pa)),
+        Math.round(pb * pa + bodyVia[2] * (1 - pa)),
+    ];
+}
+/**
+ * Ensure `--neu-shadow-dark` and `--neu-shadow-light` produce a visible
+ * luminance delta against `--bg-main` so neumorphism shapes remain
+ * perceptible. Minimum luminance delta: 0.03.
+ */
+function ensureNeuShadowVisibility() {
+    const cs = getComputedStyle(document.body);
+    const bgMain = parseCssColor(cs.getPropertyValue("--bg-main"));
+    const neuDark = parseCssColor(cs.getPropertyValue("--neu-shadow-dark"));
+    const neuLight = parseCssColor(cs.getPropertyValue("--neu-shadow-light"));
+    const bgL = relativeLuminance(bgMain);
+    const darkL = relativeLuminance(neuDark);
+    const lightL = relativeLuminance(neuLight);
+    const MIN_DELTA = 0.03;
+    const bs = document.body.style;
+    if (Math.abs(bgL - darkL) < MIN_DELTA) {
+        const nudged = blendToward(neuDark, [0, 0, 0], 0.35);
+        bs.setProperty("--neu-shadow-dark", `rgb(${nudged[0]},${nudged[1]},${nudged[2]})`);
+    }
+    if (Math.abs(lightL - bgL) < MIN_DELTA) {
+        const nudged = blendToward(neuLight, [255, 255, 255], 0.25);
+        bs.setProperty("--neu-shadow-light", `rgb(${nudged[0]},${nudged[1]},${nudged[2]})`);
+    }
+}
+/**
+ * Run the WCAG AA contrast compliance check and auto-correct if the
+ * current `--text-main` / `--bg-main` combination falls below 4.5:1.
+ *
+ * For **glass**, the effective opaque background is computed by
+ * alpha-compositing `--glass-panel` over `--glass-body-via`.
+ *
+ * For **neumorphism**, shadow visibility is also checked.
+ *
+ * Overrides are written to `document.body.style` so they take precedence
+ * over CSS files while remaining removable on the next theme change.
+ * Updates the live contrast ratio display in settings.
+ */
+function ensureContrastCompliance() {
+    const bs = document.body.style;
+    bs.removeProperty("--text-main");
+    bs.removeProperty("--text-bright");
+    bs.removeProperty("--neu-shadow-dark");
+    bs.removeProperty("--neu-shadow-light");
+    void getComputedStyle(document.body).getPropertyValue("--text-main");
+    const cs = getComputedStyle(document.body);
+    const style = (document.body.dataset.style ?? "basic");
+    const mode = (document.body.dataset.mode ?? "dark");
+    let bgRgb;
+    if (style === "glass") {
+        bgRgb = resolveGlassBackground();
+    }
+    else {
+        bgRgb = parseCssColor(cs.getPropertyValue("--bg-main"));
+    }
+    const textMainRgb = parseCssColor(cs.getPropertyValue("--text-main"));
+    const textBrightRgb = parseCssColor(cs.getPropertyValue("--text-bright"));
+    const ratio = contrastRatio(textMainRgb, bgRgb);
+    const ratioBright = contrastRatio(textBrightRgb, bgRgb);
+    updateContrastDisplay(ratio);
+    if (!contrastAutoEnabled)
+        return;
+    const target = mode === "dark" ? [255, 255, 255] : [0, 0, 0];
+    if (ratio < WCAG_AA_RATIO) {
+        let lo = 0;
+        let hi = 1;
+        let corrected = textMainRgb;
+        for (let i = 0; i < 16; i++) {
+            const mid = (lo + hi) / 2;
+            const candidate = blendToward(textMainRgb, target, mid);
+            if (contrastRatio(candidate, bgRgb) >= WCAG_AA_RATIO) {
+                corrected = candidate;
+                hi = mid;
+            }
+            else {
+                lo = mid;
+            }
+        }
+        bs.setProperty("--text-main", `rgb(${corrected[0]},${corrected[1]},${corrected[2]})`);
+        updateContrastDisplay(contrastRatio(corrected, bgRgb));
+    }
+    if (ratioBright < WCAG_AA_RATIO) {
+        let lo = 0;
+        let hi = 1;
+        let corrected = textBrightRgb;
+        for (let i = 0; i < 16; i++) {
+            const mid = (lo + hi) / 2;
+            const candidate = blendToward(textBrightRgb, target, mid);
+            if (contrastRatio(candidate, bgRgb) >= WCAG_AA_RATIO) {
+                corrected = candidate;
+                hi = mid;
+            }
+            else {
+                lo = mid;
+            }
+        }
+        bs.setProperty("--text-bright", `rgb(${corrected[0]},${corrected[1]},${corrected[2]})`);
+    }
+    if (style === "neumorphism") {
+        ensureNeuShadowVisibility();
+    }
+}
+/**
+ * Update the live contrast ratio badge in the Appearance settings group.
+ */
+function updateContrastDisplay(ratio) {
+    const badge = document.getElementById("contrast-ratio-display");
+    if (!badge)
+        return;
+    const rounded = ratio.toFixed(2);
+    const passes = ratio >= WCAG_AA_RATIO;
+    badge.textContent = `Contrast: ${rounded}:1 ${passes ? "\u2705 AA" : "\u26A0\uFE0F Fail"}`;
+    badge.style.color = passes ? "var(--accent-green)" : "var(--accent-red)";
+}
 /** Apply an appearance mode (dark/light) and persist the choice. */
 function applyMode(mode) {
     document.body.dataset.mode = mode;
@@ -12559,12 +13152,14 @@ function applyMode(mode) {
     els.modeDarkBtn.classList.toggle("active", mode === "dark");
     els.modeLightBtn.classList.toggle("active", mode === "light");
     forceStyleInvalidation();
+    ensureContrastCompliance();
 }
 /** Apply a style to the document and persist the choice. */
 function applyStyle(style) {
     document.body.dataset.style = style;
     localStorage.setItem(LS_STYLE, style);
     els.styleSelect.value = style;
+    ensureContrastCompliance();
 }
 /** Apply a colorway to the document and persist the choice. */
 function applyColorway(colorway) {
@@ -12572,6 +13167,7 @@ function applyColorway(colorway) {
     localStorage.setItem(LS_COLORWAY, colorway);
     els.colorwaySelect.value = colorway;
     forceStyleInvalidation();
+    ensureContrastCompliance();
 }
 /** Apply a contrast level to the document and persist the choice. */
 function applyContrast(contrast) {
@@ -12579,6 +13175,7 @@ function applyContrast(contrast) {
     localStorage.setItem(LS_CONTRAST, contrast);
     els.contrastSelect.value = contrast;
     forceStyleInvalidation();
+    ensureContrastCompliance();
 }
 /**
  * Apply all four theme axes in a single synchronous pass to minimise
@@ -12614,6 +13211,10 @@ function applyThemeBatch(mode, style, colorway, contrast) {
     // Always flush — the mode-toggle strategy is safe even when values
     // haven't changed, unlike the old strip-all-attributes approach.
     forceStyleInvalidation();
+    ensureContrastCompliance();
+    // Redraw any active canvas charts so they pick up the new theme colours.
+    for (const chart of activeCharts.values())
+        chart.redraw();
 }
 /** Apply a layout mode to the document and persist the choice. */
 function applyLayout(mode) {
@@ -12621,6 +13222,9 @@ function applyLayout(mode) {
     localStorage.setItem(LS_LAYOUT, mode);
     els.layoutTabbedBtn.classList.toggle("active", mode === "tabbed");
     els.layoutSidebarBtn.classList.toggle("active", mode === "sidebar");
+    // Sync ARIA pressed states (WCAG 4.1.2).
+    els.layoutTabbedBtn.setAttribute("aria-pressed", String(mode === "tabbed"));
+    els.layoutSidebarBtn.setAttribute("aria-pressed", String(mode === "sidebar"));
     // In sidebar mode both sections are always visible — remove tab active state.
     if (mode === "sidebar") {
         els.marketView.classList.add("active-tab");
@@ -12651,6 +13255,10 @@ function switchTab(tab) {
     els.tabMarketBtn.classList.toggle("active", tab === "market");
     els.tabAdvisorBtn.classList.toggle("active", tab === "advisor");
     els.tabPortfolioBtn.classList.toggle("active", tab === "portfolio");
+    // Sync ARIA selected states (WCAG 4.1.2 – Name, Role, Value).
+    els.tabMarketBtn.setAttribute("aria-selected", String(tab === "market"));
+    els.tabAdvisorBtn.setAttribute("aria-selected", String(tab === "advisor"));
+    els.tabPortfolioBtn.setAttribute("aria-selected", String(tab === "portfolio"));
     els.marketView.classList.toggle("active-tab", tab === "market");
     els.advisorView.classList.toggle("active-tab", tab === "advisor");
     els.portfolioView.classList.toggle("active-tab", tab === "portfolio");
@@ -12692,6 +13300,9 @@ function ensureToastContainer() {
         return toastContainer;
     toastContainer = document.createElement("div");
     toastContainer.id = "toast-container";
+    toastContainer.setAttribute("aria-live", "polite");
+    toastContainer.setAttribute("aria-relevant", "additions");
+    toastContainer.setAttribute("role", "status");
     document.body.appendChild(toastContainer);
     return toastContainer;
 }
@@ -12822,6 +13433,8 @@ const EXPORT_KEYS = [
     "ge-analyzer:style",
     "ge-analyzer:colorway",
     "ge-analyzer:contrast",
+    "ge-analyzer:contrast-auto-correct",
+    "ge-analyzer:chart-layers",
 ];
 /**
  * Wire click handlers for the Export Data / Import Data buttons and the
@@ -13430,9 +14043,10 @@ function drawSparkline(canvas, data) {
     canvas.height = h;
     // ── No data: draw placeholder text ──
     if (data.length === 0) {
+        const sparkTheme = getChartThemeColors();
         const fontSize = Math.max(9, Math.round(h * 0.35));
         ctx.font = `${fontSize}px "Segoe UI", sans-serif`;
-        ctx.fillStyle = "#888";
+        ctx.fillStyle = sparkTheme.emptyText;
         ctx.textAlign = "center";
         ctx.textBaseline = "middle";
         ctx.fillText("No price history", w / 2, h / 2);
@@ -13440,7 +14054,7 @@ function drawSparkline(canvas, data) {
     }
     // ── Single data point: draw a dot ──
     if (data.length === 1) {
-        ctx.fillStyle = "#888";
+        ctx.fillStyle = getChartThemeColors().emptyText;
         ctx.beginPath();
         ctx.arc(w / 2, h / 2, Math.max(2, Math.round(h * 0.12)), 0, Math.PI * 2);
         ctx.fill();
@@ -13475,26 +14089,931 @@ function drawSparkline(canvas, data) {
 /**
  * Abbreviate a gp value for axis labels (e.g. 1200 → "1.2K", 3400000 → "3.4M").
  */
-function axisLabel(value) {
+/**
+ * Abbreviate a gp value for axis labels.
+ * When `precision` > 1 the suffix uses more decimal places so tightly-spaced
+ * ticks (e.g. 1.05M vs 1.09M) remain distinguishable instead of both
+ * rounding to "1.1M".
+ */
+function axisLabel(value, precision = 1) {
     const abs = Math.abs(value);
     const sign = value < 0 ? "-" : "";
     if (abs >= 1000000000)
-        return `${sign}${(abs / 1000000000).toFixed(1)}B`;
+        return `${sign}${(abs / 1000000000).toFixed(precision)}B`;
     if (abs >= 1000000)
-        return `${sign}${(abs / 1000000).toFixed(1)}M`;
+        return `${sign}${(abs / 1000000).toFixed(precision)}M`;
     if (abs >= 1000)
-        return `${sign}${(abs / 1000).toFixed(1)}K`;
+        return `${sign}${(abs / 1000).toFixed(precision)}K`;
     return `${sign}${abs}`;
 }
 /**
- * Draw a full-featured area chart on the graph modal canvas, including:
- * - Y-axis price labels (left)
- * - X-axis day labels (bottom: "Day 1", "Day 2", … or "d-6", "d-5", …, "today")
- * - Horizontal grid lines
- * - Gradient-filled area under the curve
- * - Trend-coloured line with data-point dots
+ * Choose the minimum decimal precision needed so that every Y-axis tick
+ * label is visually distinct after abbreviation.
+ */
+function axisLabelPrecision(min, max, ticks) {
+    const step = (max - min) / ticks;
+    if (step === 0)
+        return 1;
+    // Determine the magnitude of the divisor (K / M / B)
+    const ref = Math.max(Math.abs(min), Math.abs(max));
+    let divisor = 1;
+    if (ref >= 1000000000)
+        divisor = 1000000000;
+    else if (ref >= 1000000)
+        divisor = 1000000;
+    else if (ref >= 1000)
+        divisor = 1000;
+    const stepInUnits = step / divisor;
+    // Need enough decimals so stepInUnits doesn't round to 0
+    if (stepInUnits >= 1)
+        return 1;
+    if (stepInUnits >= 0.1)
+        return 1;
+    if (stepInUnits >= 0.01)
+        return 2;
+    return 3;
+}
+/**
+ * Compute the full EMA series for a price array.
+ * Returns an array of the same length as `prices` where each element is the
+ * running EMA up to that index.
  *
- * Handles edge cases (0 or 1 data points) the same as {@link drawSparkline}.
+ * @param prices - Chronological price array (oldest-first).
+ * @param alpha  - Smoothing factor (default 2/(30+1) ≈ 0.0645 for 30-day EMA).
+ */
+function computeEmaSeries(prices, alpha = 2 / 31) {
+    if (prices.length === 0)
+        return [];
+    const ema = [prices[0]];
+    for (let i = 1; i < prices.length; i++) {
+        ema.push(alpha * prices[i] + (1 - alpha) * ema[i - 1]);
+    }
+    return ema;
+}
+/**
+ * Read theme-aware colours for chart rendering from CSS custom properties.
+ * Returns appropriate grid, text, and container colours for the active mode.
+ */
+function getChartThemeColors() {
+    const isLight = document.body.dataset.mode === "light";
+    const cs = getComputedStyle(document.body);
+    const textMuted = cs.getPropertyValue("--text-muted").trim();
+    const textSoft = cs.getPropertyValue("--text-soft").trim();
+    return {
+        gridLine: isLight ? "rgba(0,0,0,0.10)" : "rgba(255,255,255,0.07)",
+        axisText: textMuted || (isLight ? "#777" : "#999"),
+        emptyText: textSoft || (isLight ? "#999" : "#888"),
+        dotStroke: isLight ? "rgba(0,0,0,0.25)" : "rgba(0,0,0,0.5)",
+        legendText: textMuted || (isLight ? "#777" : "#bbb"),
+    };
+}
+/** Shared chart margin constants. */
+const CHART_MARGIN = { left: 58, right: 24, top: 18, bottom: 32 };
+/** Number of horizontal grid lines (Y-axis ticks). */
+const CHART_Y_TICKS = 4;
+/** Minimum zoom window in data points. */
+const CHART_MIN_ZOOM = 5;
+/** Maximum number of zoom-in steps from full data. */
+const CHART_MAX_ZOOM_STEPS = 8;
+const CHART_LAYERS_KEY = "ge-analyzer:chart-layers";
+/** Read persisted layer toggles, falling back to all-on defaults. */
+function loadChartLayers() {
+    const defaults = { price: true, ema: true, volume: true, dots: true };
+    try {
+        const raw = localStorage.getItem(CHART_LAYERS_KEY);
+        if (raw)
+            return { ...defaults, ...JSON.parse(raw) };
+    }
+    catch { /* ignore */ }
+    return defaults;
+}
+/** Persist current layer toggles. */
+function saveChartLayers(layers) {
+    try {
+        localStorage.setItem(CHART_LAYERS_KEY, JSON.stringify(layers));
+    }
+    catch { /* ignore */ }
+}
+/**
+ * Dual-canvas interactive chart with crosshair, tooltip, and scroll-zoom.
+ *
+ * **Overlay pattern** – two `<canvas>` elements are stacked via CSS:
+ * - *Base canvas*: static grid, area gradient, price line, EMA line, data dots.
+ *   Redrawn only when data or zoom window changes.
+ * - *Interaction canvas*: crosshairs + highlight circle.
+ *   Redrawn on every `mousemove` (cheap — ≤ 6 draw calls).
+ *
+ * A sibling `.chart-tooltip` `<div>` is positioned absolutely for rich HTML
+ * tooltips without redrawing pixels.
+ *
+ * All coordinate maths accounts for `window.devicePixelRatio` to avoid
+ * offset bugs on high-DPI displays.
+ */
+class InteractiveChart {
+    /**
+     * Build the interactive chart DOM and attach it to the given parent.
+     * Does **not** draw anything yet — call {@link setData} to populate.
+     *
+     * @param parent - The DOM element that will contain both canvases + tooltip.
+     * @param height - Desired CSS height for the chart (e.g. "200px").
+     */
+    constructor(parent, height = "200px") {
+        // ── Data ──
+        this.fullData = [];
+        this.fullEma = [];
+        this.fullVolumes = [];
+        // ── Zoom window (indices into fullData) ──
+        this.winStart = 0;
+        this.winEnd = 0;
+        // ── Hover state ──
+        this.hoverData = null;
+        // ── Drag-to-pan state ──
+        this.isDragging = false;
+        this.dragStartX = 0;
+        this.dragStartWinStart = 0;
+        this.dragStartWinEnd = 0;
+        /** Timestamp (ms) when the last drag ended — used to suppress backdrop click. */
+        this.dragEndedAt = 0;
+        // ── Cached layout values (CSS pixels, updated on every base draw) ──
+        this.cssW = 0;
+        this.cssH = 0;
+        // ── Resize observer (responsive canvas sync) ──
+        this.resizeObs = null;
+        // ── Container ──
+        this.container = document.createElement("div");
+        this.container.className = "chart-container";
+        // ── Base canvas ──
+        this.baseCanvas = document.createElement("canvas");
+        this.baseCanvas.className = "chart-base-canvas";
+        this.baseCanvas.style.height = height;
+        this.baseCanvas.setAttribute("role", "img");
+        this.baseCanvas.setAttribute("aria-label", "Price chart: loading\u2026");
+        // ── Interaction overlay canvas ──
+        this.interCanvas = document.createElement("canvas");
+        this.interCanvas.className = "chart-interaction-canvas";
+        // ── Tooltip ──
+        this.tooltip = document.createElement("div");
+        this.tooltip.className = "chart-tooltip";
+        // ── Zoom hint ──
+        this.zoomHint = document.createElement("div");
+        this.zoomHint.className = "chart-zoom-hint";
+        this.zoomHint.textContent = "Scroll to zoom \u2022 Drag to pan";
+        // ── Layer toggles ──
+        this.layers = loadChartLayers();
+        this.toggleStrip = document.createElement("div");
+        this.toggleStrip.className = "chart-layer-toggles";
+        const layerDefs = [
+            { key: "price", label: "Price", color: "#4ec9b0" },
+            { key: "ema", label: "EMA", color: "#569cd6" },
+            { key: "volume", label: "Volume", color: "#888" },
+            { key: "dots", label: "Dots", color: "#bbb" },
+        ];
+        for (const def of layerDefs) {
+            const pill = document.createElement("button");
+            pill.type = "button";
+            pill.className = "chart-layer-pill" + (this.layers[def.key] ? " active" : "");
+            pill.dataset.layer = def.key;
+            pill.style.setProperty("--pill-color", def.color);
+            pill.textContent = def.label;
+            pill.addEventListener("click", () => {
+                this.layers[def.key] = !this.layers[def.key];
+                pill.classList.toggle("active", this.layers[def.key]);
+                saveChartLayers(this.layers);
+                this.drawBase();
+                // Re-draw interaction layer if hovering (so EMA highlight updates)
+                if (this.hoverData) {
+                    this.drawInteraction(this.hoverData.x, this.hoverData.y);
+                }
+            });
+            this.toggleStrip.appendChild(pill);
+        }
+        // ── Canvas wrapper (keeps interaction canvas aligned with base canvas) ──
+        this.canvasWrap = document.createElement("div");
+        this.canvasWrap.className = "chart-canvas-wrap";
+        // Assemble
+        this.container.appendChild(this.toggleStrip);
+        this.canvasWrap.appendChild(this.baseCanvas);
+        this.canvasWrap.appendChild(this.interCanvas);
+        this.canvasWrap.appendChild(this.tooltip);
+        this.container.appendChild(this.canvasWrap);
+        this.container.appendChild(this.zoomHint);
+        parent.appendChild(this.container);
+        // ── Responsive: re-sync canvas dimensions on resize ──
+        this.resizeObs = new ResizeObserver(() => {
+            if (this.fullData.length >= 2)
+                this.drawBase();
+        });
+        this.resizeObs.observe(this.baseCanvas);
+        // ── Bind events ──
+        this.boundMouseMove = this.onMouseMove.bind(this);
+        this.boundMouseLeave = this.onMouseLeave.bind(this);
+        this.boundWheel = this.onWheel.bind(this);
+        this.boundMouseDown = this.onMouseDown.bind(this);
+        this.boundMouseUp = this.onMouseUp.bind(this);
+        this.boundGlobalMouseMove = this.onGlobalMouseMove.bind(this);
+        this.container.addEventListener("mousemove", this.boundMouseMove);
+        this.container.addEventListener("mouseleave", this.boundMouseLeave);
+        this.container.addEventListener("wheel", this.boundWheel, { passive: false });
+        this.container.addEventListener("mousedown", this.boundMouseDown);
+        window.addEventListener("mouseup", this.boundMouseUp);
+        window.addEventListener("mousemove", this.boundGlobalMouseMove);
+    }
+    /**
+     * Update chart data and redraw. EMA is computed automatically; volumes are
+     * optional (pass `[]` when unavailable).
+     *
+     * @param prices  - Chronological price array (oldest-first).
+     * @param volumes - Matching volume array (same length) or empty.
+     */
+    setData(prices, volumes = []) {
+        this.fullData = prices;
+        this.fullEma = computeEmaSeries(prices);
+        this.fullVolumes = volumes;
+        this.winStart = 0;
+        this.winEnd = prices.length - 1;
+        this.hoverData = null;
+        this.hideTooltip();
+        this.drawBase();
+    }
+    /** Remove event listeners and detach from the DOM. */
+    destroy() {
+        if (this.resizeObs) {
+            this.resizeObs.disconnect();
+            this.resizeObs = null;
+        }
+        this.container.removeEventListener("mousemove", this.boundMouseMove);
+        this.container.removeEventListener("mouseleave", this.boundMouseLeave);
+        this.container.removeEventListener("wheel", this.boundWheel);
+        this.container.removeEventListener("mousedown", this.boundMouseDown);
+        window.removeEventListener("mouseup", this.boundMouseUp);
+        window.removeEventListener("mousemove", this.boundGlobalMouseMove);
+        this.container.remove();
+    }
+    /** Return the root container element (for insertion into dynamically built DOM). */
+    getElement() {
+        return this.container;
+    }
+    /** Return the base canvas (for backward-compat visibility toggling). */
+    getBaseCanvas() {
+        return this.baseCanvas;
+    }
+    /** Force a full redraw (e.g. after theme change). */
+    redraw() {
+        if (this.fullData.length >= 2)
+            this.drawBase();
+    }
+    // ═══════════════════════════════════════════════════════════════════════════
+    //  PRIVATE — Drawing
+    // ═══════════════════════════════════════════════════════════════════════════
+    /** Return the currently visible slice of data. */
+    windowedData() {
+        return this.fullData.slice(this.winStart, this.winEnd + 1);
+    }
+    /** Return the currently visible slice of EMA. */
+    windowedEma() {
+        return this.fullEma.slice(this.winStart, this.winEnd + 1);
+    }
+    /**
+     * Size a canvas to match CSS layout × devicePixelRatio, then return
+     * its 2D context scaled appropriately.
+     */
+    prepCanvas(canvas) {
+        const ctx = canvas.getContext("2d");
+        if (!ctx)
+            return null;
+        const dpr = window.devicePixelRatio || 1;
+        const cssW = this.baseCanvas.offsetWidth || this.baseCanvas.clientWidth || 480;
+        const cssH = this.baseCanvas.offsetHeight || this.baseCanvas.clientHeight || 200;
+        canvas.width = cssW * dpr;
+        canvas.height = cssH * dpr;
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        this.cssW = cssW;
+        this.cssH = cssH;
+        return ctx;
+    }
+    /**
+     * Compute CSS-space coordinates for a data point given the current window.
+     */
+    toXY(index, value, stepX, min, range) {
+        const { left, top, bottom } = CHART_MARGIN;
+        const plotH = this.cssH - top - bottom;
+        return {
+            x: left + index * stepX,
+            y: top + plotH - ((value - min) / range) * plotH,
+        };
+    }
+    // ── Base layer ────────────────────────────────────────────────────────────
+    /** Redraw the static base layer (grid, area, price line, EMA line, dots). */
+    drawBase() {
+        const data = this.windowedData();
+        const ema = this.windowedEma();
+        const ctx = this.prepCanvas(this.baseCanvas);
+        if (!ctx)
+            return;
+        // Also resize the interaction canvas to match.
+        this.prepCanvas(this.interCanvas);
+        const cssW = this.cssW;
+        const cssH = this.cssH;
+        const { left: mL, right: mR, top: mT, bottom: mB } = CHART_MARGIN;
+        const plotW = cssW - mL - mR;
+        const plotH = cssH - mT - mB;
+        // ── Accessibility: update aria-label ──
+        if (data.length >= 2) {
+            const first = data[0];
+            const last = data[data.length - 1];
+            const pctDelta = ((last - first) / first * 100).toFixed(1);
+            const dir = last > first ? "up" : last < first ? "down" : "flat";
+            this.baseCanvas.setAttribute("aria-label", `Price chart: ${data.length} data points. Trend ${dir} ${pctDelta}% from ${axisLabel(first)} to ${axisLabel(last)} gp.`);
+        }
+        else {
+            this.baseCanvas.setAttribute("aria-label", "Price chart: insufficient data to display.");
+        }
+        // ── Resolve theme-aware colours once per draw ──
+        const theme = getChartThemeColors();
+        // ── Edge cases ──
+        if (data.length === 0) {
+            ctx.font = '12px "Segoe UI", sans-serif';
+            ctx.fillStyle = theme.emptyText;
+            ctx.textAlign = "center";
+            ctx.textBaseline = "middle";
+            ctx.fillText("No price history available", cssW / 2, cssH / 2);
+            return;
+        }
+        if (data.length === 1) {
+            ctx.font = '11px "Segoe UI", sans-serif';
+            ctx.fillStyle = theme.emptyText;
+            ctx.textAlign = "center";
+            ctx.textBaseline = "middle";
+            ctx.fillText(`${axisLabel(data[0])} gp (1 day)`, cssW / 2, cssH / 2);
+            return;
+        }
+        // ── Axis ranges (use full dataset so Y-axis stays stable when panning) ──
+        const isZoomed = this.winEnd - this.winStart + 1 < this.fullData.length;
+        const ySource = isZoomed
+            ? [...this.fullData, ...this.fullEma.filter(v => v > 0)]
+            : [...data, ...ema.filter(v => v > 0)];
+        const rawMin = Math.min(...ySource);
+        const rawMax = Math.max(...ySource);
+        const rawRange = rawMax - rawMin || 1;
+        // Add 5% vertical padding so extreme values aren't clipped at the edges
+        const pad = rawRange * 0.05;
+        const min = rawMin - pad;
+        const max = rawMax + pad;
+        const range = max - min;
+        const stepX = plotW / (data.length - 1);
+        // ── Y-axis ticks + grid ──
+        const tickValues = [];
+        for (let i = 0; i <= CHART_Y_TICKS; i++) {
+            tickValues.push(min + (range * i) / CHART_Y_TICKS);
+        }
+        const yPrec = axisLabelPrecision(min, max, CHART_Y_TICKS);
+        ctx.font = '11px "Segoe UI", sans-serif';
+        ctx.textAlign = "right";
+        ctx.textBaseline = "middle";
+        for (const tv of tickValues) {
+            const y = mT + plotH - ((tv - min) / range) * plotH;
+            ctx.strokeStyle = theme.gridLine;
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.moveTo(mL, y);
+            ctx.lineTo(cssW - mR, y);
+            ctx.stroke();
+            ctx.fillStyle = theme.axisText;
+            ctx.fillText(axisLabel(tv, yPrec), mL - 6, y);
+        }
+        // ── X-axis labels (short dates, evenly spaced) ──
+        ctx.textBaseline = "top";
+        ctx.fillStyle = theme.axisText;
+        const SHORT_MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+        const maxLabels = 6;
+        // Choose an even day-interval that fits within the visible window
+        const totalDays = data.length - 1;
+        let dayInterval = Math.max(1, Math.ceil(totalDays / (maxLabels - 1)));
+        // Snap to "nice" intervals when range is large enough
+        const niceIntervals = [1, 2, 5, 7, 10, 14, 15, 30, 45, 60, 90];
+        for (const ni of niceIntervals) {
+            if (ni >= dayInterval) {
+                dayInterval = ni;
+                break;
+            }
+        }
+        // Build label indices from the END (most recent) backwards at even intervals
+        const labelIndices = [];
+        for (let idx = totalDays; idx >= 0; idx -= dayInterval) {
+            labelIndices.unshift(idx);
+        }
+        // Always include the first point if not already there
+        if (labelIndices[0] !== 0)
+            labelIndices.unshift(0);
+        const labelY = cssH - mB + 8;
+        for (let li = 0; li < labelIndices.length; li++) {
+            const idx = labelIndices[li];
+            const x = mL + idx * stepX;
+            const globalIdx = this.winStart + idx;
+            const daysAgo = this.fullData.length - 1 - globalIdx;
+            let label;
+            if (daysAgo === 0) {
+                label = "Today";
+            }
+            else {
+                const d = new Date();
+                d.setDate(d.getDate() - daysAgo);
+                label = `${d.getDate()} ${SHORT_MONTHS[d.getMonth()]}`;
+            }
+            // Clamp alignment at edges so text doesn't overflow the plot area
+            if (li === 0) {
+                ctx.textAlign = "left";
+            }
+            else if (li === labelIndices.length - 1) {
+                ctx.textAlign = "right";
+            }
+            else {
+                ctx.textAlign = "center";
+            }
+            ctx.fillText(label, x, labelY);
+        }
+        // Trend colour (locked to full dataset when zoomed so panning doesn't flip it)
+        const trendFirst = isZoomed ? this.fullData[0] : data[0];
+        const trendLast = isZoomed ? this.fullData[this.fullData.length - 1] : data[data.length - 1];
+        const lineColour = trendLast > trendFirst ? "#4ec9b0" : trendLast < trendFirst ? "#f44747" : "#888888";
+        // ── Clip to plot area so nothing bleeds into margins ──
+        ctx.save();
+        ctx.beginPath();
+        ctx.rect(mL, mT, plotW, plotH);
+        ctx.clip();
+        // ── Volume bars (drawn first so they sit behind price line) ──
+        if (this.layers.volume) {
+            const winVols = this.fullVolumes.slice(this.winStart, this.winEnd + 1);
+            const maxVol = Math.max(...winVols, 1);
+            const volMaxH = plotH * 0.25; // volume occupies bottom 25% of plot
+            const barW = Math.max(1, stepX * 0.5);
+            ctx.globalAlpha = 0.25;
+            for (let i = 0; i < winVols.length; i++) {
+                if (!winVols[i])
+                    continue;
+                const barH = (winVols[i] / maxVol) * volMaxH;
+                const x = mL + i * stepX - barW / 2;
+                const y = mT + plotH - barH;
+                ctx.fillStyle = winVols[i] >= maxVol * 0.75 ? "#e2b93d" : "#888";
+                ctx.fillRect(x, y, barW, barH);
+            }
+            ctx.globalAlpha = 1;
+        }
+        // ── Gradient fill under curve ──
+        if (this.layers.price) {
+            const p0 = this.toXY(0, data[0], stepX, min, range);
+            ctx.beginPath();
+            ctx.moveTo(p0.x, p0.y);
+            for (let i = 1; i < data.length; i++) {
+                const p = this.toXY(i, data[i], stepX, min, range);
+                ctx.lineTo(p.x, p.y);
+            }
+            const pLast = this.toXY(data.length - 1, data[data.length - 1], stepX, min, range);
+            ctx.lineTo(pLast.x, mT + plotH);
+            ctx.lineTo(p0.x, mT + plotH);
+            ctx.closePath();
+            const grad = ctx.createLinearGradient(0, mT, 0, mT + plotH);
+            grad.addColorStop(0, lineColour + "44");
+            grad.addColorStop(1, lineColour + "08");
+            ctx.fillStyle = grad;
+            ctx.fill();
+            // ── Price line ──
+            ctx.strokeStyle = lineColour;
+            ctx.lineWidth = 2;
+            ctx.lineJoin = "round";
+            ctx.lineCap = "round";
+            ctx.beginPath();
+            for (let i = 0; i < data.length; i++) {
+                const p = this.toXY(i, data[i], stepX, min, range);
+                if (i === 0)
+                    ctx.moveTo(p.x, p.y);
+                else
+                    ctx.lineTo(p.x, p.y);
+            }
+            ctx.stroke();
+        }
+        // ── EMA line (dashed, semi-transparent) ──
+        if (this.layers.ema && ema.length >= 2 && ema[0] > 0) {
+            ctx.save();
+            ctx.strokeStyle = "rgba(86,156,214,0.7)"; // --accent-primary fallback
+            ctx.lineWidth = 1.5;
+            ctx.setLineDash([4, 3]);
+            ctx.beginPath();
+            for (let i = 0; i < ema.length; i++) {
+                const p = this.toXY(i, ema[i], stepX, min, range);
+                if (i === 0)
+                    ctx.moveTo(p.x, p.y);
+                else
+                    ctx.lineTo(p.x, p.y);
+            }
+            ctx.stroke();
+            ctx.restore();
+        }
+        // ── Data-point dots ──
+        if (this.layers.dots && this.layers.price) {
+            for (let i = 0; i < data.length; i++) {
+                const p = this.toXY(i, data[i], stepX, min, range);
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, 3, 0, Math.PI * 2);
+                ctx.fillStyle = lineColour;
+                ctx.fill();
+                ctx.strokeStyle = theme.dotStroke;
+                ctx.lineWidth = 1;
+                ctx.stroke();
+            }
+        }
+        // ── Restore from plot-area clip ──
+        ctx.restore();
+        // Update zoom hint visibility
+        this.zoomHint.style.display = this.fullData.length > CHART_MIN_ZOOM ? "" : "none";
+        // ── Update Price pill colour to match trend line ──
+        const pricePill = this.toggleStrip.querySelector('[data-layer="price"]');
+        if (pricePill)
+            pricePill.style.setProperty("--pill-color", lineColour);
+    }
+    // ── Interaction layer ─────────────────────────────────────────────────────
+    /** Redraw the interaction overlay (crosshairs + highlight). */
+    drawInteraction(cssX, cssY) {
+        const ctx = this.interCanvas.getContext("2d");
+        if (!ctx)
+            return;
+        const dpr = window.devicePixelRatio || 1;
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        ctx.clearRect(0, 0, this.cssW, this.cssH);
+        const { left: mL, right: mR, top: mT, bottom: mB } = CHART_MARGIN;
+        const plotW = this.cssW - mL - mR;
+        const plotH = this.cssH - mT - mB;
+        // Clamp cursor to plot area
+        const cx = Math.max(mL, Math.min(cssX, mL + plotW));
+        const cy = Math.max(mT, Math.min(cssY, mT + plotH));
+        // Read --accent-primary from the page (fallback blue)
+        const accentColour = getComputedStyle(document.body)
+            .getPropertyValue("--accent-primary").trim() || "#569cd6";
+        // ── Clip to plot area so crosshairs/circles never bleed into axes ──
+        ctx.save();
+        ctx.beginPath();
+        ctx.rect(mL, mT, plotW, plotH);
+        ctx.clip();
+        // ── Dashed vertical line (Time) ──
+        ctx.strokeStyle = accentColour;
+        ctx.lineWidth = 1;
+        ctx.setLineDash([4, 3]);
+        ctx.globalAlpha = 0.7;
+        ctx.beginPath();
+        ctx.moveTo(cx, mT);
+        ctx.lineTo(cx, mT + plotH);
+        ctx.stroke();
+        // ── Dashed horizontal line (snaps to nearest data point) ──
+        const snapY = this.hoverData ? this.hoverData.y : cy;
+        ctx.beginPath();
+        ctx.moveTo(mL, snapY);
+        ctx.lineTo(mL + plotW, snapY);
+        ctx.stroke();
+        // Reset dash and alpha for circles
+        ctx.setLineDash([]);
+        ctx.globalAlpha = 1;
+        // ── Highlight circle on nearest data point ──
+        if (this.hoverData && this.layers.price) {
+            const { x, y } = this.hoverData;
+            ctx.beginPath();
+            ctx.arc(x, y, 5, 0, Math.PI * 2);
+            ctx.fillStyle = accentColour;
+            ctx.globalAlpha = 0.35;
+            ctx.fill();
+            ctx.globalAlpha = 1;
+            ctx.strokeStyle = accentColour;
+            ctx.lineWidth = 2;
+            ctx.stroke();
+        }
+        // ── Highlight circle on EMA line at the same index ──
+        if (this.hoverData && this.layers.ema) {
+            const ema = this.windowedEma();
+            const data = this.windowedData();
+            const emaVal = ema[this.hoverData.windowIndex];
+            if (emaVal && emaVal > 0 && data.length >= 2) {
+                const isZoomed = this.winEnd - this.winStart + 1 < this.fullData.length;
+                const ySource = isZoomed
+                    ? [...this.fullData, ...this.fullEma.filter(v => v > 0)]
+                    : [...data, ...ema.filter(v => v > 0)];
+                const eRawMin = Math.min(...ySource);
+                const eRawMax = Math.max(...ySource);
+                const eRawRange = eRawMax - eRawMin || 1;
+                const ePad = eRawRange * 0.05;
+                const eMin = eRawMin - ePad;
+                const eMax = eRawMax + ePad;
+                const eRange = eMax - eMin;
+                const stepXE = plotW / (data.length - 1);
+                const ep = this.toXY(this.hoverData.windowIndex, emaVal, stepXE, eMin, eRange);
+                ctx.beginPath();
+                ctx.arc(ep.x, ep.y, 4, 0, Math.PI * 2);
+                ctx.fillStyle = "rgba(86,156,214,0.35)";
+                ctx.fill();
+                ctx.strokeStyle = "rgba(86,156,214,0.9)";
+                ctx.lineWidth = 1.5;
+                ctx.stroke();
+            }
+        }
+        // ── Restore from plot-area clip ──
+        ctx.restore();
+    }
+    // ═══════════════════════════════════════════════════════════════════════════
+    //  PRIVATE — Coordinate mapping
+    // ═══════════════════════════════════════════════════════════════════════════
+    /**
+     * Convert a mouse event's clientX/Y to CSS-space coordinates relative to
+     * the base canvas, accounting for DPR.
+     */
+    clientToCSS(e) {
+        const rect = this.baseCanvas.getBoundingClientRect();
+        return {
+            cssX: e.clientX - rect.left,
+            cssY: e.clientY - rect.top,
+        };
+    }
+    /**
+     * Find the nearest data point (by X distance) to a CSS-space X coordinate.
+     * Updates `this.hoverData` and returns it.
+     */
+    resolveNearestPoint(cssX) {
+        const data = this.windowedData();
+        const ema = this.windowedEma();
+        if (data.length < 2)
+            return null;
+        const { left: mL, right: mR, top: mT, bottom: mB } = CHART_MARGIN;
+        const plotW = this.cssW - mL - mR;
+        const plotH = this.cssH - mT - mB;
+        const stepX = plotW / (data.length - 1);
+        const isZoomed = this.winEnd - this.winStart + 1 < this.fullData.length;
+        const ySource = isZoomed
+            ? [...this.fullData, ...this.fullEma.filter(v => v > 0)]
+            : [...data, ...ema.filter(v => v > 0)];
+        const rawMin = Math.min(...ySource);
+        const rawMax = Math.max(...ySource);
+        const rawRange = rawMax - rawMin || 1;
+        const pad = rawRange * 0.05;
+        const min = rawMin - pad;
+        const max = rawMax + pad;
+        const range = max - min;
+        // Nearest index in window
+        const rawIdx = (cssX - mL) / stepX;
+        const idx = Math.max(0, Math.min(Math.round(rawIdx), data.length - 1));
+        const globalIdx = this.winStart + idx;
+        const pt = this.toXY(idx, data[idx], stepX, min, range);
+        // Date label: days ago from today
+        const daysAgo = this.fullData.length - 1 - globalIdx;
+        const d = new Date();
+        d.setDate(d.getDate() - daysAgo);
+        const dateLabel = d.toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" });
+        const hd = {
+            windowIndex: idx,
+            dataIndex: globalIdx,
+            x: pt.x,
+            y: pt.y,
+            price: data[idx],
+            ema: ema[idx] || 0,
+            volume: this.fullVolumes[globalIdx] || 0,
+            dateLabel,
+        };
+        this.hoverData = hd;
+        return hd;
+    }
+    // ═══════════════════════════════════════════════════════════════════════════
+    //  PRIVATE — Tooltip
+    // ═══════════════════════════════════════════════════════════════════════════
+    /** Position and populate the tooltip <div> near the hovered point. */
+    showTooltip(hd) {
+        const emaRow = this.layers.ema && hd.ema > 0
+            ? `<div class="chart-tooltip-row"><span class="chart-tooltip-label">30d EMA</span><span class="chart-tooltip-value">${Math.round(hd.ema).toLocaleString("en-US")} gp</span></div>`
+            : "";
+        const volRow = this.layers.volume && hd.volume > 0
+            ? `<div class="chart-tooltip-row"><span class="chart-tooltip-label">Volume</span><span class="chart-tooltip-value">${hd.volume.toLocaleString("en-US")}</span></div>`
+            : "";
+        const priceDir = this.fullData.length >= 2 && hd.dataIndex > 0
+            ? (hd.price > this.fullData[hd.dataIndex - 1] ? "up" : hd.price < this.fullData[hd.dataIndex - 1] ? "down" : "")
+            : "";
+        this.tooltip.innerHTML =
+            `<div class="chart-tooltip-row"><span class="chart-tooltip-label">Date</span><span class="chart-tooltip-value">${hd.dateLabel}</span></div>` +
+                `<div class="chart-tooltip-row"><span class="chart-tooltip-label">Price</span><span class="chart-tooltip-value ${priceDir}">${hd.price.toLocaleString("en-US")} gp</span></div>` +
+                emaRow + volRow;
+        // Position: if cursor is in the right half of the plot, flip tooltip left
+        // of the cursor (and vice-versa).  Bounds are relative to the canvas wrapper
+        // (the tooltip's offset parent) so coordinates align with hd.x / hd.y.
+        const tipW = 180; // approximate max width
+        const tipH = 80;
+        const { left: mL, right: mR } = CHART_MARGIN;
+        const plotW = this.cssW - mL - mR;
+        const plotMidX = mL + plotW / 2;
+        const wrapW = this.cssW;
+        const wrapH = this.cssH;
+        let left;
+        if (hd.x > plotMidX) {
+            // Right half → tooltip to the LEFT of the cursor
+            left = hd.x - tipW - 14;
+        }
+        else {
+            // Left half → tooltip to the RIGHT of the cursor
+            left = hd.x + 14;
+        }
+        let top = hd.y - tipH / 2;
+        // Clamp within wrapper bounds
+        if (left + tipW > wrapW - 4)
+            left = wrapW - tipW - 4;
+        if (left < 4)
+            left = 4;
+        if (top < 4)
+            top = 4;
+        if (top + tipH > wrapH - 4)
+            top = wrapH - tipH - 4;
+        this.tooltip.style.left = `${left}px`;
+        this.tooltip.style.top = `${top}px`;
+        this.tooltip.classList.add("visible");
+    }
+    /** Hide the tooltip. */
+    hideTooltip() {
+        this.tooltip.classList.remove("visible");
+    }
+    // ═══════════════════════════════════════════════════════════════════════════
+    //  PRIVATE — Event handlers
+    // ═══════════════════════════════════════════════════════════════════════════
+    /** Handle mousemove — resolve nearest point + crosshair + tooltip (drag handled globally). */
+    onMouseMove(e) {
+        // During drag, global handler manages panning — skip local hover logic.
+        if (this.isDragging)
+            return;
+        const { cssX, cssY } = this.clientToCSS(e);
+        const hd = this.resolveNearestPoint(cssX);
+        this.drawInteraction(cssX, cssY);
+        if (hd) {
+            this.showTooltip(hd);
+            // Accessibility: update aria-label with hovered price
+            this.baseCanvas.setAttribute("aria-label", `Price chart: hovering ${hd.dateLabel}, ${hd.price.toLocaleString("en-US")} gp.`);
+        }
+    }
+    /** Handle mouseleave — clear crosshair and tooltip (drag continues globally). */
+    onMouseLeave() {
+        // Don't cancel drag — window-level mousemove/mouseup handle it.
+        if (!this.isDragging) {
+            this.hoverData = null;
+            // Clear the interaction canvas
+            const ctx = this.interCanvas.getContext("2d");
+            if (ctx) {
+                const dpr = window.devicePixelRatio || 1;
+                ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+                ctx.clearRect(0, 0, this.cssW, this.cssH);
+            }
+            this.hideTooltip();
+            // Restore default aria-label
+            const data = this.windowedData();
+            if (data.length >= 2) {
+                const first = data[0];
+                const last = data[data.length - 1];
+                const pctDelta = ((last - first) / first * 100).toFixed(1);
+                const dir = last > first ? "up" : last < first ? "down" : "flat";
+                this.baseCanvas.setAttribute("aria-label", `Price chart: ${data.length} data points. Trend ${dir} ${pctDelta}% from ${axisLabel(first)} to ${axisLabel(last)} gp.`);
+            }
+        }
+    }
+    /** Handle mousedown — start drag-to-pan when zoomed in. */
+    onMouseDown(e) {
+        // Only left-click, only when zoomed in
+        if (e.button !== 0)
+            return;
+        const winLen = this.winEnd - this.winStart + 1;
+        if (winLen >= this.fullData.length)
+            return;
+        this.isDragging = true;
+        this.dragStartX = this.clientToCSS(e).cssX;
+        this.dragStartWinStart = this.winStart;
+        this.dragStartWinEnd = this.winEnd;
+        this.hideTooltip();
+        this.updateCursor();
+        e.preventDefault(); // prevent text selection
+    }
+    /** Handle mouseup — end drag-to-pan. */
+    onMouseUp(_e) {
+        if (!this.isDragging)
+            return;
+        this.isDragging = false;
+        this.dragEndedAt = Date.now();
+        this.updateCursor();
+    }
+    /**
+     * Returns true if a drag ended very recently (within 300 ms).
+     * Used by external code (backdrop click handlers) to avoid closing the modal.
+     */
+    wasDragging() {
+        return Date.now() - this.dragEndedAt < 300;
+    }
+    /** Handle global mousemove — continue drag-pan even when cursor leaves the chart. */
+    onGlobalMouseMove(e) {
+        if (!this.isDragging)
+            return;
+        const { cssX } = this.clientToCSS(e);
+        const dx = cssX - this.dragStartX;
+        const { left: mL, right: mR } = CHART_MARGIN;
+        const plotW = this.cssW - mL - mR;
+        const winLen = this.dragStartWinEnd - this.dragStartWinStart + 1;
+        const stepX = plotW / (winLen - 1);
+        const indexDelta = Math.round(-dx / stepX);
+        let newStart = this.dragStartWinStart + indexDelta;
+        newStart = Math.max(0, Math.min(newStart, this.fullData.length - winLen));
+        const newEnd = newStart + winLen - 1;
+        if (newStart !== this.winStart || newEnd !== this.winEnd) {
+            this.winStart = newStart;
+            this.winEnd = newEnd;
+            this.hoverData = null;
+            this.hideTooltip();
+            this.drawBase();
+        }
+    }
+    /** Update cursor style based on zoom/drag state. */
+    updateCursor() {
+        const isZoomed = (this.winEnd - this.winStart + 1) < this.fullData.length;
+        if (this.isDragging) {
+            this.container.style.cursor = "grabbing";
+        }
+        else if (isZoomed) {
+            this.container.style.cursor = "grab";
+        }
+        else {
+            this.container.style.cursor = "crosshair";
+        }
+    }
+    /** Handle wheel — zoom to cursor. */
+    onWheel(e) {
+        if (this.fullData.length <= CHART_MIN_ZOOM)
+            return;
+        e.preventDefault();
+        const { cssX } = this.clientToCSS(e);
+        const data = this.windowedData();
+        if (data.length < 2)
+            return;
+        const { left: mL, right: mR } = CHART_MARGIN;
+        const plotW = this.cssW - mL - mR;
+        const stepX = plotW / (data.length - 1);
+        // Cursor position as a fraction of the current window
+        const rawIdx = (cssX - mL) / stepX;
+        const frac = Math.max(0, Math.min(rawIdx / (data.length - 1), 1));
+        const currentLen = this.winEnd - this.winStart + 1;
+        const zoomIn = e.deltaY < 0;
+        let newLen;
+        if (zoomIn) {
+            newLen = Math.max(CHART_MIN_ZOOM, Math.floor(currentLen * 0.75));
+        }
+        else {
+            newLen = Math.min(this.fullData.length, Math.ceil(currentLen / 0.75));
+        }
+        if (newLen === currentLen)
+            return;
+        // Anchor the zoom around the cursor position
+        const pivotGlobal = this.winStart + frac * (currentLen - 1);
+        let newStart = Math.round(pivotGlobal - frac * (newLen - 1));
+        newStart = Math.max(0, Math.min(newStart, this.fullData.length - newLen));
+        const newEnd = newStart + newLen - 1;
+        this.winStart = newStart;
+        this.winEnd = Math.min(newEnd, this.fullData.length - 1);
+        this.hoverData = null;
+        this.hideTooltip();
+        this.drawBase();
+        this.updateCursor();
+    }
+}
+/** Active interactive chart instances keyed by modal type (for cleanup). */
+const activeCharts = new Map();
+/**
+ * Create (or replace) an InteractiveChart in the given parent.
+ *
+ * @param key     - Unique key for cleanup tracking (e.g. "graph-modal", "analytics").
+ * @param parent  - DOM container to append the chart into.
+ * @param data    - Chronological price array.
+ * @param volumes - Optional matching volume array.
+ * @param height  - CSS height string.
+ * @returns The new InteractiveChart instance.
+ */
+function createInteractiveChart(key, parent, data, volumes = [], height = "200px") {
+    // Destroy any previous chart for this key
+    const prev = activeCharts.get(key);
+    if (prev)
+        prev.destroy();
+    const chart = new InteractiveChart(parent, height);
+    chart.setData(data, volumes);
+    activeCharts.set(key, chart);
+    return chart;
+}
+/**
+ * Destroy the interactive chart for a given key (called on modal hide).
+ */
+function destroyInteractiveChart(key) {
+    const chart = activeCharts.get(key);
+    if (chart) {
+        chart.destroy();
+        activeCharts.delete(key);
+    }
+}
+/**
+ * Legacy wrapper — draw a chart on an existing single `<canvas>`.
+ * Used by mini card sparkline-upgrade paths that still pass a bare canvas.
+ * Creates a temporary non-interactive static render.
  *
  * @param canvas - The target `<canvas>` DOM element.
  * @param data   - Array of numeric price values in chronological order.
@@ -13503,104 +15022,140 @@ function drawGraphChart(canvas, data) {
     const ctx = canvas.getContext("2d");
     if (!ctx)
         return;
+    // Accessible description for screen readers (WCAG 1.1.1).
+    canvas.setAttribute("role", "img");
+    if (data.length >= 2) {
+        const first = data[0];
+        const last = data[data.length - 1];
+        const pctDelta = ((last - first) / first * 100).toFixed(1);
+        const dir = last > first ? "up" : last < first ? "down" : "flat";
+        canvas.setAttribute("aria-label", `Price chart: ${data.length} data points. Trend ${dir} ${pctDelta}% from ${axisLabel(first)} to ${axisLabel(last)} gp.`);
+    }
+    else {
+        canvas.setAttribute("aria-label", "Price chart: insufficient data to display.");
+    }
     const dpr = window.devicePixelRatio || 1;
     const cssW = canvas.offsetWidth || canvas.width;
     const cssH = canvas.offsetHeight || canvas.height;
     canvas.width = cssW * dpr;
     canvas.height = cssH * dpr;
     ctx.scale(dpr, dpr);
-    // ── No data: placeholder ──
+    // ── Resolve theme-aware colours once per draw ──
+    const themeL = getChartThemeColors();
     if (data.length === 0) {
         ctx.font = '12px "Segoe UI", sans-serif';
-        ctx.fillStyle = "#888";
+        ctx.fillStyle = themeL.emptyText;
         ctx.textAlign = "center";
         ctx.textBaseline = "middle";
         ctx.fillText("No price history available", cssW / 2, cssH / 2);
         return;
     }
-    // ── Single data point ──
     if (data.length === 1) {
         ctx.font = '11px "Segoe UI", sans-serif';
-        ctx.fillStyle = "#888";
+        ctx.fillStyle = themeL.emptyText;
         ctx.textAlign = "center";
         ctx.textBaseline = "middle";
         ctx.fillText(`${axisLabel(data[0])} gp (1 day)`, cssW / 2, cssH / 2);
         return;
     }
-    // ── Chart margins ──
-    const marginLeft = 52;
-    const marginRight = 10;
-    const marginTop = 10;
-    const marginBottom = 22;
-    const plotW = cssW - marginLeft - marginRight;
-    const plotH = cssH - marginTop - marginBottom;
-    const min = Math.min(...data);
-    const max = Math.max(...data);
-    const range = max - min || 1;
-    // Compute nice Y-axis ticks (4 horizontal lines).
-    const TICKS = 4;
+    const { left: mL, right: mR, top: mT, bottom: mB } = CHART_MARGIN;
+    const plotW = cssW - mL - mR;
+    const plotH = cssH - mT - mB;
+    const rawMin = Math.min(...data);
+    const rawMax = Math.max(...data);
+    const rawRange = rawMax - rawMin || 1;
+    const pad = rawRange * 0.05;
+    const min = rawMin - pad;
+    const max = rawMax + pad;
+    const range = max - min;
+    const stepX = plotW / (data.length - 1);
+    // Y-axis ticks + grid
     const tickValues = [];
-    for (let i = 0; i <= TICKS; i++) {
-        tickValues.push(min + (range * i) / TICKS);
-    }
-    // ── Draw grid lines + Y-axis labels ──
-    ctx.font = '10px "Segoe UI", sans-serif';
+    for (let i = 0; i <= CHART_Y_TICKS; i++)
+        tickValues.push(min + (range * i) / CHART_Y_TICKS);
+    const yPrec = axisLabelPrecision(rawMin, rawMax, CHART_Y_TICKS);
+    ctx.font = '11px "Segoe UI", sans-serif';
     ctx.textAlign = "right";
     ctx.textBaseline = "middle";
     for (const tv of tickValues) {
-        const y = marginTop + plotH - ((tv - min) / range) * plotH;
-        // Grid line
-        ctx.strokeStyle = "rgba(255,255,255,0.07)";
+        const y = mT + plotH - ((tv - min) / range) * plotH;
+        ctx.strokeStyle = themeL.gridLine;
         ctx.lineWidth = 1;
         ctx.beginPath();
-        ctx.moveTo(marginLeft, y);
-        ctx.lineTo(cssW - marginRight, y);
+        ctx.moveTo(mL, y);
+        ctx.lineTo(cssW - mR, y);
         ctx.stroke();
-        // Label
-        ctx.fillStyle = "#888";
-        ctx.fillText(axisLabel(tv), marginLeft - 6, y);
+        ctx.fillStyle = themeL.axisText;
+        ctx.fillText(axisLabel(tv, yPrec), mL - 6, y);
     }
-    // ── X-axis labels ──
-    ctx.textAlign = "center";
+    // X-axis labels (short dates, evenly spaced)
     ctx.textBaseline = "top";
-    ctx.fillStyle = "#888";
-    const stepX = plotW / (data.length - 1);
-    // Show labels at first, last, and ~3 evenly-spaced middle points.
-    const labelCount = Math.min(data.length, 6);
-    const labelStep = (data.length - 1) / (labelCount - 1);
-    for (let li = 0; li < labelCount; li++) {
-        const idx = Math.round(li * labelStep);
-        const x = marginLeft + idx * stepX;
-        // Label: days ago relative to today.
-        const daysAgo = data.length - 1 - idx;
-        const label = daysAgo === 0 ? "today" : `d\u2212${daysAgo}`;
-        ctx.fillText(label, x, cssH - marginBottom + 6);
+    ctx.fillStyle = themeL.axisText;
+    const SHORT_MONTHS_L = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+    const maxLabelsL = 6;
+    const totalDaysL = data.length - 1;
+    let dayIntervalL = Math.max(1, Math.ceil(totalDaysL / (maxLabelsL - 1)));
+    const niceIntervalsL = [1, 2, 5, 7, 10, 14, 15, 30, 45, 60, 90];
+    for (const ni of niceIntervalsL) {
+        if (ni >= dayIntervalL) {
+            dayIntervalL = ni;
+            break;
+        }
     }
-    // ── Helper: data index → canvas coords ──
+    const labelIndicesL = [];
+    for (let idx = totalDaysL; idx >= 0; idx -= dayIntervalL) {
+        labelIndicesL.unshift(idx);
+    }
+    if (labelIndicesL[0] !== 0)
+        labelIndicesL.unshift(0);
+    const labelYL = cssH - mB + 8;
+    for (let li = 0; li < labelIndicesL.length; li++) {
+        const idx = labelIndicesL[li];
+        const x = mL + idx * stepX;
+        const daysAgo = data.length - 1 - idx;
+        let label;
+        if (daysAgo === 0) {
+            label = "Today";
+        }
+        else {
+            const d = new Date();
+            d.setDate(d.getDate() - daysAgo);
+            label = `${d.getDate()} ${SHORT_MONTHS_L[d.getMonth()]}`;
+        }
+        if (li === 0) {
+            ctx.textAlign = "left";
+        }
+        else if (li === labelIndicesL.length - 1) {
+            ctx.textAlign = "right";
+        }
+        else {
+            ctx.textAlign = "center";
+        }
+        ctx.fillText(label, x, labelYL);
+    }
     const toXY = (i) => ({
-        x: marginLeft + i * stepX,
-        y: marginTop + plotH - ((data[i] - min) / range) * plotH,
+        x: mL + i * stepX,
+        y: mT + plotH - ((data[i] - min) / range) * plotH,
     });
-    // Trend colour.
     const first = data[0];
     const last = data[data.length - 1];
     const lineColour = last > first ? "#4ec9b0" : last < first ? "#f44747" : "#888888";
-    // ── Gradient fill under curve ──
+    // Gradient fill
     ctx.beginPath();
     ctx.moveTo(toXY(0).x, toXY(0).y);
     for (let i = 1; i < data.length; i++) {
         const p = toXY(i);
         ctx.lineTo(p.x, p.y);
     }
-    ctx.lineTo(toXY(data.length - 1).x, marginTop + plotH);
-    ctx.lineTo(toXY(0).x, marginTop + plotH);
+    ctx.lineTo(toXY(data.length - 1).x, mT + plotH);
+    ctx.lineTo(toXY(0).x, mT + plotH);
     ctx.closePath();
-    const grad = ctx.createLinearGradient(0, marginTop, 0, marginTop + plotH);
+    const grad = ctx.createLinearGradient(0, mT, 0, mT + plotH);
     grad.addColorStop(0, lineColour + "44");
     grad.addColorStop(1, lineColour + "08");
     ctx.fillStyle = grad;
     ctx.fill();
-    // ── Line ──
+    // Line
     ctx.strokeStyle = lineColour;
     ctx.lineWidth = 2;
     ctx.lineJoin = "round";
@@ -13614,17 +15169,32 @@ function drawGraphChart(canvas, data) {
             ctx.lineTo(p.x, p.y);
     }
     ctx.stroke();
-    // ── Data-point dots ──
+    // Dots
     for (let i = 0; i < data.length; i++) {
         const p = toXY(i);
         ctx.beginPath();
         ctx.arc(p.x, p.y, 3, 0, Math.PI * 2);
         ctx.fillStyle = lineColour;
         ctx.fill();
-        ctx.strokeStyle = "rgba(0,0,0,0.5)";
+        ctx.strokeStyle = themeL.dotStroke;
         ctx.lineWidth = 1;
         ctx.stroke();
     }
+    // Legend (top-left, inside plot area)
+    const legX = mL + 6;
+    const legY = mT + 6;
+    ctx.font = '10px "Segoe UI", sans-serif';
+    ctx.textAlign = "left";
+    ctx.textBaseline = "middle";
+    ctx.strokeStyle = lineColour;
+    ctx.lineWidth = 2;
+    ctx.setLineDash([]);
+    ctx.beginPath();
+    ctx.moveTo(legX, legY + 7);
+    ctx.lineTo(legX + 16, legY + 7);
+    ctx.stroke();
+    ctx.fillStyle = themeL.legendText;
+    ctx.fillText("Price", legX + 22, legY + 7);
 }
 /**
  * Render all market items in the current view mode.
@@ -13872,6 +15442,7 @@ function buildItemCard(item) {
     analyticsBtn.className = "popout-btn";
     analyticsBtn.textContent = "\u2197";
     analyticsBtn.title = "View Analytics";
+    analyticsBtn.setAttribute("aria-label", `View analytics for ${item.name}`);
     analyticsBtn.addEventListener("click", (e) => {
         e.stopPropagation();
         showAnalyticsModal(item);
@@ -13881,10 +15452,13 @@ function buildItemCard(item) {
     favBtn.className = "fav-btn";
     favBtn.textContent = getFavorites().has(item.name) ? "\u2605" : "\u2606";
     favBtn.title = "Toggle favourite";
+    favBtn.setAttribute("aria-label", `Toggle favourite for ${item.name}`);
+    favBtn.setAttribute("aria-pressed", String(getFavorites().has(item.name)));
     favBtn.addEventListener("click", (e) => {
         e.stopPropagation();
         const nowFav = toggleFavorite(item.name);
         favBtn.textContent = nowFav ? "\u2605" : "\u2606";
+        favBtn.setAttribute("aria-pressed", String(nowFav));
         card.classList.toggle("favorited", nowFav);
     });
     // Quick-add-to-portfolio button.
@@ -13892,6 +15466,7 @@ function buildItemCard(item) {
     addFlipCardBtn.className = "quick-add-btn";
     addFlipCardBtn.textContent = "+";
     addFlipCardBtn.title = "Add to portfolio";
+    addFlipCardBtn.setAttribute("aria-label", `Add ${item.name} to portfolio`);
     addFlipCardBtn.addEventListener("click", (e) => {
         e.stopPropagation();
         quickAddToPortfolio(item);
@@ -13956,6 +15531,7 @@ function buildItemCard(item) {
     alertBtn.className = "alert-btn";
     alertBtn.textContent = "\uD83D\uDD14";
     alertBtn.title = "Set price alerts";
+    alertBtn.setAttribute("aria-label", `Set price alert for ${item.name}`);
     // Show active state if thresholds already exist.
     if (existingAlert?.targetBuy || existingAlert?.targetSell) {
         alertBtn.classList.add("alert-active");
@@ -14000,9 +15576,20 @@ function buildItemCard(item) {
         `<div class="detail-row"><span class="detail-label" title="${DETAIL_TIPS["Tax Gap"]}">${DETAIL_LABELS["Tax Gap"]}</span><span class="detail-value${item.isRisky ? " risky-text" : ""}">${formatGpShort(item.taxGap)} gp${item.isRisky ? " ⚠ risky" : ""}</span></div>`,
         `<div class="detail-row"><span class="detail-label" title="${DETAIL_TIPS["Est. Margin (2% tax)"]}">${DETAIL_LABELS["Est. Margin (2% tax)"]}</span><span class="detail-value">${formatGpShort(Math.round(item.price * 0.02))} gp</span></div>`,
     ].join("");
+    // Make the card header keyboard-accessible (WCAG 2.1.1).
+    header.tabIndex = 0;
+    header.setAttribute("role", "button");
+    header.setAttribute("aria-expanded", "false");
     // Toggle inline expand on click (multiple cards can be expanded).
     header.addEventListener("click", () => {
-        card.classList.toggle("expanded");
+        const expanded = card.classList.toggle("expanded");
+        header.setAttribute("aria-expanded", String(expanded));
+    });
+    header.addEventListener("keydown", (e) => {
+        if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            header.click();
+        }
     });
     card.appendChild(header);
     card.appendChild(alertPopover);
@@ -14033,12 +15620,16 @@ function ensureModal() {
     });
     const modal = document.createElement("div");
     modal.className = "item-modal";
+    modal.setAttribute("role", "dialog");
+    modal.setAttribute("aria-modal", "true");
+    modal.setAttribute("aria-label", "Item details");
     const mHeader = document.createElement("div");
     mHeader.className = "item-modal-header";
     mHeader.id = "item-modal-header";
     const closeBtn = document.createElement("button");
     closeBtn.className = "item-modal-close";
     closeBtn.textContent = "\u2715";
+    closeBtn.setAttribute("aria-label", "Close item details");
     closeBtn.addEventListener("click", hideItemModal);
     const mBody = document.createElement("div");
     mBody.className = "item-modal-body";
@@ -14214,17 +15805,26 @@ function ensureGraphModal() {
     const backdrop = document.createElement("div");
     backdrop.className = "graph-modal-backdrop";
     backdrop.addEventListener("click", (e) => {
-        if (e.target === backdrop)
+        if (e.target === backdrop) {
+            for (const chart of activeCharts.values()) {
+                if (chart.wasDragging())
+                    return;
+            }
             hideGraphModal();
+        }
     });
     const modal = document.createElement("div");
     modal.className = "graph-modal";
+    modal.setAttribute("role", "dialog");
+    modal.setAttribute("aria-modal", "true");
+    modal.setAttribute("aria-label", "Price chart");
     const mHeader = document.createElement("div");
     mHeader.className = "graph-modal-header";
     mHeader.id = "graph-modal-header";
     const closeBtn = document.createElement("button");
     closeBtn.className = "item-modal-close";
     closeBtn.textContent = "\u2715";
+    closeBtn.setAttribute("aria-label", "Close price chart");
     closeBtn.addEventListener("click", hideGraphModal);
     mHeader.appendChild(closeBtn);
     const mBody = document.createElement("div");
@@ -14292,6 +15892,25 @@ async function fetchItemHistory(name, range = 7) {
     return allPrices.slice(-range);
 }
 /**
+ * Like {@link fetchItemHistory} but returns both prices and volumes
+ * so charts can render volume bars.
+ */
+async function fetchItemHistoryFull(name, range = 7) {
+    // Ensure the cache is populated (reuse existing helper).
+    await ensureItemHistory(name, 90);
+    // Read full records from cache to get both price + volume.
+    const records = await cache.getHistoricalRecords(name, 90);
+    if (records.length === 0)
+        return { prices: [], volumes: [] };
+    // Records are oldest-first.  Trim to requested range.
+    const sliced = (range < 90 && records.length > range)
+        ? records.slice(-range) : records;
+    return {
+        prices: sliced.map(r => r.price),
+        volumes: sliced.map(r => r.volume ?? 0),
+    };
+}
+/**
  * Refresh the graph modal chart with a new history range.
  * Called when the in-modal range dropdown changes.
  */
@@ -14299,28 +15918,18 @@ async function fetchItemHistory(name, range = 7) {
 async function refreshItemGraph(item, range) {
     const backdrop = ensureGraphModal();
     const mBody = backdrop.querySelector("#graph-modal-body");
-    // Show loading while fetching / checking cache.
-    const canvas = mBody.querySelector(".graph-modal-canvas");
-    if (canvas) {
-        const ctx = canvas.getContext("2d");
-        if (ctx) {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            ctx.font = "12px 'Segoe UI', sans-serif";
-            ctx.fillStyle = "#888";
-            ctx.textAlign = "center";
-            ctx.textBaseline = "middle";
-            ctx.fillText("Fetching history\u2026", canvas.width / 2, canvas.height / 2);
-        }
-    }
+    // Destroy previous chart while fetching.
+    destroyInteractiveChart("graph-modal");
     let fetched;
     try {
-        fetched = await fetchItemHistory(item.name, range);
+        fetched = await fetchItemHistoryFull(item.name, range);
     }
     catch {
         showToast("History unavailable \u2014 could not fetch price data.", "info");
-        fetched = [];
+        fetched = { prices: [], volumes: [] };
     }
-    const hist = fetched.length > 0 ? [...fetched, item.price] : [item.price];
+    const hist = fetched.prices.length > 0 ? [...fetched.prices, item.price] : [item.price];
+    const histVols = fetched.volumes.length > 0 ? [...fetched.volumes, 0] : [];
     const hasData = hist.length >= 2;
     const currentPrice = item.price;
     const oldestPrice = hasData ? hist[0] : currentPrice;
@@ -14337,51 +15946,32 @@ async function refreshItemGraph(item, range) {
     const statsEl = mBody.querySelector(".graph-stats");
     if (statsEl) {
         statsEl.innerHTML =
-            `<div class="graph-stat-row">` +
-                `<span class="graph-stat-label">${range}-Day Trend</span>` +
-                `<span class="graph-stat-value" style="color:${trendColour}">${trendIcon} ${trendLabel}</span>` +
-                `</div>` +
-                `<div class="graph-stat-row">` +
-                `<span class="graph-stat-label">Change</span>` +
-                `<span class="graph-stat-value" style="color:${trendColour}">${absChange >= 0 ? "+" : ""}${formatGpShort(absChange)} gp (${pctChange >= 0 ? "+" : ""}${pctChange.toFixed(1)}%)</span>` +
-                `</div>` +
-                `<div class="graph-stat-row">` +
-                `<span class="graph-stat-label">Current Price</span>` +
-                `<span class="graph-stat-value">${currentPrice.toLocaleString("en-US")} gp</span>` +
-                `</div>` +
-                `<div class="graph-stat-row">` +
-                `<span class="graph-stat-label">${range}-Day High</span>` +
-                `<span class="graph-stat-value">${highPrice.toLocaleString("en-US")} gp</span>` +
-                `</div>` +
-                `<div class="graph-stat-row">` +
-                `<span class="graph-stat-label">${range}-Day Low</span>` +
-                `<span class="graph-stat-value">${lowPrice.toLocaleString("en-US")} gp</span>` +
-                `</div>` +
-                `<div class="graph-stat-row">` +
-                `<span class="graph-stat-label">Volatility</span>` +
-                `<span class="graph-stat-value">${volatility.toFixed(1)}%</span>` +
-                `</div>` +
-                `<div class="graph-stat-row">` +
-                `<span class="graph-stat-label">Data Points</span>` +
-                `<span class="graph-stat-value">${hist.length} day${hist.length !== 1 ? "s" : ""}</span>` +
-                `</div>`;
+            statCardHtml("graph-stat-row", `${range}-Day Trend`, `${trendIcon} ${trendLabel}`, "Trend", `color:${trendColour}`) +
+                statCardHtml("graph-stat-row", "Change", `${absChange >= 0 ? "+" : ""}${formatGpShort(absChange)} gp (${pctChange >= 0 ? "+" : ""}${pctChange.toFixed(1)}%)`, "Change", `color:${trendColour}`) +
+                statCardHtml("graph-stat-row", "Current Price", `${currentPrice.toLocaleString("en-US")} gp`, "Current Price") +
+                statCardHtml("graph-stat-row", `${range}-Day High`, `${highPrice.toLocaleString("en-US")} gp`, "High") +
+                statCardHtml("graph-stat-row", `${range}-Day Low`, `${lowPrice.toLocaleString("en-US")} gp`, "Low") +
+                statCardHtml("graph-stat-row", "Volatility", `${volatility.toFixed(1)}%`, "Volatility") +
+                statCardHtml("graph-stat-row", "Data Points", `${hist.length} day${hist.length !== 1 ? "s" : ""}`, "Data Points");
     }
     // Manual history refresh fallback – March 2026
     // Update history-status visibility after range refresh.
     const statusEl = mBody.querySelector(".graph-history-status");
+    const chartSlot = mBody.querySelector(".chart-slot");
     if (hist.length < 7) {
         statusEl?.classList.add("visible");
-        if (canvas)
-            canvas.style.display = "none";
+        if (chartSlot)
+            chartSlot.style.display = "none";
     }
     else {
         statusEl?.classList.remove("visible");
-        if (canvas)
-            canvas.style.display = "";
+        if (chartSlot)
+            chartSlot.style.display = "";
     }
     requestAnimationFrame(() => {
-        if (canvas && hist.length >= 2)
-            drawGraphChart(canvas, hist);
+        if (chartSlot && hist.length >= 2) {
+            createInteractiveChart("graph-modal", chartSlot, hist, histVols, "180px");
+        }
     });
 }
 /**
@@ -14428,17 +16018,18 @@ async function showGraphModal(item) {
     }
     let fetched;
     try {
-        fetched = await fetchItemHistory(item.name, range);
+        fetched = await fetchItemHistoryFull(item.name, range);
     }
     catch {
         showToast("History unavailable \u2014 could not fetch price data.", "info");
-        fetched = [];
+        fetched = { prices: [], volumes: [] };
     }
-    const hist = fetched.length > 0 ? [...fetched, item.price] : (item.priceHistory.length >= 2 ? item.priceHistory : [item.price]);
+    const hist = fetched.prices.length > 0 ? [...fetched.prices, item.price] : (item.priceHistory.length >= 2 ? item.priceHistory : [item.price]);
+    const histVols = fetched.volumes.length > 0 ? [...fetched.volumes, 0] : [];
     const hasData = hist.length >= 2;
     // Update item priceHistory if we got fresh data and range is 7d.
-    if (fetched.length > 0 && range <= 7) {
-        item.priceHistory = [...fetched, item.price];
+    if (fetched.prices.length > 0 && range <= 7) {
+        item.priceHistory = [...fetched.prices, item.price];
         if (item.priceHistory.length >= 2 && item.priceHistory[0] > 0) {
             const pct = (item.price - item.priceHistory[0]) / item.priceHistory[0];
             item.priceTrend = pct < -0.05 ? "Downtrend" : pct > 0.05 ? "Uptrend" : "Stable";
@@ -14466,40 +16057,19 @@ async function showGraphModal(item) {
             `<label>Range:</label>` +
             `<select class="graph-range-inline">${rangeOptions}</select>` +
             `</div>` +
-            `<canvas class="graph-modal-canvas" width="480" height="180"${insufficientData ? ' style="display:none"' : ''}></canvas>` +
+            `<div class="chart-slot"${insufficientData ? ' style="display:none"' : ''}></div>` +
             `<div class="graph-history-status${insufficientData ? ' visible' : ''}">` +
             `Insufficient history \u2022 ` +
             `<button class="refresh-history-btn">Refresh</button>` +
             `</div>` +
             `<div class="graph-stats">` +
-            `<div class="graph-stat-row">` +
-            `<span class="graph-stat-label">${range}-Day Trend</span>` +
-            `<span class="graph-stat-value" style="color:${trendColour}">${trendIcon} ${trendLabel}</span>` +
-            `</div>` +
-            `<div class="graph-stat-row">` +
-            `<span class="graph-stat-label">Change</span>` +
-            `<span class="graph-stat-value" style="color:${trendColour}">${absChange >= 0 ? "+" : ""}${formatGpShort(absChange)} gp (${pctChange >= 0 ? "+" : ""}${pctChange.toFixed(1)}%)</span>` +
-            `</div>` +
-            `<div class="graph-stat-row">` +
-            `<span class="graph-stat-label">Current Price</span>` +
-            `<span class="graph-stat-value">${currentPrice.toLocaleString("en-US")} gp</span>` +
-            `</div>` +
-            `<div class="graph-stat-row">` +
-            `<span class="graph-stat-label">${range}-Day High</span>` +
-            `<span class="graph-stat-value">${highPrice.toLocaleString("en-US")} gp</span>` +
-            `</div>` +
-            `<div class="graph-stat-row">` +
-            `<span class="graph-stat-label">${range}-Day Low</span>` +
-            `<span class="graph-stat-value">${lowPrice.toLocaleString("en-US")} gp</span>` +
-            `</div>` +
-            `<div class="graph-stat-row">` +
-            `<span class="graph-stat-label">Volatility</span>` +
-            `<span class="graph-stat-value">${volatility.toFixed(1)}%</span>` +
-            `</div>` +
-            `<div class="graph-stat-row">` +
-            `<span class="graph-stat-label">Data Points</span>` +
-            `<span class="graph-stat-value">${hist.length} day${hist.length !== 1 ? "s" : ""}</span>` +
-            `</div>` +
+            statCardHtml("graph-stat-row", `${range}-Day Trend`, `${trendIcon} ${trendLabel}`, "Trend", `color:${trendColour}`) +
+            statCardHtml("graph-stat-row", "Change", `${absChange >= 0 ? "+" : ""}${formatGpShort(absChange)} gp (${pctChange >= 0 ? "+" : ""}${pctChange.toFixed(1)}%)`, "Change", `color:${trendColour}`) +
+            statCardHtml("graph-stat-row", "Current Price", `${currentPrice.toLocaleString("en-US")} gp`, "Current Price") +
+            statCardHtml("graph-stat-row", `${range}-Day High`, `${highPrice.toLocaleString("en-US")} gp`, "High") +
+            statCardHtml("graph-stat-row", `${range}-Day Low`, `${lowPrice.toLocaleString("en-US")} gp`, "Low") +
+            statCardHtml("graph-stat-row", "Volatility", `${volatility.toFixed(1)}%`, "Volatility") +
+            statCardHtml("graph-stat-row", "Data Points", `${hist.length} day${hist.length !== 1 ? "s" : ""}`, "Data Points") +
             `</div>`;
     // Bind inline range dropdown.
     const inlineRange = mBody.querySelector(".graph-range-inline");
@@ -14513,11 +16083,12 @@ async function showGraphModal(item) {
     }
     // Manual history refresh fallback – March 2026
     bindRefreshHistoryBtn(mBody, item);
-    // Draw the chart after the modal is in the DOM.
+    // Create the interactive chart after the modal is in the DOM.
     requestAnimationFrame(() => {
-        const canvas = mBody.querySelector(".graph-modal-canvas");
-        if (canvas && !insufficientData)
-            drawGraphChart(canvas, hist);
+        const slot = mBody.querySelector(".chart-slot");
+        if (slot && !insufficientData) {
+            createInteractiveChart("graph-modal", slot, hist, histVols, "180px");
+        }
     });
 }
 // Manual history refresh fallback – March 2026
@@ -14533,31 +16104,10 @@ function bindRefreshHistoryBtn(container, item) {
         btn.disabled = true;
         btn.textContent = "Fetching\u2026";
         try {
-            const prices = await ensureItemHistory(item.name, 90);
+            await ensureItemHistory(item.name, 90);
             const range = parseInt((container.querySelector(".graph-range-inline")?.value) || "7", 10);
-            const sliced = (range < 90 && prices.length > range) ? prices.slice(-range) : prices;
-            const hist = sliced.length > 0 ? [...sliced, item.price] : [item.price];
-            // Update canvas visibility & status strip.
-            const canvas = container.querySelector(".graph-modal-canvas");
-            const statusEl = container.querySelector(".graph-history-status");
-            if (hist.length >= 7) {
-                if (canvas) {
-                    canvas.style.display = "";
-                    drawGraphChart(canvas, hist);
-                }
-                statusEl?.classList.remove("visible");
-            }
-            else {
-                // Still insufficient — draw what we have but keep the status.
-                if (canvas) {
-                    canvas.style.display = "";
-                    drawGraphChart(canvas, hist);
-                }
-                btn.textContent = "Refresh";
-                btn.disabled = false;
-            }
-            // Refresh stats as well.
-            refreshItemGraph(item, range);
+            // refreshItemGraph re-reads from cache with volumes and recreates the chart.
+            await refreshItemGraph(item, range);
         }
         catch {
             showToast("Failed to load history", "info");
@@ -14566,10 +16116,11 @@ function bindRefreshHistoryBtn(container, item) {
         }
     });
 }
-/** Hide the graph modal. */
+/** Hide the graph modal and clean up the interactive chart. */
 function hideGraphModal() {
     if (graphModal)
         graphModal.classList.remove("visible");
+    destroyInteractiveChart("graph-modal");
 }
 // ─── Unified Analytics Modal – combines details + graph – March 2026 ────────
 /** Lazily-created singleton analytics modal container. */
@@ -14581,8 +16132,14 @@ function ensureAnalyticsModal() {
     const backdrop = document.createElement("div");
     backdrop.className = "analytics-modal-backdrop";
     backdrop.addEventListener("click", (e) => {
-        if (e.target === backdrop)
+        if (e.target === backdrop) {
+            // Don't close if user just finished dragging the chart and released outside
+            for (const chart of activeCharts.values()) {
+                if (chart.wasDragging())
+                    return;
+            }
             hideAnalyticsModal();
+        }
     });
     const modal = document.createElement("div");
     modal.className = "analytics-modal";
@@ -14593,19 +16150,49 @@ function ensureAnalyticsModal() {
     modal.setAttribute("aria-labelledby", "analytics-modal-title");
     backdrop.appendChild(modal);
     document.body.appendChild(backdrop);
-    // Global Escape key handler.
+    // Global keyboard handler: Escape to close + focus trap (WCAG 2.4.3).
     document.addEventListener("keydown", (e) => {
-        if (e.key === "Escape" && backdrop.classList.contains("visible")) {
+        if (!backdrop.classList.contains("visible"))
+            return;
+        if (e.key === "Escape") {
             hideAnalyticsModal();
+            return;
+        }
+        // Focus trap: cycle Tab within the modal.
+        if (e.key === "Tab") {
+            const focusable = modal.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
+            if (focusable.length === 0)
+                return;
+            const first = focusable[0];
+            const last = focusable[focusable.length - 1];
+            if (e.shiftKey) {
+                if (document.activeElement === first) {
+                    e.preventDefault();
+                    last.focus();
+                }
+            }
+            else {
+                if (document.activeElement === last) {
+                    e.preventDefault();
+                    first.focus();
+                }
+            }
         }
     });
     analyticsModal = backdrop;
     return backdrop;
 }
-/** Hide the unified analytics modal. */
+/** The element that had focus before the analytics modal opened. */
+let analyticsModalTrigger = null;
+/** Hide the unified analytics modal and return focus to the trigger. */
 function hideAnalyticsModal() {
     if (analyticsModal)
         analyticsModal.classList.remove("visible");
+    destroyInteractiveChart("analytics");
+    if (analyticsModalTrigger) {
+        analyticsModalTrigger.focus();
+        analyticsModalTrigger = null;
+    }
 }
 /**
  * Show the unified analytics modal for a given item.
@@ -14616,6 +16203,8 @@ function hideAnalyticsModal() {
  * @param item - The ranked item to display.
  */
 async function showAnalyticsModal(item) {
+    // Save trigger element for focus restoration (WCAG 2.4.3).
+    analyticsModalTrigger = document.activeElement;
     const backdrop = ensureAnalyticsModal();
     const modal = backdrop.querySelector("#analytics-modal");
     // Read the current range from the market-filters dropdown.
@@ -14645,6 +16234,7 @@ async function showAnalyticsModal(item) {
     closeBtn.className = "analytics-modal-close";
     closeBtn.textContent = "\u2715";
     closeBtn.title = "Close (Esc)";
+    closeBtn.setAttribute("aria-label", "Close analytics modal");
     closeBtn.addEventListener("click", hideAnalyticsModal);
     header.appendChild(img);
     header.appendChild(nameEl);
@@ -14837,19 +16427,21 @@ async function showAnalyticsModal(item) {
     }
     let fetched;
     try {
-        fetched = await fetchItemHistory(item.name, range);
+        fetched = await fetchItemHistoryFull(item.name, range);
     }
     catch {
         showToast("History unavailable \u2014 could not fetch price data.", "info");
-        fetched = [];
+        fetched = { prices: [], volumes: [] };
     }
-    const hist = fetched.length > 0
-        ? [...fetched, item.price]
+    const hist = fetched.prices.length > 0
+        ? [...fetched.prices, item.price]
         : (item.priceHistory.length >= 2 ? item.priceHistory : [item.price]);
+    const histVols = fetched.volumes.length > 0
+        ? [...fetched.volumes, 0] : [];
     const hasData = hist.length >= 2;
     // Update item priceHistory if we got fresh data and range is 7d.
-    if (fetched.length > 0 && range <= 7) {
-        item.priceHistory = [...fetched, item.price];
+    if (fetched.prices.length > 0 && range <= 7) {
+        item.priceHistory = [...fetched.prices, item.price];
         if (item.priceHistory.length >= 2 && item.priceHistory[0] > 0) {
             const pct = (item.price - item.priceHistory[0]) / item.priceHistory[0];
             item.priceTrend = pct < -0.05 ? "Downtrend" : pct > 0.05 ? "Uptrend" : "Stable";
@@ -14876,40 +16468,19 @@ async function showAnalyticsModal(item) {
             [7, 30, 90].map((d) => `<option value="${d}"${d === range ? " selected" : ""}>History: ${d} days</option>`).join("") +
             `</select>` +
             `</div>` +
-            `<canvas class="graph-modal-canvas" width="480" height="200"${insufficientData ? ' style="display:none"' : ''}></canvas>` +
+            `<div class="chart-slot"${insufficientData ? ' style="display:none"' : ''}></div>` +
             `<div class="graph-history-status${insufficientData ? ' visible' : ''}">` +
             `Insufficient history \u2022 ` +
             `<button class="refresh-history-btn">Refresh</button>` +
             `</div>` +
             `<div class="analytics-stats-grid">` +
-            `<div class="analytics-stat-card">` +
-            `<span class="analytics-stat-label">${range}-Day Trend</span>` +
-            `<span class="analytics-stat-value" style="color:${trendColour}">${trendIcon} ${trendLabel}</span>` +
-            `</div>` +
-            `<div class="analytics-stat-card">` +
-            `<span class="analytics-stat-label">Change</span>` +
-            `<span class="analytics-stat-value" style="color:${trendColour}">${absChange >= 0 ? "+" : ""}${formatGpShort(absChange)} gp (${pctChange >= 0 ? "+" : ""}${pctChange.toFixed(1)}%)</span>` +
-            `</div>` +
-            `<div class="analytics-stat-card">` +
-            `<span class="analytics-stat-label">Current Price</span>` +
-            `<span class="analytics-stat-value">${currentPrice.toLocaleString("en-US")} gp</span>` +
-            `</div>` +
-            `<div class="analytics-stat-card">` +
-            `<span class="analytics-stat-label">${range}-Day High</span>` +
-            `<span class="analytics-stat-value">${highPrice.toLocaleString("en-US")} gp</span>` +
-            `</div>` +
-            `<div class="analytics-stat-card">` +
-            `<span class="analytics-stat-label">${range}-Day Low</span>` +
-            `<span class="analytics-stat-value">${lowPrice.toLocaleString("en-US")} gp</span>` +
-            `</div>` +
-            `<div class="analytics-stat-card">` +
-            `<span class="analytics-stat-label">Volatility</span>` +
-            `<span class="analytics-stat-value">${volatility.toFixed(1)}%</span>` +
-            `</div>` +
-            `<div class="analytics-stat-card">` +
-            `<span class="analytics-stat-label">Data Points</span>` +
-            `<span class="analytics-stat-value">${hist.length} day${hist.length !== 1 ? "s" : ""}</span>` +
-            `</div>` +
+            statCardHtml("analytics-stat-card", `${range}-Day Trend`, `${trendIcon} ${trendLabel}`, "Trend", `color:${trendColour}`) +
+            statCardHtml("analytics-stat-card", "Change", `${absChange >= 0 ? "+" : ""}${formatGpShort(absChange)} gp (${pctChange >= 0 ? "+" : ""}${pctChange.toFixed(1)}%)`, "Change", `color:${trendColour}`) +
+            statCardHtml("analytics-stat-card", "Current Price", `${currentPrice.toLocaleString("en-US")} gp`, "Current Price") +
+            statCardHtml("analytics-stat-card", `${range}-Day High`, `${highPrice.toLocaleString("en-US")} gp`, "High") +
+            statCardHtml("analytics-stat-card", `${range}-Day Low`, `${lowPrice.toLocaleString("en-US")} gp`, "Low") +
+            statCardHtml("analytics-stat-card", "Volatility", `${volatility.toFixed(1)}%`, "Volatility") +
+            statCardHtml("analytics-stat-card", "Data Points", `${hist.length} day${hist.length !== 1 ? "s" : ""}`, "Data Points") +
             `</div>`;
     // Bind inline range dropdown.
     const inlineRange = graphSection.querySelector(".graph-range-inline");
@@ -14922,11 +16493,12 @@ async function showAnalyticsModal(item) {
     }
     // Bind manual refresh button.
     bindAnalyticsRefreshBtn(graphSection, item);
-    // Draw the chart.
+    // Create the interactive chart.
     requestAnimationFrame(() => {
-        const canvas = graphSection.querySelector(".graph-modal-canvas");
-        if (canvas && !insufficientData)
-            drawGraphChart(canvas, hist);
+        const slot = graphSection.querySelector(".chart-slot");
+        if (slot && !insufficientData) {
+            createInteractiveChart("analytics", slot, hist, histVols);
+        }
     });
 }
 /**
@@ -14934,27 +16506,18 @@ async function showAnalyticsModal(item) {
  * Called when the in-modal range dropdown changes.
  */
 async function refreshAnalyticsGraph(item, graphSection, range) {
-    const canvas = graphSection.querySelector(".graph-modal-canvas");
-    if (canvas) {
-        const ctx = canvas.getContext("2d");
-        if (ctx) {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            ctx.font = "12px 'Segoe UI', sans-serif";
-            ctx.fillStyle = "#888";
-            ctx.textAlign = "center";
-            ctx.textBaseline = "middle";
-            ctx.fillText("Fetching history\u2026", canvas.width / 2, canvas.height / 2);
-        }
-    }
+    // Destroy previous chart while fetching.
+    destroyInteractiveChart("analytics");
     let fetched;
     try {
-        fetched = await fetchItemHistory(item.name, range);
+        fetched = await fetchItemHistoryFull(item.name, range);
     }
     catch {
         showToast("History unavailable \u2014 could not fetch price data.", "info");
-        fetched = [];
+        fetched = { prices: [], volumes: [] };
     }
-    const hist = fetched.length > 0 ? [...fetched, item.price] : [item.price];
+    const hist = fetched.prices.length > 0 ? [...fetched.prices, item.price] : [item.price];
+    const histVols = fetched.volumes.length > 0 ? [...fetched.volumes, 0] : [];
     const hasData = hist.length >= 2;
     const currentPrice = item.price;
     const oldestPrice = hasData ? hist[0] : currentPrice;
@@ -14971,50 +16534,31 @@ async function refreshAnalyticsGraph(item, graphSection, range) {
     const statsGrid = graphSection.querySelector(".analytics-stats-grid");
     if (statsGrid) {
         statsGrid.innerHTML =
-            `<div class="analytics-stat-card">` +
-                `<span class="analytics-stat-label">${range}-Day Trend</span>` +
-                `<span class="analytics-stat-value" style="color:${trendColour}">${trendIcon} ${trendLabel}</span>` +
-                `</div>` +
-                `<div class="analytics-stat-card">` +
-                `<span class="analytics-stat-label">Change</span>` +
-                `<span class="analytics-stat-value" style="color:${trendColour}">${absChange >= 0 ? "+" : ""}${formatGpShort(absChange)} gp (${pctChange >= 0 ? "+" : ""}${pctChange.toFixed(1)}%)</span>` +
-                `</div>` +
-                `<div class="analytics-stat-card">` +
-                `<span class="analytics-stat-label">Current Price</span>` +
-                `<span class="analytics-stat-value">${currentPrice.toLocaleString("en-US")} gp</span>` +
-                `</div>` +
-                `<div class="analytics-stat-card">` +
-                `<span class="analytics-stat-label">${range}-Day High</span>` +
-                `<span class="analytics-stat-value">${highPrice.toLocaleString("en-US")} gp</span>` +
-                `</div>` +
-                `<div class="analytics-stat-card">` +
-                `<span class="analytics-stat-label">${range}-Day Low</span>` +
-                `<span class="analytics-stat-value">${lowPrice.toLocaleString("en-US")} gp</span>` +
-                `</div>` +
-                `<div class="analytics-stat-card">` +
-                `<span class="analytics-stat-label">Volatility</span>` +
-                `<span class="analytics-stat-value">${volatility.toFixed(1)}%</span>` +
-                `</div>` +
-                `<div class="analytics-stat-card">` +
-                `<span class="analytics-stat-label">Data Points</span>` +
-                `<span class="analytics-stat-value">${hist.length} day${hist.length !== 1 ? "s" : ""}</span>` +
-                `</div>`;
+            statCardHtml("analytics-stat-card", `${range}-Day Trend`, `${trendIcon} ${trendLabel}`, "Trend", `color:${trendColour}`) +
+                statCardHtml("analytics-stat-card", "Change", `${absChange >= 0 ? "+" : ""}${formatGpShort(absChange)} gp (${pctChange >= 0 ? "+" : ""}${pctChange.toFixed(1)}%)`, "Change", `color:${trendColour}`) +
+                statCardHtml("analytics-stat-card", "Current Price", `${currentPrice.toLocaleString("en-US")} gp`, "Current Price") +
+                statCardHtml("analytics-stat-card", `${range}-Day High`, `${highPrice.toLocaleString("en-US")} gp`, "High") +
+                statCardHtml("analytics-stat-card", `${range}-Day Low`, `${lowPrice.toLocaleString("en-US")} gp`, "Low") +
+                statCardHtml("analytics-stat-card", "Volatility", `${volatility.toFixed(1)}%`, "Volatility") +
+                statCardHtml("analytics-stat-card", "Data Points", `${hist.length} day${hist.length !== 1 ? "s" : ""}`, "Data Points");
     }
     // Update history-status visibility after range refresh.
     const statusEl = graphSection.querySelector(".graph-history-status");
+    const chartSlot = graphSection.querySelector(".chart-slot");
     if (hist.length < 7) {
         statusEl?.classList.add("visible");
-        if (canvas)
-            canvas.style.display = "none";
+        if (chartSlot)
+            chartSlot.style.display = "none";
     }
     else {
         statusEl?.classList.remove("visible");
-        if (canvas)
-            canvas.style.display = "";
+        if (chartSlot)
+            chartSlot.style.display = "";
     }
     requestAnimationFrame(() => {
-        if (canvas && hist.length >= 2)
-            drawGraphChart(canvas, hist);
+        if (chartSlot && hist.length >= 2) {
+            createInteractiveChart("analytics", chartSlot, hist, histVols);
+        }
     });
 }
 /**
@@ -15028,28 +16572,10 @@ function bindAnalyticsRefreshBtn(graphSection, item) {
         btn.disabled = true;
         btn.textContent = "Fetching\u2026";
         try {
-            const prices = await ensureItemHistory(item.name, 90);
+            await ensureItemHistory(item.name, 90);
             const range = parseInt((graphSection.querySelector(".graph-range-inline")?.value) || "7", 10);
-            const sliced = (range < 90 && prices.length > range) ? prices.slice(-range) : prices;
-            const hist = sliced.length > 0 ? [...sliced, item.price] : [item.price];
-            const canvas = graphSection.querySelector(".graph-modal-canvas");
-            const statusEl = graphSection.querySelector(".graph-history-status");
-            if (hist.length >= 7) {
-                if (canvas) {
-                    canvas.style.display = "";
-                    drawGraphChart(canvas, hist);
-                }
-                statusEl?.classList.remove("visible");
-            }
-            else {
-                if (canvas) {
-                    canvas.style.display = "";
-                    drawGraphChart(canvas, hist);
-                }
-                btn.textContent = "Refresh";
-                btn.disabled = false;
-            }
-            refreshAnalyticsGraph(item, graphSection, range);
+            // refreshAnalyticsGraph re-reads from cache with volumes and recreates the chart.
+            await refreshAnalyticsGraph(item, graphSection, range);
         }
         catch {
             showToast("Failed to load history", "info");
@@ -15223,12 +16749,16 @@ function bindPortfolioSubNav() {
     els.portfolioActiveBtn.addEventListener("click", () => {
         els.portfolioActiveBtn.classList.add("active");
         els.portfolioHistoryBtn.classList.remove("active");
+        els.portfolioActiveBtn.setAttribute("aria-selected", "true");
+        els.portfolioHistoryBtn.setAttribute("aria-selected", "false");
         els.portfolioActiveContainer.style.display = "";
         els.portfolioHistoryContainer.style.display = "none";
     });
     els.portfolioHistoryBtn.addEventListener("click", () => {
         els.portfolioHistoryBtn.classList.add("active");
         els.portfolioActiveBtn.classList.remove("active");
+        els.portfolioHistoryBtn.setAttribute("aria-selected", "true");
+        els.portfolioActiveBtn.setAttribute("aria-selected", "false");
         els.portfolioHistoryContainer.style.display = "";
         els.portfolioActiveContainer.style.display = "none";
         // Refresh stats and history list each time the tab is opened.
@@ -15419,22 +16949,27 @@ function handleAddFlip() {
     const quantity = Number(els.flipQuantity.value);
     const sellPrice = Number(els.flipSellPrice.value);
     if (!itemName) {
+        showToast("Please enter an item name.", "info");
         els.flipItemName.focus();
         return;
     }
     if (!buyPrice || buyPrice <= 0) {
+        showToast("Please enter a valid buy price.", "info");
         els.flipBuyPrice.focus();
         return;
     }
     if (!quantity || quantity <= 0) {
+        showToast("Please enter a valid quantity.", "info");
         els.flipQuantity.focus();
         return;
     }
     if (!sellPrice || sellPrice <= 0) {
+        showToast("Please enter a valid sell price.", "info");
         els.flipSellPrice.focus();
         return;
     }
     portfolio.addFlip(itemName, buyPrice, quantity, sellPrice);
+    showToast(`Flip added: ${itemName}`, "buy");
     // Clear the form.
     els.flipItemName.value = "";
     els.flipBuyPrice.value = "";
@@ -15486,6 +17021,7 @@ function buildFlipCard(flip) {
     removeBtn.type = "button";
     removeBtn.textContent = "✕";
     removeBtn.title = "Remove flip";
+    removeBtn.setAttribute("aria-label", `Remove ${flip.itemName} flip`);
     removeBtn.addEventListener("click", () => {
         portfolio.removeFlip(flip.id);
         renderFlips();
@@ -15495,6 +17031,7 @@ function buildFlipCard(flip) {
     completeBtn.type = "button";
     completeBtn.textContent = "✓";
     completeBtn.title = "Mark as sold";
+    completeBtn.setAttribute("aria-label", `Mark ${flip.itemName} as sold`);
     completeBtn.addEventListener("click", () => {
         const input = prompt(`Enter the actual sell price per item for "${flip.itemName}":`, String(flip.targetSellPrice));
         if (input === null)
@@ -15971,6 +17508,7 @@ function resolveElements() {
         modeDarkBtn: q("mode-dark-btn"),
         modeLightBtn: q("mode-light-btn"),
         contrastSelect: q("contrast-select"),
+        contrastAutoToggle: q("contrast-auto-toggle"),
         tabMarketBtn: q("tab-market-btn"),
         tabAdvisorBtn: q("tab-advisor-btn"),
         viewTabs: q("view-tabs"),
@@ -16029,6 +17567,26 @@ function formatVolume(vol) {
 }
 
 
+/***/ },
+
+/***/ "./appconfig.json"
+/*!************************!*\
+  !*** ./appconfig.json ***!
+  \************************/
+(module, __unused_webpack_exports, __webpack_require__) {
+
+module.exports = __webpack_require__.p + "appconfig.json";
+
+/***/ },
+
+/***/ "./icon.png"
+/*!******************!*\
+  !*** ./icon.png ***!
+  \******************/
+(module, __unused_webpack_exports, __webpack_require__) {
+
+module.exports = __webpack_require__.p + "icon.png";
+
 /***/ }
 
 /******/ 	});
@@ -16043,12 +17601,6 @@ function formatVolume(vol) {
 /******/ 		if (cachedModule !== undefined) {
 /******/ 			return cachedModule.exports;
 /******/ 		}
-/******/ 		// Check if module exists (development only)
-/******/ 		if (__webpack_modules__[moduleId] === undefined) {
-/******/ 			var e = new Error("Cannot find module '" + moduleId + "'");
-/******/ 			e.code = 'MODULE_NOT_FOUND';
-/******/ 			throw e;
-/******/ 		}
 /******/ 		// Create a new module (and put it into the cache)
 /******/ 		var module = __webpack_module_cache__[moduleId] = {
 /******/ 			id: moduleId,
@@ -16057,6 +17609,12 @@ function formatVolume(vol) {
 /******/ 		};
 /******/ 	
 /******/ 		// Execute the module function
+/******/ 		if (!(moduleId in __webpack_modules__)) {
+/******/ 			delete __webpack_module_cache__[moduleId];
+/******/ 			var e = new Error("Cannot find module '" + moduleId + "'");
+/******/ 			e.code = 'MODULE_NOT_FOUND';
+/******/ 			throw e;
+/******/ 		}
 /******/ 		__webpack_modules__[moduleId](module, module.exports, __webpack_require__);
 /******/ 	
 /******/ 		// Return the exports of the module
@@ -16088,6 +17646,18 @@ function formatVolume(vol) {
 /******/ 		};
 /******/ 	})();
 /******/ 	
+/******/ 	/* webpack/runtime/global */
+/******/ 	(() => {
+/******/ 		__webpack_require__.g = (function() {
+/******/ 			if (typeof globalThis === 'object') return globalThis;
+/******/ 			try {
+/******/ 				return this || new Function('return this')();
+/******/ 			} catch (e) {
+/******/ 				if (typeof window === 'object') return window;
+/******/ 			}
+/******/ 		})();
+/******/ 	})();
+/******/ 	
 /******/ 	/* webpack/runtime/hasOwnProperty shorthand */
 /******/ 	(() => {
 /******/ 		__webpack_require__.o = (obj, prop) => (Object.prototype.hasOwnProperty.call(obj, prop))
@@ -16102,6 +17672,29 @@ function formatVolume(vol) {
 /******/ 			}
 /******/ 			Object.defineProperty(exports, '__esModule', { value: true });
 /******/ 		};
+/******/ 	})();
+/******/ 	
+/******/ 	/* webpack/runtime/publicPath */
+/******/ 	(() => {
+/******/ 		var scriptUrl;
+/******/ 		if (__webpack_require__.g.importScripts) scriptUrl = __webpack_require__.g.location + "";
+/******/ 		var document = __webpack_require__.g.document;
+/******/ 		if (!scriptUrl && document) {
+/******/ 			if (document.currentScript && document.currentScript.tagName.toUpperCase() === 'SCRIPT')
+/******/ 				scriptUrl = document.currentScript.src;
+/******/ 			if (!scriptUrl) {
+/******/ 				var scripts = document.getElementsByTagName("script");
+/******/ 				if(scripts.length) {
+/******/ 					var i = scripts.length - 1;
+/******/ 					while (i > -1 && (!scriptUrl || !/^http(s?):/.test(scriptUrl))) scriptUrl = scripts[i--].src;
+/******/ 				}
+/******/ 			}
+/******/ 		}
+/******/ 		// When supporting browsers where an automatic publicPath is not supported you must specify an output.publicPath manually via configuration
+/******/ 		// or pass an empty string ("") and set the __webpack_public_path__ variable from your code to use your own logic.
+/******/ 		if (!scriptUrl) throw new Error("Automatic publicPath is not supported in this browser");
+/******/ 		scriptUrl = scriptUrl.replace(/^blob:/, "").replace(/#.*$/, "").replace(/\?.*$/, "").replace(/\/[^\/]+$/, "/");
+/******/ 		__webpack_require__.p = scriptUrl;
 /******/ 	})();
 /******/ 	
 /******/ 	/* webpack/runtime/nonce */
@@ -16119,7 +17712,9 @@ var __webpack_exports__ = {};
 __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _services__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./services */ "./services/index.ts");
 /* harmony import */ var _uiService__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./uiService */ "./uiService.ts");
-/* harmony import */ var _css_main_css__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./css/main.css */ "./css/main.css");
+/* harmony import */ var _appconfig_json__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./appconfig.json */ "./appconfig.json");
+/* harmony import */ var _icon_png__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./icon.png */ "./icon.png");
+/* harmony import */ var _css_main_css__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./css/main.css */ "./css/main.css");
 /**
  * @module index
  * Application entry point.
