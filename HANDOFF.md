@@ -1,6 +1,6 @@
 # GE Market Analyzer — Agent Handoff Document
 
-> **Purpose**: Bring a new AI agent chat session fully up to speed on the architecture, codebase, constraints, and current status of this Alt1 Toolkit plugin.
+> **Purpose**: Single source of truth for architecture, constraints, and resolved issues. Optimised for AI coding-assistant context.
 
 ---
 
@@ -26,26 +26,23 @@
 - [5. localStorage Keys](#5-localstorage-keys)
 - [6. Key Types Reference](#6-key-types-reference)
 - [7. Build & Serve](#7-build--serve)
-  - [Build](#build)
-  - [Serve locally](#serve-locally)
-  - [TypeScript type-check](#typescript-type-check)
-  - [Webpack config notes](#webpack-config-notes)
 - [8. Current Status](#8-current-status)
 - [9. Past Issues & Resolutions](#9-past-issues--resolutions)
-- [9.1 Known Issues (Open)](#91-known-issues-open)
-- [10. Potential Next Steps](#10-potential-next-steps-not-started)
+- [10. Known Issues (Open)](#10-known-issues-open)
+- [11. Potential Next Steps](#11-potential-next-steps)
+- [12. Package Dependencies](#12-package-dependencies)
 
 ---
 
 ## 1. Project Overview
 
-This is a **RuneScape 3 Alt1 Toolkit plugin** called the **GE Market Analyzer**. It is an intelligent Grand Exchange market analyzer and money-making instructor that uses a **RAG (Retrieval-Augmented Generation)** pipeline:
+**RuneScape 3 Alt1 Toolkit plugin** — intelligent Grand Exchange market analyzer and money-making instructor using a RAG pipeline:
 
 ```
-Data Ingestion → Local Caching → Deterministic Filtering → LLM Synthesis
+Weird Gloop API → IndexedDB cache → Deterministic filtering → LLM synthesis
 ```
 
-The plugin runs as an overlay inside the RS3 game client via the Alt1 framework, and also works standalone in a browser for development.
+Runs as an Alt1 overlay inside RS3 or standalone in a browser for development.
 
 **Tech stack**: TypeScript, Webpack 5, IndexedDB, native `fetch` API, multi-provider LLM support (OpenAI-compatible).
 
@@ -53,20 +50,17 @@ The plugin runs as an overlay inside the RS3 game client via the Alt1 framework,
 
 ## 2. Standing Rules & Constraints
 
-These rules were established across all prior prompts and **must be followed in all future work**:
-
-1. **Act as an expert TypeScript developer specializing in RuneScape 3 Alt1 Toolkit plugins.**
-2. **Prioritize clean architecture, strict modularity, and separation of concerns.**
-3. **Do not provide basic explanations of the tech stack. Write production-ready code.**
-4. **Do NOT use any external NPM packages for LLM/HTTP** (like `openai`); rely exclusively on the native browser `fetch` API to keep the Webpack bundle small.
-5. **Do not modify the existing cache or API service files unless absolutely necessary.**
-6. **Include descriptive JSDoc comments** on all public methods and interfaces.
-7. **Ensure all methods are strongly typed using TypeScript interfaces.**
-8. The LLM system prompt must **explicitly forbid hallucinating prices, volumes, or game mechanics** and **must only use the provided GE data and curated economic rules**.
-9. ~~Wiki guide fetching uses a **two-step search → extract** strategy.~~ Removed (March 2026) — `coreKnowledge.ts` provides curated, flipping-focused context that outperforms raw wiki prose. WikiService now only fetches structured data (buy limits, alch values).
-10. The LLM system prompt must include the **RS3 economic rules** from `coreKnowledge.ts` with a supremacy clause — these rules override any outside knowledge the model may have.
-11. **Barrel imports**: Always import services/types from `./services` (the barrel), not from individual files like `./services/types`.
-12. **All DOM manipulation lives in `uiService.ts`** — no other file should touch the DOM. Services remain UI-agnostic.
+1. **Expert TypeScript developer** specializing in RS3 Alt1 Toolkit plugins.
+2. **Clean architecture, strict modularity, separation of concerns.**
+3. **Production-ready code only** — no basic tech-stack explanations.
+4. **No external NPM packages for LLM/HTTP** (`openai`, `axios`, etc.) — native `fetch` only.
+5. **Do not modify `cacheService.ts` or `weirdGloopService.ts`** unless absolutely necessary.
+6. **JSDoc on all public methods and exported interfaces.**
+7. **Strongly typed** — all methods use TypeScript interfaces.
+8. **LLM prompt must forbid hallucinating** prices/volumes/game mechanics — only use provided GE data + curated economic rules.
+9. **LLM prompt must include `RS3_ECONOMIC_RULES`** from `coreKnowledge.ts` with a supremacy clause overriding model training data.
+10. **Barrel imports** — import from `./services` (the barrel), never from `./services/types` directly.
+11. **All DOM manipulation lives in `uiService.ts`** — services remain UI-agnostic.
 
 ---
 
@@ -123,14 +117,6 @@ Called once at startup from `index.ts`:
 **`runFullMarketScan(catalogue, onProgress?, signal?, deepHistory?)`**: Non-blocking background scan of all ~7,000 items in batches of 100 with **adaptive inter-batch delay** (1 500 ms baseline). Consecutive empty batches double the delay up to a 30 s ceiling; delay resets to 1 500 ms on a successful batch. Fetches latest prices + buy limits + high alch values per batch, bulk-inserts into IndexedDB immediately (resume-safe). History is **only** fetched when `deepHistory=true` (90-day per item via individual `/last90d` requests — significantly slower). When `deepHistory=false` (default), history is loaded on demand when the user opens the analytics modal. **History-only optimisation**: if `deepHistory` is requested and ≥ 90% of the catalogue already has prices fetched within the last hour, the scan skips price/enrichment entirely and only fetches history. Supports `AbortSignal` for user cancellation. Progress callback `(done, total)` drives the UI progress bar.
 
 **`fetchGECatalogue()`**: Fetches the full RS Wiki `Module:GEIDs/data.json` (~7,000 GE-tradeable items, ~215KB). Returns a sorted `GECatalogueEntry[]` used for the market search bar.
-
-**`runFullMarketScan(catalogue, onProgress?, signal?, deepHistory?)`** also exported from `initDataPipeline.ts` — see §4.1 above for full description.
-
-- Endpoint: `https://api.weirdgloop.org/exchange/history/rs/latest?name=ITEM1|ITEM2`
-- Items are pipe-delimited, batched in groups of 100.
-- Batches are dispatched **sequentially** with 300 ms inter-batch pauses (was concurrent `Promise.allSettled` — changed to avoid API rate-limiting). Individual batch failures are logged but do not abort the scan.
-- All HTTP calls go through `WeirdGloopService.fetchWithRetry()` — exponential backoff on 429 and network errors (MAX_RETRIES=4, BACKOFF_BASE_MS=2 000 ms).
-- Returns `Map<string, WeirdGloopPriceRecord>`.
 
 ### 4.2 Weird Gloop Service (`weirdGloopService.ts`)
 
@@ -472,7 +458,7 @@ css/
   - Renamed colorway values (`classic`→`default`, `osrs`→`classic`) auto-migrate once via `migrateColorwayRename()`, gated by `ge-analyzer:colorway-v2` flag.
 - Font stack: Segoe UI / Consolas.
 - `html` and `body` both `width: 100%; height: 100%`.
-- **CSS custom-property alias tokens**: `:root` defines `--border: var(--border-main)` and `--text: var(--text-main)` as convenience aliases for legacy references. Prefer the canonical `--border-main` / `--text-main` in new CSS.
+- **CSS custom-property alias tokens**: `:root` defines `--border: var(--border-main)` and `--text: var(--text-main)` as convenience aliases for legacy references. **Do not use `var(--text)` for component text colours** — the alias resolves at `:root` (dark-mode) scope and does not re-resolve when light colorways override `--text-main` on `body`. Always use `var(--text-main)` or `var(--text-bright)` directly.
 - **Semantic badge background tokens**: `:root` defines `--badge-velocity-*-bg` (insta/active/slow/muted), `--badge-trend-*-bg` (up/down), `--badge-tier-*-bg/border` (free/freetier/lowcost/neutral), `--table-active-row-bg`, `--detail-expanded-bg`, `--setup-note-bg`, `--table-hover-bg`, `--predictive-badge-bg`, `--close-hover-bg` (modal close button hover), `--win-glow` / `--loss-glow` (completed flip card background gradients, derived via `color-mix()` from `--accent-green-bright` / `--accent-red-dark`). All have `body[data-mode="light"]` overrides with boosted alpha values (0.18–0.22 for readability on white backgrounds). Badge classes consume these tokens via `var()` — do not hard-code `rgba()` values.
 - **`--text-price` standardised to green family**: All 12 colorway×mode combinations use greens (dark: #4ade80–#a0b800; light: #1a8a2a–#5a8a0e). Previously inconsistent (gold in Classic, olive in Solarized) — March 2026 fix.
 - **Consolidated light-mode selectors**: All 6 light-mode colorways share a single `body[data-mode="light"] { background: ... }` rule (plus `.view-btn.active { color: #fff }`) instead of 6 duplicate blocks. Similarly, skeuomorphism light-mode selectors are consolidated into `body[data-mode="light"][data-style="skeuomorphism"]` (not enumerated per-colorway).
@@ -597,32 +583,18 @@ All defined in `src/services/types.ts`:
 
 ## 7. Build & Serve
 
-### Build
-
-The preferred development workflow is `npm run watch` in a dedicated terminal — it rebuilds automatically on every file save. Use `npm run build` only when a clean one-shot build is needed (e.g. final verification before a commit).
-
 ```bash
-npm run watch        # recommended — webpack --watch, auto-rebuilds on save
-npm run build        # one-shot build → dist/ (0 errors expected) — use sparingly
+npm run watch          # recommended — webpack --watch, auto-rebuilds on save
+npm run build          # one-shot build → dist/ (0 errors expected) — use sparingly
+npx serve dist --listen 8080   # local dev server (separate terminal)
+npx tsc --noEmit       # type-check only (expect ~11 benign alt1 errors — webpack resolves them)
 ```
 
-### Serve locally
-```bash
-npx serve dist --listen 8080       # serves at http://localhost:8080 (separate terminal)
-```
-
-### TypeScript type-check
-```bash
-npx tsc --noEmit
-```
-
-**Known pre-existing `tsc` warnings**: `tsc --noEmit` may show ~11 errors in `index.ts` related to the `alt1` module and `window.alt1`. These are expected because `tsc` runs without webpack's module resolution — the `alt1` package types are resolved by webpack at build time. These errors do **NOT** affect the Webpack build. **Only webpack output (watch or build) is the true validation.**
-
-### Webpack config notes
-- `HtmlWebpackPlugin` handles `index.html` emission — do NOT add HTML to `asset/resource` rules.
-- `style-loader` + `css-loader` handle `.css` imports (injected into `<head>` at runtime). The CSS entry point is `css/main.css`, which uses `@import` to compose 51 sub-modules — `css-loader` resolves all imports into a single bundle. No additional PostCSS plugins needed.
+**Webpack config notes**:
+- `HtmlWebpackPlugin` handles `index.html` — do NOT add HTML to `asset/resource` rules.
+- `style-loader` + `css-loader` handle `.css` imports (injected into `<head>` at runtime). Entry point: `css/main.css` (51 `@import` sub-modules). No PostCSS.
 - `ts-loader` compiles TypeScript.
-- `asset/resource` rule for images and JSON (excluding `.data.png` and `.fontmeta.json` which use alt1 loaders).
+- `asset/resource` for images + JSON (excluding `.data.png` and `.fontmeta.json` which use alt1 loaders).
 - Library output: UMD as `window.TestApp`.
 - Externals: `sharp`, `canvas`, `electron/common` (node-only alt1 deps).
 
@@ -693,75 +665,97 @@ Everything below is **complete and verified** (builds with 0 errors):
 
 ## 9. Past Issues & Resolutions
 
-| Issue | Root Cause | Fix |
-|-------|-----------|-----|
-| ES5 lib errors (Promise, Map, Object.entries) | tsconfig defaulted to ES5 | Set `target: "ES2020"`, `lib: ["ES2020", "DOM", "DOM.Iterable"]` |
-| `index.html` not emitted to `dist/` | Webpack `asset/resource` rule for HTML | Installed `html-webpack-plugin`, removed HTML from asset rule |
-| Chat input cut off at different zoom levels | `100vh` on `#app` didn't adapt | Used `height: 95%`, flex layout with `max-height: 30%` market / `min-height: 120px` chat |
-| `tsc --noEmit` shows alt1 errors | `tsc` lacks webpack's module resolution | Expected/benign — does NOT affect webpack build |
-| Model datalist pre-filtered on provider switch | Auto-filling model text filtered `<datalist>` | Clear input on provider change; placeholder shows default model |
-| DOM refs dropped during refactor | Refactoring replaced DOM ref block omitting some refs | Manually restored all refs in `resolveElements()` |
-| Expanded cards pushing tile grid | Inline expand with z-index/grid-column broke layout | Replaced with floating modal overlay for detail view |
-| Item names invisible in tile/hybrid views | Overflow hidden + no min-width | Added `min-width: 60px`, `flex-wrap: wrap`, `flex-shrink: 1` |
-| Flip profit always 1-2 gp | Old formula used bare break-even for sell price | New formula: buy at 0.99×, sell at 1.03×, ~2% net after tax |
-| Search replacing Top 20 items | Both rendered into same `#market-items` container | Added separate `#search-results` container above Top 20 |
-| On-demand searched items missing buy limits | Buy limit fetch skipped for non-cached items | Added wiki `getBulkBuyLimits()` call in search flow before cache insert |
-| Favourites/action buttons vertical in tile view | Tile `flex-direction: column` stacked all header children | Wrapped action buttons in `.card-actions` horizontal flex container |
-| Portfolio dropdown opens on "Add Flip" click | `handleAddFlip()` called `flipItemName.focus()` after clearing form | Changed to `flipItemName.blur()` to prevent autocomplete trigger |
-| Portfolio dropdown opens on quick-add from card | Tab switch + form fill triggered focus event on name input | Added `suppressAutocomplete` flag, guard in `updateSuggestions()`, reset via `requestAnimationFrame` |
-| Search results rendering inline after view toggle move | Moving `#view-toggle` into `#search-section` (flex container) caused `#search-results` and `#search-loading` to flow beside the input | Added `width: 100%` to both elements to force them onto their own row in the flex-wrap container |
-| Graph modal showing no data / stuck on "Loading price history…" | Full market scan fetches current prices but not deep history; `fetchItemHistory` always hit the API directly (no cache) | Implemented `ensureItemHistory()` cache-first flow: checks IndexedDB for ≥ 7 data points, fetches via `WeirdGloopService.fetchHistoricalPrices` on demand, persists via `bulkInsertHistory`, dynamic loading text + error toast (March 2026) |
-| API 429 rate-limiting during full market scan | Concurrent `Promise.allSettled` dispatch in `fetchLatestPrices` overwhelmed the Weird Gloop API after ~2 batches | Switched to sequential batch dispatch with 300 ms pauses; added `fetchWithRetry()` with exponential backoff (MAX_RETRIES=4, base 2 s); increased `runFullMarketScan` inter-batch delay from 500 ms to 1 500 ms with adaptive doubling (ceiling 30 s) on consecutive empty batches (March 2026) |
-| Graph modal showing no data for low-volume items with no fallback action | Users had no way to manually trigger history fetch when automatic cache had insufficient data | Added `.graph-history-status` strip with Refresh button: calls `ensureItemHistory()`, re-renders graph on success, toast on failure. Only visible when < 7 data points (March 2026) |
-| Full market scan history fetches hitting 429 rate limits after first batch | `fetchHistoricalPrices` used individual per-item HTTP requests (100 requests per 100-item batch in concurrent groups of 10), exhausting the API rate limit | Rewrote to use **pipe-delimited batched requests** of 50 items each (March 2026), then reverted to **individual per-item requests** with 200 ms pauses after discovering the `/last90d` endpoint only accepts 1 item (`"Too many names"` error); health check re-seeding capped to SEED_ITEMS (~230), sparse fallback capped at 200 (March 2026) |
-| Health check B re-seeding returning 0 items despite valid API | 28 SEED_ITEMS had wrong names or were untradeable — API returned `{success:false}` which the parser silently skipped | **Wave 1**: removed 9 non-existent items (Overload, Adrenaline potion, charms, Golden cracker, non-existent bars), renamed 7 (hallowe'en masks, Bane bar, Orikalkum bar, Spirit shards, Reinforced dragon bones). **Wave 2**: renamed 11 clean herbs ("Dwarf weed" → "Clean dwarf weed" etc.), "Bow string" → "Bowstring", "Dragon rider lance" → "Dragon Rider lance" (case-sensitive). Added diagnostic skip-reason counters and case-insensitive key fallback in `fetchHistoricalPrices` (March 2026) |
-| Post-scan `refreshMarketPanel` triggering 30 K+ 429 errors | `marketAnalyzerService.fetchAPIHistory` had its own per-item fetch loop (no retry, no delay, CONCURRENCY=10); after a 7 059-item scan the sparse-data fallback tried to fetch history for all ~1 849 cached items individually | Replaced bespoke `fetchAPIHistory` with delegation to `WeirdGloopService.fetchHistoricalPrices` (individual per-item requests, 200 ms pauses). Sparse fallback capped at 200 items and results persisted to IndexedDB (March 2026) |
-| CORS failures on Firefox but not Chrome | `fetchWithRetry()` in `weirdGloopService.ts` and `fetchBuyLimitBatch`/`fetchAlchValueBatch` in `wikiService.ts` set a custom `User-Agent` header. Firefox sends it (non-safelisted → triggers CORS preflight), but the APIs only allow `accept` in `Access-Control-Allow-Headers`. Chrome silently strips `User-Agent` so no preflight occurs | Removed the custom `User-Agent` header from all browser `fetch()` calls in both services — browser sends its own `User-Agent` automatically. Never set non-safelisted headers in browser `fetch()` (March 2026) |
-| High Alch values showing "Unknown" for all items | `getBulkHighAlchValues` regex matched only `alchvalue = <number>`, but most `Module:Exchange/<Item>` Lua sources only have a `value` field (base item value); `alchvalue` is rarely present | Added fallback: if no explicit `alchvalue`, compute High Alch as `floor(value × 0.6)` from the base `value` field. Also skip items with `alchable = false`. Added `VALUE_RE` and `ALCHABLE_FALSE_RE` regexes (March 2026) |
-| High Alch showing "Unknown" instead of "Not Alchable" for non-alchable items | `highAlch` was `number \| undefined` — no way to distinguish "not yet fetched" from "item cannot be alched" | Switched primary data source to `Module:GEHighAlchs/data.json?action=raw` bulk endpoint (single HTTP request for all alchable items). Changed `highAlch` type to `number \| false \| undefined`: `false` = explicitly not alchable, `undefined` = not yet determined. UI now shows "Not Alchable" for `false`, LLM format shows "Not Alchable" / "N/A" accordingly. Per-item `Module:Exchange` parsing retained as fallback (March 2026) |
-| Two separate modals (item detail + graph) with duplicated data and disjointed UX | `showItemModal` and `showGraphModal` were independent singletons — users had to open two modals to see all item info, and features like alerts/actions were only in one | Consolidated into `showAnalyticsModal(item)` — a single scrollable overlay combining badges, action buttons, detail rows, alert inputs, interactive price chart with range selector, and stats grid. Old functions deprecated but retained. Single ↗ button per card (March 2026) |
-| HTTP 413 Content Too Large on multi-turn chat | `buildUserMessage()` embedded full market data in every user message; `generateAdvice()` sent the entire `_messages` array to the API. By message 4 the payload exceeded Groq's request size limit | Added `buildTrimmedHistory()`: strips data blocks from all user messages except the most recent, caps history to `MAX_HISTORY_PAIRS` (8) exchanges. Added specific 413 error hint in `handleHttpError()` (March 2026) |
-| HTTP 413 recurring even on first message | Wiki text from MediaWiki API was completely unbounded — no `exchars`/`exintro` limit. A single RS3 wiki article can be 10–30 KB; with 5 guides, wiki text alone could be 50–150 KB, blowing past any body size limit. `LLM_CONTEXT_TOP_N` was also 100 items (unnecessarily large) | **Resolved permanently**: wiki guide text removed entirely (March 2026) — `coreKnowledge.ts` provides better, curated context. `MAX_BODY_BYTES` set to 50 KB with progressive market-data trimming. `LLM_CONTEXT_TOP_N` reduced from 100 → 50. Payload now ~6–8 KB on first message |
-| LLM giving contradictory/spotty advice (e.g. "high volatility (0.0%)", "negative slope (+0.0)") | Core knowledge was only 4 rules; system prompt had no data interpretation guidance; `formatForLLM` omitted trade velocity, high alch, and data-sufficiency markers | Expanded `RS3_ECONOMIC_RULES` to 8 laws (item categories, flipping strategy, gp/hr formulas, common pitfalls). Added `DATA_FIELD_LEGEND` explaining every metric. System prompt now has 12 analytical reasoning rules including the "slope ±0.0 + volatility 0% = insufficient data" case. `formatForLLM` now includes High Alch, Velocity tier, and `[LIMITED DATA]` tag when < 3 history points (March 2026) |
+Each row distilled to **Symptom → Fix/Rule**. Grouped by domain.
 
-| Volume preset filter (Low / High) barely changing Top 20 results | `minVolume` / `maxVolume` filters applied against `effectivePlayerVolume` (clamped by buy limits), not raw GE volume. Most expensive items have small buy limits (2–10), giving effectivePlayerVolume of 12–60 — well below the "Low" cap of 1 000. So virtually the same items appeared in both "Any" and "Low" | Changed `scoreAndFilter` to filter `minVolume`/`maxVolume` against **global daily GE volume** (`globalVol`) instead of `effectivePlayerVolume`. Bumped "Low" threshold from 1 000 → 5 000. `effectivePlayerVolume` still used for **scoring** (`tradedValue`), just not for filtering (March 2026) |
-| Undefined `--border` / `--text` CSS custom properties | 12 rules referenced `var(--border)` and `var(--text)` but `:root` only defined `--border-main` and `--text-main`. Properties resolved to `unset` / browser default, causing invisible or miscolored borders and text in some selectors | Added `--border: var(--border-main)` and `--text: var(--text-main)` alias tokens to `:root` |
-| Hard-coded `rgba()` on badge backgrounds bypassing theme system | 30+ badge/tier/table/detail backgrounds used raw `rgba()` values that didn't respond to mode/colorway changes | Tokenised all values into CSS custom properties (`--badge-velocity-*-bg`, `--badge-tier-*-bg/border`, `--table-active-row-bg`, `--detail-expanded-bg`, etc.) in `:root` with `body[data-mode="light"]` overrides |
-| Duplicate light-mode colorway CSS selectors | Each of 6 light-mode colorways had its own `background` rule and `.view-btn.active { color }` rule (12 rules total) with identical values | Consolidated into 2 rules: one `body[data-mode="light"]` background block and one `.view-btn.active` block. Also consolidated 18 skeuomorphism light-mode selectors (6 colorways × 3 elements) into 3 selectors |
-| `EXPORT_KEYS` missing `mode` and `contrast` | JSON export/import of settings only backed up `style` and `colorway` — `mode` (dark/light) and `contrast` (default/soft/hard) were lost on restore | Added `"ge-analyzer:mode"` and `"ge-analyzer:contrast"` to the `EXPORT_KEYS` array |
-| Four separate dataset writes on theme init causing 4 style recalcs | `bindTheme()` called `applyMode` + `applyStyle` + `applyColorway` + `applyContrast` sequentially, each writing one `dataset` property and triggering an intermediate layout | Added `applyThemeBatch()` that writes all 4 `dataset` properties in a single synchronous pass; `bindTheme()` now uses it for initial restore. `forceStyleInvalidation()` helper flushes the browser's `color-mix()` cache by temporarily removing `data-colorway` (breaks all colorway/contrast selector matches), forcing a synchronous `getComputedStyle` read, then restoring the attribute (called in `applyThemeBatch`, `applyMode`, `applyColorway`, `applyContrast`) |
-| Gruvbox Light `.view-btn.active` color was cream (#fbf1c7) instead of white | Individual colorway block set the active button text to the Gruvbox light base colour, making it nearly invisible on the accent background | Consolidated rule now uses `#ffffff` for all light-mode `.view-btn.active` |
-| `!important` on highlight colour classes | `.hype-text`, `.buy-highlight`, `.sell-highlight`, `.profit-highlight`, `.risky-text` used `!important` for colour overrides | Replaced with doubled-selector specificity (`.market-card .hype-text, .hype-text.hype-text`) |
-| Contrast modifiers breaking all colorways — colours falling back to browser defaults | Every `color-mix()` call in contrast modifier rules self-referenced the property being set (`--bg-main: color-mix(..., var(--bg-main), ...)`) creating CSS custom-property dependency cycles → `guaranteed-invalid` values | Rewrote all contrast modifier rules using strict DAG references: each property only mixes from sibling properties (e.g. `--bg-main` references `--bg-panel`/`--bg-elevated`, `--bg-panel` references `--bg-muted`). Added WCAG AA financial accent colour adjustments in hard contrast modes (March 2026) |
-| Light mode broken / very dark when contrast ≠ default after refresh | Contrast modifier selectors had specificity 0,2,1 — same as colorway selectors. Browser could cache stale `color-mix()` computed values from dark-mode variables, failing to invalidate them on `data-mode` / `data-colorway` attribute changes | Boosted contrast modifier selectors to 0,3,1 by appending `[data-colorway]` (always present on `body`). Added `forceStyleInvalidation()` helper that temporarily removes `data-colorway` + synchronous `getComputedStyle` read to flush cached values (March 2026) |
-| `migrateColorwayRename()` ran on every page load, silently converting valid "classic" → "default" | Migration had no one-time guard — the rename map mapped "classic" (a now-valid value) to "default", so the Classic (brown OSRS) colorway could never persist across page loads | Added `ge-analyzer:colorway-v2` localStorage flag; both `index.ts` inline migration and `migrateColorwayRename()` now run exactly once (March 2026) |
-| Hard contrast self-referencing accent vars causing `guaranteed-invalid` in Edge | Hard contrast modifier set `--accent-teal: color-mix(..., var(--accent-teal), ...)` (and same for `--accent-red`, `--accent-blue-text`, `--accent-gold`) — CSS dependency cycles. Edge may invalidate the entire declaration block, causing background/text properties in the same rule to also become `guaranteed-invalid`, falling back to dark `:root` defaults in light mode | Added `--accent-teal-base`, `--accent-red-base`, `--accent-blue-text-base`, `--accent-gold-base` to all 16 colorway files (duplicate of the main accent value). Contrast modifiers now reference `*-base` vars instead of self-referencing. Also improved `forceStyleInvalidation()` to remove/restore `data-colorway` (breaks real selector matches vs. old dummy attribute approach) (March 2026) |
-| Light mode + hard contrast broken after page refresh (but works in incognito) | `forceStyleInvalidation()` ran unconditionally on startup via `applyThemeBatch()`, even though the early restoration IIFE in `index.ts` already set the same dataset values. The function temporarily stripped `data-colorway` (leaving `data-mode="light"` active), creating a mixed dark-`:root` + light-badge intermediate state. The synchronous `getComputedStyle` flush resolved `color-mix()` expressions against dark `:root` variable values; Chrome's per-process style cache sometimes retained these stale inputs after restoration, breaking light-mode colours. Incognito's cold renderer process cache didn't exhibit the issue. | Initially fixed by skipping `forceStyleInvalidation()` when values were unchanged (startup no-op). However, this left stale dark `:root` `color-mix()` values in place on light-mode refresh (see next row). Superseded by mode-toggle approach (March 2026) |
-| Light mode colours broken after page refresh (any contrast level) | `style-loader` injects CSS when the webpack bundle executes (`<script defer>`). The early-restoration IIFE in `index.ts` ran as part of that same bundle, so by the time it set `data-mode="light"`, Chrome had already computed and cached all CSS custom properties from the dark `:root` defaults (the only matching rules when no `data-mode` attribute exists). Previous invalidation strategies (attribute stripping, mode-toggling) all ran too late. | **Resolved (March 2026):** Moved theme restoration to a raw **inline `<script>`** in `index.html` immediately after `<body>`. This script reads localStorage and sets all four `data-*` attributes before the webpack bundle (and `style-loader`) loads. Chrome's first style computation sees the correct `body[data-mode="light"]` selectors from the start — no stale cache to fight. The old IIFE in `index.ts` was removed. `forceStyleInvalidation()` (mode-toggle strategy) remains as a belt-and-suspenders measure for interactive theme changes. |
-| Glassmorphism, Neumorphism, Skeuomorphism visually incomplete | Style rules only covered a few elements (cards, sections); buttons, inputs, settings, flip cards, modals lacked thematic treatment. Neumorphism cards didn't match canvas bg. Skeuomorphism lacked inner-shadow bevels and `:active` pressed states | Comprehensive refactor: Glass now covers 20+ selectors with `backdrop-filter: blur(18px) saturate(1.2)` + crisp borders. Neumorphism sets `background: var(--bg-main)` on all themed elements + paired light/dark shadows on every component type. Skeuomorphism adds `linear-gradient` textures, full 4-edge bevel borders, inner shadows, `:active` pressed transforms, and carved inset inputs. Micro-component protection prevents icon buttons from being swallowed by heavy style effects (March 2026) |
-| Inconsistent `--text-price` colour across colorways | Classic (formerly OSRS) used gold (#d4a843), Solarized used olive (#859900), Gruvbox used lime (#b8bb26) — switching colorway could make "profit" look like a loss or neutral. Light-mode badge alphas too low (0.10–0.14) making badges nearly invisible on white backgrounds | Standardised `--text-price` to a green family across all 12 colorway×mode combos (dark: #4ade80–#a0b800; light: #1a8a2a–#5a8a0e). Boosted light-mode badge token alphas to 0.18–0.22. Added `--close-hover-bg`, `--win-glow`, `--loss-glow` tokens to replace last hard-coded `rgba()` values. Bumped badge sizing tokens (`--badge-font-sm`: 10→11px, `--badge-padding-sm`: 1px 5px→2px 6px). Consolidated `--accent-hype` as canonical consumption token (March 2026) |
+### Build & Config
 
-### 9.1 Known Issues (Open)
+| Symptom | Fix |
+|---------|-----|
+| ES5 lib errors (Promise, Map, Object.entries) | Set `target: "ES2020"`, `lib: ["ES2020", "DOM", "DOM.Iterable"]` in tsconfig |
+| `index.html` not emitted to `dist/` | Use `HtmlWebpackPlugin`; removed HTML from `asset/resource` rule |
+| `tsc --noEmit` shows ~11 alt1 errors | Expected — `tsc` lacks webpack's module resolution. Does NOT affect build |
 
-No open issues at this time. The light-mode-on-refresh bug was resolved via the mode-toggle `forceStyleInvalidation()` strategy (March 2026) — see the past-issues table above.
+### API & Data Pipeline
+
+| Symptom | Fix |
+|---------|-----|
+| API 429 rate-limiting during full market scan | Switched from concurrent `Promise.allSettled` to **sequential** batch dispatch with 300 ms pauses + `fetchWithRetry()` exponential backoff. Adaptive inter-batch delay 1.5 s → 30 s ceiling |
+| Post-scan `refreshMarketPanel` triggering 30 K+ 429 errors | Replaced bespoke `fetchAPIHistory` loop (no retry, no delay, CONCURRENCY=10) with delegation to `WeirdGloopService.fetchHistoricalPrices` (200 ms per-item pauses, capped at 200 items) |
+| Full scan history fetches hitting 429 after first batch | `/last90d` only accepts 1 item — reverted to sequential per-item requests with 200 ms pauses. Health check re-seeding capped to SEED_ITEMS (~230) |
+| Health check B returning 0 items despite valid API | 28 `SEED_ITEMS` had wrong/untradeable names. Fixed in two waves: removed untradeable items, corrected canonical RS Wiki titles (hallowe'en masks, "Clean " prefix for herbs, case-sensitive "Dragon Rider lance", etc.) |
+| CORS failures on Firefox but not Chrome | Custom `User-Agent` header triggered CORS preflight. **Rule: never set non-safelisted headers in browser `fetch()`** |
+| Graph modal showing no data / stuck "Loading…" | No cache-first flow for history. **Fix**: `ensureItemHistory()` — checks IndexedDB ≥ 7 points, fetches on demand, persists via `bulkInsertHistory` |
+| No fallback for low-volume items with sparse data | Added `.graph-history-status` strip with manual Refresh button when < 7 data points |
+
+### LLM & Chat
+
+| Symptom | Fix |
+|---------|-----|
+| HTTP 413 on multi-turn chat | Full market data embedded in every user message. **Fix**: `buildTrimmedHistory()` strips data blocks from all but most recent message, caps at `MAX_HISTORY_PAIRS` (8) |
+| HTTP 413 on first message | Unbounded wiki text (10–30 KB/article × 5) + `LLM_CONTEXT_TOP_N` was 100. **Fix**: removed wiki text entirely; `coreKnowledge.ts` provides curated context. `MAX_BODY_BYTES` = 50 KB with progressive trimming. `LLM_CONTEXT_TOP_N` reduced to 50 |
+| LLM contradictory advice ("high volatility (0.0%)", "negative slope (+0.0)") | Sparse rules (4), no data legend. **Fix**: expanded `RS3_ECONOMIC_RULES` to 8 laws + added `DATA_FIELD_LEGEND`. System prompt now covers "slope ±0.0 + volatility 0% = insufficient data". `formatForLLM` includes `[LIMITED DATA]` tag |
+
+### UI & Layout
+
+| Symptom | Fix |
+|---------|-----|
+| Chat input cut off at different zoom levels | `100vh` on `#app` didn't adapt. **Fix**: `height: 95%` + flex layout with `max-height: 30%` market / `min-height: 120px` chat |
+| Model datalist pre-filtered on provider switch | Auto-fill text filtered `<datalist>`. **Fix**: clear input on change; placeholder shows default model |
+| DOM refs dropped during refactor | Refactoring omitted some refs. **Rule**: verify **all** existing refs survive in `resolveElements()` |
+| Expanded cards pushing tile grid | Inline expand with z-index broke layout. **Fix**: floating modal overlay |
+| Item names invisible in tile/hybrid | Overflow hidden + no min-width. **Fix**: `min-width: 60px`, `flex-wrap: wrap`, `flex-shrink: 1` |
+| Flip profit always 1–2 gp | Old formula used bare break-even sell. **Fix**: buy at 0.99×, sell at 1.03×, ~2% net margin after tax |
+| Search replacing Top 20 items | Both rendered into same `#market-items`. **Fix**: added separate `#search-results` container |
+| Searched items missing buy limits | Buy-limit fetch skipped for non-cached items. **Fix**: added `getBulkBuyLimits()` call in search flow |
+| Favourites/action buttons vertical in tile view | Tile `flex-direction: column` stacked all children. **Fix**: `.card-actions` horizontal flex container |
+| Portfolio dropdown opens on "Add Flip" click | `focus()` after clearing form. **Fix**: `blur()` instead |
+| Portfolio dropdown opens on quick-add | Tab switch triggered focus event. **Fix**: `suppressAutocomplete` flag + guard in `updateSuggestions()` |
+| Search results inline after view toggle move | `#search-results`/`#search-loading` lacked width constraint. **Fix**: `width: 100%` on both |
+| Two separate modals with duplicated data | `showItemModal` and `showGraphModal` were independent. **Fix**: unified `showAnalyticsModal(item)` — single scrollable overlay |
+| Volume preset (Low/High) barely changing results | Filtered on `effectivePlayerVolume` (clamped by buy limits). **Fix**: filter on **global daily GE volume** instead |
+| `EXPORT_KEYS` missing `mode` and `contrast` | Lost on settings restore. **Fix**: added both to `EXPORT_KEYS` array |
+
+### Wiki & Enrichment
+
+| Symptom | Fix |
+|---------|-----|
+| High Alch "Unknown" for all items | Regex only matched `alchvalue` (rare). **Fix**: fallback to `floor(value × 0.6)` from base `value` field; skip `alchable = false` |
+| No distinction "Unknown" vs "Not Alchable" | `highAlch` was `number \| undefined`. **Fix**: switched to bulk `GEHighAlchs/data.json` endpoint. Type expanded to `number \| false \| undefined` |
+
+### CSS & Theme System
+
+| Symptom | Fix |
+|---------|-----|
+| Undefined `--border`/`--text` properties | `:root` only defined `--border-main`/`--text-main`. **Fix**: added `--border: var(--border-main)` and `--text: var(--text-main)` aliases. **Rule**: use `var(--text-main)` or `var(--text-bright)` directly in components — alias resolves at `:root` scope, fails to re-resolve under light-mode `body` overrides |
+| Hard-coded `rgba()` on badges bypassing themes | 30+ badge/table backgrounds used raw `rgba()`. **Fix**: tokenised into `--badge-velocity-*-bg`, `--badge-tier-*-bg/border`, etc. with light-mode overrides |
+| Duplicate light-mode colorway selectors | 6 identical blocks. **Fix**: consolidated into shared `body[data-mode="light"]` rules |
+| `!important` on highlight colours | **Fix**: replaced with doubled-selector specificity (`.market-card .hype-text, .hype-text.hype-text`) |
+| Contrast modifiers breaking all colorways | `color-mix()` self-referenced the property being set → `guaranteed-invalid`. **Rule**: strict DAG — each property only references siblings (e.g. `--bg-main` mixes from `--bg-panel`/`--bg-elevated`) |
+| Hard contrast self-referencing accent vars | Same `color-mix()` cycle on `--accent-teal`, etc. **Fix**: added `*-base` duplicate vars in all 16 colorway files; contrast modifiers reference `*-base` |
+| Light mode broken after refresh (contrast ≠ default) | Contrast selectors had same specificity (0,2,1) as colorway selectors → stale cached `color-mix()` values. **Fix**: boosted contrast selectors to 0,3,1 by appending `[data-colorway]` |
+| Light mode colours broken after any page refresh | `style-loader` injects CSS at bundle exec time; early-restoration IIFE ran too late — Chrome cached dark `:root` defaults first. **Fix**: moved theme restoration to **inline `<script>` in `index.html`** before the webpack bundle. **Rule**: never move this script into the bundle |
+| Four dataset writes = 4 style recalcs on init | Sequential `applyMode` + `applyStyle` + `applyColorway` + `applyContrast`. **Fix**: `applyThemeBatch()` writes all 4 `dataset` props in one pass. `forceStyleInvalidation()` flushes browser cache via temporary mode toggle |
+| `migrateColorwayRename()` ran on every load | No one-time guard; mapped current-valid "classic" → "default". **Fix**: `ge-analyzer:colorway-v2` flag gates migration |
+| Gruvbox Light `.view-btn.active` invisible | Cream text (#fbf1c7) on accent bg. **Fix**: consolidated rule uses `#fff` for all light-mode active buttons |
+| Glassmorphism/Neumorphism/Skeuomorphism incomplete | Only covered a few elements. **Fix**: comprehensive refactor covering 20+ selectors per style + micro-component protection for icon buttons |
+| Inconsistent `--text-price` across colorways | Gold in Classic, olive in Solarized, lime in Gruvbox. **Fix**: standardised to green family across all 16 combos. Boosted light-mode badge alphas to 0.18–0.22 |
+| Analytics stat values unreadable in light mode | `var(--text)` alias resolved at dark `:root` scope. **Fix**: replaced with `var(--text-bright)` / `var(--text-main)` directly. Strengthened soft contrast light-mode text for WCAG AA |
 
 ---
 
-These were discussed or implied but never started:
+## 10. Known Issues (Open)
 
-- ~~**Improved wiki title mapping**~~: ✅ Implemented then removed — two-step MediaWiki search → extract strategy was replaced by curated `coreKnowledge.ts` (March 2026). WikiService now only fetches structured data (buy limits, alch values).
-- ~~**Error recovery UI**~~: ✅ Implemented — dismissible error banner with retry button, try/catch wrappers across pipeline and UI.
-- ~~**Item detail links**~~: ✅ Implemented — Wiki and GE Database links on every card and in the detail modal.
-- ~~**Responsive mobile layout**~~: ✅ Implemented — `@media (max-width: 600px)` mobile modal/header fixes, `@media (max-width: 700px)` sidebar auto-disable, `@media (min-width: 800px)` desktop breakpoint with wider modals, expanded grids.
-- ~~**Favourites sorting**~~: ✅ Implemented — per-section sort dropdowns on Favourites, Top 20, and Search Results.
-- ~~**Portfolio profit tracking**~~: ✅ Implemented — completed flips with actual sell price, realised profit, stats dashboard (see §4.9).
+No open issues at this time.
+
+---
+
+## 11. Potential Next Steps
+
 - **Alt1 overlay integration**: Capture game state, integrate with Alt1's screen-reading capabilities.
-- ~~**Price alerts**~~: ✅ Implemented — per-item buy/sell alert thresholds in the detail modal, native browser notifications + DOM toast, session dedup via `firedAlerts` Set (see §4.10).
-- ~~**Export/import**~~: ✅ Implemented — JSON backup of favourites, portfolio, portfolio-history, and theme via Data Management buttons in settings (see §4.12).
 
 ---
 
-## 11. Package Dependencies
+## 12. Package Dependencies
 
 **Runtime**: `alt1` (v0.0.1) — RS3 overlay framework.
 

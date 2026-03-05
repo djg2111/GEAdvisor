@@ -202,7 +202,7 @@
 .analytics-stat-value {
   font-size: 13px;
   font-weight: 600;
-  color: var(--text);
+  color: var(--text-bright);
 }
 
 /* ── Analytics modal: responsive adjustments ────────────────────────────────── */

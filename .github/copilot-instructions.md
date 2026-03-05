@@ -1,79 +1,171 @@
-# Copilot Instructions — GE Market Analyzer (Alt1 Plugin)
+﻿# Copilot Instructions  GE Market Analyzer (Alt1 Plugin)
+
+---
 
 ## AI Persona & Design Philosophy
 
-When interacting with this workspace, act as an **Expert UI/UX Designer, Master of Color Theory, and Senior Frontend Developer**. When writing, refactoring, or reviewing UI, CSS, or DOM code, you must strictly adhere to modern industry standards:
-- **Foundational Color Theory**: Ensure excellent contrast, visual hierarchy, and harmonious balance. The UI must look modern, professional, and visually appealing while maintaining the structural integrity of the 144-theme matrix. 
-- **Universal UX & Information Architecture**: Prioritize intuitiveness and rapid readability of dense financial data. Ensure data points, margins, and tooltips are logically grouped with adequate negative space (white space) to prevent visual clutter.
-- **Industry Standards & Accessibility**: Strictly enforce **WCAG 2.1 AA** (or AAA) contrast ratios. Ensure font sizing, weights, and spacing prevent eye strain. Never sacrifice accessibility for aesthetics. 
-- **Responsive & Fluid Architecture**: Prefer modern CSS Grid and Flexbox fluid layout techniques (e.g., `clamp()`, `minmax()`, `auto-fit`) over hard-coded magic numbers or excessive media query breakpoints. The UI must scale flawlessly from a constrained Alt1 overlay window to a full desktop browser.
-- **Maintainable Code**: Follow DRY (Don't Repeat Yourself) principles. Rely entirely on the established CSS custom property token system for colors and spacing.
+Act as an **Expert UI/UX Designer, Master of Color Theory, and Senior Frontend Developer**.
+
+### Core Principles
+- **Foundational Color Theory**: Excellent contrast, visual hierarchy, and harmonious balance. Maintain the structural integrity of the 192-theme matrix.
+- **Universal UX & Information Architecture**: Prioritize intuitiveness and rapid readability of dense financial data. Group data points, margins, and tooltips logically with adequate negative space.
+- **Accessibility**: Strictly enforce **WCAG 2.1 AA** (or AAA) contrast ratios. Never sacrifice accessibility for aesthetics.
+- **Responsive & Fluid Architecture**: Prefer modern CSS Grid and Flexbox fluid techniques (`clamp()`, `minmax()`, `auto-fit`) over hard-coded magic numbers or excessive media query breakpoints. Scale flawlessly from Alt1 overlay to full desktop browser.
+- **Maintainable Code**: Follow DRY principles. Use the established CSS custom property token system exclusively for colours and spacing.
+
+### UI/UX Freedom
+This is an **Alt1 overlay plugin for dense financial data**. The UI/UX approach is **open-ended**  prioritize universal readability, modern design patterns, and information density over strictly adhering to standard RS3 interface conventions. The goal is a professional financial dashboard that happens to display RuneScape data.
+
+### RS3 Financial Accuracy
+All calculations, recommendations, and LLM-injected context **must** account for RS3 economic rules:
+- **2% GE tax** on the sell side (floor-rounded, exempt at <=50 gp)
+- **Buy limits** per 4-hour window (6 windows/day)
+- **Flip profit formula**: `recSellPrice - recBuyPrice - floor(recSellPrice * 0.02)`
+- **Tax gap**: `ceil(price / 0.98) - price`  minimum spread to break even
+- **High Alch floor**: `floor(value * 0.6)` anchors item prices
+- The LLM system prompt **must** include `RS3_ECONOMIC_RULES` and `DATA_FIELD_LEGEND` from `coreKnowledge.ts` with a supremacy clause  these override any model training data
+
+---
 
 ## Architecture
 
-RS3 Alt1 Toolkit plugin using a RAG pipeline: `Weird Gloop API → IndexedDB cache → deterministic filtering → LLM synthesis`. All services live in `src/services/` with a barrel re-export via `src/services/index.ts`. The UI layer (`src/uiService.ts`) is the **only** file that touches the DOM — all services are UI-agnostic. Entry point `src/index.ts` is a thin orchestrator (~80 lines) with startup overlay + step counter.
+RS3 Alt1 Toolkit plugin using a RAG pipeline:
+
+```
+Weird Gloop API -> IndexedDB cache -> deterministic filtering -> LLM synthesis
+```
+
+All services live in `src/services/` with a barrel re-export via `src/services/index.ts`. The UI layer (`src/uiService.ts`) is the **only** file that touches the DOM  all services are UI-agnostic. Entry point `src/index.ts` is a thin orchestrator (~80 lines) with startup overlay + step counter.
+
+---
 
 ## Hard Constraints
 
-- **No external HTTP/LLM packages** — use native `fetch` exclusively (no `openai`, `axios`, etc.)
+- **No external HTTP/LLM packages**  use native `fetch` exclusively (no `openai`, `axios`, etc.)
 - **Do not modify `cacheService.ts` or `weirdGloopService.ts`** unless absolutely necessary
-- All shared interfaces and the `LLM_PROVIDERS` constant live in `src/services/types.ts` — add new types there, not in service files
+- All shared interfaces and the `LLM_PROVIDERS` constant live in `src/services/types.ts`  add new types there, not in service files
 - JSDoc on all public methods and exported interfaces
-- LLM system prompt must include `RS3_ECONOMIC_RULES` and `DATA_FIELD_LEGEND` from `coreKnowledge.ts` with supremacy clause — these rules override any model training data
 - LLM prompts must forbid hallucinating prices/volumes/game mechanics; only use data passed in the user message
-- **Keep docs in sync**: After completing any feature, bug fix, or refactor, update **all three** documentation files before considering the task done:
-  1. `.github/copilot-instructions.md` — update File Roles, UI Layout, Key Patterns, or Gotchas if the change affects architecture, DOM structure, conventions, or known pitfalls.
-  2. `readme.md` — update the Features list or any other section that the change touches (e.g. new UI capabilities, new service, removed feature). **If you add or rename a `##`/`###` heading, update the Table of Contents at the top of the file to match.**
-  3. `HANDOFF.md` — update the relevant deep-dive section(s), localStorage keys table, types table, current-status checklist, and past-issues table as applicable. **If you add or rename a `##`/`###` heading (including new `4.x` subsections), update the Table of Contents at the top of the file to match.**
+- **Barrel imports**: Always import services/types from `./services` (the barrel), not from individual files like `./services/types`
+- **`HistoricalPriceRecord`** is re-exported from the barrel  use it in uiService for typed cache reads
+
+---
 
 ## Build & Verify
 
-The developer runs `npm run watch` in a dedicated terminal for continuous rebuilds during development. **Prefer `watch` output to validate changes** — only run `npm run build` manually when a clean one-shot build is needed (e.g. final verification before commit).
+The developer runs `npm run watch` in a dedicated terminal for continuous rebuilds. **Prefer `watch` output to validate changes**  only run `npm run build` for clean one-shot builds (e.g. final verification before commit).
 
 ```sh
-npm run watch          # primary dev workflow — webpack --watch, rebuilds on save
-npm run build          # one-shot build → dist/ (0 errors expected) — use sparingly
+npm run watch          # primary dev workflow  webpack --watch, rebuilds on save
+npm run build          # one-shot build -> dist/ (0 errors expected)  use sparingly
 npx serve dist --listen 8080   # local dev server (run in a separate terminal)
 ```
 
-`npx tsc --noEmit` will show ~11 errors about the `alt1` module — these are **expected** (webpack resolves alt1 types at build time). Only webpack output (watch or build) is the true validation.
+`npx tsc --noEmit` will show ~11 errors about the `alt1` module  these are **expected** (webpack resolves alt1 types at build time). Only webpack output (watch or build) is the true validation.
+
+---
 
 ## Key Patterns
 
-- **Services use constructor injection**: e.g. `new MarketAnalyzerService(cacheService)`, `new LLMService({ apiKey, endpoint, model })`
-- **LLMService accepts `Partial<LLMConfig>`** — all fields optional (defaults to Groq). API key omitted = no Authorization header (for self-hosted models)
-- **Runtime filter overrides**: `analyzer.getTopItems(overrides?)` merges `Partial<MarketAnalyzerConfig>` at call time — don’t reconstruct the service for filter changes. Volume preset filters (High / Low) apply against **global daily GE volume**, not `effectivePlayerVolume`, so they meaningfully differentiate market liquidity tiers.
-- **localStorage keys** are prefixed `ge-analyzer:` (e.g. `ge-analyzer:llm-provider`, `ge-analyzer:view-mode`, `ge-analyzer:top20-sort`, `ge-analyzer:mode`, `ge-analyzer:style`, `ge-analyzer:colorway`, `ge-analyzer:contrast`, `ge-analyzer:deep-history`, `ge-analyzer:compact-tiles`, `ge-analyzer:colorway-v2`)
-- **Favourites use `FavoriteItem[]`** (not plain strings) — stored in `ge-analyzer:favorites` as `{ name, targetBuy?, targetSell? }`. Legacy `string[]` format auto-migrates on first load via `loadFavorites()`.
-- **Price alert dedup**: `firedAlerts` Set (session-scoped) prevents the same alert from firing repeatedly. Alerts trigger both a DOM toast (`#toast-container`) and a native `Notification` (if permission granted).
-- **Inline alert popover**: Each item card has a 🔔 button in `.card-actions` that toggles a `.card-alert-popover` with compact buy/sell inputs — only one popover open at a time per list. The unified analytics modal also retains its own alert inputs.
-- **Per-section sort controls**: Top 20, Search Results, and Favourites each have their own sort `<select>` and localStorage key (`ge-analyzer:top20-sort`, `ge-analyzer:search-sort`, `ge-analyzer:fav-sort`). Shared `applySortOrder()` helper sorts in place — do not add a global sort.
-- **Unified analytics modal**: `showAnalyticsModal(item)` opens a single scrollable overlay combining item details (badges, recommendations, alerts, actions) with the interactive price chart and trend stats. Detail rows are ordered: flip/profit metrics first (GE price, rec buy/sell, flip profit, High Alch, tax gap, margin), then volume/liquidity metrics, then a "Predictive Analytics" section (30d EMA, Daily Volatility σ%, LR Slope, Predicted Price). Volume Spike row is always visible (shows "Normal" when ≤1.5×). Item sprite has a `title` tooltip showing the item ID. Replaces the old separate `showItemModal` + `showGraphModal` pair. Lazily created singleton (`ensureAnalyticsModal()`). Closes on backdrop click or Escape key. Each item card has one ↗ button that opens it.
-- **History-range selector**: `<select id="history-range-select">` in `#market-filters` (7/30/90 days). Also rendered inline inside the analytics modal — changing either syncs the other. `fetchItemHistory(name, range)` delegates to `ensureItemHistory` (cache-first, API fallback) then slices to the requested range.
-- **On-demand graph history**: `ensureItemHistory(itemName, 90)` checks IndexedDB first; if < 7 data points are cached it fetches via `WeirdGloopService.fetchHistoricalPrices`, persists via `cache.bulkInsertHistory`, then returns prices. The analytics modal shows dynamic loading text ("Checking cached history…" → "Fetching price history…") and a toast on failure.
-- **Manual history refresh fallback**: When the analytics modal has < 7 data points, a `.graph-history-status` strip appears ("Insufficient history • Refresh") below the canvas. Clicking the button calls `ensureItemHistory(itemName, 90)`, re-renders on success, shows toast on failure. Button only visible when data is insufficient.
-- **Predictive badges**: `buildItemCard` appends `.predictive-badges` (EMA, predicted 24h, volatility) after the momentum badges. Values come from `RankedItem.ema30d`, `.predictedNextPrice`, `.volatility`. Hidden in tile/hybrid view when compact mode is enabled (`ge-analyzer:compact-tiles`); always visible in list view. The analytics modal also includes a dedicated "Predictive Analytics" detail section (30d EMA, Daily Volatility σ%, LR Slope, Predicted Price).
-- **Compact tiles toggle**: Checkbox next to the view-mode buttons; persisted in `ge-analyzer:compact-tiles`. When checked, `.predictive-badges` receive `.compact-hidden` (hidden) in tile/hybrid views only — list view remains detailed. UI state tracked via module-scoped `compactMode` boolean; toggling re-renders all three market panels.
-- **Completed flips table**: `renderCompletedFlips()` renders a `<table class="completed-flips-table">` with clickable sort headers. Module-scoped `completedFlipsSortCol`/`completedFlipsSortAsc` track state.
-- **CSV export**: `#export-csv-btn` in the portfolio history toolbar triggers `exportCompletedFlipsCsv()` — generates a data-URL CSV download of all `CompletedFlip` entries.
-- **Four-axis theme system (Mode × Style × Colorway × Contrast)**: 2 modes × 4 styles × 8 colorways × 3 contrast levels = 192 combinations via four `<body>` data attributes. **Modes** (`data-mode`): Dark (default), Light. **Styles** (`data-style`): Basic, Glassmorphism (`body[data-style="glass"]`) — frosted panels via `backdrop-filter: blur(18px) saturate(1.2)`, translucent rgba backgrounds, crisp semi-transparent borders; Neumorphism (`body[data-style="neumorphism"]`) — elements share canvas `--bg-main`, shape conveyed entirely by paired `box-shadow` (light+dark), no visible borders; Skeuomorphism (`body[data-style="skeuomorphism"]`) — `linear-gradient` backgrounds for texture, inner shadows for beveling, drop shadows for depth. **Colorways** (`data-colorway`): Default (`:root` default), Classic (`body[data-colorway="classic"]`) — brown/parchment palette, RS3 Modern (`body[data-colorway="rs3-modern"]`), RS Lobby (`body[data-colorway="rs-lobby"]`), Gruvbox (`body[data-colorway="gruvbox"]`), Solarized (`body[data-colorway="solarized"]`), Twilight Amethyst (`body[data-colorway="twilight-amethyst"]`) — deep indigo-violet palette with lavender text & amethyst accents, OSRS Design (`body[data-colorway="osrs-design"]`) — authentic OSRS interface palette (#FFCF3F yellow, #E6A519 gold, #2E2C29 background) from osrs.design. **Contrast** (`data-contrast`): Normal, Soft, Hard — layered via non-circular `color-mix(in srgb, ...)` (strict DAG — each override references only sibling properties, never the property being set). Hard contrast adjusts financial accent colours (`--accent-green`, `--accent-teal`, `--accent-red`, `--accent-blue-text`, `--accent-gold`) for WCAG AA compliance; accent adjustments use `*-base` duplicate vars (e.g. `--accent-teal-base`) set by each colorway so the `color-mix()` never self-references. CSS selectors use compound form `body[data-mode="dark"][data-colorway="classic"]`. Each colorway defines both dark and light palettes plus helper vars (`--glass-*`, `--neu-*`, `--skeu-*`) consumed by the style structural blocks. Legacy colorway values (`light`, `sol-dark`, `sol-light`) auto-migrate via `migrateColorwayToMode()`. Renamed values (`classic`→`default`, `osrs`→`classic`) auto-migrate once via `migrateColorwayRename()` (gated by `ge-analyzer:colorway-v2` flag). New UI elements must use `var(--*)` tokens, never hard-coded colours.
-- **Micro-component protection**: Icon-only buttons (`.popout-btn`, `.fav-btn`, `.alert-btn`, `.quick-add-btn`, `.flip-remove-btn`, `.flip-complete-btn`, `.ext-link`) have per-style overrides that suppress heavy shadows, blurs, and gradients so they remain legible and clickable in all 4 styles.
-- **Batched theme application**: `applyThemeBatch(mode, style, colorway, contrast)` writes all four `dataset` properties in a single synchronous pass to minimise style recalculations. `forceStyleInvalidation()` flushes the browser's `color-mix()` computed-value cache by toggling `data-mode` to its **opposite** value (e.g. light→dark), forcing a synchronous `getComputedStyle` read, then restoring the original mode and forcing another read. `applyThemeBatch()` always calls `forceStyleInvalidation()`. Interactive single-axis changes (`applyMode/Colorway/Contrast`) also call `forceStyleInvalidation()`.
-- **Semantic badge tokens**: Badge backgrounds and borders are tokenised into CSS custom properties (`--badge-velocity-*-bg`, `--badge-tier-*-bg/border`, `--table-active-row-bg`, `--detail-expanded-bg`, `--close-hover-bg`, `--win-glow`, `--loss-glow`, etc.) defined in `:root` with light-mode overrides in `body[data-mode="light"]`. Light-mode badge overrides use stronger alpha values (0.18–0.22) for readability on white backgrounds. Do not hard-code `rgba()` on badge classes — use the tokens.
-- **`--text-price` is standardised to a green family** across all 16 colorway×mode combinations (dark modes: bright greens #4ade80–#a0b800; light modes: darker greens #1a8a2a–#5a8a0e). Do not use gold/olive tones for prices — green semantically means “money/value” in a GE app.
-- **`--border` and `--text` aliases**: `:root` defines `--border: var(--border-main)` and `--text: var(--text-main)` as convenience aliases. Prefer the canonical `--border-main` / `--text-main` in new CSS, but the aliases exist for legacy references.
-- **Provider presets** in `LLM_PROVIDERS` array (`types.ts`) — each has `endpoint`, `defaultModel`, `keyPlaceholder`, curated `models[]` with `recommended` flags, `costTier` (free/free-tier/low-cost/paid/self-hosted), `costNote`, and optional `signupUrl`
-- **Provider cost badges**: `populateProviderDropdown()` appends a cost-tier emoji badge to each `<option>` label (e.g. "Groq  \u2705 FREE \u2B50 Recommended"). `applyProviderUI()` shows a colour-coded `#provider-cost-hint` span and toggles the `#setup-guide-btn` visibility.
-- **Setup guide modal**: `showSetupGuide()` opens a lazily-created singleton (`ensureSetupGuideModal()`) with provider-specific step-by-step instructions (from `SETUP_GUIDES` map), a cost-tier banner, a direct link to the provider\'s API-key page, and a comparison table of all providers. Closes on backdrop click or Escape.
-- **Barrel imports**: Always import services/types from `./services` (the barrel), not from individual files like `./services/types`
-- **Conversation trimming**: `buildTrimmedHistory()` in `LLMService` strips `=== GRAND EXCHANGE DATA ===` blocks from all user messages except the most recent before sending to the API. Also caps conversation to `MAX_HISTORY_PAIRS` (8) exchanges + system prompt. Prevents HTTP 413 errors on multi-turn chat.
-- **Payload size guard**: `generateAdvice()` checks JSON body size against `MAX_BODY_BYTES` (50 KB). Progressive trimming: halves market-data lines (up to 4×). `LLM_CONTEXT_TOP_N` = 50 items (down from 100). Always-on payload byte logging on every request.
-- **`HistoricalPriceRecord`** is re-exported from the barrel (`services/index.ts`) — use it in uiService for typed cache reads
-- **Deep-history scan checkbox**: `#deep-history-checkbox` next to the scan button; persisted in `ge-analyzer:deep-history`. When checked, `runFullMarketScan(..., deepHistory=true)` fetches 90-day history per item in addition to prices (significantly slower — the `/last90d` endpoint only accepts 1 item per request). When unchecked (default), the scan only fetches current prices; individual item history is loaded on demand when the analytics modal is opened. **History-only optimisation**: if prices are already fresh (≥ 90% of catalogue within 1 hour), the scan skips prices/enrichment entirely and only fetches history. One-time warning toast on enable.
-- **TTL-cached scoring maps**: `MarketAnalyzerService.getOrBuildMaps(days)` caches `avgVolumeMap` and `priceHistoryMap` in memory with a 10-minute TTL. All three public methods (`getTopItems`, `searchItems`, `getItemsByNames`) use this cache — maps are only rebuilt from IndexedDB when stale. `invalidateMapCache()` exists for manual reset, but is rarely needed since data-update paths (scan, reload, retry) construct a new service instance.
-- **Startup step counter**: `index.ts` shows a 4-step counter in the startup overlay ("Step 1 of 4"). Steps: Loading market data → Ranking top items → Loading favourites → Fetching item catalogue. `initUI` receives an `onStatus` callback to drive steps 2–4. All four theme axes (mode, style, colorway, contrast) are restored from localStorage by a raw inline `<script>` in `index.html` (before the webpack bundle loads) so the overlay matches the user's chosen appearance.
-- **Rate-limit retry & adaptive backoff**: `WeirdGloopService.fetchWithRetry()` retries 429s and network errors with exponential backoff (MAX_RETRIES=4, BACKOFF_BASE_MS=2 000 ms). `fetchLatestPrices` dispatches batches **sequentially** (not concurrently) with 300 ms inter-batch pauses. History fetches use **individual per-item requests** with `HISTORY_ITEM_DELAY_MS` (200 ms) pauses — the `/last90d` endpoint only accepts 1 item per request. `fetchHistoricalPrices` includes diagnostic skip-reason counters (not-found / no-data / empty-after-filter / retry-exhausted) and detects API-level error responses (`{success:false}`) returned with HTTP 200. `runFullMarketScan` uses 1 500 ms inter-batch delay with adaptive backoff: consecutive empty batches double the delay up to a 30 s ceiling; delay resets to baseline on a successful batch.
-- **SEED_ITEMS naming**: Names must be **exact** canonical RS Wiki titles. The `/last90d` API returns `{"success":false}` for unknown items (silently skipped). Verify new seed items via `https://api.weirdgloop.org/exchange/history/rs/last90d?name=<encoded>` before adding. Common pitfalls: "hallowe'en" not "h'ween", "Bane bar" not "Banite bar", "Orikalkum bar" not "Orichalcite bar", "Spirit shards" (plural), clean herbs need "Clean " prefix ("Clean dwarf weed" not "Dwarf weed"), "Bowstring" (one word), "Dragon Rider lance" (capital R), untradeable items (Overload, Adrenaline potion, charms) have no GE data.
+### Service Architecture
+
+- **Constructor injection**: e.g. `new MarketAnalyzerService(cacheService)`, `new LLMService({ apiKey, endpoint, model })`
+- **`LLMService` accepts `Partial<LLMConfig>`**  all fields optional (defaults to Groq). API key omitted = no Authorization header (for self-hosted models)
+- **Runtime filter overrides**: `analyzer.getTopItems(overrides?)` merges `Partial<MarketAnalyzerConfig>` at call time  don't reconstruct the service for filter changes
+- **Volume preset filters** (High / Low) apply against **global daily GE volume**, not `effectivePlayerVolume`
+- **TTL-cached scoring maps**: `MarketAnalyzerService.getOrBuildMaps(days)` caches `avgVolumeMap` and `priceHistoryMap` with a 10-minute TTL. All public methods use this cache  maps rebuild from IndexedDB only when stale. `invalidateMapCache()` exists for manual reset
+
+### State Management & localStorage
+
+- **Key prefix**: `ge-analyzer:` (e.g. `ge-analyzer:llm-provider`, `ge-analyzer:view-mode`, `ge-analyzer:mode`, `ge-analyzer:style`, `ge-analyzer:colorway`, `ge-analyzer:contrast`, `ge-analyzer:compact-tiles`, `ge-analyzer:colorway-v2`)
+- **Favourites**: `FavoriteItem[]` (not plain strings)  stored as `{ name, targetBuy?, targetSell? }`. Legacy `string[]` format auto-migrates via `loadFavorites()`
+- **Price alert dedup**: `firedAlerts` Set (session-scoped) prevents repeat alerts. Triggers DOM toast + native `Notification`
+- **Per-section sort controls**: Top 20, Search Results, and Favourites each have their own sort `<select>` and localStorage key. Shared `applySortOrder()` helper  do not add a global sort
+- **EXPORT_KEYS completeness**: The `EXPORT_KEYS` array in `uiService.ts` must include all user-preference localStorage keys. Verify after adding new persisted settings
+
+### CSS & Theme System
+
+- **Four-axis system** (Mode x Style x Colorway x Contrast): 2 x 4 x 8 x 3 = 192 combinations via `<body>` data attributes (`data-mode`, `data-style`, `data-colorway`, `data-contrast`)
+- **Modes**: Dark (default), Light
+- **Styles**: Basic, Glassmorphism (`glass`), Neumorphism (`neumorphism`), Skeuomorphism (`skeuomorphism`)
+- **Colorways**: Default, Classic, RS3 Modern, RS Lobby, Gruvbox, Solarized, Twilight Amethyst, OSRS Design
+- **Contrast**: Normal, Soft, Hard  via non-circular `color-mix(in srgb, ...)` (strict DAG)
+- **Selectors**: Compound form `body[data-mode="dark"][data-colorway="classic"]`
+- **Colorway files** define both dark/light palettes plus `--glass-*`, `--neu-*`, `--skeu-*` helper vars and 4 `*-base` accent vars consumed by contrast modifiers
+- **Contrast modifier specificity**: 0,3,1 (`body[data-mode][data-contrast][data-colorway]`) always beats colorway selectors (0,2,1)
+- **`color-mix()` must NEVER self-reference**  creates CSS dependency cycles. Each override references ONLY sibling properties (strict DAG). Financial accents use `*-base` duplicates (e.g. `--accent-teal-base`)
+- **`--text-price`**: Standardised to green family across all 16 colorway x mode combinations. Do not use gold/olive tones for prices
+- **`--text` and `--border` aliases**: Do NOT use `var(--text)` for component text  resolves at `:root` scope and fails to re-resolve under `body` light-mode overrides. Always use `var(--text-main)` or `var(--text-bright)` directly
+- **Semantic badge tokens**: Badge backgrounds/borders are CSS custom properties (`--badge-velocity-*-bg`, `--badge-tier-*-bg/border`, etc.)  do not hard-code `rgba()`
+- **Badge sizing tokens**: `--badge-font-sm`: 11px, `--badge-font-md`: 12px, `--badge-padding-sm`: 2px 6px, `--badge-padding-md`: 3px 7px. Sized for 110-125% DPI. Override tokens, not individual classes
+- **`--accent-hype`**: Single canonical hype/volume-spike colour token. Sell badges keep `--accent-gold`
+- **No `!important` on badge/highlight colours**: Use doubled-selector specificity instead (`.market-card .hype-text, .hype-text.hype-text`)
+- **New UI elements** must use `var(--*)` tokens, never hard-coded colours
+- **Legacy migrations**: `migrateColorwayToMode()` handles old values (`light`, `sol-dark`, `sol-light`). `migrateColorwayRename()` handles renames (`classic` -> `default`, `osrs` -> `classic`), gated by `ge-analyzer:colorway-v2` flag
+
+#### Theme Application
+- **`applyThemeBatch(mode, style, colorway, contrast)`**: Writes all four `dataset` properties in a single synchronous pass
+- **`forceStyleInvalidation()`**: Flushes browser `color-mix()` cache by toggling `data-mode` to its opposite, forcing `getComputedStyle`, then restoring. Called by `applyThemeBatch()` and interactive single-axis changes
+- **Pre-bundle theme restoration**: An inline `<script>` in `index.html` reads localStorage and sets all four `data-*` attributes **before** the webpack bundle loads. **Do not move this logic into the webpack bundle**
+- **Micro-component protection**: Icon-only buttons (`.popout-btn`, `.fav-btn`, `.alert-btn`, `.quick-add-btn`, `.flip-remove-btn`, `.flip-complete-btn`, `.ext-link`) have per-style overrides suppressing heavy shadows/blurs/gradients
+
+### UI Components & Modals
+
+- **Unified analytics modal**: `showAnalyticsModal(item)`  single scrollable overlay with item details, badges, alerts, actions, interactive price chart, trend stats. Lazy singleton via `ensureAnalyticsModal()`. Closes on backdrop/Escape. Detail row order: flip/profit -> volume/liquidity -> Predictive Analytics
+- **History-range selector**: `<select id="history-range-select">` (7/30/90 days) in `#market-filters` and inline in modal  synced bidirectionally
+- **On-demand graph history**: `ensureItemHistory(itemName, 90)`  cache-first, API fallback, persists results
+- **Manual history refresh**: `.graph-history-status` strip with Refresh button when < 7 data points
+- **Inline alert popover**: bell button toggles `.card-alert-popover`  only one open at a time per list
+- **Predictive badges**: `.predictive-badges` (EMA, predicted 24h, volatility). Hidden in tile/hybrid when compact mode enabled; always visible in list view
+- **Compact tiles toggle**: `ge-analyzer:compact-tiles` checkbox. Toggling re-renders all three market panels
+- **Completed flips table**: `<table class="completed-flips-table">` with clickable sort headers
+- **CSV export**: `#export-csv-btn` triggers data-URL CSV download
+- **Startup step counter**: 4-step counter in overlay. `initUI` receives `onStatus` callback for steps 2-4
+
+### LLM & Chat
+
+- **Provider presets**: `LLM_PROVIDERS` array in `types.ts`  each has `endpoint`, `defaultModel`, `keyPlaceholder`, `models[]`, `costTier`, `costNote`, optional `signupUrl`
+- **Provider cost badges**: Emoji badges on `<option>` labels. `#provider-cost-hint` colour-coded span
+- **Setup guide modal**: `showSetupGuide()`  lazy singleton with per-provider instructions, cost banner, comparison table
+- **Conversation trimming**: `buildTrimmedHistory()` strips `=== GRAND EXCHANGE DATA ===` blocks from all but the most recent user message. Caps at `MAX_HISTORY_PAIRS` (8) exchanges
+- **Payload size guard**: `MAX_BODY_BYTES` (50 KB). Progressive trimming halves market-data lines (up to 4x). `LLM_CONTEXT_TOP_N` = 50 items. Always-on byte logging
+- **LLM context**: `getFormattedForLLM()` builds an unfiltered top-50 dataset for the chat advisor (broader than the UI's filtered top-20)
+
+### Data Pipeline & API
+
+- **Deep-history scan**: `#deep-history-checkbox` (persisted `ge-analyzer:deep-history`). When checked, fetches 90-day history per item (significantly slower). When unchecked, history loads on demand via analytics modal. **History-only optimisation**: if >= 90% of catalogue has fresh prices, scan fetches only history
+- **Rate-limit retry**: `fetchWithRetry()`  exponential backoff on 429s/network errors (MAX_RETRIES=4, BACKOFF_BASE_MS=2000ms)
+- **Batch dispatch**: `fetchLatestPrices`  **sequential** with 300 ms pauses. Do not revert to concurrent dispatch
+- **History fetches**: Individual per-item requests with 200 ms pauses (the `/last90d` endpoint only accepts 1 item)
+- **Adaptive scan backoff**: `runFullMarketScan` uses 1500 ms baseline, doubles on empty batches (30 s ceiling), resets on success
+- **SEED_ITEMS naming**: Must be **exact** canonical RS Wiki titles. Verify via `https://api.weirdgloop.org/exchange/history/rs/last90d?name=<encoded>` before adding. Common pitfalls: "hallowe'en" not "h'ween", "Bane bar" not "Banite bar", "Orikalkum bar" not "Orichalcite bar", "Spirit shards" (plural), clean herbs need "Clean " prefix, "Bowstring" (one word), "Dragon Rider lance" (capital R), untradeable items have no GE data
+- **Do not set `User-Agent`** (or other non-safelisted headers) in browser `fetch()`  triggers CORS preflight on Firefox
+
+---
+
+## Gotchas
+
+### Build & Webpack
+- `HtmlWebpackPlugin` emits `index.html`  never add HTML to webpack's `asset/resource` rules
+- The inline `<script>` in `index.html` (theme restoration) **MUST stay outside the webpack bundle**  do not move this logic into `index.ts` or any bundled file
+- `#app` height is `95%` (not `100vh`) to fix Alt1 zoom scaling  do not change
+- Modal section in `uiService.ts` uses literal JS unicode escape sequences  use Node.js scripts for safe text replacement if needed
+
+### CSS & Theming
+- Slider pseudo-element styles (`::-webkit-slider-*` / `::-moz-range-*`) must stay in **separate rule blocks** per browser spec
+- `:focus-visible` is set globally with `outline: 2px solid var(--accent-primary)`. Do not remove without providing an alternative keyboard focus indicator
+- Style-specific micro-component overrides: Glass suppresses `backdrop-filter`; Neumorphism sets `box-shadow: none` on `.card-actions` children; Skeuomorphism flattens to `background: transparent`. Do not add heavy style effects to icon buttons
+- Settings panel uses `<fieldset class="settings-group">`  three groups: Appearance, AI Provider, Data
+- Profit/loss indicators use shape prefixes (triangle up / triangle down) in addition to colour for colour-blind accessibility
+- Mobile breakpoints: <=600px (modal detail wrapping, compact UI), <=700px (sidebar disables, restores tabbed), >=800px (wider modals, expanded grids)
+
+### DOM & UI
+- Market panel `max-height: 30%`, chat panel `flex: 1 1 0` with `min-height: 120px`  intentional flex balance
+- When editing DOM ref resolution in `uiService.ts`, verify **all** existing refs survive
+- Model `<input>` uses `<datalist>`  do not auto-fill on provider change (pre-filters dropdown); set placeholder instead
+- `#search-results` and `#search-loading` must have `width: 100%`  do not remove
+
+---
 
 ## File Roles
 
@@ -81,56 +173,59 @@ npx serve dist --listen 8080   # local dev server (run in a separate terminal)
 |------|---------------|
 | `uiService.ts` | **All** DOM manipulation, event binding, localStorage, rendering (~4 600 lines) |
 | `services/types.ts` | Every shared interface + `LLM_PROVIDERS` constant |
-| `services/coreKnowledge.ts` | Static RS3 economic rules (GE tax, buy limits, margin checking, high alch, item categories, flipping strategy, gp/hr formulas, common pitfalls) + data field legend for LLM interpretation |
-| `services/llmService.ts` | OpenAI-compatible chat-completion client; builds system + user prompt; payload size guard (`MAX_BODY_BYTES` = 50 KB); conversation trimming via `buildTrimmedHistory()` (strips data blocks from older messages, caps at 8 exchanges) |
-| `services/marketAnalyzerService.ts` | Score → filter → rank → format. Includes trade velocity scoring, 7-day price momentum classification, and sparse-history fallback to Weird Gloop `last90d` API for chart data. Sparse check uses an absolute threshold (< 400 items with ≥ 2 days of history): triggers on fresh install, stops after seeds (~230) + one fallback round (200) accumulate enough cached data. Uses absolute count because `bulkInsert` writes a today-snapshot for every price, making all ~7,000 items appear in history with 1 row. Sparse fallback delegates to `WeirdGloopService.fetchHistoricalPrices` (individual per-item requests) and is capped at 200 items. TTL-cached `avgVolumeMap`/`priceHistoryMap` (10-min) avoids redundant IndexedDB reads on UI refresh. `getFormattedForLLM()` builds a broader top-50 unfiltered dataset (`LLM_CONTEXT_TOP_N = 50`) for the chat advisor. |
-| `services/initDataPipeline.ts` | Startup orchestrator + `SEED_ITEMS` list (~230 RS3 items). Runs two health checks on every startup: re-enriches missing `highAlch`/`buyLimit` (>50% threshold) and re-seeds sparse history (<30% coverage, capped to SEED_ITEMS only). `runFullMarketScan` uses adaptive inter-batch backoff (1.5 s baseline, 30 s ceiling) |
+| `services/coreKnowledge.ts` | Static RS3 economic rules + data field legend for LLM interpretation |
+| `services/llmService.ts` | OpenAI-compatible chat client; payload size guard; conversation trimming |
+| `services/marketAnalyzerService.ts` | Score -> filter -> rank -> format. TTL-cached maps. Sparse-history fallback. LLM context builder |
+| `services/initDataPipeline.ts` | Startup orchestrator + `SEED_ITEMS` (~230). Health checks + `runFullMarketScan` |
 | `services/portfolioService.ts` | Active flip tracker + completed flip history with P&L stats (localStorage) |
-| `services/weirdGloopService.ts` | Weird Gloop RS3 GE API client — batched sequential fetching with `fetchWithRetry()` exponential backoff (429 / network errors) |
-| `services/wikiService.ts` | RS Wiki structured-data API client — bulk buy-limit fetching from `Module:Exchange/<Item>` Lua sources + High Alch value fetching from `Module:GEHighAlchs/data.json` bulk endpoint (single HTTP request for all alchable items). Items not in the bulk list are stored as `highAlch: false` (not alchable). Falls back to per-item `Module:Exchange/<Item>` Lua parsing when bulk endpoint is unreachable. Guide/article text fetching removed (March 2026) — `coreKnowledge.ts` provides better flipping-focused LLM context |
-| `css/main.css` | **Modular CSS entry point** — `@import` cascade across `css/` subdirectories. Import order is critical: base → themes → contrast → styles → micro-component protection → layout → components → responsive. Webpack `css-loader` resolves all `@import`s and `style-loader` injects the bundled result into `<head>` at runtime |
-| `css/base/` | Reset (`reset.css`), Alt1 status banner (`alt1-status.css`) |
-| `css/themes/` | 16 colorway files (`colorway-{name}-{dark|light}.css`), light-mode consolidated overrides (`light-mode-overrides.css`), contrast modifiers (`contrast-modifiers.css`). Each colorway defines all colour variables + per-style helper vars (`--glass-*`, `--neu-*`, `--skeu-*`) + 4 `*-base` accent vars (`--accent-teal-base`, `--accent-red-base`, `--accent-blue-text-base`, `--accent-gold-base`) consumed by contrast modifiers to avoid self-referencing `color-mix()` cycles. Default Dark `:root` is the default. Contrast modifier selectors use specificity 0,3,1 (`body[data-mode][data-contrast][data-colorway]`) to always beat colorway selectors (0,2,1). Non-circular contrast `color-mix()` DAG, WCAG-adjusted financial accents in hard contrast, semantic badge-bg tokens, standardised `--text-price` (green family) |
-| `css/styles/` | Glassmorphism (`style-glassmorphism.css`), Neumorphism (`style-neumorphism.css`), Skeuomorphism (`style-skeuomorphism.css`), micro-component protection (`micro-component-protection.css`). Structural overrides consuming `--glass-*`/`--neu-*`/`--skeu-*` helper vars |
-| `css/layout/` | App shell (`app-shell.css`), main content wrapper (`main-content.css`), tabbed + sidebar layout modes (`layout-modes.css`), list/tile/hybrid views (`views.css`), responsive breakpoints (`responsive.css`: mobile ≤600px, sidebar-disable ≤700px, desktop ≥800px) |
-| `css/components/` | 26 component files: settings, provider, inputs, tabs, market-panel, filters, startup overlay, market-cards, badges, highlights, search, detail-panel, card-actions, favourites, modals, analytics-modal, chat, portfolio, predictive-badges, completed-flips, scrollbar, toasts, alerts, accessibility, settings-fieldsets, analytics-dividers, layout-toggle |
+| `services/weirdGloopService.ts` | Weird Gloop RS3 GE API client  sequential batching + `fetchWithRetry()` |
+| `services/wikiService.ts` | RS Wiki structured-data API  bulk buy-limits + High Alch values |
+| `css/main.css` | **Modular CSS entry point**  `@import` cascade: base -> themes -> contrast -> styles -> micro-component protection -> layout -> components -> responsive |
+| `css/base/` | Reset, Alt1 status banner |
+| `css/themes/` | 16 colorway files, light-mode overrides, contrast modifiers |
+| `css/styles/` | Glassmorphism, Neumorphism, Skeuomorphism, micro-component protection |
+| `css/layout/` | App shell, main content, layout modes, views, responsive breakpoints |
+| `css/components/` | 26 component files (settings, cards, modals, chat, portfolio, etc.) |
 
-## UI Layout (index.html, top → bottom)
+---
 
-0. `#startup-overlay` — full-area spinner + step counter ("Step 1 of 4") + status text (auto-removed after boot completes)
-1. `#background-sync-progress` — scan progress bar (hidden by default, shown during full market scan)
-2. `#error-banner` — dismissible error bar with retry (hidden by default)
-3. `#market-filters` — volume / price dropdowns + refresh button
-3. Custom slider groups (volume min/max, budget) — shown when "Custom" selected
-4. `#search-section` — search input + `#search-sort-select` + view toggle (☰ ▦ ⊞) + compact-tiles checkbox + `#search-results`
-5. `#favorites-section` — ★ header + `#favorites-sort-select` + collapse button + `#favorites-items`
-6. `.top20-section` → `#market-header` (h2 + `.market-header-actions`: `#full-market-scan-btn` + `#deep-history-checkbox` + `#top20-sort-select` + collapse ▾) + `#market-items`
+## UI Layout (index.html, top -> bottom)
 
-## Gotchas
+0. `#startup-overlay`  spinner + step counter + status text (auto-removed after boot)
+1. `#background-sync-progress`  scan progress bar (hidden by default)
+2. `#error-banner`  dismissible error bar with retry (hidden by default)
+3. `#market-filters`  volume / price dropdowns + refresh button
+4. Custom slider groups (volume min/max, budget)  shown when "Custom" selected
+5. `#search-section`  search input + `#search-sort-select` + view toggle + compact-tiles checkbox + `#search-results`
+6. `#favorites-section`  star header + `#favorites-sort-select` + collapse button + `#favorites-items`
+7. `.top20-section` -> `#market-header` (h2 + `.market-header-actions`: scan btn + deep-history checkbox + sort select + collapse) + `#market-items`
 
-- `HtmlWebpackPlugin` emits `index.html` — never add HTML to webpack's `asset/resource` rules
-- **The inline `<script>` in `index.html` (theme restoration) MUST stay outside the webpack bundle** — it runs before `main.js` loads so that `data-mode`/`data-colorway` attributes are set before `style-loader` injects CSS. Moving this logic into the bundle (e.g. an IIFE in `index.ts`) causes Chrome to cache dark `:root` values that persist into light mode on refresh. Past bug (March 2026).
-- `#app` height is `95%` (not `100vh`) to fix Alt1 zoom scaling — do not change this
-- Market panel `max-height: 30%`, chat panel `flex: 1 1 0` with `min-height: 120px` — this flex balance is intentional
-- When editing DOM ref resolution in `uiService.ts`, verify **all** existing refs survive — past refactors accidentally dropped refs
-- Model `<input>` uses `<datalist>` — do not auto-fill the value on provider change (it pre-filters the dropdown); set placeholder instead
-- `#search-results` and `#search-loading` must have `width: 100%` to stay below the flex-row search bar — do not remove this
-- Modal section in `uiService.ts` uses literal JS unicode escape sequences — use Node.js scripts for safe text replacement if needed
-- Slider pseudo-element styles (`::-webkit-slider-*` / `::-moz-range-*`) must stay in **separate rule blocks** per browser spec
-- `fetchLatestPrices` dispatches batches **sequentially** (not via `Promise.allSettled`) — do not revert to concurrent dispatch or the API will rate-limit aggressively
-- **Do not set `User-Agent` (or other non-safelisted headers) in browser `fetch()` calls** — Firefox honours the header (triggering a CORS preflight the API doesn't support), while Chrome silently strips it. Caused cross-origin failures on Firefox but not Chrome in both `weirdGloopService.ts` and `wikiService.ts` (March 2026).
-- **Badge sizing uses CSS custom-property tokens** (`--badge-font-sm`: 11px, `--badge-font-md`: 12px, `--badge-padding-sm`: 2px 6px, `--badge-padding-md`: 3px 7px) defined in `:root`. Sized for 110–125% Windows DPI scaling in Alt1. Do not hard-code `font-size` or `padding` on individual badge classes — override the tokens if you need size changes.
-- **No `!important` on badge/highlight colours**: `.hype-text`, `.buy-highlight`, `.sell-highlight`, `.profit-highlight`, `.risky-text` use doubled-selector specificity (`.market-card .hype-text, .hype-text.hype-text`) instead of `!important`. Do not reintroduce `!important` for colour overrides — raise specificity instead.
-- **EXPORT_KEYS completeness**: The `EXPORT_KEYS` array in `uiService.ts` must include all user-preference localStorage keys (`mode`, `style`, `colorway`, `contrast`, `favorites`, `portfolio`, `portfolio-history`). Verify after adding new persisted settings.
-- **`--accent-hype` is the single hype/volume-spike colour token**: Hype badges, vol-badges, and `.hype-text` all use `var(--accent-hype)`. Sell badges keep `var(--accent-gold)`. Each mode×colorway combination defines its own `--accent-hype` value. `--accent-gold-hype` is defined per-colorway but `--accent-hype` is the canonical consumption token.
-- **Settings panel uses `<fieldset class="settings-group">`** — three groups: Appearance, AI Provider, Data. When adding new settings, place them in the appropriate fieldset.
-- **`:focus-visible` is set globally** with `outline: 2px solid var(--accent-primary)`. Do not override or remove this without providing an alternative keyboard focus indicator.
-- **Profit/loss indicators use shape prefixes** (▲/▼) in addition to colour for colour-blind accessibility.
-- **Mobile responsive breakpoints**: `@media (max-width: 600px)` handles analytics modal detail-row wrapping (flex-wrap, `overflow-wrap: anywhere`), smaller scan-btn / sort-select / deep-history text, and Top 20 header actions wrapping to a new line. `@media (max-width: 700px)` disables sidebar layout (restores tabbed navigation, hides the Sidebar button). Sidebar layout is desktop-only (≥701px).
-- **Contrast modifier `color-mix()` must NEVER self-reference** — setting `--accent-teal: color-mix(in srgb, var(--accent-teal), ...)` creates a CSS custom-property dependency cycle, making the value `guaranteed-invalid`. Edge may invalidate the **entire declaration block** when it detects any cycle, causing background/text properties in the same rule to also become invalid. Each contrast modifier override must reference ONLY other properties (strict DAG). For financial accent adjustments, each colorway defines `*-base` duplicates (e.g. `--accent-teal-base`) and the contrast modifier references those instead. Contrast modifier selectors use specificity 0,3,1 (`body[data-mode][data-contrast][data-colorway]`) to always beat colorway selectors (0,2,1), preventing stale cached `color-mix()` values when the user switches themes. Past bug (March 2026).
-- **Style-specific micro-component overrides**: Glass suppresses `backdrop-filter` on icon buttons; Neumorphism sets `box-shadow: none` on `.card-actions` / `.flip-card-actions` children (subtle hover shadow only); Skeuomorphism flattens icon buttons to `background: transparent` (hover uses translucent highlight). Do not add heavy style effects to these elements.
-- **`forceStyleInvalidation()` uses a mode-toggle strategy** — it flips `data-mode` to the opposite value, forces a `getComputedStyle` read, then restores the original mode with another forced read. This avoids the bare-`:root` intermediate (deleting all `data-*` attributes) that previously poisoned Chrome's `color-mix()` cache. Past bugs: bare-`:root` approach (March 2026), skipping on startup (March 2026).
-- **Pre-bundle theme restoration via inline `<script>` in `index.html`** — an inline `<script>` immediately after `<body>` reads localStorage and sets all four theme `data-*` attributes **before** the webpack bundle loads. Because `style-loader` injects CSS only when the bundle executes (`<script defer src="main.js">`), the body already has the correct attributes (e.g. `data-mode="light"`) when Chrome first computes styles. This eliminates the stale-dark-cache bug entirely — previous approaches (IIFE in `index.ts`, `forceStyleInvalidation()` mode-toggle, attribute stripping) all ran too late because CSS was already injected and dark `:root` values were cached. The old IIFE in `index.ts` has been removed. The colorway rename migration also lives in this inline script. **Do not move this logic back into the webpack bundle.**
+---
+
+## Documentation Synchronization Protocol
+
+**Do not update documentation after every response.** Only synchronize docs at these milestones:
+
+### When to Update
+1. **Feature completed**  a discrete feature is fully implemented and verified
+2. **Bug fully resolved**  root cause identified, fix applied, build passes
+3. **Major refactor done**  file structure, architecture, or conventions changed
+4. **User commands "Doc Sync"**  explicit request to synchronize all three files
+
+### Separation of Concerns
+
+| File | Update When | What to Update |
+|------|-------------|----------------|
+| `.github/copilot-instructions.md` | Architectural rules, hard constraints, or global UI patterns change | File Roles, UI Layout, Key Patterns, Gotchas. Add/remove directives only |
+| `HANDOFF.md` | Bugs resolved, state management changes, new service logic, status shifts | Past Issues table, Current Status checklist, architecture deep-dive, localStorage keys, types table. **Update ToC if headers change** |
+| `readme.md` | User-facing features or installation steps change | Features list, Architecture table, LLM Providers table, Getting Started. **Update ToC if headers change** |
+
+### Rules
+- **copilot-instructions.md** contains only **directives** (do / do not). Historical bug context and "why it was broken" lore belongs in HANDOFF.md Past Issues
+- **HANDOFF.md** is the single source of truth for resolved bugs, migration history, and implementation details
+- **readme.md** is user-facing only  no internal architecture decisions or past bug references
+
+---
 
 ## Full Context
 

@@ -61,9 +61,9 @@ body[data-mode="light"][data-contrast="soft"][data-colorway] {
   --bg-panel:    color-mix(in srgb, var(--bg-elevated) 60%, white);
   /* Lighten borders */
   --border-main: color-mix(in srgb, var(--border-section) 50%, white);
-  /* Reduce text intensity */
-  --text-main:   var(--text-muted);
-  --text-bright: color-mix(in srgb, var(--text-muted), black 25%);
+  /* Reduce text intensity — but keep --text-bright readable (WCAG AA ≥ 4.5:1) */
+  --text-main:   color-mix(in srgb, var(--text-muted), black 15%);
+  --text-bright: color-mix(in srgb, var(--text-muted), black 40%);
   /* Softer modal scrim */
   --modal-backdrop: rgba(0, 0, 0, 0.15);
 }
