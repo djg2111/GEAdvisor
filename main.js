@@ -500,7 +500,7 @@ ___CSS_LOADER_EXPORT___.push([module.id, `/* ═══════════�
 .analytics-stat-value {
   font-size: 13px;
   font-weight: 600;
-  color: var(--text);
+  color: var(--text-bright);
 }
 
 /* ── Analytics modal: responsive adjustments ────────────────────────────────── */
@@ -2206,7 +2206,7 @@ ___CSS_LOADER_EXPORT___.push([module.id, `/* ── Floating Item Detail Modal �
   flex: 1;
   font-weight: 600;
   font-size: 14px;
-  color: var(--text);
+  color: var(--text-main);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -2271,7 +2271,7 @@ ___CSS_LOADER_EXPORT___.push([module.id, `/* ── Floating Item Detail Modal �
 }
 .graph-stat-value {
   font-weight: 600;
-  color: var(--text);
+  color: var(--text-bright);
 }
 `, ""]);
 // Exports
@@ -7286,9 +7286,9 @@ body[data-mode="light"][data-contrast="soft"][data-colorway] {
   --bg-panel:    color-mix(in srgb, var(--bg-elevated) 60%, white);
   /* Lighten borders */
   --border-main: color-mix(in srgb, var(--border-section) 50%, white);
-  /* Reduce text intensity */
-  --text-main:   var(--text-muted);
-  --text-bright: color-mix(in srgb, var(--text-muted), black 25%);
+  /* Reduce text intensity — but keep --text-bright readable (WCAG AA ≥ 4.5:1) */
+  --text-main:   color-mix(in srgb, var(--text-muted), black 15%);
+  --text-bright: color-mix(in srgb, var(--text-muted), black 40%);
   /* Softer modal scrim */
   --modal-backdrop: rgba(0, 0, 0, 0.15);
 }
@@ -15163,26 +15163,6 @@ function formatVolume(vol) {
 }
 
 
-/***/ },
-
-/***/ "./appconfig.json"
-/*!************************!*\
-  !*** ./appconfig.json ***!
-  \************************/
-(module, __unused_webpack_exports, __webpack_require__) {
-
-module.exports = __webpack_require__.p + "appconfig.json";
-
-/***/ },
-
-/***/ "./icon.png"
-/*!******************!*\
-  !*** ./icon.png ***!
-  \******************/
-(module, __unused_webpack_exports, __webpack_require__) {
-
-module.exports = __webpack_require__.p + "icon.png";
-
 /***/ }
 
 /******/ 	});
@@ -15197,6 +15177,12 @@ module.exports = __webpack_require__.p + "icon.png";
 /******/ 		if (cachedModule !== undefined) {
 /******/ 			return cachedModule.exports;
 /******/ 		}
+/******/ 		// Check if module exists (development only)
+/******/ 		if (__webpack_modules__[moduleId] === undefined) {
+/******/ 			var e = new Error("Cannot find module '" + moduleId + "'");
+/******/ 			e.code = 'MODULE_NOT_FOUND';
+/******/ 			throw e;
+/******/ 		}
 /******/ 		// Create a new module (and put it into the cache)
 /******/ 		var module = __webpack_module_cache__[moduleId] = {
 /******/ 			id: moduleId,
@@ -15205,12 +15191,6 @@ module.exports = __webpack_require__.p + "icon.png";
 /******/ 		};
 /******/ 	
 /******/ 		// Execute the module function
-/******/ 		if (!(moduleId in __webpack_modules__)) {
-/******/ 			delete __webpack_module_cache__[moduleId];
-/******/ 			var e = new Error("Cannot find module '" + moduleId + "'");
-/******/ 			e.code = 'MODULE_NOT_FOUND';
-/******/ 			throw e;
-/******/ 		}
 /******/ 		__webpack_modules__[moduleId](module, module.exports, __webpack_require__);
 /******/ 	
 /******/ 		// Return the exports of the module
@@ -15242,18 +15222,6 @@ module.exports = __webpack_require__.p + "icon.png";
 /******/ 		};
 /******/ 	})();
 /******/ 	
-/******/ 	/* webpack/runtime/global */
-/******/ 	(() => {
-/******/ 		__webpack_require__.g = (function() {
-/******/ 			if (typeof globalThis === 'object') return globalThis;
-/******/ 			try {
-/******/ 				return this || new Function('return this')();
-/******/ 			} catch (e) {
-/******/ 				if (typeof window === 'object') return window;
-/******/ 			}
-/******/ 		})();
-/******/ 	})();
-/******/ 	
 /******/ 	/* webpack/runtime/hasOwnProperty shorthand */
 /******/ 	(() => {
 /******/ 		__webpack_require__.o = (obj, prop) => (Object.prototype.hasOwnProperty.call(obj, prop))
@@ -15268,29 +15236,6 @@ module.exports = __webpack_require__.p + "icon.png";
 /******/ 			}
 /******/ 			Object.defineProperty(exports, '__esModule', { value: true });
 /******/ 		};
-/******/ 	})();
-/******/ 	
-/******/ 	/* webpack/runtime/publicPath */
-/******/ 	(() => {
-/******/ 		var scriptUrl;
-/******/ 		if (__webpack_require__.g.importScripts) scriptUrl = __webpack_require__.g.location + "";
-/******/ 		var document = __webpack_require__.g.document;
-/******/ 		if (!scriptUrl && document) {
-/******/ 			if (document.currentScript && document.currentScript.tagName.toUpperCase() === 'SCRIPT')
-/******/ 				scriptUrl = document.currentScript.src;
-/******/ 			if (!scriptUrl) {
-/******/ 				var scripts = document.getElementsByTagName("script");
-/******/ 				if(scripts.length) {
-/******/ 					var i = scripts.length - 1;
-/******/ 					while (i > -1 && (!scriptUrl || !/^http(s?):/.test(scriptUrl))) scriptUrl = scripts[i--].src;
-/******/ 				}
-/******/ 			}
-/******/ 		}
-/******/ 		// When supporting browsers where an automatic publicPath is not supported you must specify an output.publicPath manually via configuration
-/******/ 		// or pass an empty string ("") and set the __webpack_public_path__ variable from your code to use your own logic.
-/******/ 		if (!scriptUrl) throw new Error("Automatic publicPath is not supported in this browser");
-/******/ 		scriptUrl = scriptUrl.replace(/^blob:/, "").replace(/#.*$/, "").replace(/\?.*$/, "").replace(/\/[^\/]+$/, "/");
-/******/ 		__webpack_require__.p = scriptUrl;
 /******/ 	})();
 /******/ 	
 /******/ 	/* webpack/runtime/nonce */
@@ -15308,9 +15253,7 @@ var __webpack_exports__ = {};
 __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _services__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./services */ "./services/index.ts");
 /* harmony import */ var _uiService__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./uiService */ "./uiService.ts");
-/* harmony import */ var _appconfig_json__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./appconfig.json */ "./appconfig.json");
-/* harmony import */ var _icon_png__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./icon.png */ "./icon.png");
-/* harmony import */ var _css_main_css__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./css/main.css */ "./css/main.css");
+/* harmony import */ var _css_main_css__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./css/main.css */ "./css/main.css");
 /**
  * @module index
  * Application entry point.
