@@ -198,52 +198,6 @@
 					<button id="error-retry-btn" type="button">⟳ Retry</button>
 				</div>
 
-				<!-- ── Market filters (global, above search) ─────────── -->
-				<div id="market-filters" class="filter-bar">
-					<select id="filter-volume" title="Trading style">
-						<option value="any">Vol: Any</option>
-						<option value="high">Vol: High (&gt;50K)</option>
-						<option value="low">Vol: Low (&lt;5K)</option>
-						<option value="custom">Vol: Custom</option>
-					</select>
-					<select id="filter-price" title="Max item budget">
-						<option value="0">Budget: Unlimited</option>
-						<option value="10000000">Budget: &lt;10M</option>
-						<option value="100000000">Budget: &lt;100M</option>
-						<option value="500000000">Budget: &lt;500M</option>
-						<option value="custom">Budget: Custom</option>
-					</select>
-					<select id="history-range-select" title="Chart history range">
-						<option value="7" selected>History: 7 days</option>
-						<option value="30">History: 30 days</option>
-						<option value="90">History: 90 days</option>
-					</select>
-					<button id="refresh-market-btn" class="refresh-btn" type="button">⟳ Refresh</button>
-				</div>
-
-				<!-- Precise volume controls (visible when "Vol: Custom" selected) -->
-				<div id="volume-custom-group" class="custom-filter-group" style="display:none">
-					<label class="custom-filter-label">Min Volume</label>
-					<div class="slider-row">
-						<input id="volume-min-slider" type="range" min="0" max="200000" step="500" value="0" />
-						<input id="volume-min-input" type="number" min="0" placeholder="0" value="0" />
-					</div>
-					<label class="custom-filter-label">Max Volume <span class="hint">(0 = no limit)</span></label>
-					<div class="slider-row">
-						<input id="volume-max-slider" type="range" min="0" max="500000" step="1000" value="0" />
-						<input id="volume-max-input" type="number" min="0" placeholder="0" value="0" />
-					</div>
-				</div>
-
-				<!-- Precise budget controls (visible when "Budget: Custom" selected) -->
-				<div id="budget-custom-group" class="custom-filter-group" style="display:none">
-					<label class="custom-filter-label">Max Price (gp) <span class="hint">(0 = no limit)</span></label>
-					<div class="slider-row">
-						<input id="budget-slider" type="range" min="0" max="2000000000" step="1000000" value="0" />
-						<input id="budget-input" type="number" min="0" placeholder="0" value="0" />
-					</div>
-				</div>
-
 				<!-- ── Search section (above Top 20) ──────────────────── -->
 				<div id="search-section">
 					<input type="search" id="market-search-input" placeholder="Search all GE items…" autocomplete="off" spellcheck="false" />
@@ -288,6 +242,7 @@
 				<div id="market-header">
 					<h2>Top 20 Markets</h2>
 					<div class="market-header-actions">
+						<button id="refresh-market-btn" class="refresh-btn" type="button">⟳ Refresh</button>
 						<button id="full-market-scan-btn" class="scan-btn" type="button" title="Fetch current prices, buy limits, and alch values for all ~7,000 GE items (~2–3 min). History for individual items is loaded on demand when you open their analytics modal.">🔍 Scan Full Market</button>
 						<label class="deep-history-label" title="Also fetch 90-day price history for every item during the scan. Much slower (~20+ min) because the API only allows one item per request. Leave unchecked to load history on demand instead.">
 							<input type="checkbox" id="deep-history-checkbox" />
@@ -302,6 +257,52 @@
 						<button id="top20-collapse-btn" class="view-btn" type="button" title="Collapse Top 20">▾</button>
 					</div>
 				</div>
+
+				<!-- ── Top 20 filters ─────────────────────────────────── -->
+				<div id="market-filters" class="filter-bar">
+					<select id="filter-volume" title="Trading style">
+						<option value="any">Vol: Any</option>
+						<option value="high">Vol: High (&gt;50K)</option>
+						<option value="low">Vol: Low (&lt;5K)</option>
+						<option value="custom">Vol: Custom</option>
+					</select>
+					<select id="filter-price" title="Max item budget">
+						<option value="0">Budget: Unlimited</option>
+						<option value="10000000">Budget: &lt;10M</option>
+						<option value="100000000">Budget: &lt;100M</option>
+						<option value="500000000">Budget: &lt;500M</option>
+						<option value="custom">Budget: Custom</option>
+					</select>
+					<select id="history-range-select" title="Chart history range">
+						<option value="7" selected>History: 7 days</option>
+						<option value="30">History: 30 days</option>
+						<option value="90">History: 90 days</option>
+					</select>
+				</div>
+
+				<!-- Precise volume controls (visible when "Vol: Custom" selected) -->
+				<div id="volume-custom-group" class="custom-filter-group" style="display:none">
+					<label class="custom-filter-label">Min Volume</label>
+					<div class="slider-row">
+						<input id="volume-min-slider" type="range" min="0" max="200000" step="500" value="0" />
+						<input id="volume-min-input" type="number" min="0" placeholder="0" value="0" />
+					</div>
+					<label class="custom-filter-label">Max Volume <span class="hint">(0 = no limit)</span></label>
+					<div class="slider-row">
+						<input id="volume-max-slider" type="range" min="0" max="500000" step="1000" value="0" />
+						<input id="volume-max-input" type="number" min="0" placeholder="0" value="0" />
+					</div>
+				</div>
+
+				<!-- Precise budget controls (visible when "Budget: Custom" selected) -->
+				<div id="budget-custom-group" class="custom-filter-group" style="display:none">
+					<label class="custom-filter-label">Max Price (gp) <span class="hint">(0 = no limit)</span></label>
+					<div class="slider-row">
+						<input id="budget-slider" type="range" min="0" max="2000000000" step="1000000" value="0" />
+						<input id="budget-input" type="number" min="0" placeholder="0" value="0" />
+					</div>
+				</div>
+
 				<div id="market-loading" class="loader">Loading market data…</div>
 				<div id="market-items"></div>
 				</div><!-- /.top20-section -->
