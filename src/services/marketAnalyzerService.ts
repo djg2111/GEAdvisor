@@ -276,6 +276,24 @@ export class MarketAnalyzerService {
   }
 
   /**
+   * Return **all** cached items as fully-scored {@link RankedItem} objects.
+   * Used for filter-only browsing when no search query is active.
+   * Results are capped at {@link maxResults} to keep DOM rendering fast.
+   *
+   * @param maxResults - Maximum items to return (default 200).
+   * @returns All cached items ranked by `tradedValue`.
+   */
+  async getAllScored(maxResults = 200): Promise<RankedItem[]> {
+    const allRecords = await this.cache.getAll();
+    if (allRecords.length === 0) return [];
+
+    const { avgVolumeMap, priceHistoryMap } = await this.getOrBuildMaps(30);
+    const scored = this.scoreAndFilter(allRecords, 0, 0, 0, avgVolumeMap, priceHistoryMap);
+    const sorted = this.sortDescending(scored);
+    return sorted.slice(0, maxResults);
+  }
+
+  /**
    * Look up cached items by an exact set of names and return fully-scored
    * {@link RankedItem} objects.  Used to render the user's favourites list.
    *

@@ -1,0 +1,180 @@
+/* ── Search filter popover ─────────────────────────────────────────────────── */
+
+.search-filter-btn,
+.browse-all-btn {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 11px;
+  padding: 4px 8px;
+  background: var(--bg-muted);
+  border: 1px solid var(--border-input);
+  color: var(--text-main);
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+  white-space: nowrap;
+  position: relative;
+}
+
+.search-filter-btn:hover,
+.browse-all-btn:hover {
+  background: var(--accent-primary);
+  color: var(--text-bright);
+}
+
+.search-filter-btn.has-active-filters {
+  border-color: var(--accent-primary);
+  color: var(--accent-primary);
+}
+
+.search-filter-btn.has-active-filters:hover {
+  color: var(--text-bright);
+}
+
+/* Active-filter count badge */
+.filter-count-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 15px;
+  height: 15px;
+  padding: 0 4px;
+  font-size: 9px;
+  font-weight: 700;
+  line-height: 1;
+  background: var(--accent-primary);
+  color: var(--text-bright);
+  border-radius: 8px;
+}
+
+/* ── Popover panel ────────────────────────────────────────────────────────── */
+
+.search-filter-popover {
+  display: none;
+  position: absolute;
+  top: 100%;
+  left: 0;
+  z-index: 200;
+  width: 320px;
+  max-height: 400px;
+  overflow-y: auto;
+  margin-top: 4px;
+  padding: 8px 10px;
+  background: var(--bg-panel);
+  border: 1px solid var(--border-section);
+  border-radius: 6px;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.35);
+}
+
+.search-filter-popover.open {
+  display: block;
+}
+
+/* ── Filter group (one per category) ──────────────────────────────────────── */
+
+.search-filter-group {
+  margin-bottom: 8px;
+}
+
+.search-filter-group:last-child {
+  margin-bottom: 0;
+}
+
+.search-filter-group-title {
+  display: block;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-muted);
+  margin-bottom: 4px;
+  padding-bottom: 3px;
+  border-bottom: 1px solid var(--border-section);
+}
+
+/* ── Checkbox tags (pill layout) ──────────────────────────────────────────── */
+
+.search-filter-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.search-filter-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 10px;
+  padding: 2px 7px;
+  background: var(--bg-muted);
+  border: 1px solid var(--border-input);
+  color: var(--text-soft);
+  border-radius: 10px;
+  cursor: pointer;
+  transition: background 0.12s, border-color 0.12s, color 0.12s;
+  user-select: none;
+}
+
+.search-filter-tag:hover {
+  border-color: var(--accent-primary);
+  color: var(--text-main);
+}
+
+.search-filter-tag input[type="checkbox"] {
+  display: none;
+}
+
+.search-filter-tag.checked {
+  background: var(--accent-primary);
+  border-color: var(--accent-primary);
+  color: var(--text-bright);
+}
+
+/* ── Footer actions ───────────────────────────────────────────────────────── */
+
+.search-filter-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 6px;
+  margin-top: 8px;
+  padding-top: 6px;
+  border-top: 1px solid var(--border-section);
+}
+
+.search-filter-actions button {
+  font-size: 10px;
+  padding: 3px 10px;
+  border-radius: 3px;
+  border: 1px solid var(--border-input);
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.search-filter-clear-btn {
+  background: var(--bg-muted);
+  color: var(--text-muted);
+}
+
+.search-filter-clear-btn:hover {
+  background: var(--bg-input);
+  color: var(--text-main);
+}
+
+.search-filter-apply-btn {
+  background: var(--accent-primary);
+  color: var(--text-bright);
+  border-color: var(--accent-primary);
+}
+
+.search-filter-apply-btn:hover {
+  filter: brightness(1.15);
+}
+
+/* ── Wrapper for positioning context ──────────────────────────────────────── */
+
+.search-filter-wrapper {
+  position: relative;
+  flex-shrink: 0;
+}

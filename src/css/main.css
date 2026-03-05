@@ -67,6 +67,7 @@
 @import "./components/market-cards.css";
 @import "./components/highlights.css";
 @import "./components/search.css";
+@import "./components/search-filters.css";
 @import "./components/detail-panel.css";
 @import "./components/card-actions.css";
 @import "./components/favourites.css";

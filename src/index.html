@@ -201,6 +201,11 @@
 				<!-- ── Search section (above Top 20) ──────────────────── -->
 				<div id="search-section">
 					<input type="search" id="market-search-input" placeholder="Search all GE items…" autocomplete="off" spellcheck="false" />
+					<div class="search-filter-wrapper">
+						<button id="search-filter-btn" class="search-filter-btn" type="button" title="Filter search results">🔍 Filters</button>
+						<div id="search-filter-popover" class="search-filter-popover"></div>
+					</div>
+					<button id="browse-all-btn" class="browse-all-btn" type="button" title="Browse all cached items (apply filters to narrow down)">📋 Browse All</button>
 					<select id="search-sort-select" class="section-sort-select" title="Sort search results">
 						<option value="default">Sort: Default</option>
 						<option value="alpha">Sort: A–Z</option>
