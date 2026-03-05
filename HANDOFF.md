@@ -83,8 +83,8 @@ alt1minimal/
     │   ├── themes/            # 16 colorway files, light-mode-overrides.css, contrast-modifiers.css
     │   ├── styles/            # style-glassmorphism.css, style-neumorphism.css, style-skeuomorphism.css, micro-component-protection.css
     │   ├── layout/            # app-shell.css, main-content.css, layout-modes.css, views.css, responsive.css
-    │   └── components/        # 26 component files (settings, market-cards, modals, chat, portfolio, etc.)
-    ├── uiService.ts           # All DOM logic: settings, market render, search, favourites, portfolio, chat RAG, error recovery, price alerts, data export/import, CSV export, sortable flips table, unified analytics modal (~4265 lines)
+    │   └── components/        # 28 component files (settings, market-cards, modals, chat, portfolio, search-filters, back-to-top, etc.)
+    ├── uiService.ts           # All DOM logic: settings, market render, search, favourites, portfolio, chat RAG, error recovery, price alerts, data export/import, CSV export, sortable flips table, unified analytics modal (~4 634 lines)
     └── services/
         ├── index.ts               # Barrel re-export of all services + types + constants
         ├── types.ts               # All shared TypeScript interfaces + LLM_PROVIDERS preset array
@@ -261,7 +261,7 @@ Manages active flips **and** completed flip history:
 
 ### 4.10 UI Service (`uiService.ts`)
 
-All DOM manipulation isolated here — services remain UI-agnostic. ~4 600 lines.
+All DOM manipulation isolated here — services remain UI-agnostic. ~4 634 lines.
 
 `initUI()` flow:
 1. Resolves all DOM elements by ID (~50 refs, throws if missing).
@@ -421,16 +421,16 @@ Lean orchestrator (~80 lines) with startup overlay management:
 
 ### 4.13 Stylesheet (`css/main.css`)
 
-The monolithic `style.css` has been refactored into a modular `src/css/` directory. The entry point `css/main.css` uses `@import` to compose 51 sub-modules in cascade order. Webpack's `css-loader` resolves all imports; `style-loader` injects the result into `<head>` at runtime. No PostCSS or additional tooling required.
+The monolithic `style.css` has been refactored into a modular `src/css/` directory. The entry point `css/main.css` uses `@import` to compose 57 sub-modules in cascade order. Webpack's `css-loader` resolves all imports; `style-loader` injects the result into `<head>` at runtime. No PostCSS or additional tooling required.
 
 ```
 css/
 ├── main.css                         # @import cascade entry point
 ├── base/                            # reset.css, alt1-status.css
-├── themes/                          # 12 colorway-{name}-{dark|light}.css + light-mode-overrides.css + contrast-modifiers.css
+├── themes/                          # 16 colorway-{name}-{dark|light}.css + light-mode-overrides.css + contrast-modifiers.css
 ├── styles/                          # style-glassmorphism/neumorphism/skeuomorphism.css + micro-component-protection.css
 ├── layout/                          # app-shell.css, main-content.css, layout-modes.css, views.css, responsive.css
-└── components/                      # 26 files: settings, provider, inputs, tabs, market-panel, filters, startup, market-cards, highlights, search, detail-panel, card-actions, favourites, modals, analytics-modal, analytics-dividers, chat, portfolio, predictive-badges, completed-flips, scrollbar, toasts, alerts, accessibility, settings-fieldsets, layout-toggle
+└── components/                      # 28 files: settings, provider, inputs, tabs, market-panel, filters, startup, market-cards, highlights, search, search-filters, detail-panel, card-actions, favourites, modals, analytics-modal, analytics-dividers, chat, portfolio, predictive-badges, completed-flips, scrollbar, toasts, alerts, accessibility, settings-fieldsets, layout-toggle, back-to-top
 ```
 
 - **Four-axis theme system** (Mode × Style × Colorway × Contrast) using CSS custom properties — 2 modes × 4 styles × 8 colorways × 3 contrast levels = 192 combinations:
@@ -448,7 +448,10 @@ css/
     - **RS3 Modern** (`body[data-colorway="rs3-modern"]`) — dark: dark navy, blue accents; light: light slate, blue highlights.
     - **Solarized** (`body[data-colorway="solarized"]`) — dark: Ethan Schoonover’s dark palette (#002b36 base); light: warm cream (#fdf6e3 base).
     - **RS Lobby** (`body[data-colorway="rs-lobby"]`) — inspired by the RuneScape in-game lobby UI. Dark: deep parchment browns (#1a140f base), gold accents; light: warm cream parchment (#f2ece2 base), earthy gold tones. A blend of Classic and RS3 Modern aesthetics.
-    - **Gruvbox** (`body[data-colorway="gruvbox"]`) — morhetz/gruvbox “retro groove” palette. Dark: warm earthy tone (#282828 base), pastel accents (yellow #fabd2f, aqua #8ec07c, orange #fe8019); light: warm cream (#fbf1c7 base), muted accent counterparts.    - **Twilight Amethyst** (`body[data-colorway="twilight-amethyst"]`) — deep indigo-violet palette. Dark: rich purple (#12101e base), lavender text (#cdc5e0), amethyst primary (#7c4dff); light: soft lilac (#f0ecfa base), deep violet text (#3a2e5a), amethyst accents. Glass helpers use purple-tinted translucent panels.  - **Contrast** (`body[data-contrast]`) adjusts intensity via non-circular `color-mix(in srgb, ...)` — each property override references only sibling properties (strict DAG, no self-referencing to avoid `guaranteed-invalid` cycles). Financial accent adjustments in hard contrast reference `*-base` duplicate vars (e.g. `--accent-teal-base`) set by each colorway, so the `color-mix()` never self-references the property being set. Selectors use specificity 0,3,1 (`body[data-mode][data-contrast][data-colorway]`) to reliably override colorway selectors (0,2,1), preventing stale cached `color-mix()` values when switching themes:
+    - **Gruvbox** (`body[data-colorway="gruvbox"]`) — morhetz/gruvbox "retro groove" palette. Dark: warm earthy tone (#282828 base), pastel accents (yellow #fabd2f, aqua #8ec07c, orange #fe8019); light: warm cream (#fbf1c7 base), muted accent counterparts.
+    - **Twilight Amethyst** (`body[data-colorway="twilight-amethyst"]`) — deep indigo-violet palette. Dark: rich purple (#12101e base), lavender text (#cdc5e0), amethyst primary (#7c4dff); light: soft lilac (#f0ecfa base), deep violet text (#3a2e5a), amethyst accents. Glass helpers use purple-tinted translucent panels.
+    - **OSRS Design** (`body[data-colorway="osrs-design"]`) — based on the official OSRS Design System (osrs.design). Dark: earthy brown (#2e2c29 base), gold text (#ffcf3f), yellow heading (#e6a519), cyan accent (#00ffff); light: warm parchment, dark brown text, gold accents. Captures the authentic Old School RuneScape interface palette.
+  - **Contrast** (`body[data-contrast]`) adjusts intensity via non-circular `color-mix(in srgb, ...)` — each property override references only sibling properties (strict DAG, no self-referencing to avoid `guaranteed-invalid` cycles). Financial accent adjustments in hard contrast reference `*-base` duplicate vars (e.g. `--accent-teal-base`) set by each colorway, so the `color-mix()` never self-references the property being set. Selectors use specificity 0,3,1 (`body[data-mode][data-contrast][data-colorway]`) to reliably override colorway selectors (0,2,1), preventing stale cached `color-mix()` values when switching themes:
     - **Normal** — no adjustment.
     - **Soft** — reduces contrast (muted backgrounds, softer text). Dark: lifts `--bg-main` toward `--bg-panel`/`--bg-elevated`; light: pushes bgs toward white.
     - **Hard** — increases contrast (deeper backgrounds, brighter text). Dark: pushes bgs toward black, `--text-bright: #fff`; light: `--bg-panel: #fff`, `--text-bright: #000`. Financial accent colours (`--accent-green`, `--accent-teal`, `--accent-red`, `--accent-blue-text`, `--accent-gold`) are adjusted via `color-mix()` referencing `*-base` vars to maintain WCAG AA ≥ 4.5:1 against shifted backgrounds.
@@ -460,8 +463,8 @@ css/
 - `html` and `body` both `width: 100%; height: 100%`.
 - **CSS custom-property alias tokens**: `:root` defines `--border: var(--border-main)` and `--text: var(--text-main)` as convenience aliases for legacy references. **Do not use `var(--text)` for component text colours** — the alias resolves at `:root` (dark-mode) scope and does not re-resolve when light colorways override `--text-main` on `body`. Always use `var(--text-main)` or `var(--text-bright)` directly.
 - **Semantic badge background tokens**: `:root` defines `--badge-velocity-*-bg` (insta/active/slow/muted), `--badge-trend-*-bg` (up/down), `--badge-tier-*-bg/border` (free/freetier/lowcost/neutral), `--table-active-row-bg`, `--detail-expanded-bg`, `--setup-note-bg`, `--table-hover-bg`, `--predictive-badge-bg`, `--close-hover-bg` (modal close button hover), `--win-glow` / `--loss-glow` (completed flip card background gradients, derived via `color-mix()` from `--accent-green-bright` / `--accent-red-dark`). All have `body[data-mode="light"]` overrides with boosted alpha values (0.18–0.22 for readability on white backgrounds). Badge classes consume these tokens via `var()` — do not hard-code `rgba()` values.
-- **`--text-price` standardised to green family**: All 12 colorway×mode combinations use greens (dark: #4ade80–#a0b800; light: #1a8a2a–#5a8a0e). Previously inconsistent (gold in Classic, olive in Solarized) — March 2026 fix.
-- **Consolidated light-mode selectors**: All 6 light-mode colorways share a single `body[data-mode="light"] { background: ... }` rule (plus `.view-btn.active { color: #fff }`) instead of 6 duplicate blocks. Similarly, skeuomorphism light-mode selectors are consolidated into `body[data-mode="light"][data-style="skeuomorphism"]` (not enumerated per-colorway).
+- **`--text-price` standardised to green family**: All 16 colorway×mode combinations use greens (dark: #4ade80–#a0b800; light: #1a8a2a–#5a8a0e). Previously inconsistent (gold in Classic, olive in Solarized) — March 2026 fix.
+- **Consolidated light-mode selectors**: All 8 light-mode colorways share a single `body[data-mode="light"] { background: ... }` rule (plus `.view-btn.active { color: #fff }`) instead of 8 duplicate blocks. Similarly, skeuomorphism light-mode selectors are consolidated into `body[data-mode="light"][data-style="skeuomorphism"]` (not enumerated per-colorway).
 - **No `!important` on colour overrides**: `.hype-text`, `.buy-highlight`, `.sell-highlight`, `.profit-highlight`, `.risky-text` use doubled-selector specificity (`.market-card .hype-text, .hype-text.hype-text`) instead. Do not reintroduce `!important`.
 - **`#app` uses `height: 95%`** (manually set to fix Alt1 zoom-level scaling issues — do NOT change).
 - **Market panel**: `flex: 0 1 auto`, `max-height: 30%` in non-tabbed layout.
@@ -523,7 +526,7 @@ css/
 | `ge-analyzer:view-mode` | Market panel view mode (`list`, `tile`, or `hybrid`) |
 | `ge-analyzer:layout` | Interface layout mode (`tabbed` or `sidebar`) |
 | `ge-analyzer:style` | Visual style (`basic`, `glass`, `neumorphism`, or `skeuomorphism`) — migrated from legacy `ge-analyzer:theme` |
-| `ge-analyzer:colorway` | Colour palette (`default`, `classic`, `rs3-modern`, `rs-lobby`, `gruvbox`, `solarized`, or `twilight-amethyst`) — mode-agnostic; combined with `ge-analyzer:mode` for full palette resolution. Legacy values (`light`, `sol-dark`, `sol-light`) auto-migrate via `migrateColorwayToMode()`; renamed values (`classic`→`default`, `osrs`→`classic`) auto-migrate once via `migrateColorwayRename()` (gated by `ge-analyzer:colorway-v2` one-time flag) |
+| `ge-analyzer:colorway` | Colour palette (`default`, `classic`, `rs3-modern`, `rs-lobby`, `gruvbox`, `solarized`, `twilight-amethyst`, or `osrs-design`) — mode-agnostic; combined with `ge-analyzer:mode` for full palette resolution. Legacy values (`light`, `sol-dark`, `sol-light`) auto-migrate via `migrateColorwayToMode()`; renamed values (`classic`→`default`, `osrs`→`classic`) auto-migrate once via `migrateColorwayRename()` (gated by `ge-analyzer:colorway-v2` one-time flag) |
 | `ge-analyzer:colorway-v2` | One-time migration flag for colorway rename (`classic`→`default`, `osrs`→`classic`). Value `"1"` means migration has run |
 | `ge-analyzer:mode` | Appearance mode (`dark` or `light`) — sets `data-mode` on `<body>` |
 | `ge-analyzer:contrast` | Contrast level (`default`, `soft`, or `hard`) — sets `data-contrast` on `<body>`, layered via `color-mix()` |

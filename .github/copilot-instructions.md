@@ -171,7 +171,7 @@ npx serve dist --listen 8080   # local dev server (run in a separate terminal)
 
 | File | Responsibility |
 |------|---------------|
-| `uiService.ts` | **All** DOM manipulation, event binding, localStorage, rendering (~4 600 lines) |
+| `uiService.ts` | **All** DOM manipulation, event binding, localStorage, rendering (~4 634 lines) |
 | `services/types.ts` | Every shared interface + `LLM_PROVIDERS` constant |
 | `services/coreKnowledge.ts` | Static RS3 economic rules + data field legend for LLM interpretation |
 | `services/llmService.ts` | OpenAI-compatible chat client; payload size guard; conversation trimming |
@@ -185,7 +185,7 @@ npx serve dist --listen 8080   # local dev server (run in a separate terminal)
 | `css/themes/` | 16 colorway files, light-mode overrides, contrast modifiers |
 | `css/styles/` | Glassmorphism, Neumorphism, Skeuomorphism, micro-component protection |
 | `css/layout/` | App shell, main content, layout modes, views, responsive breakpoints |
-| `css/components/` | 26 component files (settings, cards, modals, chat, portfolio, etc.) |
+| `css/components/` | 28 component files (settings, cards, modals, chat, portfolio, search-filters, back-to-top, etc.) |
 
 ---
 
