@@ -90,7 +90,7 @@ alt1minimal/
         ├── types.ts               # All shared TypeScript interfaces + LLM_PROVIDERS preset array
         ├── coreKnowledge.ts       # Static RS3 economic rules knowledge base (injected into LLM prompt)
         ├── weirdGloopService.ts   # Weird Gloop RS3 GE API client
-        ├── cacheService.ts        # IndexedDB wrapper (v2: prices + price-history stores)
+        ├── cacheService.ts        # IndexedDB wrapper (v3: prices + intraday price-history stores)
         ├── marketAnalyzerService.ts # Deterministic filtering: score → filter → rank → format (with runtime overrides)
         ├── wikiService.ts         # RS3 Wiki MediaWiki API client + Cargo buy-limit API
         ├── llmService.ts          # OpenAI-compatible chat-completion client + anti-hallucination + economic rules prompt
@@ -105,8 +105,8 @@ alt1minimal/
 ### 4.1 Data Pipeline (`initDataPipeline.ts`)
 
 Called once at startup from `index.ts`:
-1. Opens IndexedDB (`ge-analyzer-cache` database, version 2).
-2. Checks staleness via cursor on `fetchedAt` index descending — if newest record > 24h old, cache is stale.
+1. Opens IndexedDB (`ge-analyzer-cache` database, version 3).
+2. Checks staleness via cursor on `fetchedAt` index descending — if newest record > 1h old, cache is stale.
 3. If stale: fetches ~230 curated seed items from the Weird Gloop API → enriches with buy limits from the RS Wiki Cargo API → bulk-inserts into IndexedDB (both `prices` and `price-history` stores).
 4. **Health check A** (runs on every startup): If >50% of cached records are missing `highAlch` or `buyLimit`, re-enriches them via `WikiService` and persists via `bulkInsert`.
 5. **Health check B** (runs on every startup): If <30% of cached items have ≥2 days of price history, re-seeds history for **SEED_ITEMS only** (not all cached items) via `WeirdGloopService.fetchHistoricalPrices` and persists via `bulkInsertHistory`. Capped to ~230 seed items to keep startup under ~60 s since the `/last90d` endpoint only accepts 1 item per request.
@@ -127,13 +127,15 @@ Called once at startup from `index.ts`:
 
 ### 4.3 Cache Service (`cacheService.ts`)
 
-- IndexedDB wrapper. Database: `ge-analyzer-cache`, version 2.
+- IndexedDB wrapper. Database: `ge-analyzer-cache`, version 3.
 - **Two object stores**:
   - `prices` — keyPath: `name`, index on `fetchedAt`. Current snapshot of each item.
-  - `price-history` — compound keyPath: `[name, day]`. One row per item per calendar day for SMA / hype tracking.
-- Key methods: `open()`, `bulkInsert(prices)`, `getAll()`, `getRecentHistory(days)`, `getHistoricalRecords()`, `isStale()`, `clear()`.
-- `bulkInsert` writes to both stores in a single read-write transaction. History store uses daily dedup via the `[name, day]` compound key.
-- `isStale()` opens a descending cursor on the `fetchedAt` index, checks if newest record > 24h TTL.
+  - `price-history` — compound keyPath: `[name, timestamp]`. Multiple records per item per day for intraday OHLC tracking. Indexes: `name`, `timestamp`.
+- **DB migration (v2→3)**: The `open()` method detects the old `[name, day]`-keyed history store, deletes it, and recreates it with the `[name, timestamp]` keyPath. Data is re-populated on next scan/fetch.
+- Key methods: `open()`, `bulkInsert(prices)`, `getAll()`, `getRecentHistory(days)`, `getHistoricalRecords()`, `getIntradayRecords(itemName, windowMs)`, `isStale()`, `clear()`.
+- `bulkInsert` writes to both stores in a single read-write transaction. Each call inserts a unique snapshot keyed by `Date.now()` epoch ms.
+- `getIntradayRecords(itemName, windowMs)` — queries the `name` index and filters by timestamp within the window. Used for OHLC aggregation and 4-hour momentum.
+- `isStale()` opens a descending cursor on the `fetchedAt` index, checks if newest record > 1h TTL (reduced from 24h to react to intraday volatility).
 
 ### 4.4 Market Analyzer Service (`marketAnalyzerService.ts`)
 
@@ -143,7 +145,7 @@ Pure math on local data with one network fallback — when the local IndexedDB p
 
 Pipeline:
 1. Reads all cached records from `CacheService.getAll()`.
-2. Builds 7-day average volume map and price history map from the `price-history` store (or returns cached versions if within TTL).
+2. Builds 7-day average volume map and price history map from the `price-history` store (or returns cached versions if within TTL). With the v3 intraday schema, deduplicates by calendar day (max volume per day for SMA, latest price per day for sparklines).
 3. Scores each item via `scoreAndFilter()`:
    - `tradedValue = price × volume`
    - `recBuyPrice = floor(price × 0.99)` — 1% below market (realistic instant-buy entry)
@@ -154,6 +156,7 @@ Pipeline:
    - `volumeSpikeMultiplier` — ratio of today's volume to 7-day SMA (hype detection at >1.5×)
    - `tradeVelocity` — categorical speed label based on volume × buy-limit throughput: `"Insta-Flip"` (>50 K), `"Active"` (>5 K), `"Slow"` (>500), `"Very Slow"` (≤500)
    - `priceTrend` — 7-day price momentum: `"Downtrend"` (dropped >5 %), `"Uptrend"` (risen >5 %), `"Stable"` (within ±5 %). Empty/short history defaults to Stable.
+   - `fourHourMomentum` — percentage change between the current price and the earliest price in the last 4-hour buy-limit window. Uses `getIntradayOHLC()` which queries `CacheService.getIntradayRecords()`.
    - `isRisky = price < 500` — low-price items where tax eats most spreads
 4. Filters items by `minVolume`, `maxVolume` (against **global daily GE volume**), `maxPrice`.
 5. Sorts descending by `tradedValue`.
@@ -551,10 +554,11 @@ All defined in `src/services/types.ts`:
 | `WeirdGloopPriceRecord` | API response shape: `id`, `timestamp`, `price`, `volume`, `buyLimit?`, `highAlch?: number \| false` |
 | `WeirdGloopLatestResponse` | `{ [itemName: string]: WeirdGloopPriceRecord }` |
 | `StoredPriceRecord` | Extends API record with `name` (keyPath) + `fetchedAt` (TTL) |
-| `HistoricalPriceRecord` | Extends `StoredPriceRecord` with `day` (ISO date, compound key with `name`) |
-| `RankedItem` | 23 fields: `name`, `itemId`, `price`, `recBuyPrice`, `volume`, `tradedValue`, `buyLimit?`, `effectivePlayerVolume`, `maxCapitalPer4H`, `taxGap`, `recSellPrice`, `estFlipProfit`, `isRisky`, `volumeSpikeMultiplier`, `tradeVelocity`, `priceHistory`, `priceTrend`, `ema30d`, `volatility`, `linearSlope`, `predictedNextPrice`, `highAlch?: number \| false` |
+| `HistoricalPriceRecord` | Extends `StoredPriceRecord` with `day` (ISO date compat field) + `timestamp` (compound key with `name` since v3) |
+| `OHLCData` | Intraday OHLC aggregation: `windowStart`, `open`, `high`, `low`, `close`, `volume`, `count` |
+| `RankedItem` | 24 fields: `name`, `itemId`, `price`, `recBuyPrice`, `volume`, `tradedValue`, `buyLimit?`, `effectivePlayerVolume`, `maxCapitalPer4H`, `taxGap`, `recSellPrice`, `estFlipProfit`, `isRisky`, `volumeSpikeMultiplier`, `tradeVelocity`, `priceHistory`, `priceTrend`, `ema30d`, `volatility`, `fourHourMomentum`, `linearSlope`, `predictedNextPrice`, `highAlch?: number \| false` |
 | `MarketAnalyzerConfig` | `topN` (20), `minVolume` (0), `maxVolume?`, `maxPrice?` |
-| `CacheServiceConfig` | `dbName`, `storeName`, `ttlMs` (default 24h) |
+| `CacheServiceConfig` | `dbName`, `storeName`, `ttlMs` (default 1h) |
 | `WeirdGloopServiceConfig` | `batchSize` (default 100) |
 | `GECatalogueEntry` | `name`, `id` — one entry per GE-tradeable item (~7,000 total) |
 | `FavoriteItem` | `name`, `targetBuy?`, `targetSell?` — favourited item with optional price-alert thresholds |
@@ -608,7 +612,7 @@ npx tsc --noEmit       # type-check only (expect ~11 benign alt1 errors — webp
 Everything below is **complete and verified** (builds with 0 errors):
 
 - [x] Weird Gloop API service (batched sequential fetching with `fetchWithRetry` exponential backoff)
-- [x] IndexedDB cache service v2 (TTL-based staleness, bulk insert, prices + price-history stores)
+- [x] IndexedDB cache service v3 (1h TTL, intraday timestamp-keyed history, OHLC support, auto-migration from v2)
 - [x] Data pipeline orchestrator (seed list of ~230 items, buy-limit enrichment from wiki)
 - [x] Startup health checks — re-enriches missing `highAlch`/`buyLimit` (>50% threshold) and re-seeds sparse history (<30% coverage) on every launch (March 2026)
 - [x] Full GE catalogue fetch (~7,000 items from `Module:GEIDs/data.json`)

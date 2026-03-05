@@ -19,6 +19,7 @@ export type {
   WeirdGloopHistoryResponse,
   StoredPriceRecord,
   HistoricalPriceRecord,
+  OHLCData,
   RankedItem,
   LLMConfig,
   LLMProvider,

@@ -443,7 +443,8 @@ export async function initDataPipeline(): Promise<StoredPriceRecord[]> {
     // Count items with ≥ 2 non-today data points.
     const grouped = new Map<string, number>();
     for (const h of recentHistory) {
-      if (h.day === today) continue;
+      const day = h.day ?? new Date(h.timestamp).toISOString().slice(0, 10);
+      if (day === today) continue;
       grouped.set(h.name, (grouped.get(h.name) ?? 0) + 1);
     }
     const itemsWithSufficientHistory = [...grouped.values()].filter((c) => c >= 2).length;

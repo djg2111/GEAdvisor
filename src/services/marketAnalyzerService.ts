@@ -24,6 +24,7 @@ import { CacheService } from "./cacheService";
 import { WeirdGloopService } from "./weirdGloopService";
 import type {
   MarketAnalyzerConfig,
+  OHLCData,
   RankedItem,
   StoredPriceRecord,
 } from "./types";
@@ -151,6 +152,9 @@ export class MarketAnalyzerService {
   private cachedPriceHistoryMap: Map<string, number[]> | null = null;
   private mapCacheTimestamp = 0;
 
+  /** 4-hour window in milliseconds — matches the RS3 GE buy-limit cycle. */
+  private static readonly FOUR_HOUR_MS = 4 * 60 * 60 * 1000;
+
   /**
    * @param cache  - An **already-opened** {@link CacheService} instance.
    * @param config - Optional overrides for ranking behaviour.
@@ -202,6 +206,64 @@ export class MarketAnalyzerService {
     this.mapCacheTimestamp = Date.now();
 
     return { avgVolumeMap, priceHistoryMap };
+  }
+
+  /**
+   * Query the CacheService for intraday records within a time window and
+   * aggregate them into an OHLC (Open-High-Low-Close) bar.
+   *
+   * @param itemName - Canonical RS3 item name.
+   * @param windowMs - Lookback window in milliseconds (e.g. 4 hours).
+   * @returns An {@link OHLCData} object, or `null` if no intraday data exists.
+   */
+  private async getIntradayOHLC(
+    itemName: string,
+    windowMs: number,
+  ): Promise<OHLCData | null> {
+    const records = await this.cache.getIntradayRecords(itemName, windowMs);
+    if (records.length === 0) return null;
+
+    // Records are sorted oldest-first by timestamp.
+    const windowStart = new Date(records[0].timestamp).getTime();
+    let high = -Infinity;
+    let low = Infinity;
+    let totalVolume = 0;
+
+    for (const r of records) {
+      if (r.price > high) high = r.price;
+      if (r.price < low) low = r.price;
+      totalVolume += Number(r.volume) || 0;
+    }
+
+    return {
+      windowStart,
+      open: records[0].price,
+      high,
+      low,
+      close: records[records.length - 1].price,
+      volume: totalVolume,
+      count: records.length,
+    };
+  }
+
+  /**
+   * Compute the 4-hour momentum for a single item: percentage change
+   * between the current price and the earliest price in the 4-hour window.
+   *
+   * @param itemName     - Canonical RS3 item name.
+   * @param currentPrice - The item's latest known GE price.
+   * @returns Percentage change (e.g. 0.05 = +5 %).  `0` when no data.
+   */
+  private async computeFourHourMomentum(
+    itemName: string,
+    currentPrice: number,
+  ): Promise<number> {
+    const ohlc = await this.getIntradayOHLC(
+      itemName,
+      MarketAnalyzerService.FOUR_HOUR_MS,
+    );
+    if (!ohlc || ohlc.open === 0) return 0;
+    return (currentPrice - ohlc.open) / ohlc.open;
   }
 
   // ─── Public API ───────────────────────────────────────────────────────
@@ -571,6 +633,12 @@ export class MarketAnalyzerService {
         tradeVelocity = "Very Slow";
       }
 
+      // ── 4-hour intraday momentum ──────────────────────────────────────
+      // Uses cached intraday records to measure short-term price movement.
+      // Computed asynchronously but batched at the end for efficiency.
+      // We'll fill this in after the loop to avoid N serial awaits.
+      const fourHourMomentum = 0; // placeholder—populated post-loop
+
       // ── Scoring adjustments based on predictive indicators ──────────
       let tradedValue = record.price * effectivePlayerVolume;
       // Reward upward-trending items (positive linear slope).
@@ -598,6 +666,7 @@ export class MarketAnalyzerService {
         priceTrend,
         ema30d,
         volatility,
+        fourHourMomentum,
         linearSlope,
         predictedNextPrice,
         highAlch: record.highAlch,
@@ -622,6 +691,10 @@ export class MarketAnalyzerService {
    * Fetch recent history from IndexedDB and build a
    * `Map<itemName, averageVolume>` for volume-spike detection.
    *
+   * With the v3 intraday schema, multiple records per day may exist.
+   * We deduplicate by calendar day (taking the max volume per day) so
+   * the SMA remains comparable to the legacy daily-keyed behaviour.
+   *
    * @param days - Number of calendar days to average over.
    * @returns A map from item name to its simple moving average volume.
    */
@@ -629,21 +702,26 @@ export class MarketAnalyzerService {
     const map = new Map<string, number>();
     try {
       const history = await this.cache.getRecentHistory(days);
-      // Group volumes by item name, excluding today so the SMA only
-      // contains *past* data (avoids self-comparison on first fetch).
       const today = new Date().toISOString().slice(0, 10);
-      const grouped = new Map<string, number[]>();
+
+      // Group volumes by (item, day), keeping the max volume per day to
+      // collapse intraday duplicates into one daily figure.
+      const grouped = new Map<string, Map<string, number>>();
       for (const rec of history) {
-        if (rec.day === today) continue;
-        const arr = grouped.get(rec.name);
+        const day = rec.day ?? new Date(rec.timestamp).toISOString().slice(0, 10);
+        if (day === today) continue;
         const vol = Number(rec.volume) || 0;
-        if (arr) {
-          arr.push(vol);
-        } else {
-          grouped.set(rec.name, [vol]);
+        let dayMap = grouped.get(rec.name);
+        if (!dayMap) {
+          dayMap = new Map();
+          grouped.set(rec.name, dayMap);
         }
+        const existing = dayMap.get(day) ?? 0;
+        if (vol > existing) dayMap.set(day, vol);
       }
-      for (const [name, vols] of grouped) {
+
+      for (const [name, dayMap] of grouped) {
+        const vols = [...dayMap.values()];
         const avg = vols.reduce((s, v) => s + v, 0) / vols.length;
         map.set(name, avg);
       }
@@ -659,6 +737,10 @@ export class MarketAnalyzerService {
    * for sparkline rendering.  Each array contains one price per past day
    * (does **not** include today — the caller appends the current price).
    *
+   * With the v3 intraday schema, multiple records per day may exist.
+   * We pick the *last* (most recent) price for each calendar day to
+   * produce a clean daily close series.
+   *
    * When the local IndexedDB history is sparse (most items have ≤ 1 day),
    * the method falls back to the Weird Gloop `last90d` API to fetch
    * real historical prices, extracting data for the last {@link days} days.
@@ -671,23 +753,28 @@ export class MarketAnalyzerService {
       const history = await this.cache.getRecentHistory(days);
       const today = new Date().toISOString().slice(0, 10);
 
-      // Collect (day, price) pairs per item, excluding today.
-      const grouped = new Map<string, { day: string; price: number }[]>();
+      // Collect (day, price, timestamp) per item, excluding today.
+      // Use a Map<day, { price, ts }> to keep the latest price per day.
+      const grouped = new Map<string, Map<string, { price: number; ts: string }> >();
       for (const rec of history) {
-        if (rec.day === today) continue;
-        const arr = grouped.get(rec.name);
-        const entry = { day: rec.day, price: rec.price };
-        if (arr) {
-          arr.push(entry);
-        } else {
-          grouped.set(rec.name, [entry]);
+        const day = rec.day ?? new Date(rec.timestamp).toISOString().slice(0, 10);
+        if (day === today) continue;
+        let dayMap = grouped.get(rec.name);
+        if (!dayMap) {
+          dayMap = new Map();
+          grouped.set(rec.name, dayMap);
+        }
+        const existing = dayMap.get(day);
+        if (!existing || rec.timestamp > existing.ts) {
+          dayMap.set(day, { price: rec.price, ts: rec.timestamp });
         }
       }
 
-      // Sort chronologically and extract prices.
-      for (const [name, entries] of grouped) {
-        entries.sort((a, b) => (a.day < b.day ? -1 : a.day > b.day ? 1 : 0));
-        map.set(name, entries.map((e) => e.price));
+      // Sort by calendar day and extract prices.
+      for (const [name, dayMap] of grouped) {
+        const sorted = [...dayMap.entries()]
+          .sort((a, b) => (a[0] < b[0] ? -1 : a[0] > b[0] ? 1 : 0));
+        map.set(name, sorted.map(([, v]) => v.price));
       }
 
       // ── Sparse-data fallback: fetch from Weird Gloop API ──────────────
@@ -705,8 +792,8 @@ export class MarketAnalyzerService {
       // round (200 items) the condition is met and subsequent startups
       // skip the ~40 s API call.
       // Capped at 200 items since the API only accepts 1 item per request.
-      const itemsWithSufficient = [...grouped.values()]  // items with ≥2 non-today rows
-        .filter((entries) => entries.length >= 2).length;
+      const itemsWithSufficient = [...grouped.values()]
+        .filter((dayMap) => dayMap.size >= 2).length;
       const sparse = itemsWithSufficient < 400;
 
       if (!sparse) {

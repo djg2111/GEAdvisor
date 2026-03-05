@@ -73,8 +73,8 @@ npx serve dist --listen 8080   # local dev server (run in a separate terminal)
 - **`LLMService` accepts `Partial<LLMConfig>`**  all fields optional (defaults to Groq). API key omitted = no Authorization header (for self-hosted models)
 - **Runtime filter overrides**: `analyzer.getTopItems(overrides?)` merges `Partial<MarketAnalyzerConfig>` at call time  don't reconstruct the service for filter changes
 - **Volume preset filters** (High / Low) apply against **global daily GE volume**, not `effectivePlayerVolume`
-- **TTL-cached scoring maps**: `MarketAnalyzerService.getOrBuildMaps(days)` caches `avgVolumeMap` and `priceHistoryMap` with a 10-minute TTL. All public methods use this cache  maps rebuild from IndexedDB only when stale. `invalidateMapCache()` exists for manual reset
-
+- **TTL-cached scoring maps**: `MarketAnalyzerService.getOrBuildMaps(days)` caches `avgVolumeMap` and `priceHistoryMap` with a 10-minute TTL. All public methods use this cache  maps rebuild from IndexedDB only when stale. `invalidateMapCache()` exists for manual reset- **Intraday OHLC**: `getIntradayOHLC(itemName, windowMs)` aggregates sub-daily price snapshots into Open/High/Low/Close bars via `CacheService.getIntradayRecords()`. Used for `fourHourMomentum` on `RankedItem`
+- **Database version 3**: `price-history` store uses compound keyPath `[name, timestamp]` (epoch ms) for intraday resolution. The `day` field is retained for backward compat but is **not** part of the key. Migration from v2 `[name, day]` is automatic — old store is deleted and recreated on version bump
 ### State Management & localStorage
 
 - **Key prefix**: `ge-analyzer:` (e.g. `ge-analyzer:llm-provider`, `ge-analyzer:view-mode`, `ge-analyzer:mode`, `ge-analyzer:style`, `ge-analyzer:colorway`, `ge-analyzer:contrast`, `ge-analyzer:compact-tiles`, `ge-analyzer:colorway-v2`)

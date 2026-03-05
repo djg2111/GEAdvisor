@@ -72,12 +72,43 @@ export interface StoredPriceRecord extends WeirdGloopPriceRecord {
 }
 
 /**
- * A daily snapshot stored in the `price-history` object store.
- * The compound key `[name, day]` ensures one row per item per calendar day.
+ * A price snapshot stored in the `price-history` object store.
+ *
+ * **v3 schema**: The compound key is `[name, timestamp]` (epoch ms),
+ * allowing multiple intraday records per item for OHLC candlestick
+ * charts and 4-hour buy-limit window analysis.
+ *
+ * The legacy `day` field is retained for backward compatibility with
+ * consumers that group/filter by calendar date.
  */
 export interface HistoricalPriceRecord extends StoredPriceRecord {
-  /** ISO date string `"YYYY-MM-DD"` — forms a compound key with `name`. */
+  /**
+   * ISO date string `"YYYY-MM-DD"` derived from `timestamp`.
+   * Retained for backward compatibility — **not** part of the IndexedDB
+   * key path since v3.
+   */
   day: string;
+}
+
+/**
+ * Open-High-Low-Close aggregation for a single time window.
+ * Used for candlestick charts and intraday momentum analysis.
+ */
+export interface OHLCData {
+  /** Unix-millisecond timestamp of the window start. */
+  windowStart: number;
+  /** First observed price in the window. */
+  open: number;
+  /** Maximum observed price in the window. */
+  high: number;
+  /** Minimum observed price in the window. */
+  low: number;
+  /** Last observed price in the window (most recent timestamp). */
+  close: number;
+  /** Sum of volumes across all records in the window. */
+  volume: number;
+  /** Number of individual price observations in the window. */
+  count: number;
 }
 
 // ─── Service Configuration ──────────────────────────────────────────────────
@@ -189,6 +220,12 @@ export interface RankedItem {
    * `0` when fewer than 2 data points.
    */
   volatility: number;
+  /**
+   * Percentage change between the current price and the price ~4 hours ago.
+   * Positive = price has risen, negative = dropped.
+   * `0` when there is no intraday data available.
+   */
+  fourHourMomentum: number;
   /**
    * OLS linear-regression slope of the price series (gp per day).
    * Positive = upward drift, negative = declining.

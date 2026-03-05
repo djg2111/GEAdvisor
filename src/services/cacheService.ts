@@ -24,7 +24,7 @@ import type {
 const DEFAULTS: CacheServiceConfig = {
   dbName: "ge-analyzer-cache",
   storeName: "prices",
-  ttlMs: 24 * 60 * 60 * 1000, // 24 hours
+  ttlMs: 1 * 60 * 60 * 1000, // 1 hour — react to intraday volatility
 };
 
 /** Name of the object store that accumulates daily price snapshots. */
@@ -77,25 +77,36 @@ export class CacheService {
     if (this.db) return this.db;
 
     return new Promise<IDBDatabase>((resolve, reject) => {
-      const request = indexedDB.open(this.dbName, 2);
+      // Version 3: migrate from [name, day] → [name, timestamp] compound key
+      // to support intraday (sub-daily) price tracking and OHLC charts.
+      const DB_VERSION = 3;
+      const request = indexedDB.open(this.dbName, DB_VERSION);
 
-      request.onupgradeneeded = () => {
+      request.onupgradeneeded = (event) => {
         const db = request.result;
+        const oldVersion = (event as IDBVersionChangeEvent).oldVersion;
+
         // Version 1: main prices store.
         if (!db.objectStoreNames.contains(this.storeName)) {
           const store = db.createObjectStore(this.storeName, { keyPath: "name" });
-          // Index on fetchedAt so we can efficiently query staleness.
           store.createIndex("fetchedAt", "fetchedAt", { unique: false });
           console.log(`[CacheService] Created object store "${this.storeName}".`);
         }
-        // Version 2: daily price-history store for SMA / hype tracking.
+
+        // Version 2→3 migration: delete old day-keyed history store.
+        if (oldVersion >= 2 && db.objectStoreNames.contains(HISTORY_STORE)) {
+          db.deleteObjectStore(HISTORY_STORE);
+          console.log(`[CacheService] Deleted legacy "${HISTORY_STORE}" (keyPath was [name, day]).`);
+        }
+
+        // Version 3: timestamp-keyed history store for intraday resolution.
         if (!db.objectStoreNames.contains(HISTORY_STORE)) {
           const hs = db.createObjectStore(HISTORY_STORE, {
-            keyPath: ["name", "day"],
+            keyPath: ["name", "timestamp"],
           });
           hs.createIndex("name", "name", { unique: false });
-          hs.createIndex("day", "day", { unique: false });
-          console.log(`[CacheService] Created object store "${HISTORY_STORE}".`);
+          hs.createIndex("timestamp", "timestamp", { unique: false });
+          console.log(`[CacheService] Created object store "${HISTORY_STORE}" (v3, keyPath [name, timestamp]).`);
         }
       };
 
@@ -149,8 +160,13 @@ export class CacheService {
           count++;
         };
 
-        // Also persist a daily snapshot (compound key [name, day] deduplicates).
-        const historical: HistoricalPriceRecord = { ...stored, day: today };
+        // Persist an intraday snapshot keyed by [name, timestamp].
+        // Each call inserts a unique record (Date.now() epoch ms).
+        const historical: HistoricalPriceRecord = {
+          ...stored,
+          timestamp: new Date(now).toISOString(),
+          day: today,
+        };
         histStore.put(historical);
       }
 
@@ -190,6 +206,9 @@ export class CacheService {
       for (const [name, entries] of historyMap) {
         for (const entry of entries) {
           const day = new Date(entry.timestamp).toISOString().slice(0, 10);
+          // Use the original API timestamp (epoch ms) as the key so each
+          // snapshot gets its own row.  Duplicate timestamps are
+          // idempotently overwritten via `put`.
           const record: HistoricalPriceRecord = {
             id: 0,
             name,
@@ -255,7 +274,10 @@ export class CacheService {
   }
 
   /**
-   * Retrieve historical daily snapshots for a single item.
+   * Retrieve historical snapshots for a single item.
+   *
+   * With the v3 intraday schema multiple records per day may exist.
+   * Results are sorted oldest-first by ISO timestamp.
    *
    * @param itemName - Canonical RS3 item name.
    * @param days     - Number of past calendar days to include.
@@ -281,7 +303,41 @@ export class CacheService {
         const all = req.result as HistoricalPriceRecord[];
         const filtered = all
           .filter((r) => r.day >= cutoffDay)
-          .sort((a, b) => (a.day < b.day ? -1 : a.day > b.day ? 1 : 0));
+          .sort((a, b) => (a.timestamp < b.timestamp ? -1 : a.timestamp > b.timestamp ? 1 : 0));
+        resolve(filtered);
+      };
+      req.onerror = () => reject(req.error);
+    });
+  }
+
+  /**
+   * Retrieve intraday records for a single item within a recent time window.
+   *
+   * Uses the `timestamp` index for efficient range queries — e.g. "all
+   * records from the last 4 hours" for buy-limit window analysis.
+   *
+   * @param itemName - Canonical RS3 item name.
+   * @param windowMs - Lookback window in milliseconds (e.g. `4 * 3_600_000`).
+   * @returns Records within the window, sorted oldest-first.
+   */
+  async getIntradayRecords(
+    itemName: string,
+    windowMs: number,
+  ): Promise<HistoricalPriceRecord[]> {
+    const db = this.ensureOpen();
+    const cutoffTs = new Date(Date.now() - windowMs).toISOString();
+
+    return new Promise<HistoricalPriceRecord[]>((resolve, reject) => {
+      const tx = db.transaction(HISTORY_STORE, "readonly");
+      const store = tx.objectStore(HISTORY_STORE);
+      const index = store.index("name");
+      const req = index.getAll(IDBKeyRange.only(itemName));
+
+      req.onsuccess = () => {
+        const all = req.result as HistoricalPriceRecord[];
+        const filtered = all
+          .filter((r) => r.timestamp >= cutoffTs)
+          .sort((a, b) => (a.timestamp < b.timestamp ? -1 : a.timestamp > b.timestamp ? 1 : 0));
         resolve(filtered);
       };
       req.onerror = () => reject(req.error);
@@ -297,15 +353,13 @@ export class CacheService {
    */
   async getRecentHistory(days: number): Promise<HistoricalPriceRecord[]> {
     const db = this.ensureOpen();
-    const cutoff = new Date();
-    cutoff.setDate(cutoff.getDate() - days);
-    const cutoffDay = cutoff.toISOString().slice(0, 10);
+    const cutoffTs = new Date(Date.now() - days * 24 * 60 * 60 * 1000).toISOString();
 
     return new Promise<HistoricalPriceRecord[]>((resolve, reject) => {
       const tx = db.transaction(HISTORY_STORE, "readonly");
       const store = tx.objectStore(HISTORY_STORE);
-      const index = store.index("day");
-      const range = IDBKeyRange.lowerBound(cutoffDay);
+      const index = store.index("timestamp");
+      const range = IDBKeyRange.lowerBound(cutoffTs);
       const req = index.getAll(range);
 
       req.onsuccess = () => resolve(req.result as HistoricalPriceRecord[]);
