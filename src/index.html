@@ -6,6 +6,9 @@
 	<title>GE Market Analyzer</title>
 </head>
 <body data-layout="tabbed">
+	<!-- ── Skip to content link (WCAG 2.4.1 Bypass Blocks) ──────────── -->
+	<a href="#app-content" class="skip-link">Skip to content</a>
+
 	<!-- ── Pre-bundle theme restoration ───────────────────────────────────
 	     This MUST run before the webpack bundle loads. style-loader injects
 	     CSS when the bundle executes; if body lacks data-mode/data-colorway
@@ -151,10 +154,11 @@
 							placeholder="gsk_…"
 							autocomplete="off"
 							spellcheck="false"
+							aria-describedby="key-status"
 						/>
 						<button id="save-key-btn" type="button">Save</button>
 					</div>
-					<span id="key-status" class="status-hint"></span>
+					<span id="key-status" class="status-hint" role="status" aria-live="polite"></span>
 					</form>
 				</fieldset>
 
@@ -182,19 +186,19 @@
 		</details>
 
 		<!-- ── Tab navigation (visible only in tabbed layout) ─────────── -->
-		<nav id="view-tabs">
-			<button id="tab-market-btn" class="tab-btn active" type="button">Market Data</button>
-			<button id="tab-advisor-btn" class="tab-btn" type="button">Ask Advisor</button>
-			<button id="tab-portfolio-btn" class="tab-btn" type="button">Portfolio</button>
+		<nav id="view-tabs" role="tablist" aria-label="Main navigation">
+			<button id="tab-market-btn" class="tab-btn active" type="button" role="tab" aria-selected="true" aria-controls="market-view">Market Data</button>
+			<button id="tab-advisor-btn" class="tab-btn" type="button" role="tab" aria-selected="false" aria-controls="advisor-view">Ask Advisor</button>
+			<button id="tab-portfolio-btn" class="tab-btn" type="button" role="tab" aria-selected="false" aria-controls="portfolio-view">Portfolio</button>
 		</nav>
 
 		<!-- ── Main content area ──────────────────────────────────────── -->
 		<main id="app-content">
 
 			<!-- ── Market data view ───────────────────────────────────── -->
-			<section id="market-view" class="active-tab">
+			<section id="market-view" class="active-tab" role="tabpanel" aria-labelledby="tab-market-btn">
 				<!-- ── Background sync progress bar (relocated to top) ── -->
-				<div id="background-sync-progress" class="sync-progress hidden">
+				<div id="background-sync-progress" class="sync-progress hidden" role="progressbar" aria-label="Market scan progress" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
 					<div class="sync-progress-track">
 						<div id="sync-progress-fill" class="sync-progress-fill"></div>
 					</div>
@@ -202,14 +206,14 @@
 				</div>
 
 				<!-- ── Error recovery banner ──────────────────────────── -->
-				<div id="error-banner" class="error-banner hidden">
+				<div id="error-banner" class="error-banner hidden" role="alert">
 					<span id="error-banner-msg">Something went wrong.</span>
 					<button id="error-retry-btn" type="button">⟳ Retry</button>
 				</div>
 
 				<!-- ── Search section (above Top 20) ──────────────────── -->
 				<div id="search-section">
-					<input type="search" id="market-search-input" placeholder="Search all GE items…" autocomplete="off" spellcheck="false" />
+					<input type="search" id="market-search-input" placeholder="Search all GE items…" autocomplete="off" spellcheck="false" aria-label="Search all GE items" />
 					<div class="search-filter-wrapper">
 						<button id="search-filter-btn" class="search-filter-btn" type="button" title="Filter search results">🔍 Filters</button>
 						<div id="search-filter-popover" class="search-filter-popover"></div>
@@ -325,12 +329,12 @@
 			</section>
 
 			<!-- ── Advisor / chat view ────────────────────────────────── -->
-			<section id="advisor-view">
+			<section id="advisor-view" role="tabpanel" aria-labelledby="tab-advisor-btn">
 				<div id="advisor-header">
 					<h2>Ask the Advisor</h2>
 					<button id="clear-chat-btn" type="button" title="Clear chat history">🗑 Clear</button>
 				</div>
-				<div id="chat-history"></div>
+				<div id="chat-history" aria-live="polite" aria-relevant="additions"></div>
 				<div id="chat-input-row">
 					<input
 						id="chat-input"
@@ -344,27 +348,27 @@
 			</section>
 
 			<!-- ── Portfolio / active flip tracker ────────────────────────────── -->
-			<section id="portfolio-view">
+			<section id="portfolio-view" role="tabpanel" aria-labelledby="tab-portfolio-btn">
 				<h2>Active Portfolio</h2>
 
 				<!-- Sub-navigation: Active Flips vs History & Stats -->
-				<div id="portfolio-sub-nav" class="portfolio-sub-nav">
-					<button id="portfolio-active-btn" class="portfolio-sub-btn active" type="button">Active Flips</button>
-					<button id="portfolio-history-btn" class="portfolio-sub-btn" type="button">History &amp; Stats</button>
+				<div id="portfolio-sub-nav" class="portfolio-sub-nav" role="tablist" aria-label="Portfolio sections">
+					<button id="portfolio-active-btn" class="portfolio-sub-btn active" type="button" role="tab" aria-selected="true" aria-controls="portfolio-active-container">Active Flips</button>
+					<button id="portfolio-history-btn" class="portfolio-sub-btn" type="button" role="tab" aria-selected="false" aria-controls="portfolio-history-container">History &amp; Stats</button>
 				</div>
 
 				<!-- Active flips pane -->
-				<div id="portfolio-active-container">
+				<div id="portfolio-active-container" role="tabpanel" aria-labelledby="portfolio-active-btn">
 				<!-- Add-flip form -->
 				<div id="portfolio-form" class="portfolio-form">
 					<div class="autocomplete-wrap">
-						<input id="flip-item-name" type="text" placeholder="Search or pick an item…" autocomplete="off" spellcheck="false" />
+						<input id="flip-item-name" type="text" placeholder="Search or pick an item…" autocomplete="off" spellcheck="false" aria-label="Item name" aria-autocomplete="list" aria-controls="flip-suggestions" />
 						<div id="flip-suggestions" class="autocomplete-list"></div>
 					</div>
 					<div class="portfolio-form-row">
-						<input id="flip-buy-price" type="number" min="1" placeholder="Buy price" />
-						<input id="flip-quantity" type="number" min="1" placeholder="Qty" />
-						<input id="flip-sell-price" type="number" min="1" placeholder="Sell price" />
+						<input id="flip-buy-price" type="number" min="1" placeholder="Buy price" aria-label="Buy price" />
+						<input id="flip-quantity" type="number" min="1" placeholder="Qty" aria-label="Quantity" />
+						<input id="flip-sell-price" type="number" min="1" placeholder="Sell price" aria-label="Sell price" />
 					</div>
 					<button id="add-flip-btn" type="button">+ Add Flip</button>
 				</div>
@@ -374,7 +378,7 @@
 				</div>
 
 				<!-- History & Stats pane (hidden by default) -->
-				<div id="portfolio-history-container" style="display:none">
+				<div id="portfolio-history-container" role="tabpanel" aria-labelledby="portfolio-history-btn" style="display:none">
 					<div class="portfolio-history-toolbar">
 						<input id="completed-flips-filter" type="text" placeholder="Filter by item or profit…" autocomplete="off" spellcheck="false" />
 						<button id="export-csv-btn" type="button">📊 Export CSV</button>

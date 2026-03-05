@@ -1,4 +1,27 @@
 ﻿/* ══════════════════════════════════════════════════════════════════════════════
+   Skip-to-content link  (WCAG 2.4.1 Bypass Blocks)
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+.skip-link {
+  position: absolute;
+  top: -100%;
+  left: 0;
+  z-index: 10000;
+  padding: 8px 16px;
+  background: var(--accent-primary);
+  color: #fff;
+  font-weight: 700;
+  font-size: 14px;
+  text-decoration: none;
+  border-radius: 0 0 4px 0;
+  transition: top 0.15s ease;
+}
+
+.skip-link:focus {
+  top: 0;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
    Global keyboard focus ring (accessibility)
    ══════════════════════════════════════════════════════════════════════════════ */
 
@@ -16,4 +39,20 @@
 .tab-btn:focus-visible {
   outline-offset: 1px;
   border-radius: 3px;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   Screen-reader only utility (visually hidden, announced by AT)
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
 }

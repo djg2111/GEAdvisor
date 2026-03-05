@@ -1,0 +1,227 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+ *  Interactive Chart — dual-canvas overlay + floating tooltip
+ *
+ *  Base canvas: static grid, price line, EMA, area gradient (redrawn on data change)
+ *  Interaction canvas: crosshairs + highlight dot (redrawn on mousemove)
+ *  Tooltip: absolutely-positioned <div> shown on hover
+ * ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ── Container (stacks both canvases + tooltip) ─────────────────────────────── */
+.chart-container {
+  position: relative;
+  width: 100%;
+  margin-bottom: 14px;
+  cursor: crosshair;
+  touch-action: pan-y;        /* allow vertical page scroll, capture horizontal */
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+/* ── Canvas wrapper (aligns interaction canvas exactly over the base canvas) ── */
+.chart-canvas-wrap {
+  position: relative;
+  width: 100%;
+}
+
+/* ── Base canvas (static layer) ─────────────────────────────────────────────── */
+.chart-container .chart-base-canvas {
+  display: block;
+  width: 100%;
+  border-radius: 4px;
+  background: var(--bg-elevated);
+}
+
+/* ── Interaction overlay canvas ─────────────────────────────────────────────── */
+.chart-container .chart-interaction-canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;       /* events pass through to container */
+  border-radius: 4px;
+}
+
+/* ── Floating tooltip ───────────────────────────────────────────────────────── */
+.chart-tooltip {
+  position: absolute;
+  display: none;
+  pointer-events: none;
+  z-index: 20;
+  background: var(--bg-main, #1e1e1e);
+  border: 1px solid var(--accent-primary, #569cd6);
+  border-radius: 6px;
+  padding: 8px 10px;
+  font-size: 11px;
+  line-height: 1.5;
+  color: var(--text-main, #ccc);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.45);
+  white-space: nowrap;
+  max-width: 240px;
+  transition: opacity 0.08s ease;
+}
+
+.chart-tooltip.visible {
+  display: block;
+}
+
+/* Tooltip data rows */
+.chart-tooltip-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.chart-tooltip-label {
+  color: var(--text-muted, #888);
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.chart-tooltip-value {
+  font-weight: 600;
+  color: var(--text-bright, #fff);
+}
+
+.chart-tooltip-value.up {
+  color: var(--accent-green-bright, #4ec9b0);
+}
+
+.chart-tooltip-value.down {
+  color: var(--accent-red, #f44747);
+}
+
+/* ── Zoom hint badge (sits below the canvas, never overlaps data) ───────────── */
+.chart-zoom-hint {
+  text-align: right;
+  font-size: 9px;
+  color: var(--text-muted, #666);
+  padding: 2px 6px 0;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+}
+
+.chart-container:hover .chart-zoom-hint {
+  opacity: 0.85;
+}
+
+/* ── Layer toggle pill strip ────────────────────────────────────────────────── */
+.chart-layer-toggles {
+  display: flex;
+  gap: 5px;
+  padding: 4px 2px 6px;
+  flex-wrap: wrap;
+}
+
+.chart-layer-pill {
+  --pill-color: #888;
+  appearance: none;
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 10px;
+  padding: 2px 9px 2px 22px;
+  font-size: 10px;
+  font-family: "Segoe UI", sans-serif;
+  line-height: 1.4;
+  cursor: pointer;
+  background: var(--bg-elevated, #2a2a2a);
+  color: var(--text-muted, #888);
+  transition: background 0.15s, color 0.15s, border-color 0.15s, opacity 0.15s;
+  opacity: 0.6;
+  position: relative;
+}
+
+/* Swatch indicator (line/bar preview matching graph style) */
+.chart-layer-pill::before {
+  content: "";
+  position: absolute;
+  left: 7px;
+  top: 50%;
+  width: 10px;
+  height: 2px;
+  background: var(--text-muted, #888);
+  border-radius: 1px;
+  transform: translateY(-50%);
+  transition: background 0.15s;
+}
+
+/* Dashed swatch for EMA */
+.chart-layer-pill[data-layer="ema"]::before {
+  background: repeating-linear-gradient(
+    90deg,
+    var(--text-muted, #888) 0px, var(--text-muted, #888) 3px,
+    transparent 3px, transparent 5px
+  );
+  height: 2px;
+}
+
+/* Bar swatch for Volume */
+.chart-layer-pill[data-layer="volume"]::before {
+  width: 10px;
+  height: 8px;
+  border-radius: 1px 1px 0 0;
+}
+
+/* Dot swatch for Dots */
+.chart-layer-pill[data-layer="dots"]::before {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+}
+
+.chart-layer-pill:hover {
+  opacity: 0.85;
+}
+
+.chart-layer-pill.active {
+  opacity: 1;
+  color: var(--pill-color);
+  border-color: var(--pill-color);
+  background: rgba(255,255,255,0.06);
+}
+
+/* Active swatch colours */
+.chart-layer-pill.active::before {
+  background: var(--pill-color);
+}
+
+.chart-layer-pill.active[data-layer="ema"]::before {
+  background: repeating-linear-gradient(
+    90deg,
+    var(--pill-color) 0px, var(--pill-color) 3px,
+    transparent 3px, transparent 5px
+  );
+}
+
+.chart-layer-pill.active[data-layer="volume"]::before {
+  background: var(--pill-color);
+  opacity: 0.6;
+}
+
+/* Light mode adjustments */
+body[data-mode="light"] .chart-layer-pill {
+  border-color: rgba(0,0,0,0.15);
+  background: var(--bg-elevated, #f0f0f0);
+}
+
+body[data-mode="light"] .chart-layer-pill.active {
+  background: rgba(0,0,0,0.06);
+}
+
+/* ── Responsive heights (match existing graph-modal-canvas sizing) ──────────── */
+.graph-modal-body .chart-base-canvas,
+.analytics-graph-section .chart-base-canvas {
+  height: 200px;
+}
+
+@media (min-width: 480px) {
+  .analytics-graph-section .chart-base-canvas {
+    height: 220px;
+  }
+}
+
+@media (max-width: 600px) {
+  .analytics-graph-section .chart-base-canvas {
+    height: 160px;
+  }
+}

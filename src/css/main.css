@@ -74,6 +74,7 @@
 @import "./components/modals.css";
 @import "./components/analytics-modal.css";
 @import "./components/analytics-dividers.css";
+@import "./components/interactive-chart.css";
 @import "./components/chat.css";
 @import "./components/portfolio.css";
 @import "./components/predictive-badges.css";
