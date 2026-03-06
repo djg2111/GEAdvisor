@@ -1344,6 +1344,157 @@ ___CSS_LOADER_EXPORT___.push([module.id, `/* ── Expandable detail panel ─�
 
 /***/ },
 
+/***/ "../node_modules/css-loader/dist/cjs.js!./css/components/disclaimer.css"
+/*!******************************************************************************!*\
+  !*** ../node_modules/css-loader/dist/cjs.js!./css/components/disclaimer.css ***!
+  \******************************************************************************/
+(module, __webpack_exports__, __webpack_require__) {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var _node_modules_css_loader_dist_runtime_noSourceMaps_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../../node_modules/css-loader/dist/runtime/noSourceMaps.js */ "../node_modules/css-loader/dist/runtime/noSourceMaps.js");
+/* harmony import */ var _node_modules_css_loader_dist_runtime_noSourceMaps_js__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_node_modules_css_loader_dist_runtime_noSourceMaps_js__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../../node_modules/css-loader/dist/runtime/api.js */ "../node_modules/css-loader/dist/runtime/api.js");
+/* harmony import */ var _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(_node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1__);
+// Imports
+
+
+var ___CSS_LOADER_EXPORT___ = _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1___default()((_node_modules_css_loader_dist_runtime_noSourceMaps_js__WEBPACK_IMPORTED_MODULE_0___default()));
+// Module
+___CSS_LOADER_EXPORT___.push([module.id, `/* ── Site Disclaimer Overlay ──────────────────────────────────────────────── */
+
+.disclaimer-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.75);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+}
+
+.disclaimer-overlay.hidden {
+  display: none;
+}
+
+.disclaimer-card {
+  background: var(--bg-main, #1e1e1e);
+  border: 1px solid var(--accent-primary, #4fc3f7);
+  border-radius: 8px;
+  width: 460px;
+  max-width: 92vw;
+  max-height: 85vh;
+  overflow-y: auto;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+  animation: disclaimer-in 0.2s ease-out;
+  padding: 0;
+}
+
+@keyframes disclaimer-in {
+  from { opacity: 0; transform: scale(0.95) translateY(12px); }
+  to   { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+.disclaimer-header {
+  padding: 14px 16px 10px;
+  border-bottom: 2px solid var(--border-main, #333);
+  text-align: center;
+}
+
+.disclaimer-header h2 {
+  margin: 0;
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--accent-primary, #4fc3f7);
+  letter-spacing: 0.3px;
+}
+
+.disclaimer-body {
+  padding: 14px 16px;
+  font-size: 13px;
+  line-height: 1.55;
+  color: var(--text-main, #ccc);
+}
+
+.disclaimer-body h3 {
+  margin: 12px 0 6px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-bright, #eee);
+}
+
+.disclaimer-body h3:first-child {
+  margin-top: 0;
+}
+
+.disclaimer-body ul {
+  margin: 4px 0 8px 18px;
+  padding: 0;
+}
+
+.disclaimer-body li {
+  margin-bottom: 4px;
+}
+
+.disclaimer-body .disclaimer-warning {
+  color: var(--accent-gold, #ffc107);
+  font-weight: 600;
+}
+
+.disclaimer-footer {
+  padding: 10px 16px 14px;
+  border-top: 1px solid var(--border-main, #333);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.disclaimer-persist-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--text-muted, #888);
+  cursor: pointer;
+  user-select: none;
+}
+
+.disclaimer-persist-label input[type="checkbox"] {
+  accent-color: var(--accent-primary, #4fc3f7);
+  cursor: pointer;
+}
+
+.disclaimer-ack-btn {
+  padding: 8px 28px;
+  font-size: 13px;
+  font-weight: 600;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  background: var(--accent-primary, #4fc3f7);
+  color: var(--bg-main, #1e1e1e);
+  transition: opacity 0.15s, transform 0.1s;
+}
+
+.disclaimer-ack-btn:hover {
+  opacity: 0.88;
+}
+
+.disclaimer-ack-btn:active {
+  transform: scale(0.97);
+}
+`, ""]);
+// Exports
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (___CSS_LOADER_EXPORT___);
+
+
+/***/ },
+
 /***/ "../node_modules/css-loader/dist/cjs.js!./css/components/favourites.css"
 /*!******************************************************************************!*\
   !*** ../node_modules/css-loader/dist/cjs.js!./css/components/favourites.css ***!
@@ -4845,8 +4996,10 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _node_modules_css_loader_dist_cjs_js_components_alerts_css__WEBPACK_IMPORTED_MODULE_56__ = __webpack_require__(/*! -!../../node_modules/css-loader/dist/cjs.js!./components/alerts.css */ "../node_modules/css-loader/dist/cjs.js!./css/components/alerts.css");
 /* harmony import */ var _node_modules_css_loader_dist_cjs_js_components_accessibility_css__WEBPACK_IMPORTED_MODULE_57__ = __webpack_require__(/*! -!../../node_modules/css-loader/dist/cjs.js!./components/accessibility.css */ "../node_modules/css-loader/dist/cjs.js!./css/components/accessibility.css");
 /* harmony import */ var _node_modules_css_loader_dist_cjs_js_components_back_to_top_css__WEBPACK_IMPORTED_MODULE_58__ = __webpack_require__(/*! -!../../node_modules/css-loader/dist/cjs.js!./components/back-to-top.css */ "../node_modules/css-loader/dist/cjs.js!./css/components/back-to-top.css");
-/* harmony import */ var _node_modules_css_loader_dist_cjs_js_layout_responsive_css__WEBPACK_IMPORTED_MODULE_59__ = __webpack_require__(/*! -!../../node_modules/css-loader/dist/cjs.js!./layout/responsive.css */ "../node_modules/css-loader/dist/cjs.js!./css/layout/responsive.css");
+/* harmony import */ var _node_modules_css_loader_dist_cjs_js_components_disclaimer_css__WEBPACK_IMPORTED_MODULE_59__ = __webpack_require__(/*! -!../../node_modules/css-loader/dist/cjs.js!./components/disclaimer.css */ "../node_modules/css-loader/dist/cjs.js!./css/components/disclaimer.css");
+/* harmony import */ var _node_modules_css_loader_dist_cjs_js_layout_responsive_css__WEBPACK_IMPORTED_MODULE_60__ = __webpack_require__(/*! -!../../node_modules/css-loader/dist/cjs.js!./layout/responsive.css */ "../node_modules/css-loader/dist/cjs.js!./css/layout/responsive.css");
 // Imports
+
 
 
 
@@ -4965,7 +5118,8 @@ ___CSS_LOADER_EXPORT___.i(_node_modules_css_loader_dist_cjs_js_components_toasts
 ___CSS_LOADER_EXPORT___.i(_node_modules_css_loader_dist_cjs_js_components_alerts_css__WEBPACK_IMPORTED_MODULE_56__["default"]);
 ___CSS_LOADER_EXPORT___.i(_node_modules_css_loader_dist_cjs_js_components_accessibility_css__WEBPACK_IMPORTED_MODULE_57__["default"]);
 ___CSS_LOADER_EXPORT___.i(_node_modules_css_loader_dist_cjs_js_components_back_to_top_css__WEBPACK_IMPORTED_MODULE_58__["default"]);
-___CSS_LOADER_EXPORT___.i(_node_modules_css_loader_dist_cjs_js_layout_responsive_css__WEBPACK_IMPORTED_MODULE_59__["default"]);
+___CSS_LOADER_EXPORT___.i(_node_modules_css_loader_dist_cjs_js_components_disclaimer_css__WEBPACK_IMPORTED_MODULE_59__["default"]);
+___CSS_LOADER_EXPORT___.i(_node_modules_css_loader_dist_cjs_js_layout_responsive_css__WEBPACK_IMPORTED_MODULE_60__["default"]);
 // Module
 ___CSS_LOADER_EXPORT___.push([module.id, `/* ═══════════════════════════════════════════════════════════════════════════
  *  GE Market Analyzer — CSS Module Entry Point
@@ -8581,27 +8735,44 @@ class CacheService {
             const store = tx.objectStore(this.storeName);
             const histStore = tx.objectStore(HISTORY_STORE);
             let count = 0;
+            let histSkipped = 0;
             for (const [name, record] of prices) {
                 const stored = {
                     ...record,
                     name,
                     fetchedAt: now,
                 };
-                const req = store.put(stored);
-                req.onsuccess = () => {
+                // Read the existing record to check whether the price actually
+                // changed.  Guide prices update ~once per day, so most hourly
+                // polls return the same value — skipping duplicate history rows
+                // prevents IndexedDB bloat (~24× fewer rows per day).
+                const getReq = store.get(name);
+                getReq.onsuccess = () => {
+                    const existing = getReq.result;
+                    store.put(stored);
                     count++;
+                    // Only persist a history snapshot when the price has actually
+                    // changed (or no prior record exists).
+                    if (!existing || existing.price !== record.price) {
+                        const historical = {
+                            ...stored,
+                            timestamp: new Date(now).toISOString(),
+                            day: today,
+                        };
+                        histStore.put(historical);
+                    }
+                    else {
+                        histSkipped++;
+                    }
                 };
-                // Persist an intraday snapshot keyed by [name, timestamp].
-                // Each call inserts a unique record (Date.now() epoch ms).
-                const historical = {
-                    ...stored,
-                    timestamp: new Date(now).toISOString(),
-                    day: today,
-                };
-                histStore.put(historical);
             }
             tx.oncomplete = () => {
-                console.log(`[CacheService] Bulk-inserted ${count} records.`);
+                if (histSkipped > 0) {
+                    console.log(`[CacheService] Bulk-inserted ${count} records (${histSkipped} unchanged-price history rows skipped).`);
+                }
+                else {
+                    console.log(`[CacheService] Bulk-inserted ${count} records.`);
+                }
                 resolve(count);
             };
             tx.onerror = () => {
@@ -8918,6 +9089,15 @@ const RS3_ECONOMIC_RULES = `\
 
 11. GE MID-PRICE LAG & STALENESS: The displayed GE mid-price updates daily based on recent trades, but for low-volume or suddenly volatile items (new releases, boss drops, nerfs), it can lag significantly (days or weeks). During these periods, the mid-price becomes unreliable or "fictional." Always rely on real-time margin checking (insta-buy/sell offers) rather than the listed mid-price for high-volatility events or low-trade items.
 
+12. DATA SOURCE REALITY: All price and volume data in this system comes from the Weird Gloop API, which polls the official Jagex GE API every 30–60 minutes. Guide prices update approximately once per day. Volume is a rolling 24-hour aggregate, NOT a live ticker. This means:
+   - Prices shown are GUIDE PRICES, not real-time transaction prices. The actual buy/sell spread is invisible.
+   - Intraday price movement is NOT visible — a 10% spike and recovery within 6 hours will not appear in this data.
+   - Volume changes reflect the rolling 24h window shifting, not hourly breakdowns.
+   - RS3 lacks an OSRS-style real-time data source (RuneLite). Treat this as a value-investing / daily-flip planning tool, not a high-frequency trading terminal.
+   - ALWAYS advise the user to margin-check (see rule 3) a single item in-game before committing capital to confirm the real spread.
+   - Do NOT claim to know "current spread" or "right now" prices — you only know the last guide price.
+   - The "Predicted 24h Price" and trend indicators extrapolate from daily guide-price snapshots and should be treated as directional hints, not precise forecasts.
+
 === LLM OUTPUT CONSTRAINTS (MANDATORY) ===
 - When recommending any flip or calculating profit/gp/hr, you MUST explicitly show the math: e.g., "Gross margin = Sell price - Buy price = X gp; Tax = floor(Sell price × 0.02) = Y gp; Net profit per item = X - Y = Z gp; gp/hr = Z × (Limit / fill hours) = W gp/hr."
 - Never describe any flip as "guaranteed profit" or use the word "guaranteed" — all GE prices are player-driven and can change.
@@ -8939,6 +9119,10 @@ Each item line in the market data contains these fields:
 • Eff. Vol — effective daily player volume = min(global daily volume, buy limit × 6). Reflects what one player can realistically trade.
 • Max 4H Capital — price × buy limit. How much gold you need to max out one 4-hour window.
 • Tax Gap — minimum spread (in gp) required to break even after the 2% GE tax.
+• ROT (Return on Time) — estimated gp/hr for a single player flipping this item:
+  ROT = estFlipProfit × (globalVol / 24) × 0.7 fill-factor.
+  Higher ROT = more profitable use of your time. Use this to compare items with different margins and volumes.
+  An item with lower per-item profit but much higher volume can vastly outperform a "big margin" slow-mover.
 • 30d Trend Slope — linear regression slope over available price history:
   - Positive (+N.N) = prices trending upward → good for buying.
   - Negative (−N.N) = prices trending downward → good for selling / risky to hold.
@@ -10276,54 +10460,6 @@ class MarketAnalyzerService {
         this.mapCacheTimestamp = Date.now();
         return { avgVolumeMap, priceHistoryMap };
     }
-    /**
-     * Query the CacheService for intraday records within a time window and
-     * aggregate them into an OHLC (Open-High-Low-Close) bar.
-     *
-     * @param itemName - Canonical RS3 item name.
-     * @param windowMs - Lookback window in milliseconds (e.g. 4 hours).
-     * @returns An {@link OHLCData} object, or `null` if no intraday data exists.
-     */
-    async getIntradayOHLC(itemName, windowMs) {
-        const records = await this.cache.getIntradayRecords(itemName, windowMs);
-        if (records.length === 0)
-            return null;
-        // Records are sorted oldest-first by timestamp.
-        const windowStart = new Date(records[0].timestamp).getTime();
-        let high = -Infinity;
-        let low = Infinity;
-        let totalVolume = 0;
-        for (const r of records) {
-            if (r.price > high)
-                high = r.price;
-            if (r.price < low)
-                low = r.price;
-            totalVolume += Number(r.volume) || 0;
-        }
-        return {
-            windowStart,
-            open: records[0].price,
-            high,
-            low,
-            close: records[records.length - 1].price,
-            volume: totalVolume,
-            count: records.length,
-        };
-    }
-    /**
-     * Compute the 4-hour momentum for a single item: percentage change
-     * between the current price and the earliest price in the 4-hour window.
-     *
-     * @param itemName     - Canonical RS3 item name.
-     * @param currentPrice - The item's latest known GE price.
-     * @returns Percentage change (e.g. 0.05 = +5 %).  `0` when no data.
-     */
-    async computeFourHourMomentum(itemName, currentPrice) {
-        const ohlc = await this.getIntradayOHLC(itemName, MarketAnalyzerService.FOUR_HOUR_MS);
-        if (!ohlc || ohlc.open === 0)
-            return 0;
-        return (currentPrice - ohlc.open) / ohlc.open;
-    }
     // ─── Public API ───────────────────────────────────────────────────────
     /**
      * Run the full filtering pipeline and return the top-N most liquid items.
@@ -10461,7 +10597,7 @@ class MarketAnalyzerService {
             return "[No liquid items available — cache may be empty.]";
         }
         const header = `=== RS3 Grand Exchange — Top ${items.length} by Traded Value (unfiltered) ===`;
-        const legend = "# Fields: Name | Price | Buy | Sell | Profit | Limit | EffVol | 4HCap | TaxGap | Alch | Velocity | Slope | Vol% | Pred | Flags";
+        const legend = "# Fields: Name | Price | Buy | Sell | Profit | Limit | EffVol | 4HCap | TaxGap | Alch | Velocity | ROT(gp/hr) | Slope | Vol% | Pred | Flags";
         const lines = items.map((item, idx) => {
             const rank = String(idx + 1).padStart(2, " ");
             const price = this.formatGp(item.price);
@@ -10480,6 +10616,7 @@ class MarketAnalyzerService {
                 ? this.formatGp(item.highAlch)
                 : item.highAlch === false ? "N/A" : "?";
             const velocity = item.tradeVelocity;
+            const rot = this.formatGp(item.returnOnTime);
             const slope = item.linearSlope >= 0
                 ? `+${item.linearSlope.toFixed(1)}`
                 : item.linearSlope.toFixed(1);
@@ -10493,7 +10630,7 @@ class MarketAnalyzerService {
             if (item.volumeSpikeMultiplier > 0)
                 flags.push(`🔥${item.volumeSpikeMultiplier}x`);
             const flagStr = flags.length > 0 ? " " + flags.join(" ") : "";
-            return `${rank}. ${item.name} | ${price} | ${buy} | ${sell} | ${profit} | ${limit} | ${effVol} | ${cap4h} | ${taxGap} | ${alch} | ${velocity} | ${slope} | ${vol} | ${pred}${flagStr}`;
+            return `${rank}. ${item.name} | ${price} | ${buy} | ${sell} | ${profit} | ${limit} | ${effVol} | ${cap4h} | ${taxGap} | ${alch} | ${velocity} | ${rot} | ${slope} | ${vol} | ${pred}${flagStr}`;
         });
         return [header, legend, ...lines].join("\n");
     }
@@ -10539,9 +10676,10 @@ class MarketAnalyzerService {
                 ? `High Alch: ${this.formatGp(item.highAlch)} gp`
                 : item.highAlch === false ? "High Alch: Not Alchable" : "High Alch: Unknown";
             const velocity = item.tradeVelocity;
+            const rot = this.formatGp(item.returnOnTime);
             const histLen = item.priceHistory.length;
             const histNote = histLen < 3 ? " [LIMITED DATA]" : "";
-            return `${rank}. ${item.name} | GE Price: ${price} gp | Buy ≤ ${recBuy} | Sell ≥ ${recSell} | Profit: ${flipPft} gp/ea | Limit: ${limit} | Eff. Vol: ${effVol} | Max 4H Capital: ${cap4h} | Tax Gap: ${this.formatGp(item.taxGap)} gp | ${alch} | Velocity: ${velocity} | 30d Trend Slope: ${slope} | Volatility: ${vol}%${histNote} | Predicted 24h Price: ${predicted} gp${risk}${hype}`;
+            return `${rank}. ${item.name} | GE Price: ${price} gp | Buy ≤ ${recBuy} | Sell ≥ ${recSell} | Profit: ${flipPft} gp/ea | Limit: ${limit} | Eff. Vol: ${effVol} | Max 4H Capital: ${cap4h} | Tax Gap: ${this.formatGp(item.taxGap)} gp | ${alch} | Velocity: ${velocity} | ROT: ${rot} gp/hr | 30d Trend Slope: ${slope} | Volatility: ${vol}%${histNote} | Predicted 24h Price: ${predicted} gp${risk}${hype}`;
         });
         return [header, ...lines, divider].join("\n");
     }
@@ -10645,11 +10783,14 @@ class MarketAnalyzerService {
             else {
                 tradeVelocity = "Very Slow";
             }
-            // ── 4-hour intraday momentum ──────────────────────────────────────
-            // Uses cached intraday records to measure short-term price movement.
-            // Computed asynchronously but batched at the end for efficiency.
-            // We'll fill this in after the loop to avoid N serial awaits.
-            const fourHourMomentum = 0; // placeholder—populated post-loop
+            // ── Return on Time (ROT) — gp/hr estimate ────────────────────────
+            // ROT = estFlipProfit × estHourlyFillRate × fillFactor.
+            // Hourly fill rate is globalVol / 24 (best available estimate from
+            // the Weird Gloop rolling-24h volume — RS3 has no sub-daily API).
+            const estHourlyFillRate = globalVol / 24;
+            const returnOnTime = safeBuyLimit > 0 && estHourlyFillRate > 0
+                ? Math.round(estFlipProfit * estHourlyFillRate * MarketAnalyzerService.ROT_FILL_FACTOR)
+                : 0;
             // ── Scoring adjustments based on predictive indicators ──────────
             let tradedValue = record.price * effectivePlayerVolume;
             // Reward upward-trending items (positive linear slope).
@@ -10678,7 +10819,7 @@ class MarketAnalyzerService {
                 priceTrend,
                 ema30d,
                 volatility,
-                fourHourMomentum,
+                returnOnTime,
                 linearSlope,
                 predictedNextPrice,
                 highAlch: record.highAlch,
@@ -10912,8 +11053,11 @@ class MarketAnalyzerService {
 // Cached intermediate maps with TTL – March 2026
 /** TTL for cached volume/price maps (10 minutes). */
 MarketAnalyzerService.MAP_CACHE_TTL_MS = 10 * 60 * 1000;
-/** 4-hour window in milliseconds — matches the RS3 GE buy-limit cycle. */
-MarketAnalyzerService.FOUR_HOUR_MS = 4 * 60 * 60 * 1000;
+/**
+ * Fill-rate factor for ROT estimation — a single player rarely captures
+ * 100 % of hourly GE volume.  0.7 is a conservative middle-ground.
+ */
+MarketAnalyzerService.ROT_FILL_FACTOR = 0.7;
 
 
 /***/ },
@@ -11884,6 +12028,8 @@ const LS_FAVORITES = "ge-analyzer:favorites";
 const LS_DEEP_HISTORY = "ge-analyzer:deep-history";
 /** `localStorage` key for contrast auto-correction toggle (boolean string). */
 const LS_CONTRAST_AUTO = "ge-analyzer:contrast-auto-correct";
+/** Whether the user has acknowledged the site disclaimer. */
+const LS_DISCLAIMER_ACK = "ge-analyzer:disclaimer-ack";
 /** WCAG AA minimum contrast ratio for normal text. */
 const WCAG_AA_RATIO = 4.5;
 /** Maximum number of messages (user + assistant) persisted to localStorage. */
@@ -12421,6 +12567,7 @@ const SEARCH_FILTER_GROUPS = [
  */
 async function initUI(onStatus) {
     resolveElements();
+    bindDisclaimer();
     populateProviderDropdown();
     restoreSettings();
     bindSettingsEvents();
@@ -13540,6 +13687,25 @@ function bindBackToTop() {
         els.marketView.scrollTo({ top: 0, behavior: "smooth" });
     });
 }
+// ─── Disclaimer Overlay ─────────────────────────────────────────────────────
+/**
+ * Wire the disclaimer overlay's Acknowledge button and persist checkbox.
+ * The overlay is shown/hidden by the inline <script> in index.html
+ * (pre-bundle) based on the localStorage flag.
+ */
+function bindDisclaimer() {
+    const overlay = document.getElementById("disclaimer-overlay");
+    const ackBtn = document.getElementById("disclaimer-ack-btn");
+    const persistCheck = document.getElementById("disclaimer-persist-check");
+    if (!overlay || !ackBtn)
+        return;
+    ackBtn.addEventListener("click", () => {
+        if (persistCheck?.checked) {
+            localStorage.setItem(LS_DISCLAIMER_ACK, "1");
+        }
+        overlay.classList.add("hidden");
+    });
+}
 // ─── Data Management (Export / Import) ──────────────────────────────────────
 /** localStorage keys included in the JSON backup. */
 const EXPORT_KEYS = [
@@ -13552,6 +13718,7 @@ const EXPORT_KEYS = [
     "ge-analyzer:contrast",
     "ge-analyzer:contrast-auto-correct",
     "ge-analyzer:chart-layers",
+    "ge-analyzer:disclaimer-ack",
 ];
 /**
  * Wire click handlers for the Export Data / Import Data buttons and the
@@ -17684,26 +17851,6 @@ function formatVolume(vol) {
 }
 
 
-/***/ },
-
-/***/ "./appconfig.json"
-/*!************************!*\
-  !*** ./appconfig.json ***!
-  \************************/
-(module, __unused_webpack_exports, __webpack_require__) {
-
-module.exports = __webpack_require__.p + "appconfig.json";
-
-/***/ },
-
-/***/ "./icon.png"
-/*!******************!*\
-  !*** ./icon.png ***!
-  \******************/
-(module, __unused_webpack_exports, __webpack_require__) {
-
-module.exports = __webpack_require__.p + "icon.png";
-
 /***/ }
 
 /******/ 	});
@@ -17718,6 +17865,12 @@ module.exports = __webpack_require__.p + "icon.png";
 /******/ 		if (cachedModule !== undefined) {
 /******/ 			return cachedModule.exports;
 /******/ 		}
+/******/ 		// Check if module exists (development only)
+/******/ 		if (__webpack_modules__[moduleId] === undefined) {
+/******/ 			var e = new Error("Cannot find module '" + moduleId + "'");
+/******/ 			e.code = 'MODULE_NOT_FOUND';
+/******/ 			throw e;
+/******/ 		}
 /******/ 		// Create a new module (and put it into the cache)
 /******/ 		var module = __webpack_module_cache__[moduleId] = {
 /******/ 			id: moduleId,
@@ -17726,12 +17879,6 @@ module.exports = __webpack_require__.p + "icon.png";
 /******/ 		};
 /******/ 	
 /******/ 		// Execute the module function
-/******/ 		if (!(moduleId in __webpack_modules__)) {
-/******/ 			delete __webpack_module_cache__[moduleId];
-/******/ 			var e = new Error("Cannot find module '" + moduleId + "'");
-/******/ 			e.code = 'MODULE_NOT_FOUND';
-/******/ 			throw e;
-/******/ 		}
 /******/ 		__webpack_modules__[moduleId](module, module.exports, __webpack_require__);
 /******/ 	
 /******/ 		// Return the exports of the module
@@ -17763,18 +17910,6 @@ module.exports = __webpack_require__.p + "icon.png";
 /******/ 		};
 /******/ 	})();
 /******/ 	
-/******/ 	/* webpack/runtime/global */
-/******/ 	(() => {
-/******/ 		__webpack_require__.g = (function() {
-/******/ 			if (typeof globalThis === 'object') return globalThis;
-/******/ 			try {
-/******/ 				return this || new Function('return this')();
-/******/ 			} catch (e) {
-/******/ 				if (typeof window === 'object') return window;
-/******/ 			}
-/******/ 		})();
-/******/ 	})();
-/******/ 	
 /******/ 	/* webpack/runtime/hasOwnProperty shorthand */
 /******/ 	(() => {
 /******/ 		__webpack_require__.o = (obj, prop) => (Object.prototype.hasOwnProperty.call(obj, prop))
@@ -17789,29 +17924,6 @@ module.exports = __webpack_require__.p + "icon.png";
 /******/ 			}
 /******/ 			Object.defineProperty(exports, '__esModule', { value: true });
 /******/ 		};
-/******/ 	})();
-/******/ 	
-/******/ 	/* webpack/runtime/publicPath */
-/******/ 	(() => {
-/******/ 		var scriptUrl;
-/******/ 		if (__webpack_require__.g.importScripts) scriptUrl = __webpack_require__.g.location + "";
-/******/ 		var document = __webpack_require__.g.document;
-/******/ 		if (!scriptUrl && document) {
-/******/ 			if (document.currentScript && document.currentScript.tagName.toUpperCase() === 'SCRIPT')
-/******/ 				scriptUrl = document.currentScript.src;
-/******/ 			if (!scriptUrl) {
-/******/ 				var scripts = document.getElementsByTagName("script");
-/******/ 				if(scripts.length) {
-/******/ 					var i = scripts.length - 1;
-/******/ 					while (i > -1 && (!scriptUrl || !/^http(s?):/.test(scriptUrl))) scriptUrl = scripts[i--].src;
-/******/ 				}
-/******/ 			}
-/******/ 		}
-/******/ 		// When supporting browsers where an automatic publicPath is not supported you must specify an output.publicPath manually via configuration
-/******/ 		// or pass an empty string ("") and set the __webpack_public_path__ variable from your code to use your own logic.
-/******/ 		if (!scriptUrl) throw new Error("Automatic publicPath is not supported in this browser");
-/******/ 		scriptUrl = scriptUrl.replace(/^blob:/, "").replace(/#.*$/, "").replace(/\?.*$/, "").replace(/\/[^\/]+$/, "/");
-/******/ 		__webpack_require__.p = scriptUrl;
 /******/ 	})();
 /******/ 	
 /******/ 	/* webpack/runtime/nonce */
@@ -17829,9 +17941,7 @@ var __webpack_exports__ = {};
 __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _services__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./services */ "./services/index.ts");
 /* harmony import */ var _uiService__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./uiService */ "./uiService.ts");
-/* harmony import */ var _appconfig_json__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./appconfig.json */ "./appconfig.json");
-/* harmony import */ var _icon_png__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./icon.png */ "./icon.png");
-/* harmony import */ var _css_main_css__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./css/main.css */ "./css/main.css");
+/* harmony import */ var _css_main_css__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./css/main.css */ "./css/main.css");
 /**
  * @module index
  * Application entry point.
