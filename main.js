@@ -923,10 +923,12 @@ ___CSS_LOADER_EXPORT___.push([module.id, `/* \\u2500\\u2500 Popout button \\u250
 }
 
 .card-alert-row label {
+  display: flex;
+  align-items: center;
+  gap: 4px;
   font-size: 10px;
   color: var(--text-muted);
   white-space: nowrap;
-  min-width: 34px;
 }
 
 .card-alert-row input[type="number"] {
@@ -4076,7 +4078,8 @@ ___CSS_LOADER_EXPORT___.push([module.id, `/* ── Settings panel ────�
   margin-top: 6px;
 }
 
-.settings-body label {
+.settings-body label,
+.settings-body .settings-label {
   display: block;
   margin-bottom: 3px;
   color: var(--text-muted);
@@ -14162,6 +14165,7 @@ function bindSearchFilters() {
             tag.dataset.filterId = filter.id;
             const cb = document.createElement("input");
             cb.type = "checkbox";
+            cb.name = `search-filter-${filter.id}`;
             const text = document.createTextNode(filter.label);
             tag.appendChild(cb);
             tag.appendChild(text);
@@ -15778,12 +15782,10 @@ function buildItemCard(item) {
     alertPopover.className = "card-alert-popover";
     alertPopover.innerHTML =
         `<div class="card-alert-row">` +
-            `<label>Buy \u2264</label>` +
-            `<input class="card-alert-buy" type="number" min="0" placeholder="gp" />` +
+            `<label>Buy \u2264 <input class="card-alert-buy" type="number" min="0" placeholder="gp" name="alert-buy" /></label>` +
             `</div>` +
             `<div class="card-alert-row">` +
-            `<label>Sell \u2265</label>` +
-            `<input class="card-alert-sell" type="number" min="0" placeholder="gp" />` +
+            `<label>Sell \u2265 <input class="card-alert-sell" type="number" min="0" placeholder="gp" name="alert-sell" /></label>` +
             `</div>`;
     // Prevent card expand/collapse when interacting with the popover.
     alertPopover.addEventListener("click", (e) => e.stopPropagation());
@@ -16338,8 +16340,7 @@ async function showGraphModal(item) {
     const insufficientData = hist.length < 7;
     mBody.innerHTML =
         `<div class="graph-modal-range-row">` +
-            `<label>Range:</label>` +
-            `<select class="graph-range-inline">${rangeOptions}</select>` +
+            `<label>Range: <select class="graph-range-inline" name="graph-range">${rangeOptions}</select></label>` +
             `</div>` +
             `<div class="chart-slot"${insufficientData ? ' style="display:none"' : ''}></div>` +
             `<div class="graph-history-status${insufficientData ? ' visible' : ''}">` +
@@ -16671,10 +16672,9 @@ async function showAnalyticsModal(item) {
     graphSection.className = "analytics-graph-section";
     graphSection.innerHTML =
         `<div class="analytics-range-row">` +
-            `<label>Range:</label>` +
-            `<select class="graph-range-inline">` +
+            `<label>Range: <select class="graph-range-inline" name="graph-range">` +
             [7, 30, 90].map((d) => `<option value="${d}"${d === range ? " selected" : ""}>History: ${d} days</option>`).join("") +
-            `</select>` +
+            `</select></label>` +
             `</div>` +
             `<div class="graph-loading-msg" style="text-align:center;padding:24px;color:#888;">Checking cached history\u2026</div>`;
     content.appendChild(graphSection);
@@ -16747,10 +16747,9 @@ async function showAnalyticsModal(item) {
     // Replace loading message with chart + stats.
     graphSection.innerHTML =
         `<div class="analytics-range-row">` +
-            `<label>Range:</label>` +
-            `<select class="graph-range-inline">` +
+            `<label>Range: <select class="graph-range-inline" name="graph-range">` +
             [7, 30, 90].map((d) => `<option value="${d}"${d === range ? " selected" : ""}>History: ${d} days</option>`).join("") +
-            `</select>` +
+            `</select></label>` +
             `</div>` +
             `<div class="chart-slot"${insufficientData ? ' style="display:none"' : ''}></div>` +
             `<div class="graph-history-status${insufficientData ? ' visible' : ''}">` +

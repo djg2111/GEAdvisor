@@ -95,14 +95,14 @@
 					<legend class="settings-group-title">Appearance</legend>
 
 					<!-- Interface layout -->
-					<label>Interface Layout</label>
+					<span class="settings-label">Interface Layout</span>
 					<div class="layout-toggle">
 						<button id="layout-tabbed-btn" class="layout-btn active" type="button">Tabbed</button>
 						<button id="layout-sidebar-btn" class="layout-btn" type="button">Sidebar</button>
 					</div>
 
 					<!-- Mode (dark / light) -->
-					<label>Mode</label>
+					<span class="settings-label">Mode</span>
 					<div class="layout-toggle">
 						<button id="mode-dark-btn" class="layout-btn active" type="button">🌙 Dark</button>
 						<button id="mode-light-btn" class="layout-btn" type="button">☀️ Light</button>
@@ -214,7 +214,7 @@
 
 					<!-- Data Management (export / import) -->
 					<div class="settings-field data-mgmt" style="margin-top:10px">
-						<label>Data Management</label>
+						<span class="settings-label">Data Management</span>
 						<div class="settings-row">
 							<button id="export-data-btn" type="button">⬇ Export Data</button>
 							<button id="import-data-btn" type="button">⬆ Import Data</button>
@@ -340,12 +340,12 @@
 
 				<!-- Precise volume controls (visible when "Vol: Custom" selected) -->
 				<div id="volume-custom-group" class="custom-filter-group" style="display:none">
-					<label class="custom-filter-label">Min Volume</label>
+					<label class="custom-filter-label" for="volume-min-slider">Min Volume</label>
 					<div class="slider-row">
 						<input id="volume-min-slider" type="range" min="0" max="200000" step="500" value="0" />
 						<input id="volume-min-input" type="number" min="0" placeholder="0" value="0" />
 					</div>
-					<label class="custom-filter-label">Max Volume <span class="hint">(0 = no limit)</span></label>
+					<label class="custom-filter-label" for="volume-max-slider">Max Volume <span class="hint">(0 = no limit)</span></label>
 					<div class="slider-row">
 						<input id="volume-max-slider" type="range" min="0" max="500000" step="1000" value="0" />
 						<input id="volume-max-input" type="number" min="0" placeholder="0" value="0" />
@@ -354,7 +354,7 @@
 
 				<!-- Precise budget controls (visible when "Budget: Custom" selected) -->
 				<div id="budget-custom-group" class="custom-filter-group" style="display:none">
-					<label class="custom-filter-label">Max Price (gp) <span class="hint">(0 = no limit)</span></label>
+					<label class="custom-filter-label" for="budget-slider">Max Price (gp) <span class="hint">(0 = no limit)</span></label>
 					<div class="slider-row">
 						<input id="budget-slider" type="range" min="0" max="2000000000" step="1000000" value="0" />
 						<input id="budget-input" type="number" min="0" placeholder="0" value="0" />
