@@ -12,7 +12,7 @@
 
 import * as a1lib from "alt1";
 import { initDataPipeline } from "./services";
-import { initUI } from "./uiService";
+import { initUI, showDisclaimer } from "./uiService";
 
 // ── Static asset imports (Webpack asset/resource) ───────────────────────────
 import "./appconfig.json";
@@ -78,6 +78,9 @@ function dismissOverlay(): void {
 
     console.log("[GE Analyzer] Startup complete.");
     dismissOverlay();
+
+    // Show disclaimer modal (blocks interaction until acknowledged).
+    await showDisclaimer();
   } catch (err) {
     console.error("[GE Analyzer] Startup failed:", err);
     setStartupStatus("Startup failed \u2014 see console for details.");

@@ -2065,13 +2065,12 @@ function bindBackToTop(): void {
 
 /**
  * Wire the disclaimer overlay's Acknowledge button and persist checkbox.
- * The overlay is shown/hidden by the inline <script> in index.html
- * (pre-bundle) based on the localStorage flag.
+ * Called during {@link initUI} — only binds event listeners.
  */
 function bindDisclaimer(): void {
-  const overlay = document.getElementById("disclaimer-overlay");
   const ackBtn = document.getElementById("disclaimer-ack-btn");
   const persistCheck = document.getElementById("disclaimer-persist-check") as HTMLInputElement | null;
+  const overlay = document.getElementById("disclaimer-overlay");
   if (!overlay || !ackBtn) return;
 
   ackBtn.addEventListener("click", () => {
@@ -2079,6 +2078,26 @@ function bindDisclaimer(): void {
       localStorage.setItem(LS_DISCLAIMER_ACK, "1");
     }
     overlay.classList.add("hidden");
+  });
+}
+
+/**
+ * Show the disclaimer modal (if not previously acknowledged) and return a
+ * Promise that resolves once the user clicks "I Understand".
+ * If already acknowledged, resolves immediately.
+ */
+export function showDisclaimer(): Promise<void> {
+  if (localStorage.getItem(LS_DISCLAIMER_ACK)) return Promise.resolve();
+
+  const overlay = document.getElementById("disclaimer-overlay");
+  if (!overlay) return Promise.resolve();
+
+  overlay.classList.remove("hidden");
+
+  return new Promise<void>((resolve) => {
+    const ackBtn = document.getElementById("disclaimer-ack-btn");
+    if (!ackBtn) { resolve(); return; }
+    ackBtn.addEventListener("click", () => resolve(), { once: true });
   });
 }
 
@@ -4283,22 +4302,26 @@ function buildItemCard(item: RankedItem): HTMLElement {
   // EMA Trend badge.
   if (showPredictiveBadges && item.ema30d > 0 && item.price > 0) {
     const emaPct = ((item.price - item.ema30d) / item.ema30d) * 100;
-    const emaDir = emaPct > 0 ? "up" : emaPct < 0 ? "down" : "";
+    const emaRounded = Math.abs(emaPct).toFixed(1);
+    const emaDir = Number(emaRounded) === 0 ? "neutral" : emaPct > 0 ? "up" : "down";
+    const emaArrow = emaDir === "up" ? "\u2191" : emaDir === "down" ? "\u2193" : "";
     const emaBadge = document.createElement("span");
     emaBadge.className = `ema-badge ${emaDir}`;
-    emaBadge.textContent = `EMA ${emaPct >= 0 ? "\u2191" : "\u2193"}${Math.abs(emaPct).toFixed(1)}%`;
-    emaBadge.title = `30-day Exponential Moving Average: ${formatGpShort(Math.round(item.ema30d))} gp. Current price is ${Math.abs(emaPct).toFixed(1)}% ${emaPct >= 0 ? "above" : "below"} the EMA — ${emaPct > 2 ? "bullish signal" : emaPct < -2 ? "bearish signal" : "near average"}.`;
+    emaBadge.textContent = `EMA ${emaArrow}${emaRounded}%`;
+    const emaSignal = emaDir === "up" ? (emaPct > 2 ? "bullish signal" : "slightly above average") : emaDir === "down" ? (emaPct < -2 ? "bearish signal" : "slightly below average") : "at average (neutral)";
+    const emaPosLabel = emaDir === "neutral" ? "at" : emaPct >= 0 ? "above" : "below";
+    emaBadge.title = `30-day Exponential Moving Average: ${formatGpShort(Math.round(item.ema30d))} gp. Current price is ${emaRounded}% ${emaPosLabel} the EMA \u2014 ${emaSignal}.`;
     predictiveWrap.appendChild(emaBadge);
   }
 
-  // Predicted 24h badge.
+  // Predicted next-day badge.
   if (showPredictiveBadges && item.predictedNextPrice > 0 && item.price > 0) {
     const predPct = ((item.predictedNextPrice - item.price) / item.price) * 100;
     const predDir = predPct > 0.1 ? "up" : predPct < -0.1 ? "down" : "neutral";
     const predBadge = document.createElement("span");
     predBadge.className = `predicted-badge ${predDir}`;
-    predBadge.textContent = `24h ${predPct >= 0 ? "+" : ""}${predPct.toFixed(1)}%`;
-    predBadge.title = `Linear-regression predicted next-day price: ${formatGpShort(Math.round(item.predictedNextPrice))} gp. Based on the slope of recent price history (${item.linearSlope >= 0 ? "+" : ""}${formatGpShort(Math.round(item.linearSlope))} gp/day).`;
+    predBadge.textContent = `Est ${predPct >= 0 ? "+" : ""}${predPct.toFixed(1)}%`;
+    predBadge.title = `Estimated next guide-price change: ${formatGpShort(Math.round(item.predictedNextPrice))} gp (${item.linearSlope >= 0 ? "+" : ""}${formatGpShort(Math.round(item.linearSlope))} gp/day trend). This is a mathematical estimate from linear regression on recent daily prices \u2014 not a guarantee. Always margin-check in-game.`;
     predictiveWrap.appendChild(predBadge);
   }
 

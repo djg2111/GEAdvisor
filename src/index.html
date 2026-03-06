@@ -31,11 +31,6 @@
 		b.dataset.style    = localStorage.getItem('ge-analyzer:style')    || 'basic';
 		b.dataset.colorway = localStorage.getItem('ge-analyzer:colorway') || 'default';
 		b.dataset.contrast = localStorage.getItem('ge-analyzer:contrast') || 'default';
-		// Show disclaimer overlay on first visit (before bundle loads)
-		if (!localStorage.getItem('ge-analyzer:disclaimer-ack')) {
-			var d = document.getElementById('disclaimer-overlay');
-			if (d) d.classList.remove('hidden');
-		}
 	})();
 	</script>
 	<!-- ── Alt1 detection banner (hidden once services load) ───────────── -->

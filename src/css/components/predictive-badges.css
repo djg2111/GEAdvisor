@@ -30,6 +30,11 @@
   background: var(--badge-trend-down-bg);
 }
 
+.ema-badge.neutral {
+  color: var(--text-muted);
+  background: var(--badge-neutral-bg);
+}
+
 .predicted-badge {
   font-weight: 600;
 }
