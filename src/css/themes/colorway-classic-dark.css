@@ -69,9 +69,9 @@ body[data-mode="dark"][data-colorway="classic"] {
   --limit-ready-bg: #2a3a1a;
 
   /* Glass helpers */
-  --glass-body-from: #1a1008;
-  --glass-body-via: #2a1e10;
-  --glass-body-to: #1a1508;
+  --glass-body-from: #0e0804;
+  --glass-body-via: #302218;
+  --glass-body-to: #140e06;
   --glass-panel: rgba(255, 220, 150, 0.06);
   --glass-elevated: rgba(255, 220, 150, 0.10);
   --glass-hover: rgba(255, 220, 150, 0.12);

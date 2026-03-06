@@ -71,9 +71,9 @@ body[data-mode="dark"][data-colorway="rs-lobby"] {
   --limit-ready-bg: #1e2a14;
 
   /* Glass helpers */
-  --glass-body-from: #100c08;
-  --glass-body-via: #1a140f;
-  --glass-body-to: #150f0a;
+  --glass-body-from: #080604;
+  --glass-body-via: #201a14;
+  --glass-body-to: #0c0a06;
   --glass-panel: rgba(200, 176, 122, 0.06);
   --glass-elevated: rgba(200, 176, 122, 0.10);
   --glass-hover: rgba(200, 176, 122, 0.12);

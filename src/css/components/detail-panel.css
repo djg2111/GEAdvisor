@@ -6,13 +6,13 @@
   transition: max-height 0.2s ease, padding 0.2s ease;
   padding: 0 8px;
   background: var(--bg-main);
-  border-top: 1px solid transparent;
+  border-top: none;
 }
 
 .market-card.expanded .market-card-detail {
   max-height: 400px;
   padding: 6px 8px;
-  border-top-color: var(--border-main);
+  border-top: 1px solid var(--border-main);
   background: var(--detail-expanded-bg);
   overflow-y: auto;
 }

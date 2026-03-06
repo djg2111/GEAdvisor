@@ -71,14 +71,14 @@ body[data-mode="dark"][data-colorway="gruvbox"] {
   --limit-ready-bg: #2a3a1e;
 
   /* Glass helpers */
-  --glass-body-from: #1d2021;
-  --glass-body-via: #282828;
-  --glass-body-to: #1d2021;
-  --glass-panel: rgba(235, 219, 178, 0.05);
-  --glass-elevated: rgba(235, 219, 178, 0.08);
-  --glass-hover: rgba(235, 219, 178, 0.10);
-  --glass-input: rgba(235, 219, 178, 0.06);
-  --glass-muted: rgba(235, 219, 178, 0.04);
+  --glass-body-from: #14151a;
+  --glass-body-via: #302e28;
+  --glass-body-to: #18181c;
+  --glass-panel: rgba(235, 219, 178, 0.06);
+  --glass-elevated: rgba(235, 219, 178, 0.10);
+  --glass-hover: rgba(235, 219, 178, 0.12);
+  --glass-input: rgba(235, 219, 178, 0.08);
+  --glass-muted: rgba(235, 219, 178, 0.05);
   --glass-border-card: rgba(235, 219, 178, 0.15);
   --glass-border-main: rgba(235, 219, 178, 0.08);
   --glass-border-section: rgba(235, 219, 178, 0.10);

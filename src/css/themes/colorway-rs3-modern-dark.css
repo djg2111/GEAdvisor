@@ -69,9 +69,9 @@ body[data-mode="dark"][data-colorway="rs3-modern"] {
   --limit-ready-bg: #0d2a1a;
 
   /* Glass helpers */
-  --glass-body-from: #060e18;
-  --glass-body-via: #0a1828;
-  --glass-body-to: #0a1020;
+  --glass-body-from: #020610;
+  --glass-body-via: #101e34;
+  --glass-body-to: #040c1a;
   --glass-panel: rgba(120, 180, 255, 0.06);
   --glass-elevated: rgba(120, 180, 255, 0.10);
   --glass-hover: rgba(120, 180, 255, 0.12);

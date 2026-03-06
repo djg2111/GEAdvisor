@@ -2,12 +2,34 @@
  *  STYLE: Glassmorphism  (body[data-style="glass"])
  *
  *  Frosted-glass panels via backdrop-filter: blur(), highly translucent
- *  rgba backgrounds, and crisp semi-transparent borders. Body gets a
- *  gradient background that shows through the frosted panels.
+ *  rgba backgrounds, and crisp semi-transparent borders.  Depth is conveyed
+ *  through layered box-shadows (elevation + luminous top-edge shine) and a
+ *  rich body gradient that bleeds through the frosted panels.
  * ═══════════════════════════════════════════════════════════════════════════ */
 
-body[data-style="glass"] {
-  background: linear-gradient(135deg, var(--glass-body-from) 0%, var(--glass-body-via) 50%, var(--glass-body-to) 100%);
+/* ── Mode-specific glass accent vars ────────────────────────────────────────
+ *  White shine simulates specular light hitting the top edge of a glass pane.
+ *  Shadow layers add elevation depth.  Mode-split keeps contrast safe.      */
+body[data-style="glass"][data-mode="dark"] {
+  --glass-shine:    rgba(255, 255, 255, 0.18);
+  --glass-shadow-1: rgba(0, 0, 0, 0.28);
+  --glass-shadow-2: rgba(0, 0, 0, 0.12);
+}
+body[data-style="glass"][data-mode="light"] {
+  --glass-shine:    rgba(255, 255, 255, 0.55);
+  --glass-shadow-1: rgba(0, 0, 0, 0.07);
+  --glass-shadow-2: rgba(0, 0, 0, 0.03);
+}
+
+/* ── Variable remap — specificity 0,2,1 ─────────────────────────────────────
+ *  Matches body[data-mode][data-colorway] colorway selectors. Because this
+ *  file loads AFTER colorways in the cascade, same-specificity tie-breaks
+ *  in favour of glass, correctly remapping --bg-* to translucent glass
+ *  variables for EVERY colorway.                                            */
+body[data-style="glass"][data-mode] {
+  background:
+    radial-gradient(ellipse at 20% 0%, var(--glass-shine) 0%, transparent 55%),
+    linear-gradient(135deg, var(--glass-body-from) 0%, var(--glass-body-via) 50%, var(--glass-body-to) 100%);
   --bg-main: var(--glass-panel);
   --bg-panel: var(--glass-panel);
   --bg-elevated: var(--glass-elevated);
@@ -28,7 +50,9 @@ body[data-style="glass"] #app {
   background: transparent;
 }
 
-/* ── Frosted panel treatment — backdrop-filter + rounded corners ─────────── */
+/* ── Frosted panel treatment ────────────────────────────────────────────────
+ *  Stronger blur (22 px) + higher saturate (1.35) makes the frost clearly
+ *  visible.  Layered box-shadow: outer depth + inset luminous top edge.     */
 body[data-style="glass"] .market-card,
 body[data-style="glass"] .top20-section,
 body[data-style="glass"] .favorites-section,
@@ -47,47 +71,71 @@ body[data-style="glass"] .completed-flip-card,
 body[data-style="glass"] .settings-group,
 body[data-style="glass"] #advisor-view,
 body[data-style="glass"] #portfolio-view {
-  backdrop-filter: blur(18px) saturate(1.2);
-  -webkit-backdrop-filter: blur(18px) saturate(1.2);
+  backdrop-filter: blur(22px) saturate(1.35);
+  -webkit-backdrop-filter: blur(22px) saturate(1.35);
+  box-shadow:
+    0 8px 32px var(--glass-shadow-1),
+    0 2px 8px  var(--glass-shadow-2),
+    inset 0 1px 0 var(--glass-shine);
 }
 /* Cards: crisp semi-transparent border + subtle radius */
 body[data-style="glass"] .market-card {
   border: 1px solid var(--glass-border-card);
-  border-radius: 8px;
+  border-radius: 10px;
+}
+/* Card hover: lift effect — shadow intensifies */
+body[data-style="glass"] .market-card:hover {
+  box-shadow:
+    0 12px 40px var(--glass-shadow-1),
+    0 4px 12px  var(--glass-shadow-2),
+    inset 0 1px 0 var(--glass-shine);
 }
 /* Sections: frosted panels with luminous top edge */
 body[data-style="glass"] .top20-section,
 body[data-style="glass"] .favorites-section {
   border: 1px solid var(--glass-border-section);
-  border-radius: 10px;
+  border-radius: 12px;
 }
 /* Settings fieldsets: subtle glass border */
 body[data-style="glass"] .settings-group {
   border: 1px solid var(--glass-border-section);
-  border-radius: 8px;
+  border-radius: 10px;
 }
 /* Flip cards: glass treatment */
 body[data-style="glass"] .flip-card,
 body[data-style="glass"] .completed-flip-card {
   border: 1px solid var(--glass-border-card);
-  border-radius: 6px;
+  border-radius: 8px;
 }
 /* Tab buttons: glass pill shape */
 body[data-style="glass"] .tab-btn {
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  border-radius: 6px;
+  backdrop-filter: blur(12px) saturate(1.2);
+  -webkit-backdrop-filter: blur(12px) saturate(1.2);
+  border-radius: 8px;
+  box-shadow: inset 0 1px 0 var(--glass-shine);
+}
+/* Active tab: stronger glass presence */
+body[data-style="glass"] .tab-btn.active {
+  box-shadow:
+    0 4px 16px var(--glass-shadow-2),
+    inset 0 1px 0 var(--glass-shine);
 }
 /* Modal content: stronger blur for overlays */
 body[data-style="glass"] .analytics-modal-content,
 body[data-style="glass"] .setup-guide-content {
-  backdrop-filter: blur(24px) saturate(1.3);
-  -webkit-backdrop-filter: blur(24px) saturate(1.3);
+  backdrop-filter: blur(32px) saturate(1.4);
+  -webkit-backdrop-filter: blur(32px) saturate(1.4);
   border: 1px solid var(--glass-border-card);
-  border-radius: 12px;
+  border-radius: 14px;
+  box-shadow:
+    0 16px 48px var(--glass-shadow-1),
+    0 4px 16px  var(--glass-shadow-2),
+    inset 0 1px 0 var(--glass-shine);
 }
 /* Input fields: inner glow border on focus */
 body[data-style="glass"] input:focus,
 body[data-style="glass"] select:focus {
-  box-shadow: 0 0 0 1px var(--glass-border-input);
+  box-shadow:
+    0 0 0 1px var(--glass-border-input),
+    inset 0 1px 0 var(--glass-shine);
 }

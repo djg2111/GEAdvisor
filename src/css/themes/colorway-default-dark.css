@@ -145,9 +145,9 @@
   --limit-ready-bg: #1a2e1a;
 
   /* ── Style helper vars (Glass) ───────── */
-  --glass-body-from: #141414;
-  --glass-body-via: #1e1e1e;
-  --glass-body-to: #181818;
+  --glass-body-from: #0c0c0e;
+  --glass-body-via: #222226;
+  --glass-body-to: #0f0f14;
   --glass-panel: rgba(255, 255, 255, 0.06);
   --glass-elevated: rgba(255, 255, 255, 0.10);
   --glass-hover: rgba(255, 255, 255, 0.12);

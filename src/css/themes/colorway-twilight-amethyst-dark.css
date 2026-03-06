@@ -85,9 +85,9 @@ body[data-mode="dark"][data-colorway="twilight-amethyst"] {
   --limit-ready-bg: #1a2e1a;
 
   /* ── Style helper vars (Glass) ───────── */
-  --glass-body-from: #0a0a1e;
-  --glass-body-via: #1a1040;
-  --glass-body-to: #0a2040;
+  --glass-body-from: #06061a;
+  --glass-body-via: #221250;
+  --glass-body-to: #0a1e42;
   --glass-panel: rgba(180, 160, 255, 0.06);
   --glass-elevated: rgba(180, 160, 255, 0.10);
   --glass-hover: rgba(180, 160, 255, 0.13);

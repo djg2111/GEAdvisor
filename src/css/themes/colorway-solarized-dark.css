@@ -69,14 +69,14 @@ body[data-mode="dark"][data-colorway="solarized"] {
   --limit-ready-bg: #0a2a10;
 
   /* Glass helpers */
-  --glass-body-from: #001820;
-  --glass-body-via: #002030;
-  --glass-body-to: #00182a;
-  --glass-panel: rgba(7, 54, 66, 0.60);
-  --glass-elevated: rgba(7, 54, 66, 0.70);
-  --glass-hover: rgba(14, 71, 86, 0.70);
-  --glass-input: rgba(7, 54, 66, 0.50);
-  --glass-muted: rgba(7, 54, 66, 0.40);
+  --glass-body-from: #000c14;
+  --glass-body-via: #003040;
+  --glass-body-to: #000e22;
+  --glass-panel: rgba(7, 54, 66, 0.07);
+  --glass-elevated: rgba(7, 54, 66, 0.11);
+  --glass-hover: rgba(14, 71, 86, 0.13);
+  --glass-input: rgba(7, 54, 66, 0.09);
+  --glass-muted: rgba(7, 54, 66, 0.05);
   --glass-border-card: rgba(38, 139, 210, 0.20);
   --glass-border-main: rgba(38, 139, 210, 0.10);
   --glass-border-section: rgba(38, 139, 210, 0.14);

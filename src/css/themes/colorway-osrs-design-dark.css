@@ -89,9 +89,9 @@ body[data-mode="dark"][data-colorway="osrs-design"] {
   --limit-ready-bg: #1a3a1a;
 
   /* ── Style helper vars (Glass) ───────── */
-  --glass-body-from: #1a1810;
-  --glass-body-via: #282420;
-  --glass-body-to: #1e1c18;
+  --glass-body-from: #100e08;
+  --glass-body-via: #302a1c;
+  --glass-body-to: #161210;
   --glass-panel: rgba(255, 207, 63, 0.06);
   --glass-elevated: rgba(255, 207, 63, 0.10);
   --glass-hover: rgba(255, 207, 63, 0.12);
