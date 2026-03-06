@@ -20,7 +20,8 @@
   margin-top: 6px;
 }
 
-.settings-body label {
+.settings-body label,
+.settings-body .settings-label {
   display: block;
   margin-bottom: 3px;
   color: var(--text-muted);

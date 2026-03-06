@@ -128,10 +128,12 @@
 }
 
 .card-alert-row label {
+  display: flex;
+  align-items: center;
+  gap: 4px;
   font-size: 10px;
   color: var(--text-muted);
   white-space: nowrap;
-  min-width: 34px;
 }
 
 .card-alert-row input[type="number"] {

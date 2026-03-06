@@ -83,6 +83,9 @@ const LS_DEEP_HISTORY = "ge-analyzer:deep-history";
 /** `localStorage` key for contrast auto-correction toggle (boolean string). */
 const LS_CONTRAST_AUTO = "ge-analyzer:contrast-auto-correct";
 
+/** Whether the user has acknowledged the site disclaimer. */
+const LS_DISCLAIMER_ACK = "ge-analyzer:disclaimer-ack";
+
 /** WCAG AA minimum contrast ratio for normal text. */
 const WCAG_AA_RATIO = 4.5;
 
@@ -785,6 +788,7 @@ const SEARCH_FILTER_GROUPS: SearchFilterGroup[] = [
  */
 export async function initUI(onStatus?: (msg: string, step: string) => void): Promise<void> {
   resolveElements();
+  bindDisclaimer();
   populateProviderDropdown();
   restoreSettings();
   bindSettingsEvents();
@@ -2057,6 +2061,27 @@ function bindBackToTop(): void {
   });
 }
 
+// ─── Disclaimer Overlay ─────────────────────────────────────────────────────
+
+/**
+ * Wire the disclaimer overlay's Acknowledge button and persist checkbox.
+ * The overlay is shown/hidden by the inline <script> in index.html
+ * (pre-bundle) based on the localStorage flag.
+ */
+function bindDisclaimer(): void {
+  const overlay = document.getElementById("disclaimer-overlay");
+  const ackBtn = document.getElementById("disclaimer-ack-btn");
+  const persistCheck = document.getElementById("disclaimer-persist-check") as HTMLInputElement | null;
+  if (!overlay || !ackBtn) return;
+
+  ackBtn.addEventListener("click", () => {
+    if (persistCheck?.checked) {
+      localStorage.setItem(LS_DISCLAIMER_ACK, "1");
+    }
+    overlay.classList.add("hidden");
+  });
+}
+
 // ─── Data Management (Export / Import) ──────────────────────────────────────
 
 /** localStorage keys included in the JSON backup. */
@@ -2070,6 +2095,7 @@ const EXPORT_KEYS = [
   "ge-analyzer:contrast",
   "ge-analyzer:contrast-auto-correct",
   "ge-analyzer:chart-layers",
+  "ge-analyzer:disclaimer-ack",
 ] as const;
 
 /**
@@ -2546,6 +2572,7 @@ function bindSearchFilters(): void {
 
       const cb = document.createElement("input");
       cb.type = "checkbox";
+      cb.name = `search-filter-${filter.id}`;
 
       const text = document.createTextNode(filter.label);
       tag.appendChild(cb);
@@ -4351,12 +4378,10 @@ function buildItemCard(item: RankedItem): HTMLElement {
   alertPopover.className = "card-alert-popover";
   alertPopover.innerHTML =
     `<div class="card-alert-row">` +
-      `<label>Buy \u2264</label>` +
-      `<input class="card-alert-buy" type="number" min="0" placeholder="gp" />` +
+      `<label>Buy \u2264 <input class="card-alert-buy" type="number" min="0" placeholder="gp" name="alert-buy" /></label>` +
     `</div>` +
     `<div class="card-alert-row">` +
-      `<label>Sell \u2265</label>` +
-      `<input class="card-alert-sell" type="number" min="0" placeholder="gp" />` +
+      `<label>Sell \u2265 <input class="card-alert-sell" type="number" min="0" placeholder="gp" name="alert-sell" /></label>` +
     `</div>`;
   // Prevent card expand/collapse when interacting with the popover.
   alertPopover.addEventListener("click", (e) => e.stopPropagation());
@@ -4978,8 +5003,7 @@ async function showGraphModal(item: RankedItem): Promise<void> {
 
   mBody.innerHTML =
     `<div class="graph-modal-range-row">` +
-      `<label>Range:</label>` +
-      `<select class="graph-range-inline">${rangeOptions}</select>` +
+      `<label>Range: <select class="graph-range-inline" name="graph-range">${rangeOptions}</select></label>` +
     `</div>` +
     `<div class="chart-slot"${insufficientData ? ' style="display:none"' : ''}></div>` +
     `<div class="graph-history-status${insufficientData ? ' visible' : ''}">` +
@@ -5348,12 +5372,11 @@ async function showAnalyticsModal(item: RankedItem): Promise<void> {
   graphSection.className = "analytics-graph-section";
   graphSection.innerHTML =
     `<div class="analytics-range-row">` +
-      `<label>Range:</label>` +
-      `<select class="graph-range-inline">` +
+      `<label>Range: <select class="graph-range-inline" name="graph-range">` +
         [7, 30, 90].map((d) =>
           `<option value="${d}"${d === range ? " selected" : ""}>History: ${d} days</option>`
         ).join("") +
-      `</select>` +
+      `</select></label>` +
     `</div>` +
     `<div class="graph-loading-msg" style="text-align:center;padding:24px;color:#888;">Checking cached history\u2026</div>`;
   content.appendChild(graphSection);
@@ -5435,12 +5458,11 @@ async function showAnalyticsModal(item: RankedItem): Promise<void> {
   // Replace loading message with chart + stats.
   graphSection.innerHTML =
     `<div class="analytics-range-row">` +
-      `<label>Range:</label>` +
-      `<select class="graph-range-inline">` +
+      `<label>Range: <select class="graph-range-inline" name="graph-range">` +
         [7, 30, 90].map((d) =>
           `<option value="${d}"${d === range ? " selected" : ""}>History: ${d} days</option>`
         ).join("") +
-      `</select>` +
+      `</select></label>` +
     `</div>` +
     `<div class="chart-slot"${insufficientData ? ' style="display:none"' : ''}></div>` +
     `<div class="graph-history-status${insufficientData ? ' visible' : ''}">` +

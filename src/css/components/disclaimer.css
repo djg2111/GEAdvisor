@@ -1,0 +1,125 @@
+/* ── Site Disclaimer Overlay ──────────────────────────────────────────────── */
+
+.disclaimer-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.75);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+}
+
+.disclaimer-overlay.hidden {
+  display: none;
+}
+
+.disclaimer-card {
+  background: var(--bg-main, #1e1e1e);
+  border: 1px solid var(--accent-primary, #4fc3f7);
+  border-radius: 8px;
+  width: 460px;
+  max-width: 92vw;
+  max-height: 85vh;
+  overflow-y: auto;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+  animation: disclaimer-in 0.2s ease-out;
+  padding: 0;
+}
+
+@keyframes disclaimer-in {
+  from { opacity: 0; transform: scale(0.95) translateY(12px); }
+  to   { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+.disclaimer-header {
+  padding: 14px 16px 10px;
+  border-bottom: 2px solid var(--border-main, #333);
+  text-align: center;
+}
+
+.disclaimer-header h2 {
+  margin: 0;
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--accent-primary, #4fc3f7);
+  letter-spacing: 0.3px;
+}
+
+.disclaimer-body {
+  padding: 14px 16px;
+  font-size: 13px;
+  line-height: 1.55;
+  color: var(--text-main, #ccc);
+}
+
+.disclaimer-body h3 {
+  margin: 12px 0 6px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-bright, #eee);
+}
+
+.disclaimer-body h3:first-child {
+  margin-top: 0;
+}
+
+.disclaimer-body ul {
+  margin: 4px 0 8px 18px;
+  padding: 0;
+}
+
+.disclaimer-body li {
+  margin-bottom: 4px;
+}
+
+.disclaimer-body .disclaimer-warning {
+  color: var(--accent-gold, #ffc107);
+  font-weight: 600;
+}
+
+.disclaimer-footer {
+  padding: 10px 16px 14px;
+  border-top: 1px solid var(--border-main, #333);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.disclaimer-persist-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--text-muted, #888);
+  cursor: pointer;
+  user-select: none;
+}
+
+.disclaimer-persist-label input[type="checkbox"] {
+  accent-color: var(--accent-primary, #4fc3f7);
+  cursor: pointer;
+}
+
+.disclaimer-ack-btn {
+  padding: 8px 28px;
+  font-size: 13px;
+  font-weight: 600;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  background: var(--accent-primary, #4fc3f7);
+  color: var(--bg-main, #1e1e1e);
+  transition: opacity 0.15s, transform 0.1s;
+}
+
+.disclaimer-ack-btn:hover {
+  opacity: 0.88;
+}
+
+.disclaimer-ack-btn:active {
+  transform: scale(0.97);
+}
