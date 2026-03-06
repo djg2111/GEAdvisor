@@ -1330,13 +1330,13 @@ ___CSS_LOADER_EXPORT___.push([module.id, `/* ── Expandable detail panel ─�
   transition: max-height 0.2s ease, padding 0.2s ease;
   padding: 0 8px;
   background: var(--bg-main);
-  border-top: 1px solid transparent;
+  border-top: none;
 }
 
 .market-card.expanded .market-card-detail {
   max-height: 400px;
   padding: 6px 8px;
-  border-top-color: var(--border-main);
+  border-top: 1px solid var(--border-main);
   background: var(--detail-expanded-bg);
   overflow-y: auto;
 }`, ""]);
@@ -5291,12 +5291,34 @@ ___CSS_LOADER_EXPORT___.push([module.id, `/* ═══════════�
  *  STYLE: Glassmorphism  (body[data-style="glass"])
  *
  *  Frosted-glass panels via backdrop-filter: blur(), highly translucent
- *  rgba backgrounds, and crisp semi-transparent borders. Body gets a
- *  gradient background that shows through the frosted panels.
+ *  rgba backgrounds, and crisp semi-transparent borders.  Depth is conveyed
+ *  through layered box-shadows (elevation + luminous top-edge shine) and a
+ *  rich body gradient that bleeds through the frosted panels.
  * ═══════════════════════════════════════════════════════════════════════════ */
 
-body[data-style="glass"] {
-  background: linear-gradient(135deg, var(--glass-body-from) 0%, var(--glass-body-via) 50%, var(--glass-body-to) 100%);
+/* ── Mode-specific glass accent vars ────────────────────────────────────────
+ *  White shine simulates specular light hitting the top edge of a glass pane.
+ *  Shadow layers add elevation depth.  Mode-split keeps contrast safe.      */
+body[data-style="glass"][data-mode="dark"] {
+  --glass-shine:    rgba(255, 255, 255, 0.18);
+  --glass-shadow-1: rgba(0, 0, 0, 0.28);
+  --glass-shadow-2: rgba(0, 0, 0, 0.12);
+}
+body[data-style="glass"][data-mode="light"] {
+  --glass-shine:    rgba(255, 255, 255, 0.55);
+  --glass-shadow-1: rgba(0, 0, 0, 0.07);
+  --glass-shadow-2: rgba(0, 0, 0, 0.03);
+}
+
+/* ── Variable remap — specificity 0,2,1 ─────────────────────────────────────
+ *  Matches body[data-mode][data-colorway] colorway selectors. Because this
+ *  file loads AFTER colorways in the cascade, same-specificity tie-breaks
+ *  in favour of glass, correctly remapping --bg-* to translucent glass
+ *  variables for EVERY colorway.                                            */
+body[data-style="glass"][data-mode] {
+  background:
+    radial-gradient(ellipse at 20% 0%, var(--glass-shine) 0%, transparent 55%),
+    linear-gradient(135deg, var(--glass-body-from) 0%, var(--glass-body-via) 50%, var(--glass-body-to) 100%);
   --bg-main: var(--glass-panel);
   --bg-panel: var(--glass-panel);
   --bg-elevated: var(--glass-elevated);
@@ -5317,7 +5339,9 @@ body[data-style="glass"] #app {
   background: transparent;
 }
 
-/* ── Frosted panel treatment — backdrop-filter + rounded corners ─────────── */
+/* ── Frosted panel treatment ────────────────────────────────────────────────
+ *  Stronger blur (22 px) + higher saturate (1.35) makes the frost clearly
+ *  visible.  Layered box-shadow: outer depth + inset luminous top edge.     */
 body[data-style="glass"] .market-card,
 body[data-style="glass"] .top20-section,
 body[data-style="glass"] .favorites-section,
@@ -5336,49 +5360,73 @@ body[data-style="glass"] .completed-flip-card,
 body[data-style="glass"] .settings-group,
 body[data-style="glass"] #advisor-view,
 body[data-style="glass"] #portfolio-view {
-  backdrop-filter: blur(18px) saturate(1.2);
-  -webkit-backdrop-filter: blur(18px) saturate(1.2);
+  backdrop-filter: blur(22px) saturate(1.35);
+  -webkit-backdrop-filter: blur(22px) saturate(1.35);
+  box-shadow:
+    0 8px 32px var(--glass-shadow-1),
+    0 2px 8px  var(--glass-shadow-2),
+    inset 0 1px 0 var(--glass-shine);
 }
 /* Cards: crisp semi-transparent border + subtle radius */
 body[data-style="glass"] .market-card {
   border: 1px solid var(--glass-border-card);
-  border-radius: 8px;
+  border-radius: 10px;
+}
+/* Card hover: lift effect — shadow intensifies */
+body[data-style="glass"] .market-card:hover {
+  box-shadow:
+    0 12px 40px var(--glass-shadow-1),
+    0 4px 12px  var(--glass-shadow-2),
+    inset 0 1px 0 var(--glass-shine);
 }
 /* Sections: frosted panels with luminous top edge */
 body[data-style="glass"] .top20-section,
 body[data-style="glass"] .favorites-section {
   border: 1px solid var(--glass-border-section);
-  border-radius: 10px;
+  border-radius: 12px;
 }
 /* Settings fieldsets: subtle glass border */
 body[data-style="glass"] .settings-group {
   border: 1px solid var(--glass-border-section);
-  border-radius: 8px;
+  border-radius: 10px;
 }
 /* Flip cards: glass treatment */
 body[data-style="glass"] .flip-card,
 body[data-style="glass"] .completed-flip-card {
   border: 1px solid var(--glass-border-card);
-  border-radius: 6px;
+  border-radius: 8px;
 }
 /* Tab buttons: glass pill shape */
 body[data-style="glass"] .tab-btn {
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  border-radius: 6px;
+  backdrop-filter: blur(12px) saturate(1.2);
+  -webkit-backdrop-filter: blur(12px) saturate(1.2);
+  border-radius: 8px;
+  box-shadow: inset 0 1px 0 var(--glass-shine);
+}
+/* Active tab: stronger glass presence */
+body[data-style="glass"] .tab-btn.active {
+  box-shadow:
+    0 4px 16px var(--glass-shadow-2),
+    inset 0 1px 0 var(--glass-shine);
 }
 /* Modal content: stronger blur for overlays */
 body[data-style="glass"] .analytics-modal-content,
 body[data-style="glass"] .setup-guide-content {
-  backdrop-filter: blur(24px) saturate(1.3);
-  -webkit-backdrop-filter: blur(24px) saturate(1.3);
+  backdrop-filter: blur(32px) saturate(1.4);
+  -webkit-backdrop-filter: blur(32px) saturate(1.4);
   border: 1px solid var(--glass-border-card);
-  border-radius: 12px;
+  border-radius: 14px;
+  box-shadow:
+    0 16px 48px var(--glass-shadow-1),
+    0 4px 16px  var(--glass-shadow-2),
+    inset 0 1px 0 var(--glass-shine);
 }
 /* Input fields: inner glow border on focus */
 body[data-style="glass"] input:focus,
 body[data-style="glass"] select:focus {
-  box-shadow: 0 0 0 1px var(--glass-border-input);
+  box-shadow:
+    0 0 0 1px var(--glass-border-input),
+    inset 0 1px 0 var(--glass-shine);
 }`, ""]);
 // Exports
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (___CSS_LOADER_EXPORT___);
@@ -5846,9 +5894,9 @@ body[data-mode="dark"][data-colorway="classic"] {
   --limit-ready-bg: #2a3a1a;
 
   /* Glass helpers */
-  --glass-body-from: #1a1008;
-  --glass-body-via: #2a1e10;
-  --glass-body-to: #1a1508;
+  --glass-body-from: #0e0804;
+  --glass-body-via: #302218;
+  --glass-body-to: #140e06;
   --glass-panel: rgba(255, 220, 150, 0.06);
   --glass-elevated: rgba(255, 220, 150, 0.10);
   --glass-hover: rgba(255, 220, 150, 0.12);
@@ -6185,9 +6233,9 @@ ___CSS_LOADER_EXPORT___.push([module.id, `/* ───────────�
   --limit-ready-bg: #1a2e1a;
 
   /* ── Style helper vars (Glass) ───────── */
-  --glass-body-from: #141414;
-  --glass-body-via: #1e1e1e;
-  --glass-body-to: #181818;
+  --glass-body-from: #0c0c0e;
+  --glass-body-via: #222226;
+  --glass-body-to: #0f0f14;
   --glass-panel: rgba(255, 255, 255, 0.06);
   --glass-elevated: rgba(255, 255, 255, 0.10);
   --glass-hover: rgba(255, 255, 255, 0.12);
@@ -6447,14 +6495,14 @@ body[data-mode="dark"][data-colorway="gruvbox"] {
   --limit-ready-bg: #2a3a1e;
 
   /* Glass helpers */
-  --glass-body-from: #1d2021;
-  --glass-body-via: #282828;
-  --glass-body-to: #1d2021;
-  --glass-panel: rgba(235, 219, 178, 0.05);
-  --glass-elevated: rgba(235, 219, 178, 0.08);
-  --glass-hover: rgba(235, 219, 178, 0.10);
-  --glass-input: rgba(235, 219, 178, 0.06);
-  --glass-muted: rgba(235, 219, 178, 0.04);
+  --glass-body-from: #14151a;
+  --glass-body-via: #302e28;
+  --glass-body-to: #18181c;
+  --glass-panel: rgba(235, 219, 178, 0.06);
+  --glass-elevated: rgba(235, 219, 178, 0.10);
+  --glass-hover: rgba(235, 219, 178, 0.12);
+  --glass-input: rgba(235, 219, 178, 0.08);
+  --glass-muted: rgba(235, 219, 178, 0.05);
   --glass-border-card: rgba(235, 219, 178, 0.15);
   --glass-border-main: rgba(235, 219, 178, 0.08);
   --glass-border-section: rgba(235, 219, 178, 0.10);
@@ -6732,9 +6780,9 @@ body[data-mode="dark"][data-colorway="osrs-design"] {
   --limit-ready-bg: #1a3a1a;
 
   /* ── Style helper vars (Glass) ───────── */
-  --glass-body-from: #1a1810;
-  --glass-body-via: #282420;
-  --glass-body-to: #1e1c18;
+  --glass-body-from: #100e08;
+  --glass-body-via: #302a1c;
+  --glass-body-to: #161210;
   --glass-panel: rgba(255, 207, 63, 0.06);
   --glass-elevated: rgba(255, 207, 63, 0.10);
   --glass-hover: rgba(255, 207, 63, 0.12);
@@ -7015,9 +7063,9 @@ body[data-mode="dark"][data-colorway="rs-lobby"] {
   --limit-ready-bg: #1e2a14;
 
   /* Glass helpers */
-  --glass-body-from: #100c08;
-  --glass-body-via: #1a140f;
-  --glass-body-to: #150f0a;
+  --glass-body-from: #080604;
+  --glass-body-via: #201a14;
+  --glass-body-to: #0c0a06;
   --glass-panel: rgba(200, 176, 122, 0.06);
   --glass-elevated: rgba(200, 176, 122, 0.10);
   --glass-hover: rgba(200, 176, 122, 0.12);
@@ -7279,9 +7327,9 @@ body[data-mode="dark"][data-colorway="rs3-modern"] {
   --limit-ready-bg: #0d2a1a;
 
   /* Glass helpers */
-  --glass-body-from: #060e18;
-  --glass-body-via: #0a1828;
-  --glass-body-to: #0a1020;
+  --glass-body-from: #020610;
+  --glass-body-via: #101e34;
+  --glass-body-to: #040c1a;
   --glass-panel: rgba(120, 180, 255, 0.06);
   --glass-elevated: rgba(120, 180, 255, 0.10);
   --glass-hover: rgba(120, 180, 255, 0.12);
@@ -7542,14 +7590,14 @@ body[data-mode="dark"][data-colorway="solarized"] {
   --limit-ready-bg: #0a2a10;
 
   /* Glass helpers */
-  --glass-body-from: #001820;
-  --glass-body-via: #002030;
-  --glass-body-to: #00182a;
-  --glass-panel: rgba(7, 54, 66, 0.60);
-  --glass-elevated: rgba(7, 54, 66, 0.70);
-  --glass-hover: rgba(14, 71, 86, 0.70);
-  --glass-input: rgba(7, 54, 66, 0.50);
-  --glass-muted: rgba(7, 54, 66, 0.40);
+  --glass-body-from: #000c14;
+  --glass-body-via: #003040;
+  --glass-body-to: #000e22;
+  --glass-panel: rgba(7, 54, 66, 0.07);
+  --glass-elevated: rgba(7, 54, 66, 0.11);
+  --glass-hover: rgba(14, 71, 86, 0.13);
+  --glass-input: rgba(7, 54, 66, 0.09);
+  --glass-muted: rgba(7, 54, 66, 0.05);
   --glass-border-card: rgba(38, 139, 210, 0.20);
   --glass-border-main: rgba(38, 139, 210, 0.10);
   --glass-border-section: rgba(38, 139, 210, 0.14);
@@ -7822,9 +7870,9 @@ body[data-mode="dark"][data-colorway="twilight-amethyst"] {
   --limit-ready-bg: #1a2e1a;
 
   /* ── Style helper vars (Glass) ───────── */
-  --glass-body-from: #0a0a1e;
-  --glass-body-via: #1a1040;
-  --glass-body-to: #0a2040;
+  --glass-body-from: #06061a;
+  --glass-body-via: #221250;
+  --glass-body-to: #0a1e42;
   --glass-panel: rgba(180, 160, 255, 0.06);
   --glass-elevated: rgba(180, 160, 255, 0.10);
   --glass-hover: rgba(180, 160, 255, 0.13);
