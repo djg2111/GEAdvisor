@@ -66,6 +66,15 @@ export const RS3_ECONOMIC_RULES = `\
 
 11. GE MID-PRICE LAG & STALENESS: The displayed GE mid-price updates daily based on recent trades, but for low-volume or suddenly volatile items (new releases, boss drops, nerfs), it can lag significantly (days or weeks). During these periods, the mid-price becomes unreliable or "fictional." Always rely on real-time margin checking (insta-buy/sell offers) rather than the listed mid-price for high-volatility events or low-trade items.
 
+12. DATA SOURCE REALITY: All price and volume data in this system comes from the Weird Gloop API, which polls the official Jagex GE API every 30–60 minutes. Guide prices update approximately once per day. Volume is a rolling 24-hour aggregate, NOT a live ticker. This means:
+   - Prices shown are GUIDE PRICES, not real-time transaction prices. The actual buy/sell spread is invisible.
+   - Intraday price movement is NOT visible — a 10% spike and recovery within 6 hours will not appear in this data.
+   - Volume changes reflect the rolling 24h window shifting, not hourly breakdowns.
+   - RS3 lacks an OSRS-style real-time data source (RuneLite). Treat this as a value-investing / daily-flip planning tool, not a high-frequency trading terminal.
+   - ALWAYS advise the user to margin-check (see rule 3) a single item in-game before committing capital to confirm the real spread.
+   - Do NOT claim to know "current spread" or "right now" prices — you only know the last guide price.
+   - The "Predicted 24h Price" and trend indicators extrapolate from daily guide-price snapshots and should be treated as directional hints, not precise forecasts.
+
 === LLM OUTPUT CONSTRAINTS (MANDATORY) ===
 - When recommending any flip or calculating profit/gp/hr, you MUST explicitly show the math: e.g., "Gross margin = Sell price - Buy price = X gp; Tax = floor(Sell price × 0.02) = Y gp; Net profit per item = X - Y = Z gp; gp/hr = Z × (Limit / fill hours) = W gp/hr."
 - Never describe any flip as "guaranteed profit" or use the word "guaranteed" — all GE prices are player-driven and can change.
@@ -88,6 +97,10 @@ Each item line in the market data contains these fields:
 • Eff. Vol — effective daily player volume = min(global daily volume, buy limit × 6). Reflects what one player can realistically trade.
 • Max 4H Capital — price × buy limit. How much gold you need to max out one 4-hour window.
 • Tax Gap — minimum spread (in gp) required to break even after the 2% GE tax.
+• ROT (Return on Time) — estimated gp/hr for a single player flipping this item:
+  ROT = estFlipProfit × (globalVol / 24) × 0.7 fill-factor.
+  Higher ROT = more profitable use of your time. Use this to compare items with different margins and volumes.
+  An item with lower per-item profit but much higher volume can vastly outperform a "big margin" slow-mover.
 • 30d Trend Slope — linear regression slope over available price history:
   - Positive (+N.N) = prices trending upward → good for buying.
   - Negative (−N.N) = prices trending downward → good for selling / risky to hold.

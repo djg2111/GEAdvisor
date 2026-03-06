@@ -221,11 +221,13 @@ export interface RankedItem {
    */
   volatility: number;
   /**
-   * Percentage change between the current price and the price ~4 hours ago.
-   * Positive = price has risen, negative = dropped.
-   * `0` when there is no intraday data available.
+   * Estimated gp/hr a single player can earn flipping this item.
+   * `ROT = estFlipProfit × estHourlyFillRate × fillFactor`
+   * where `estHourlyFillRate = globalVol / 24` and `fillFactor = 0.7`
+   * (a single player rarely captures 100 % of hourly volume).
+   * `0` when buy limit or volume data is insufficient.
    */
-  fourHourMomentum: number;
+  returnOnTime: number;
   /**
    * OLS linear-regression slope of the price series (gp per day).
    * Positive = upward drift, negative = declining.

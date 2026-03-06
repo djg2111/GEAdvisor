@@ -148,6 +148,7 @@ export class CacheService {
       const store = tx.objectStore(this.storeName);
       const histStore = tx.objectStore(HISTORY_STORE);
       let count = 0;
+      let histSkipped = 0;
 
       for (const [name, record] of prices) {
         const stored: StoredPriceRecord = {
@@ -155,23 +156,38 @@ export class CacheService {
           name,
           fetchedAt: now,
         };
-        const req = store.put(stored);
-        req.onsuccess = () => {
-          count++;
-        };
 
-        // Persist an intraday snapshot keyed by [name, timestamp].
-        // Each call inserts a unique record (Date.now() epoch ms).
-        const historical: HistoricalPriceRecord = {
-          ...stored,
-          timestamp: new Date(now).toISOString(),
-          day: today,
+        // Read the existing record to check whether the price actually
+        // changed.  Guide prices update ~once per day, so most hourly
+        // polls return the same value — skipping duplicate history rows
+        // prevents IndexedDB bloat (~24× fewer rows per day).
+        const getReq = store.get(name);
+        getReq.onsuccess = () => {
+          const existing = getReq.result as StoredPriceRecord | undefined;
+          store.put(stored);
+          count++;
+
+          // Only persist a history snapshot when the price has actually
+          // changed (or no prior record exists).
+          if (!existing || existing.price !== record.price) {
+            const historical: HistoricalPriceRecord = {
+              ...stored,
+              timestamp: new Date(now).toISOString(),
+              day: today,
+            };
+            histStore.put(historical);
+          } else {
+            histSkipped++;
+          }
         };
-        histStore.put(historical);
       }
 
       tx.oncomplete = () => {
-        console.log(`[CacheService] Bulk-inserted ${count} records.`);
+        if (histSkipped > 0) {
+          console.log(`[CacheService] Bulk-inserted ${count} records (${histSkipped} unchanged-price history rows skipped).`);
+        } else {
+          console.log(`[CacheService] Bulk-inserted ${count} records.`);
+        }
         resolve(count);
       };
 

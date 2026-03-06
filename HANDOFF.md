@@ -133,13 +133,13 @@ Called once at startup from `index.ts`:
   - `price-history` — compound keyPath: `[name, timestamp]`. Multiple records per item per day for intraday OHLC tracking. Indexes: `name`, `timestamp`.
 - **DB migration (v2→3)**: The `open()` method detects the old `[name, day]`-keyed history store, deletes it, and recreates it with the `[name, timestamp]` keyPath. Data is re-populated on next scan/fetch.
 - Key methods: `open()`, `bulkInsert(prices)`, `getAll()`, `getRecentHistory(days)`, `getHistoricalRecords()`, `getIntradayRecords(itemName, windowMs)`, `isStale()`, `clear()`.
-- `bulkInsert` writes to both stores in a single read-write transaction. Each call inserts a unique snapshot keyed by `Date.now()` epoch ms.
-- `getIntradayRecords(itemName, windowMs)` — queries the `name` index and filters by timestamp within the window. Used for OHLC aggregation and 4-hour momentum.
-- `isStale()` opens a descending cursor on the `fetchedAt` index, checks if newest record > 1h TTL (reduced from 24h to react to intraday volatility).
+- `bulkInsert` writes to both stores in a single read-write transaction. Before writing a history snapshot it reads the existing price — if the guide price hasn't changed since the last poll, the history insert is skipped. This prevents ~24× daily row bloat from identical hourly polls (Jagex guide prices update ~once per day).
+- `getIntradayRecords(itemName, windowMs)` — queries the `name` index and filters by timestamp within the window.
+- `isStale()` opens a descending cursor on the `fetchedAt` index, checks if newest record > 1h TTL.
 
 ### 4.4 Market Analyzer Service (`marketAnalyzerService.ts`)
 
-Pure math on local data with one network fallback — when the local IndexedDB price-history store is sparse (fewer than 400 items have ≥ 2 days of multi-day history), `buildPriceHistoryMap()` delegates to `WeirdGloopService.fetchHistoricalPrices` (individual per-item requests with 200 ms pauses) and persists results to IndexedDB. The threshold uses an absolute count (not a ratio) because `bulkInsert` writes a today-snapshot for every price record — after a full market scan all ~7,000 items have ≥ 1 history row, making percentage thresholds unreachable. After seeds (~230) + one fallback round (200) the count exceeds 400 and subsequent startups skip the ~40 s API call. Capped at 200 items since the `/last90d` API only accepts 1 item per request.
+Pure math on local data with one network fallback — when the local IndexedDB price-history store is sparse (fewer than 400 items have ≥ 2 days of multi-day history), `buildPriceHistoryMap()` delegates to `WeirdGloopService.fetchHistoricalPrices` (individual per-item requests with 200 ms pauses) and persists results to IndexedDB. The threshold uses an absolute count (not a ratio) because `bulkInsert` only writes a history snapshot when the guide price has changed — after a full market scan most items have 1–2 rows, and only items with dedicated history fetches (seeds + prior fallback runs) have multi-day series. After seeds (~230 items) + one fallback round (200) the count exceeds 400 and subsequent startups skip the ~40 s API call. Capped at 200 items since the `/last90d` API only accepts 1 item per request.
 
 **TTL-cached scoring maps**: `getOrBuildMaps(days)` maintains in-memory caches of `avgVolumeMap` and `priceHistoryMap` with a 10-minute TTL (`MAP_CACHE_TTL_MS`). All three public entry points (`getTopItems`, `searchItems`, `getItemsByNames`) call `getOrBuildMaps(30)` instead of rebuilding maps from IndexedDB each time. `invalidateMapCache()` clears both maps manually; in practice this is rarely needed since all major data-update paths (full scan, force reload, retry) construct a new `MarketAnalyzerService` instance.
 
@@ -156,7 +156,7 @@ Pipeline:
    - `volumeSpikeMultiplier` — ratio of today's volume to 7-day SMA (hype detection at >1.5×)
    - `tradeVelocity` — categorical speed label based on volume × buy-limit throughput: `"Insta-Flip"` (>50 K), `"Active"` (>5 K), `"Slow"` (>500), `"Very Slow"` (≤500)
    - `priceTrend` — 7-day price momentum: `"Downtrend"` (dropped >5 %), `"Uptrend"` (risen >5 %), `"Stable"` (within ±5 %). Empty/short history defaults to Stable.
-   - `fourHourMomentum` — percentage change between the current price and the earliest price in the last 4-hour buy-limit window. Uses `getIntradayOHLC()` which queries `CacheService.getIntradayRecords()`.
+   - `returnOnTime` — estimated gp/hr: `estFlipProfit × (globalVol / 24) × 0.7` fill-factor. Ranks items by profit per hour of a single player's time. `0` when buy limit or volume is insufficient.
    - `isRisky = price < 500` — low-price items where tax eats most spreads
 4. Filters items by `minVolume`, `maxVolume` (against **global daily GE volume**), `maxPrice`.
 5. Sorts descending by `tradedValue`.
@@ -168,7 +168,7 @@ Pipeline:
 - `getItemsByNames(names: Set<string>)` — looks up specific items by exact name set, used by the favourites panel.
 - `getOrBuildMaps(days)` — returns cached `avgVolumeMap` + `priceHistoryMap` if within 10-min TTL, otherwise rebuilds from IndexedDB.
 - `invalidateMapCache()` — clears cached maps (auto-reset when a new instance is constructed).
-- `formatForLLM(items)` — produces a numbered multi-line string with K/M/B/T abbreviations for LLM context injection. Now includes High Alch value, Trade Velocity tier, and `[LIMITED DATA]` tag when < 3 history points.
+- `formatForLLM(items)` — produces a numbered multi-line string with K/M/B/T abbreviations for LLM context injection. Includes High Alch value, Trade Velocity tier, ROT (gp/hr), and `[LIMITED DATA]` tag when < 3 history points.
 - `getFormattedForLLM()` — returns the top 50 items by traded value with **no volume or price filters** (`LLM_CONTEXT_TOP_N = 50`), using a compact label-free format (`formatForLLMCompact`) to minimise payload size. Used by the chat advisor to get a broader market view than the UI's filtered top-20 panel. ≈ 6–8 KB of text.
 
 ### 4.5 Wiki Service (`wikiService.ts`)
@@ -182,7 +182,7 @@ Pipeline:
 
 Static RS3 economic rules and data interpretation guidance injected into every LLM system prompt. Exported as `RS3_ECONOMIC_RULES` and `DATA_FIELD_LEGEND` string constants.
 
-**`RS3_ECONOMIC_RULES`** (8 rules):
+**`RS3_ECONOMIC_RULES`** (12 rules):
 1. **GE Tax**: 2% tax formula with floor rounding, exempt at ≤50 gp.
 2. **Buy Limits**: 4-hour windows, 6 per day, hard cap on purchases.
 3. **Margin Checking**: Insta-buy (+5%) / insta-sell (−5%) method with tax-adjusted margin formula.
@@ -191,8 +191,10 @@ Static RS3 economic rules and data interpretation guidance injected into every L
 6. **What Makes a Good Flip**: Profit × buy limit, trade velocity, margin vs tax gap, trend safety, volume spike interpretation.
 7. **GP/HR Calculation**: Formula and fill-time estimates by trade velocity tier (Insta-Flip, Active, Slow, Very Slow).
 8. **Common Pitfalls**: Low-price tax erosion, insufficient-data misinterpretation (slope ±0.0 + volatility 0%), merch clan spikes, DXP timing.
+9–11. **Offer Priority, Safe Margin Guidelines, GE Mid-Price Lag**.
+12. **Data Source Reality**: All data comes from the Weird Gloop API which polls Jagex every 30–60 min. Guide prices update ~daily. Volume is a rolling 24h aggregate, not a live ticker. RS3 lacks OSRS-style real-time data; the LLM must always advise in-game margin checking and must not claim to know current spreads.
 
-**`DATA_FIELD_LEGEND`**: Explains every field in the `formatForLLM` output (GE Price, Buy/Sell targets, Profit, Limit, Eff. Vol, Max 4H Capital, Tax Gap, High Alch, Velocity, 30d Trend Slope, Volatility, Predicted 24h Price, RISKY flag, Vol Spike). Included in the system prompt so the LLM correctly interprets metrics — especially the "slope ±0.0 + volatility 0% = insufficient data" case that previously caused contradictory advice.
+**`DATA_FIELD_LEGEND`**: Explains every field in the `formatForLLM` output (GE Price, Buy/Sell targets, Profit, Limit, Eff. Vol, Max 4H Capital, Tax Gap, **ROT (gp/hr)**, High Alch, Velocity, 30d Trend Slope, Volatility, Predicted 24h Price, RISKY flag, Vol Spike). Included in the system prompt so the LLM correctly interprets metrics — especially the "slope ±0.0 + volatility 0% = insufficient data" case that previously caused contradictory advice.
 
 Both constants have a **supremacy clause** in the system prompt — they override any outside knowledge the model may have.
 
@@ -556,7 +558,7 @@ All defined in `src/services/types.ts`:
 | `StoredPriceRecord` | Extends API record with `name` (keyPath) + `fetchedAt` (TTL) |
 | `HistoricalPriceRecord` | Extends `StoredPriceRecord` with `day` (ISO date compat field) + `timestamp` (compound key with `name` since v3) |
 | `OHLCData` | Intraday OHLC aggregation: `windowStart`, `open`, `high`, `low`, `close`, `volume`, `count` |
-| `RankedItem` | 24 fields: `name`, `itemId`, `price`, `recBuyPrice`, `volume`, `tradedValue`, `buyLimit?`, `effectivePlayerVolume`, `maxCapitalPer4H`, `taxGap`, `recSellPrice`, `estFlipProfit`, `isRisky`, `volumeSpikeMultiplier`, `tradeVelocity`, `priceHistory`, `priceTrend`, `ema30d`, `volatility`, `fourHourMomentum`, `linearSlope`, `predictedNextPrice`, `highAlch?: number \| false` |
+| `RankedItem` | 24 fields: `name`, `itemId`, `price`, `recBuyPrice`, `volume`, `tradedValue`, `buyLimit?`, `effectivePlayerVolume`, `maxCapitalPer4H`, `taxGap`, `recSellPrice`, `estFlipProfit`, `isRisky`, `volumeSpikeMultiplier`, `tradeVelocity`, `priceHistory`, `priceTrend`, `ema30d`, `volatility`, `returnOnTime`, `linearSlope`, `predictedNextPrice`, `highAlch?: number \| false` |
 | `MarketAnalyzerConfig` | `topN` (20), `minVolume` (0), `maxVolume?`, `maxPrice?` |
 | `CacheServiceConfig` | `dbName`, `storeName`, `ttlMs` (default 1h) |
 | `WeirdGloopServiceConfig` | `batchSize` (default 100) |
@@ -612,7 +614,7 @@ npx tsc --noEmit       # type-check only (expect ~11 benign alt1 errors — webp
 Everything below is **complete and verified** (builds with 0 errors):
 
 - [x] Weird Gloop API service (batched sequential fetching with `fetchWithRetry` exponential backoff)
-- [x] IndexedDB cache service v3 (1h TTL, intraday timestamp-keyed history, OHLC support, auto-migration from v2)
+- [x] IndexedDB cache service v3 (1h TTL, timestamp-keyed history, price-change dedup on history writes, auto-migration from v2)
 - [x] Data pipeline orchestrator (seed list of ~230 items, buy-limit enrichment from wiki)
 - [x] Startup health checks — re-enriches missing `highAlch`/`buyLimit` (>50% threshold) and re-seeds sparse history (<30% coverage) on every launch (March 2026)
 - [x] Full GE catalogue fetch (~7,000 items from `Module:GEIDs/data.json`)

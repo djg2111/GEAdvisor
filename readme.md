@@ -24,6 +24,9 @@ Uses a **RAG (Retrieval-Augmented Generation) pipeline** to combine live GE mark
   - [Load in Alt1](#load-in-alt1)
   - [Development](#development)
 - [Architecture](#architecture)
+  - [Data Pipeline](#data-pipeline)
+  - [Return on Time (ROT)](#return-on-time-rot)
+  - [Data Source & Limitations](#data-source--limitations)
 - [LLM Providers](#llm-providers)
 - [Tech Stack](#tech-stack)
 - [License](#license)
@@ -34,7 +37,7 @@ Uses a **RAG (Retrieval-Augmented Generation) pipeline** to combine live GE mark
 
 ### Market Data
 
-- **Top 20 Markets** — items scored and ranked by traded value, flip profit, and volume
+- **Top 20 Markets** — items scored and ranked by **Return on Time (ROT)** — estimated gp/hr factoring in flip profit, volume, and buy limits
 - **Flip recommendations** — buy/sell prices with profit-per-item after 2 % GE tax
 - **Smart badges** — trade velocity (Insta-Flip / Active / Slow), hype detection (volume spikes), and price momentum warnings at a glance
 - **Analytics modal** — click ↗ on any card for an interactive price chart, trend stats, predictive analytics (EMA, volatility, predicted 24 h price), and history-range selector (7 / 30 / 90 days)
@@ -117,6 +120,41 @@ Live GE prices flow from the **Weird Gloop API** into an **IndexedDB cache**, ar
 
 > **Developers:** see [HANDOFF.md](HANDOFF.md) for the full architecture deep-dive, service-by-service file map, type reference tables, past issue resolutions, and contribution guidelines.
 
+### Data Pipeline
+
+The cache TTL is **1 hour** — the app re-polls the Weird Gloop API every hour to pick up the latest guide prices and volume shifts as quickly as possible.
+
+The `price-history` IndexedDB store uses a **`[name, timestamp]` compound key**, allowing multiple snapshots per item per day. However, the app employs **intelligent history deduplication**: before writing a new history row, it reads the existing price — if the guide price hasn't changed since the last poll, the write is skipped. Since Jagex guide prices update approximately once per day, this prevents ~24× daily row bloat while still capturing every actual price movement.
+
+### Return on Time (ROT)
+
+ROT is the primary ranking signal for the advisor. Simple "profit per item" is misleading — a 1M-profit item that takes 8 hours to fill is far worse than a 100K-profit item that fills in minutes.
+
+ROT estimates **gp/hr of a single player's attention**:
+
+$$ROT = \text{estFlipProfit} \times \frac{\text{globalVol}}{24} \times 0.7$$
+
+Where:
+- **estFlipProfit** — per-item net profit after the 2 % GE tax
+- **globalVol / 24** — estimated hourly fill rate from the rolling 24-hour volume
+- **0.7** — fill factor (a single player rarely captures 100 % of hourly market volume)
+
+This correctly ranks high-volume, moderate-margin items (like runes or herbs) above slow-moving, high-margin items (like rare equipment) for active flippers.
+
+### Data Source & Limitations
+
+All market data comes from the **Weird Gloop API**, which polls the official Jagex GE API every 30–60 minutes.
+
+| Data Point | Resolution | What It Means |
+|------------|------------|---------------|
+| **Guide Price** | Updates ~once per day | Not a real-time transaction price — the actual buy/sell spread is invisible |
+| **Volume** | Rolling 24-hour aggregate | Shifts hourly as old trades fall off the window, but is not an hourly breakdown |
+| **Intraday movement** | Not visible | A 10 % spike and recovery within 6 hours will not appear in this data |
+
+> **Always margin-check in-game before committing capital.** Place a +5 % insta-buy and a −5 % insta-sell on a single item to find the real spread. The prices shown here are guide prices with up to ~24 h lag — treat them as directional signals, not trading quotes.
+
+RS3 lacks an OSRS-style real-time data source (RuneLite). This tool is designed for **daily flip planning and value investing**, not high-frequency intraday trading.
+
 ---
 
 ## LLM Providers
@@ -139,7 +177,7 @@ API keys are stored locally in your browser's localStorage — never sent anywhe
 ## Tech Stack
 
 - **TypeScript** (ES2020) + **Webpack 5**
-- **IndexedDB** for offline-capable caching
+- **IndexedDB** for offline-capable caching (v3 schema: `[name, timestamp]` compound key with price-change dedup)
 - **Native `fetch`** — zero external HTTP/LLM dependencies
 - **Alt1 Toolkit** for RS3 overlay integration
 - **Canvas API** for sparkline rendering

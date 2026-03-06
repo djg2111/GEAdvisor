@@ -24,7 +24,6 @@ import { CacheService } from "./cacheService";
 import { WeirdGloopService } from "./weirdGloopService";
 import type {
   MarketAnalyzerConfig,
-  OHLCData,
   RankedItem,
   StoredPriceRecord,
 } from "./types";
@@ -152,8 +151,11 @@ export class MarketAnalyzerService {
   private cachedPriceHistoryMap: Map<string, number[]> | null = null;
   private mapCacheTimestamp = 0;
 
-  /** 4-hour window in milliseconds — matches the RS3 GE buy-limit cycle. */
-  private static readonly FOUR_HOUR_MS = 4 * 60 * 60 * 1000;
+  /**
+   * Fill-rate factor for ROT estimation — a single player rarely captures
+   * 100 % of hourly GE volume.  0.7 is a conservative middle-ground.
+   */
+  private static readonly ROT_FILL_FACTOR = 0.7;
 
   /**
    * @param cache  - An **already-opened** {@link CacheService} instance.
@@ -208,63 +210,7 @@ export class MarketAnalyzerService {
     return { avgVolumeMap, priceHistoryMap };
   }
 
-  /**
-   * Query the CacheService for intraday records within a time window and
-   * aggregate them into an OHLC (Open-High-Low-Close) bar.
-   *
-   * @param itemName - Canonical RS3 item name.
-   * @param windowMs - Lookback window in milliseconds (e.g. 4 hours).
-   * @returns An {@link OHLCData} object, or `null` if no intraday data exists.
-   */
-  private async getIntradayOHLC(
-    itemName: string,
-    windowMs: number,
-  ): Promise<OHLCData | null> {
-    const records = await this.cache.getIntradayRecords(itemName, windowMs);
-    if (records.length === 0) return null;
 
-    // Records are sorted oldest-first by timestamp.
-    const windowStart = new Date(records[0].timestamp).getTime();
-    let high = -Infinity;
-    let low = Infinity;
-    let totalVolume = 0;
-
-    for (const r of records) {
-      if (r.price > high) high = r.price;
-      if (r.price < low) low = r.price;
-      totalVolume += Number(r.volume) || 0;
-    }
-
-    return {
-      windowStart,
-      open: records[0].price,
-      high,
-      low,
-      close: records[records.length - 1].price,
-      volume: totalVolume,
-      count: records.length,
-    };
-  }
-
-  /**
-   * Compute the 4-hour momentum for a single item: percentage change
-   * between the current price and the earliest price in the 4-hour window.
-   *
-   * @param itemName     - Canonical RS3 item name.
-   * @param currentPrice - The item's latest known GE price.
-   * @returns Percentage change (e.g. 0.05 = +5 %).  `0` when no data.
-   */
-  private async computeFourHourMomentum(
-    itemName: string,
-    currentPrice: number,
-  ): Promise<number> {
-    const ohlc = await this.getIntradayOHLC(
-      itemName,
-      MarketAnalyzerService.FOUR_HOUR_MS,
-    );
-    if (!ohlc || ohlc.open === 0) return 0;
-    return (currentPrice - ohlc.open) / ohlc.open;
-  }
 
   // ─── Public API ───────────────────────────────────────────────────────
 
@@ -426,7 +372,7 @@ export class MarketAnalyzerService {
     }
 
     const header = `=== RS3 Grand Exchange — Top ${items.length} by Traded Value (unfiltered) ===`;
-    const legend = "# Fields: Name | Price | Buy | Sell | Profit | Limit | EffVol | 4HCap | TaxGap | Alch | Velocity | Slope | Vol% | Pred | Flags";
+    const legend = "# Fields: Name | Price | Buy | Sell | Profit | Limit | EffVol | 4HCap | TaxGap | Alch | Velocity | ROT(gp/hr) | Slope | Vol% | Pred | Flags";
 
     const lines = items.map((item, idx) => {
       const rank = String(idx + 1).padStart(2, " ");
@@ -446,6 +392,7 @@ export class MarketAnalyzerService {
         ? this.formatGp(item.highAlch)
         : item.highAlch === false ? "N/A" : "?";
       const velocity = item.tradeVelocity;
+      const rot = this.formatGp(item.returnOnTime);
       const slope = item.linearSlope >= 0
         ? `+${item.linearSlope.toFixed(1)}`
         : item.linearSlope.toFixed(1);
@@ -456,7 +403,7 @@ export class MarketAnalyzerService {
       if (item.priceHistory.length < 3) flags.push("LIMITED-DATA");
       if (item.volumeSpikeMultiplier > 0) flags.push(`🔥${item.volumeSpikeMultiplier}x`);
       const flagStr = flags.length > 0 ? " " + flags.join(" ") : "";
-      return `${rank}. ${item.name} | ${price} | ${buy} | ${sell} | ${profit} | ${limit} | ${effVol} | ${cap4h} | ${taxGap} | ${alch} | ${velocity} | ${slope} | ${vol} | ${pred}${flagStr}`;
+      return `${rank}. ${item.name} | ${price} | ${buy} | ${sell} | ${profit} | ${limit} | ${effVol} | ${cap4h} | ${taxGap} | ${alch} | ${velocity} | ${rot} | ${slope} | ${vol} | ${pred}${flagStr}`;
     });
 
     return [header, legend, ...lines].join("\n");
@@ -506,9 +453,10 @@ export class MarketAnalyzerService {
         ? `High Alch: ${this.formatGp(item.highAlch)} gp`
         : item.highAlch === false ? "High Alch: Not Alchable" : "High Alch: Unknown";
       const velocity = item.tradeVelocity;
+      const rot = this.formatGp(item.returnOnTime);
       const histLen = item.priceHistory.length;
       const histNote = histLen < 3 ? " [LIMITED DATA]" : "";
-      return `${rank}. ${item.name} | GE Price: ${price} gp | Buy ≤ ${recBuy} | Sell ≥ ${recSell} | Profit: ${flipPft} gp/ea | Limit: ${limit} | Eff. Vol: ${effVol} | Max 4H Capital: ${cap4h} | Tax Gap: ${this.formatGp(item.taxGap)} gp | ${alch} | Velocity: ${velocity} | 30d Trend Slope: ${slope} | Volatility: ${vol}%${histNote} | Predicted 24h Price: ${predicted} gp${risk}${hype}`;
+      return `${rank}. ${item.name} | GE Price: ${price} gp | Buy ≤ ${recBuy} | Sell ≥ ${recSell} | Profit: ${flipPft} gp/ea | Limit: ${limit} | Eff. Vol: ${effVol} | Max 4H Capital: ${cap4h} | Tax Gap: ${this.formatGp(item.taxGap)} gp | ${alch} | Velocity: ${velocity} | ROT: ${rot} gp/hr | 30d Trend Slope: ${slope} | Volatility: ${vol}%${histNote} | Predicted 24h Price: ${predicted} gp${risk}${hype}`;
     });
 
     return [header, ...lines, divider].join("\n");
@@ -633,11 +581,14 @@ export class MarketAnalyzerService {
         tradeVelocity = "Very Slow";
       }
 
-      // ── 4-hour intraday momentum ──────────────────────────────────────
-      // Uses cached intraday records to measure short-term price movement.
-      // Computed asynchronously but batched at the end for efficiency.
-      // We'll fill this in after the loop to avoid N serial awaits.
-      const fourHourMomentum = 0; // placeholder—populated post-loop
+      // ── Return on Time (ROT) — gp/hr estimate ────────────────────────
+      // ROT = estFlipProfit × estHourlyFillRate × fillFactor.
+      // Hourly fill rate is globalVol / 24 (best available estimate from
+      // the Weird Gloop rolling-24h volume — RS3 has no sub-daily API).
+      const estHourlyFillRate = globalVol / 24;
+      const returnOnTime = safeBuyLimit > 0 && estHourlyFillRate > 0
+        ? Math.round(estFlipProfit * estHourlyFillRate * MarketAnalyzerService.ROT_FILL_FACTOR)
+        : 0;
 
       // ── Scoring adjustments based on predictive indicators ──────────
       let tradedValue = record.price * effectivePlayerVolume;
@@ -666,7 +617,7 @@ export class MarketAnalyzerService {
         priceTrend,
         ema30d,
         volatility,
-        fourHourMomentum,
+        returnOnTime,
         linearSlope,
         predictedNextPrice,
         highAlch: record.highAlch,
